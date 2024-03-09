@@ -1,0 +1,29 @@
+### cached item ###
+# 1. 'tikzpicture' environment, '\tikz' command
+# 2. python-matplotlb 
+# 3. python-sympy
+# Attention: \ShowIntersection will cost much time, especially for contourplot path
+
+
+
+
+
+--> All cached
+Transcript written on release.log.
+xelatex --shell-escape release.tex  3.52s user 0.34s system 112% cpu 3.419 total
+
+
+
+
+
+--> tikz external library
+\def \tikzexternallastkey {ED59E46869BF9FED8B60D4200A2B79BE}%
+\def \tikzexternallastkey {7643E552E1AC7D3895BDC20478C1B881}%
+
+
+
+
+
+--> None cached
+Transcript written on release.log.
+xelatex --shell-escape release.tex  18.19s user 1.30s system 28% cpu 1:07.30 total

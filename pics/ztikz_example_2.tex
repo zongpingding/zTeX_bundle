@@ -1,0 +1,26 @@
+\documentclass{standalone}
+\usepackage{ztikz}
+
+
+\begin{document}
+\begin{tikzpicture}[font=\small, >=Latex, scale=.65]
+    %% ==> ztikz draw grid(coordinates)
+    \ShowGrid{(-8, -8); (8, 8)}
+    \ShowPoint{(0, 0)}[$O=(0, 0)$][below right]
+    \ShowAxis {(0, -8); (0, 8)}
+    \ShowAxis {(-8, 0); (8, 0)}
+
+    % contour plot
+    \PlotPrecise{contour}[long]{10}
+    \ContourPlot[-8:8; -8:8][thick, red]{x+6}
+    \ContourPlot[-8:8; -8:8][thick, red]{y+6}
+    \ContourPlot[-8:8; -8:8][thick, blue]{y-6}
+    \ContourPlot[-8:8; -8:8][thick, blue]{x-6}
+    \PlotPrecise{contour}[long]{200}
+    \ContourPlot[-4:4][green]{x**2/9+y**2/4-1}
+    \ContourPlot[-7:7; -7:7][teal]{sin(x**2+y**2)-exp(-x*y)}
+
+    % polar plot
+    \PolarPlot[0:10*pi][orange]{0.2*t}
+\end{tikzpicture}
+\end{document}
