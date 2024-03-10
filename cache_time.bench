@@ -10,7 +10,7 @@
 
 --> All cached
 Transcript written on release.log.
-xelatex --shell-escape release.tex  3.52s user 0.34s system 112% cpu 3.419 total
+xelatex -shell-escape release.tex  7.21s user 0.72s system 119% cpu 6.629 total
 
 
 
@@ -26,4 +26,4 @@ xelatex --shell-escape release.tex  3.52s user 0.34s system 112% cpu 3.419 total
 
 --> None cached
 Transcript written on release.log.
-xelatex --shell-escape release.tex  18.19s user 1.30s system 28% cpu 1:07.30 total
+xelatex -shell-escape release.tex  52.72s user 7.03s system 58% cpu 1:41.96 total
