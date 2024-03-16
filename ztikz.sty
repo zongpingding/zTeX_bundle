@@ -9,17 +9,19 @@
 % ----------------------------------------------------------------------
 %                        Init ztikz's Environment
 % ----------------------------------------------------------------------
+\RequirePackage{l3sys-shell}
+\NewDocumentCommand\ztikzMkdir{m}{ \sys_shell_mkdir:n {#1} }
 \ExplSyntaxOff
 \begingroup\newif\ifztikz
 \IfFileExists{./ztikz_output/scripts/sympy_script.py}{}{\ztikztrue}
 \ifztikz
 % create folders and hash file
-\immediate\write18 {mkdir ztikz_output}
-\immediate\write18 {mkdir ztikz_output/gnuplot_data}
-\immediate\write18 {mkdir ztikz_output/python_data}
-\immediate\write18 {mkdir ztikz_output/scripts}
-\immediate\write18 {mkdir ztikz_output/tikz_data}
-\immediate\write18 {mkdir ztikz_output/mma_data}
+\ztikzMkdir{ztikz_output/}
+\ztikzMkdir{ztikz_output/gnuplot_data/}
+\ztikzMkdir{ztikz_output/python_data/}
+\ztikzMkdir{ztikz_output/scripts/}
+\ztikzMkdir{ztikz_output/tikz_data/}
+\ztikzMkdir{ztikz_output/mma_data/}
 \immediate\write18 {touch ztikz_output/ztikz.hash}
 
 % writing source code
@@ -48,7 +50,7 @@ x, y, z, u, v, t = symbols('x y z u v t')
 F_res = integrate(sin(x)/x, (x, -oo, oo))
 
 # ==> write output
-filename = "./ztikz_output/python_data/sympy_1.out"
+filename = './ztikz_output/python_data/sympy.out'
 with open(filename, 'w') as file: 
     file.write(latex(F_res)+"\n")
 \end{filecontents}
@@ -205,7 +207,7 @@ plot t
     }{
         \bool_gset_true:N \g__hash_change_bool
         \typeout{current~hash~is~unique~-->~recorded}
-        \sys_shell_now:x { echo~ "\l__ztikz_hash_seq" >> ./ztikz_output/ztikz.hash}
+        \sys_shell_now:x { echo~ \l__ztikz_hash_seq >> ./ztikz_output/ztikz.hash}
     }
 }
 \cs_generate_variant:Nn \ztikz_hash_if_change_cs:n { x }
@@ -408,6 +410,7 @@ plot t
 %                          Interactive with Python
 % ----------------------------------------------------------------------
 \cs_generate_variant:Nn \xsim_file_write_start:nn {nx}
+\cs_generate_variant:Nn \sys_shell_mv:nn {xx}
 % ==> python-matplotlib
 \NewDocumentEnvironment{pyfig}{ O{width=.75\linewidth}m }{
     \newcommand{\pyfile}{#2}
@@ -420,8 +423,14 @@ plot t
     \ztikz_hash_if_change_cs:x {\g__ztikz_python_path_tl/\pyfile}   
     \bool_if:NTF \g__hash_change_bool {
         % add save figure to source
-        \exp_args:Nx \sys_shell_now:n {
-            echo~ "plt.savefig('\g__ztikz_python_path_tl/\pyfile.pdf')"~ >>~ \g__ztikz_python_path_tl/\pyfile
+        \sys_if_platform_windows:TF {
+            \exp_args:Nx \sys_shell_now:n {
+                echo~ plt.savefig('\g__ztikz_python_path_tl/\pyfile.pdf')~ >>~ \g__ztikz_python_path_tl/\pyfile
+            }
+        }{
+            \exp_args:Nx \sys_shell_now:n {
+                echo~ "plt.savefig('\g__ztikz_python_path_tl/\pyfile.pdf')"~ >>~ \g__ztikz_python_path_tl/\pyfile
+            }
         }
         % excute python source
         \exp_args:Nx \sys_shell_now:n {python~ \g__ztikz_python_path_tl/\pyfile} 
@@ -449,14 +458,14 @@ plot t
     \int_gadd:Nn \g__sympy_index_int {1}  
     \tl_set:Nx \l__current_sympy_index_tl {\int_use:N \g__sympy_index_int}
     % sympy source write
-    \sys_shell_now:x {sed~ -i~ "8s|F_res~ =~ .*|F_res~ =~  #1|"~                                                       \g__ztikz_scripts_path_tl/sympy_script.py}
-    \exp_args:Nx \sys_shell_now:n {
-        sed~ -i~ "11s|filename~ =~ .*|filename~ =~ '\g__ztikz_python_path_tl/sympy_\l__current_sympy_index_tl.out'|"~  \g__ztikz_scripts_path_tl/sympy_script.py
-    }
+    \sys_shell_now:x {sed~ -i~ "8s|F_res~ =~ .*|F_res~ =~  #1|"~ \g__ztikz_scripts_path_tl/sympy_script.py}
     % check hash
     \ztikz_hash_if_change_cs:x {\g__ztikz_scripts_path_tl/sympy_script.py}
     \bool_if:NTF \g__hash_change_bool {
         \sys_shell_now:x {python~ \g__ztikz_scripts_path_tl/sympy_script.py}
+        \sys_shell_mv:xx
+            {\g__ztikz_python_path_tl/sympy.out}
+            {\g__ztikz_python_path_tl/sympy_\int_use:N \g__sympy_index_int .out}
         \typeout{using~python~sympy~calculating~question~\l__current_sympy_index_tl ...}
         \exp_args:Nx \input{\g__ztikz_python_path_tl/sympy_\l__current_sympy_index_tl.out}
     }{
