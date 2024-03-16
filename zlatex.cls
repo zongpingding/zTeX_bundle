@@ -197,10 +197,12 @@
     {en}{
         \crefname{figure}{figure}{figures}
         \crefname{table}{table}{tables}
+        \crefname{equation}{equation}{equations}
     }
     {cn}{
         \crefname{figure}{图}{图}
         \crefname{table}{表}{表}
+        \crefname{equation}{方程}{方程}
     }
 }{\msg_error:nn {zlatex}{option-language}}
 
@@ -309,6 +311,19 @@
             \creflabelformat{zlatex#1}{##2(##1)##3}
         }
     }{\msg_error:nn {zlatex}{mathenv-lang}}
+}
+
+% framed env for user interface
+\cs_new_protected:Npn \zlatexFramed:nn #1#2 {
+    \NewDocumentEnvironment{#1}{O{#2}}{
+        \def\FrameCommand{
+            {\color{##1}\vrule width 1.5pt}\colorbox{##1!10}
+        }
+        \MakeFramed{\advance\hsize-\width\FrameRestore}   
+    }{\endMakeFramed}
+}
+\NewDocumentCommand\zlatexFramed{mO{black}}{
+    \zlatexFramed:nn {#1}{#2}
 }
 
 % proof-like env decalration
