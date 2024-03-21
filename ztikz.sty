@@ -25,7 +25,7 @@
 \immediate\write18 {touch ztikz_output/ztikz.hash}
 
 % writing source code
-\begin{filecontents}[noheader]{./ztikz_output/scripts/float_script.py}
+\begin{filecontents}[noheader]{./ztikz_output/scripts/python_script.py}
 from numpy import *
 from scipy import *
 
@@ -141,6 +141,10 @@ plot t
 \bool_new:N \g__hash_change_bool
 \bool_gset_true:N \g__hash_change_bool
 
+% io read/write interface
+\ior_new:N \g__file_read_ior
+\tl_new:N  \g__file_content_tl
+
 
 
 
@@ -150,7 +154,6 @@ plot t
 % ----------------------------------------------------------------------
 \RequirePackage{xparse}
 \RequirePackage{xsimverb}
-\RequirePackage{l3sys-shell}
 \RequirePackage{tikz}
 \RequirePackage{etoolbox}
 \patchcmd{\pgfutil@InputIfFileExists}{\input #1}{%
@@ -442,14 +445,32 @@ plot t
     }
 }
 
-% ==> python-float
-\NewDocumentCommand\pyfp{m}{
+% read from external file 
+\cs_new_protected:Npn \zlatex_Readlines_cs:nn #1#2 {
+    \ior_open:Nn \g__file_read_ior {#2}
+    \str_case:nnF {#1}{
+        {hold}{
+            \ior_get:NN \g__file_read_ior \g__file_content_tl
+        }
+        {str}{
+            \ior_str_get:NN \g__file_read_ior \g__file_content_tl
+        }
+    }{}
+    \tl_use:N \g__file_content_tl
+}
+\cs_generate_variant:Nn \zlatex_Readlines_cs:nn {xx}
+
+% ==> 1-line python command
+\NewDocumentCommand\py{O{hold}m}{
     % sympy source write
-    \sys_shell_now:x {sed~ -i~ "6s|Float_res~ =~ .*|Float_res~ =~  #1|"~ \g__ztikz_scripts_path_tl/float_script.py}
+    \sys_shell_now:x {sed~ -i~ "6s|Float_res~ =~ .*|Float_res~ =~ #2|"~ \g__ztikz_scripts_path_tl/python_script.py}
     % calculation
-    \sys_shell_now:x {python~ \g__ztikz_scripts_path_tl/float_script.py}
     \typeout{using~python~float~module~calculating...}
-    \exp_args:Nx \input{\g__ztikz_python_path_tl/PyFloat.out}
+    \sys_shell_now:x {python~ \g__ztikz_scripts_path_tl/python_script.py}
+    % using \ior_get: 
+    \zlatex_Readlines_cs:xx {#1}{\g__ztikz_python_path_tl/PyFloat.out}
+    % ---> cause bug that can't write ToC to file
+    % \iow_close:N \g__file_read_ior
 }
 
 % ==> python-sympy
@@ -471,6 +492,27 @@ plot t
     }{
         \exp_args:Nx \input{\g__ztikz_python_path_tl/sympy_\l__current_sympy_index_tl.out}
         \typeout{skip~recompile,~using~the~cache~sympy~result~\l__current_sympy_index_tl}
+    }
+}
+
+% ==> python-code-env
+\NewDocumentEnvironment{pycode}{ m }{
+    \newcommand{\pyfile}{#1}
+    \xsim_file_write_start:nx {\c_true_bool}{\g__ztikz_python_path_tl/#1}
+    }{ 
+    \xsim_file_write_stop:
+    % step picture index
+    \int_gadd:Nn \g__picture_index_int {1}   
+    % check if hash changed
+    \ztikz_hash_if_change_cs:x {\g__ztikz_python_path_tl/\pyfile}   
+    \bool_if:NTF \g__hash_change_bool {
+        % excute python source
+        \exp_args:Nx \sys_shell_now:n {python~ \g__ztikz_python_path_tl/\pyfile} 
+        \input{\g__ztikz_python_path_tl/\pyfile.out}
+        \typeout{Writing~ 'pycode'~environment~source~to~\tl_use:N \g__ztikz_python_path_tl/\pyfile}
+    }{
+        \input{\g__ztikz_python_path_tl/\pyfile.out}
+        \typeout{skip~recompile~by~python,~using~the~cache~pycode~result~\int_use:N \g__picture_index_int}
     }
 }
 

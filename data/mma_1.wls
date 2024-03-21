@@ -20,5 +20,6 @@ fp1 = plotFunction[y==Sin[x], xlimits, ylimits];
 fp2 = plotFunction[x^2/4 + y^2/3 == 5, {x, -5, 5}, {y, -5, 5}];
 
 figure = Show[fp2, fp1];
+(* 1.保存的图片格式为:*.wls.pdf; 2.保存路径在:./ztikz_output/mma_data *)
 Export["./ztikz_output/mma_data/mma_1.wls.pdf", figure];
 \end{mmafig}

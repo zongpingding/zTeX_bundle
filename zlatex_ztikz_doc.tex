@@ -3,8 +3,9 @@
     layout=oneside, 
     margin=false, 
     math-alias=true,
+    toc={rename, 2column},
 ]{zlatex}
-\usepackage{zTikZ}
+\usepackage{ztikz}
 
 % optional 
 \usepackage{amsmath}
@@ -35,7 +36,7 @@
 \let\cmd\zlatexVerb
 \newcommand{\Footnote}[1]{\stepcounter{footnote}\footnote[\thefootnote]{#1}}
 % index make
-% \makeindex[title=部分命令/名词索引, columns=3]
+\makeindex[title=部分命令/名词索引, columns=2]
 
 
 \title{z\LaTeX{}/zTikZ 系列}
@@ -176,7 +177,8 @@ z\LaTeX{}\index{z\LaTeX{}}系列。
 \vspace*{10em}
 
 \section{兼容性}
-目前本系列已经实现Windows和Linux下的兼容，但是MacOS下的兼容性还没有进行测试，所以不保证本系列可以在MacOS下正常运行.
+目前本系列已经实现Windows和Linux下的兼容; 但是MacOS下:目前仅支持z\LaTeX{}文档类.
+zTikZ还未进行适配(参见下文了解具体原因)，所以不保证本系列中的zTikZ文档类可以在MacOS下正常运行.
 具体的兼容情况请参见后续的兼容性章节.
 
 \chapter{z\LaTeX{}文档类}
@@ -199,7 +201,7 @@ z\LaTeX{}文档类在各平台的兼容情况为:
 \begin{itemize}
     \item[Windows]: \TeX{}Live最低版本2022
     \item[Linux]: \TeX{}Live最低版本2022
-    \item[MacOS]: \cmd{还未进行内测}
+    \item[MacOS]: 兼容Mac{}\TeX{}2024(老版也应兼容) 
 \end{itemize}}
 
 \subsection{加载z\LaTeX{}}
@@ -281,6 +283,7 @@ z\LaTeX{}文档类会根据用户指定的选项自动处理和加载对应的�
         fancyhdr & amsfonts & amsmath & amsthm  \\
         xcolor & biblatex & indextools & hyperref \\ 
         cleveref & graphicx & float & titletoc \\
+        titlesec & tocloft & &\\
         \bottomrule
     \end{tabular}}
     \caption{z\LaTeX{}文档类基本宏包}
@@ -337,6 +340,7 @@ z\LaTeX{}文档类会根据用户指定的选项自动处理和加载对应的�
     \cmd{math-alias} & \cmd{false, true} & \cmd{false} \\
     \cmd{math-font} & \cmd{newtx, mtpro2, euler} & \cmd{<none>} \\
     \cmd{bib-source} & \cmd{<自定义>} & \cmd{ref.bib} \\
+    \cmd{toc} & \cmd{rename, 2column} &  \cmd{<none>}\\
     \bottomrule
     \end{tabular}
     \caption{z\LaTeX{}配置选项}
@@ -360,31 +364,94 @@ z\LaTeX{}文档类会根据用户指定的选项自动处理和加载对应的�
         \cmd{mtpro2}字体并非免费字体，请注意.
     \item \cmd{math-alias}选项可以根据个人习惯进行选择，默认情况下并不会加载。但是在加载此选项后，默认的两个\LaTeX{}
         指令\cmd{\S, \ll} 会被覆盖，分别被更名为 \cmd{\ss, \LL}:(\ss, $\LL$). 
+    \item \cmd{toc}\index{\cmd{toc}}选项可以同时指定\cmd{rename, 2column},分别代表重定义目录名(居中加粗),以及使用双栏目录排版.
 \end{itemize}
+
+\subsection{数学指令}
+关于文档类选项\cmd{math-alias}\index{\cmd{math-alias}}的进一步说明,默认的自定义命令可能并不一定符合每一个人的习惯,所以请谨慎加载此选项.
+在\cmd{math-alias=true}后,z\LaTeX{}会进行如下命令的声明/重定义,以及宏包的加载:
+\begin{codeprint}
+\RequirePackage{amssymb, mathtools}
+\RequirePackage{bm}          
+% Math Font 
+\newcommand{\dd}{\mathrm{d}}
+\newcommand{\C}[1]{\ensuremath{\mathcal{#1}}}
+\let\ss\S
+\renewcommand{\S}[1]{\ensuremath{\mathscr{#1}}}
+\newcommand{\B}[1]{\ensuremath{\mathbb{#1}}}
+\newcommand{\FF}[1]{\ensuremath{\mathbf{#1}}}
+\newcommand{\F}[1]{\ensuremath{\bm{#1}}}
+\newcommand{\R}[1]{\ensuremath{\mathrm{#1}}}
+\newcommand{\K}[1]{\ensuremath{\mathfrak{#1}}}
+% Math Arrow 
+\newcommand{\lr}{\ensuremath{\longrightarrow}}
+\let\LL\ll
+\renewcommand{\ll}{\ensuremath{\longleftarrow}}
+\newcommand{\equ}{\ensuremath{\Longleftrightarrow}\,}
+\newcommand{\sr}{\ensuremath{\longmapsto}}
+\newcommand{\lrr}[2][]{\ensuremath{\xRightarrow[#1]{#2}}}
+\renewcommand{\lll}[2][]{\ensuremath{\xLeftarrow[#1]{#2}}}
+\newcommand{\ns}{\ensuremath{\varnothing}}
+\newcommand{\A}{\ensuremath{\forall}}
+% Math Operator
+\newcommand{\alt}{\ensuremath{\mathrm{Alt}\;}}
+\newcommand{\sgn}{\ensuremath{\mathrm{sgn}\;}}
+\newcommand{\curl}{\ensuremath{\mathrm{curl}\;}}
+\newcommand{\grad}{\ensuremath{\mathrm{grad}\;}}
+\newcommand{\trace}{\ensuremath{\mathrm{trace}\;}}
+\renewcommand{\div}{\ensuremath{\mathrm{div}\;}}
+\end{codeprint}
 
 \section{章节命令}
 \subsection{计数器}
 目前的计数器部分继承自 \cmd{book}文档类和使用\cmd{amsthm}\index{\cmd{amsthm}}宏包定义的数学环境计数器 
 theorem, definition, corollary, example, axiom, remark.
 
+目前z\LaTeX{}提供了一个命令\cmd{\zlatexUpdateCounterAfter}\index{\cmd{\zlatexUpdateCounterAfter}}用于设置
+计数器的更新，使用格式为:
+\begin{codeprint}
+\zlatexUpdateCounterAfter{<child>}{<father>}
+\end{codeprint}
+
+也就是让上述的\cmd{<child>}计数器随着\cmd{<father>}父计数器的更新而更新,本命令的实现原型为:
+\begin{codeprint}
+\NewDocumentCommand{\zlatexUpdateCounterAfter}{mm}{
+    \@addtoreset{#1}{#2}
+}
+\end{codeprint}
+
+关于本文档类的公式计数器的说明,本文档类公式计数器默认跟随\cmd{section}计数器更新，在z\LaTeX{}的源码中的声明为:
+\begin{codeprint}
+\counterwithin{equation}{section}
+\end{codeprint}
+
 \subsection{章节格式}
-目前还不支持指定章节格式，等后续在添加. 使用者可以加载\cmd{titlesec}等宏包进行自定义.
+目前还不支持指定章节格式，等后续在添加. 使用者可以加载\cmd{titlesec}等宏包进行自定义. z\LaTeX{}
+文档类默认加载了\cmd{titlesec, titletoc, tocloft}宏包用于章节格式和目录的格式定制. 如果使用
+者想要自定义章节格式，直接使用\cmd{titlesec}宏包的\cmd{\titleformat}命令覆盖本模板的原始定义即可，
+或者是其他的命令. 
+
+\begin{remark}
+但是本文档类默认不加载\cmd{tikz, pgf}宏包，想要使用这两个宏包定义更加复杂章节样式，请手动加载，并
+设置自己喜欢的章节格式.
+\end{remark}
 
 \subsection{高亮环境}
-目前本系列提供命令\cmd{\zlatexFramed{<name>}[<color>]}用于创建类似MarkDown的彩色引用环境. 参数中的
-\cmd{<name>}表示声明环境的名称,\cmd{<color>}表示此环境的背景颜色.一个简单的使用样例如下:
+目前本系列提供命令\cmd{\zlatexFramed{<name>}[<color>]}\index{\cmd{\zlatexFramed}}用于创建类似MarkDown
+的彩色引用环境. 参数中的\cmd{<name>}表示声明环境的名称,\cmd{<color>}表示此环境的背景颜色.
+一个简单的使用样例如下:
 
 \begin{codeprint}
 % 环境 'refer' 声明
 \zlatexFramed{refer}[orange]
 % 使用环境 'refer'
-\begin{refer}
+\begin{refer}%
 % something wrting here
 \end{refer}
 \end{codeprint}
 
 \zlatexFramed{refer}[orange]
-\begin{refer}
+\begin{refer}%
 As any dedicated reader can clearly see, the Ideal of practical
 reason is a representation of, as far as I know, the things in themselves;
 
@@ -392,6 +459,29 @@ reason is a representation of, as far as I know, the things in themselves;
 使张规军证回，世市总李率英茄持伴。
 \end{refer}
 
+\begin{remark}
+    在上面的refer环境开始时插入一个\%可以用于消除多余的空格。
+\end{remark}
+
+
+\subsection{封面样式}
+本文档类并没有内建复杂的封面格式，只是简单的重定义了\cmd{\maketitle}命令用于生成封面. 
+声明如下:
+\begin{codeprint}
+% title page
+\renewcommand{\maketitle}{
+\begin{titlepage}
+    \vfill\vspace*{40pt}
+    \noindent\hspace*{134pt}\rule[-75pt]{6pt}{95pt}{\hspace*{10pt}\fontsize{25}{25}\selectfont\bfseries\@title}\par
+    \vspace*{-15pt}
+    \noindent\hspace*{150pt}{\Large\bfseries\@author}\par
+    \vspace*{400pt}
+    \noindent\hspace*{150pt}{\Large\bfseries\textcolor{gray}{\@date}}
+    \vfill
+\end{titlepage}} 
+\end{codeprint}
+
+如果使用者想要使用更加美观的封面，请手动加载\cmd{tikz}宏包，自己定义.
 
 \section{数学环境}
 \subsection{常用数学环境}
@@ -518,20 +608,21 @@ reason is a representation of, as far as I know, the things in themselves;
 
 
 \subsection{注意事项}
-默认的所有定理类环境均采用``斜体''，相对于中文来说就是 ``楷体''。但是默认的
-证明类数学环境采用的是正体\cmd{\upshape}，如果使用者不喜欢前者默认的``斜体''字体样式，
-可以直接在数学类环境开始时使用字体命令\cmd{\upshape}进行原有字体样式的覆盖，示例如下:
+默认的数学类环境均采用正体\cmd{\upshape}，如果使用者不喜欢前者默认的``正体''字体样式，
+可以直接在数学类环境开始时使用字体命令\cmd{\itshape}进行原有字体样式的覆盖，示例如下:
 
 \begin{codeprint}
-\begin{theorem}[test theorem]\upshape
+\begin{theorem}[test theorem]\itshape
     你好, Hello world !
 \end{theorem}
 \end{codeprint}
 
-\begin{remark}\upshape
+\begin{remark}\itshape
     \boomen \par 
     \boomcn
 \end{remark}
+
+同时，本文档类中数学类环境和前文的自定义高亮环境\cmd{\zlatexFramed}均默认首行不缩进，需手动添加缩进.
 
 \subsection{自定义数学环境}
 目前还没有开发对应的接口，主要是目前的格式基本已经够用了.
@@ -692,13 +783,13 @@ l try to typeset the picture.
 \begin{itemize}
     \item 取消加载indextools宏包，改用传统的\cmd{makeidx}宏包.(需自行去修改\cmd{zlatex.cls}中的加载项)
     \item 仍然使用此宏包，但是在第一遍(tikz图片还没有缓存时)取消导言区以及文档末尾的如下命令:
-        \begin{codeprint}
-        % 导言区
-        \makeindex[title=Test Title, columns=3]
-        % 文末
-        \addcontentsline{toc}{chapter}{部分名词索引}
-        \printindex
-        \end{codeprint}
+\begin{codeprint}
+% 导言区
+\makeindex[title=Test Title, columns=3]
+% 文末
+\addcontentsline{toc}{chapter}{部分名词索引}
+\printindex
+\end{codeprint}
         然后在文档的第二次编译时取消两处命令的注释,以此达到正常编译的目的.
 \end{itemize}
 
@@ -745,7 +836,7 @@ tikz的\cmd{external}库实现的,感兴趣的可以去看看}, Python/sympy, Py
 \begin{itemize}
     \item[Windows]: \TeX{}Live最低版本2023
     \item[Linux]: \TeX{}Live最低版本2022
-    \item[MacOS]: \cmd{还未进行内测}
+    \item[MacOS]: Mac\TeX{}由于缺少\cmd{l3sys-shell}宏包(或者是不适配),所以并不兼容
 \end{itemize}}
 
 在Linux平台上并没有什么需要注意的事项，重点是Windows平台上的兼容性; 使用\cmd{zTikZ}正常运行，
@@ -1268,6 +1359,43 @@ plt.plot(x, y)
 无法识别此脚本，也就不会去执行此脚本了.
 \end{leftbar}
 
+\begin{remark}
+用户如果要使用zTikZ的Mathematica模块，请务必确保wolframscript在命令行中能够正常运行.可以使用如下
+文件作为测试用例，检测wolframscript是否正常工作; 
+\begin{codeprint}
+plotFunction[fun_, xlimits_, ylimits_] := ContourPlot[fun, 
+    xlimits, ylimits,
+    ContourStyle->{
+        RGBColor["#00C0A3"], 
+        Thickness[0.004]
+    },
+    AspectRatio->((xlimits[[2]]//Abs) + (xlimits[[3]]//Abs))/((ylimits[[2]]//Abs) + (ylimits[[3]]//Abs)), 
+    AxesOrigin->{0,0}, 
+    Axes->True,
+    Frame->False,
+    AxesStyle->Arrowheads[{0, 0.03}],
+    AxesLabel->{"x", "y"},
+    PlotRange -> Full
+]
+
+xlimits = {x, -3, 6};
+ylimits = {y, -4, 5};
+fp1 = plotFunction[y==Sin[x], xlimits, ylimits];
+fp2 = plotFunction[x^2/4 + y^2/3 == 5, {x, -5, 5}, {y, -5, 5}];
+
+figure = Show[fp2, fp1];
+(* 1.保存的图片格式为:*.wls.pdf; 2.保存路径在:./ztikz_output/mma_data *)
+Export["works_well.pdf", figure];
+\end{codeprint}
+
+把这里的源码保存为\cmd{test.wls},然后在命令行运行:
+\begin{codeprint}
+wolframscript -script test.wls
+\end{codeprint}
+如果正常工作的话，那么在你的当前工作目录下会产生一个名为\cmd{works_well.pdf}的pdf文件.反之，你的wolframscript没有
+正常配置或者是激活,也就不能够使用本模块.
+\end{remark}
+
 
 \begin{figure}[!htb]
     \centering
@@ -1313,6 +1441,28 @@ plt.plot(x, y)
     \label{fig:mma-fig-2}
 \end{figure}
 
+\subsection{matlab}
+目前zTikZ中的Matlab模块还在开发中, 但是目前你可以使用\cmd{matlab2tikz}这个Matlab插件来把你的Matlab
+图形转换为对应的tikz代码,效果也是很好的.
+
+但是目前你可以在命令行中调用Matlab运行自己的Matlab脚本, 一个测试脚本如下:
+\begin{codeprint}
+x = 1:0.1:2*pi;
+y = sin(x);
+
+figure('visible','off')
+plot(x, y, 'r-');
+
+exportgraphics(gcf, 'myfig.pdf') 
+\end{codeprint}
+
+然后在命令行中使用如下命令进行运行:
+\begin{codeprint}
+matlab -batch "run('matlab.m')"
+\end{codeprint}
+
+运行完后，你便可以在当前目录下看到一个pdf文件，名为\cmd{myfig.pdf};在运行方式这一点上,Matlab和
+Wolframscriprt的运行命令:\cmd{wolframscript -script mma.wls}是有一点区别的.
 
 \section{数值计算}
 \subsection{xfp}
@@ -1333,28 +1483,136 @@ plt.plot(x, y)
 \noindent zTikZ或者是z\LaTeX{}并不会自动加载\cmd{xfp}宏包，如果你有这方面的需要，请自己加载.
 \end{leftbar}
 
+
 \subsection{python}
 上面介绍了Python的绘图功能，这里再引入zTikZ中的浮点数计算部分(Sympy对应的部分应该不能叫浮点数计算了，毕竟Sympy
 进行的是精确的计算。)这里使用的浮点数运算主要是基于Python，以及可能的宏包\cmd{numpy}等. zTikZ在调用
 此命令时默认载入Python库\cmd{NumPy, SciPy}，并且使用\cmd{numpy}中的函数时不用再加上前缀；比如求解$\sin(2.345)$
-时，直接使用\cmd{\pyfp{sin(2.345)}}即可,不用写成\cmd{\pyfp{np.sin(2.345)}}.对于库\cmd{SciPy}中的函数
+时，直接使用\cmd{\py{sin(2.345)}}即可,不用写成\cmd{\py{np.sin(2.345)}}.对于库\cmd{SciPy}中的函数
 使用方法同理.
 
-zTikZ提供了命令\cmd{\pyfp}\index{\cmd{\pyfp}}用于浮点数运算, 这部分的结果并不会被缓存，也就是说每次编译此文档时，Python都会重新
-计算此部分的结果. \cmd{\pyfp}的参数说明如下:
+\subsubsection{python command}
+zTikZ提供了命令\cmd{\py}\index{\cmd{\py}}用于浮点数运算, 这部分的结果并不会被缓存，也就是说每次编译此文档时，Python都会重新
+计算此部分的结果. \cmd{\py}的参数说明如下:
 
 \begin{codeprint}
-\pyfig{<expression>}
+\py[<return type>]{<expression>}
 \end{codeprint}
 
-下面给出一个使用样例:
+上述的第一个默认参数值为:\cmd{hold},可选值有\cmd{str},二者的区别可以简单的认为，返回的Token的类别码不同.
+比如当外部文件中的内容为:
 \begin{codeprint}
-\pyfp{0.9**10}
+\[ a^2 + b^2 = c^2 \]
 \end{codeprint}
 
+默认情况才下，\cmd{\py}返回此命令的结果为:
 \[
-    0.9^{10} = \pyfp{0.9**10}
+    a^2 + b^2 = c^2    
 \]
+
+但是如果你指定返回的类型为\cmd{str}时，那么在文档中的显示结果就会变为:\cmd{\[ a^2 + b^2 = c^2 \]}. 而不是默认情况
+下的排版公式.
+
+值得说明的是，\cmd{\py}命令和\cmd{xfp}宏包提供的\cmd{\inteval, \fpeval}是类似的；也就是你可以把
+\cmd{\py}命令嵌套到你自己定义的一个命令中.同样是使用\cmd{#1}来表示接收到的参数. 比如你可以创建下面这几个命令:
+
+\newcommand{\pypow}[1]{\py{#1}}
+\newcommand{\pyreverse}[1]{\py{'#1'[::-1]}}
+\newcommand{\pyuppercase}[1]{\py{'#1'.upper()}}
+\begin{codeprint}
+\newcommand{\pypow}[1]{\py{#1}}
+\newcommand{\pyreverse}[1]{\py{'#1'[::-1]}}
+\newcommand{\pyuppercase}[1]{\py{'#1'.upper()}}
+\end{codeprint}
+
+分别用于数值计算(乘方计算), 字符串反转输出, 字符串大写输出. 使用效果如下:
+\begin{itemize}
+    \item Power Calculation: $2^{64} = \pypow{2**10}$
+    \item Reverse a string using Python: \pyreverse{Hello-LaTeX}
+    \item Uppercase a string: \pyuppercase{hello-latex}
+    \item Modulus: $102 = \py{102\%8}\quad \text{mod } 8$
+    \item Return string Options: \py[str]{'\\$\\$'+str(2**10)+'\\$\\$'}
+\end{itemize}
+
+\begin{remark}
+    如果你想要使用Python中的求模运算需要输入\texttt{\%}时,在\cmd{\py}命令中你应该写为:
+\begin{codeprint}
+\py{102\%8}
+\end{codeprint}
+    
+    或者是如果你需要在\cmd{\py}命令中传入\texttt{\$},请像下面这样书写:
+\begin{codeprint}
+\py{'\\$\\$'+str(2**10)+'\\$\\$'}
+\end{codeprint}
+\end{remark}
+
+\begin{remark}
+目前由于Windows上的sed命令(又或者是平台差异)和Linux下的差异,所以可能导致在Windows上使用时，
+\cmd{\py}中的单引号\cmd{'}不能正确的输入到目标文件中,从而导致字符串的声明失败.请一定注意!
+\end{remark}
+
+
+\subsubsection{python environment}
+zTikZ同时也提供了一个用于自由书写Python代码的环境\cmd{pycode}\index{pycode},可以用于生成复杂且规律的表格代码等排版元素.
+比如下面的示例:
+\begin{codeprint}
+\begin{pycode}{pycode_1.py}
+import numpy as np
+
+
+# write file
+with open ('./ztikz_output/python_data/pycode_1.py.out', 'w') as file:
+    file.write("\\begin{tabular}{p{3cm}ccc}\n")
+    file.write("\\hline\n")
+    file.write("number/function & $\\sin$ & $\\cos$ & $\\tan$\\\\\n")
+    file.write("\\hline\n")
+    for i in range(1, 21):
+        file.write(
+            f"${i}$ & ${np.around(np.sin(i), decimals=4)}$ &  ${np.around(np.cos(i), decimals=4)}$ & ${np.around(np.tan(i), decimals=4)}$\\\\\n"
+        )
+
+    file.write("\\hline\n")
+    file.write("\\end{tabular}\n")
+\end{pycode}
+\end{codeprint}
+
+
+那么在运行此命令后，在zTikZ的缓存文件夹中会生成一个名为\cmd{pycode_1.py.out}的文件，其内容为:
+\begin{codeprint}
+\begin{tabular}{p{3cm}ccc}
+\hline
+number/function & $\sin$ & $\cos$ & $\tan$\\
+\hline
+$1$ & $0.8415$ &  $0.5403$ & $1.5574$\\
+$2$ & $0.9093$ &  $-0.4161$ & $-2.185$\\
+$3$ & $0.1411$ &  $-0.99$ & $-0.1425$\\
+$4$ & $-0.7568$ &  $-0.6536$ & $1.1578$\\
+$5$ & $-0.9589$ &  $0.2837$ & $-3.3805$\\
+$6$ & $-0.2794$ &  $0.9602$ & $-0.291$\\
+$7$ & $0.657$ &  $0.7539$ & $0.8714$\\
+$8$ & $0.9894$ &  $-0.1455$ & $-6.7997$\\
+$9$ & $0.4121$ &  $-0.9111$ & $-0.4523$\\
+$10$ & $-0.544$ &  $-0.8391$ & $0.6484$\\
+$11$ & $-1.0$ &  $0.0044$ & $-225.9508$\\
+$12$ & $-0.5366$ &  $0.8439$ & $-0.6359$\\
+$13$ & $0.4202$ &  $0.9074$ & $0.463$\\
+$14$ & $0.9906$ &  $0.1367$ & $7.2446$\\
+$15$ & $0.6503$ &  $-0.7597$ & $-0.856$\\
+\hline
+\end{tabular}
+\end{codeprint}
+
+所以这段代码的具体效果如下:
+\begin{table}[H]
+    \centering
+    \input{./data/table_1.py}
+    \caption{Using Python to generate Table}
+\end{table}
+
+\begin{remark}
+    本环境(\cmd{pycode})目前还不够成熟,请谨慎使用,也欢迎各位提出宝贵的改进意见. 
+    当然,本环境目前具有缓存机制.
+\end{remark}
 
 
 \subsection{mathematica}
@@ -1567,7 +1825,6 @@ zTikZ模块提供和Mathematica相关的符号计算，数值运算和知识查�
 \]
 
 
-
 \chapter{致谢}
 \section{(L\raise2.5pt\hbox{a})\TeX{}}
 Wiki上对\TeX{}的定义:
@@ -1589,7 +1846,7 @@ Wiki上对\TeX{}的定义:
 感谢 \href{https://www.latex-project.org/latex3/}{\LaTeX3} 团队的所有成员.
 
 
-\addcontentsline{toc}{chapter}{部分命令/名词索引}
-% \printindex
+\addcontentsline{toc}{part}{部分命令/名词索引}
+\printindex
 
 \end{document}

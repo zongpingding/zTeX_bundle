@@ -10,8 +10,8 @@
 % ----------------------------------------------------------------------
 \ExplSyntaxOn
 \tl_const:Nn \c__zlatex_class_name_tl            {zlatex}
-\tl_const:Nn \c__zlatex_class_version_tl         {0.2}
-\tl_const:Nn \c__zlatex_class_date_tl            {2024/03/06}
+\tl_const:Nn \c__zlatex_class_version_tl         {0.3}
+\tl_const:Nn \c__zlatex_class_date_tl            {2024/03/21}
 \tl_const:Nn \c__zlatex_class_description_tl     {a~latex3~document~class}
 
 \ProvidesExplClass{\c__zlatex_class_name_tl}         % Class
@@ -65,6 +65,19 @@
     % bib source
     bib-source            .str_gset:N   =  \g__zlatex_bib_source_str,
     bib-source            .initial:n    = { ref.bib },
+    % toc setting
+    toc                   .multichoice:,
+    toc / 2column         .code:n       =  { \zlatex_load_after:n { \RequirePackage[toc]{multitoc} } },
+    toc / rename          .code:n       =  { 
+        \str_case:Vn \g__zlatex_lang_str {
+            {en}{ \zlatex_load_after:n {\renewcommand{\contentsname}{\hfill\bfseries\huge Contents \hfill}} }
+            {cn}{ \zlatex_load_after:n {\renewcommand{\contentsname}{\hfill\bfseries\huge 目录     \hfill}} }
+        }{}
+    },
+    toc / unknown         .code:n       =  {
+        \msg_new:nnn {zlatex}{option-toc}{Current~toc~option~is~:~'#1'~,default~toc~settings~substitute.}
+        \msg_warning:nn {zlatex}{option-toc}
+    },
 }
 \ProcessKeysOptions {zlatex / option}
 
@@ -124,7 +137,7 @@
             \dim_gset:Nn \marginparwidth{9.25em}
         }{
             \geometry{a4paper, left=3cm, right=3cm, bottom=3.5cm, footskip=1.5cm, marginparsep=1em}
-            \renewcommand{\marginpar}[1]{\leftbar#1\endleftbar}
+            \renewcommand{\marginpar}[1]{\leftbar\noindent#1\endleftbar}
         }
     }
 }{}
@@ -285,7 +298,7 @@
     \MakeFramed {\advance\hsize-\width \FrameRestore}}%
 {\endMakeFramed}
 \newtheoremstyle{zlatexTheorem}
-    {2pt}{2pt}{\itshape}
+    {2pt}{2pt}{}
     {-3pt}{\bfseries}{}
     {.25em}{\thmname{#1}~ \thmnumber{#2}~ \thmnote{(#3)}}
 \theoremstyle{zlatexTheorem}
@@ -319,7 +332,8 @@
         \def\FrameCommand{
             {\color{##1}\vrule width 1.5pt}\colorbox{##1!10}
         }
-        \MakeFramed{\advance\hsize-\width\FrameRestore}   
+        \MakeFramed{\advance\hsize-\width\FrameRestore}
+        \noindent   
     }{\endMakeFramed}
 }
 \NewDocumentCommand\zlatexFramed{mO{black}}{
@@ -335,6 +349,9 @@
     }{\str_if_eq:VnTF \l__arg_one_tl{proof}{\hfill\qedsymbol\par}{\par}}
 }
 
+% equation number style
+\counterwithin{equation}{section}
+
 % math related cmds alias
 \bool_if:NTF \g__zlatex_math_alias_bool{
     \RequirePackage{amssymb, mathtools}
@@ -345,8 +362,8 @@
     \let\ss\S
     \renewcommand{\S}[1]{\ensuremath{\mathscr{#1}}}
     \newcommand{\B}[1]{\ensuremath{\mathbb{#1}}}
-    \newcommand{\F}[1]{\ensuremath{\mathbf{#1}}}
-    \newcommand{\FF}[1]{\ensuremath{\bm{#1}}}
+    \newcommand{\FF}[1]{\ensuremath{\mathbf{#1}}}
+    \newcommand{\F}[1]{\ensuremath{\bm{#1}}}
     \newcommand{\R}[1]{\ensuremath{\mathrm{#1}}}
     \newcommand{\K}[1]{\ensuremath{\mathfrak{#1}}}
     % Math Arrow 
@@ -392,8 +409,8 @@
 % ----------------------------------------------------------------------
 %                        ToC, Titles and Cover Style
 % ----------------------------------------------------------------------
-\RequirePackage{titletoc}
 % partial ToC
+\RequirePackage{titletoc}
 \NewDocumentCommand{\partialToC}{O{}}{
     \setcounter{tocdepth}{2}  
     \titlecontents{psection}[2.3em]
@@ -405,25 +422,37 @@
     \startcontents[chapters]
     \printcontents[chapters]{p}{1}{}
 }
-% ToC name style
-\str_if_eq:VnTF \g__zlatex_lang_str{en}{
-    \zlatex_load_after:n {\renewcommand{\contentsname}{\hfill\bfseries\Large Contents\hfill}}
-}{}
+
 % chapter head style
-\def\@makechapterhead#1{%
-\vspace*{10\p@}%
-{\parindent \z@ \centering \reset@font
-    {\Huge\bfseries\thechapter}
-        \par\nobreak
-        \vspace*{10\p@}%
-        \interlinepenalty\@M
-        \hrule
-        \vspace*{10\p@}%
-        \huge\bfseries #1\par\nobreak
-        \par
-        \vspace*{10\p@}%
-    \vskip 40\p@
-}}
+\RequirePackage{titlesec}
+\definecolor{RoyalRed}{RGB}{157,16, 45}
+\titleformat{\chapter}[display]
+    {\bfseries\huge\color{black}}%
+    {\flushright\Large\color{RoyalRed}%
+    \MakeUppercase{\chaptertitlename}\hspace{1ex}%
+    {\fontsize{60}{60}\selectfont\thechapter}}%
+    {10pt}%
+    {\titlerule\vspace{1ex}}
+% chapter space
+\titlespacing{\chapter}{0pt}{-30pt}{40pt}
+
+% toc page
+\RequirePackage{tocloft}
+
+% title page
+\renewcommand{\maketitle}{
+\begin{titlepage}
+    \vfill\vspace*{40pt}
+    \noindent\hspace*{134pt}\rule[-75pt]{6pt}{95pt}{\hspace*{10pt}\fontsize{25}{25}\selectfont\bfseries\@title}\par
+    \vspace*{-15pt}
+    \noindent\hspace*{150pt}{\Large\bfseries\@author}\par
+    \vspace*{400pt}
+    \noindent\hspace*{150pt}{\Large\bfseries\textcolor{gray}{\@date}}
+    \vfill
+\end{titlepage}} 
+
+% reset counter command
+\NewDocumentCommand{\zlatexUpdateCounterAfter}{mm}{\@addtoreset{#1}{#2}}
 
 
 
