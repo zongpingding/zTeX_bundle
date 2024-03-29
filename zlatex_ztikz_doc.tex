@@ -629,6 +629,13 @@ reason is a representation of, as far as I know, the things in themselves;
 
 
 \section{标签与引用}
+\subsection{footnote}
+可能有人不喜欢默认的脚注没有在页脚的位置，而是在页脚偏上的位置，用户可以独立加载宏包\cmd{footmisc}用于
+强制脚注位于页面底部，本文档类不打算添加此宏包，用户可以自行在导言区添加如下命令:
+\begin{codeprint}
+\usepackage[bottom]{footmisc}
+\end{codeprint}
+
 \subsection{Cleveref}
 z\LaTeX{}文档类加载了\cmd{cleveref}宏包来构建标签-引用系统。常规的\cmd{\label{}}操作并没有什么变化，
 区别主要在引用标签功能上。对于普通的模板你可能会看到如下的说明: 使用\cmd{\eqref}进行公式标签的索引,
@@ -906,12 +913,15 @@ zTiKZ中把坐标``对齐''? 试想这么一个情景：你在Geogebra中找到�
 对应参数的位置(均为\cmd{{OOm}}形式的参数).所以下面就以\cmd{\Plot}命令为例, 讲解这一系列命令的用法:
 
 \begin{codeprint}
-\Plot[<plot domain>][<plot style>]{<function>}
+\Plot[<plot domain>][<plot style>][<marker options>]{<function>}
 \end{codeprint}
 
 其中\cmd{<plot domain>}就是绘制的定义域,比如\cmd{-3:4}; \cmd{<plot style>}为绘制函数的样式，
-包括图形的颜色，线型，粗细等等; \cmd{<function>}就是你要绘制的函数,比如\cmd{sin(x)}. 以下为一个具体的例子,
-首先创建一个\cmd{tikzpicture}环境，在其中写上我们的\cmd{\Plot}命令和对应的绘制参数.
+包括图形的颜色，线型，粗细等等;\cmd{<marker option>}表示是否绘制散点图(意味着此时你要把对应绘制命令的精度降低，
+不然会十分的耗时，或者是造成结果的不满意)；当你没有指定这个可选参数的值时，默认绘制连续函数的图像.marker 参数采用键值对的 
+方式进行指定，见后文\cmd{\ShowPoint}中的\cmd{<marker option>}\index{\cmd{<marker option>}}参数详细解释，二者用法完全一致.
+\cmd{<function>}就是你要绘制的函数,比如\cmd{sin(x)}. 以下为一个具体的例子,首先创建一个\cmd{tikzpicture}环境，
+在其中写上我们的\cmd{\Plot}命令和对应的绘制参数.
 
 \begin{codeprint}
 \begin{tikzpicture}
@@ -1006,57 +1016,171 @@ zTikZ中的Cache 机制和这个是十分的类似的，也可以说是一样的
 绘制点用的\cmd{\ShowPoint}命令.
 
 其中\cmd{\ShowAxis}\index{\cmd{\ShowAxis}}的参数格式为:\cmd{\ShowAxis[<plot style>]{(start coordinate);(end coordinate)}}.
-和前面的\cmd{<plot style>}参数相同，任何的\cmd{\draw[<plot style>]}的值都是合法的. \cmd{\ShowAxis}中的第二个参数
-表示绘制的坐标轴的起点和终点，使用``\cmd{;}''进行分割(zTikZ 中凡是单个参数中含有多个对象的，分割对象所用到的符号
-都是``\cmd{;}''). \cmd{\ShowGrid}\index{\cmd{\ShowGrid}}命令的参数也是和\cmd{\ShowAxis}命令的参数一样的，只不过此命令中可以
-指定一个\cmd{step}关键字，用于指定绘制网格的步长(间隔), 如\cmd{step=.5},设置步长为0.5. 对应的\cmd{\ShowPoint}\index{\cmd{\ShowPoint}}
-命令的参数格式为:
-
+这里的\cmd{<plot style>}参数采用键值对的形式指定，可用键值对列表以及不同键的默认值可参见如下源码声明:
 \begin{codeprint}
-\ShowPoint[<dot style>]{(coordinate 1); (coordinate 2); ...}[<label 1>; <label2>; ...][<position>]
+% basic tick args
+tickStart       .fp_set:N   = \l__start_fp,
+tickStart       .initial:n  = { -5 },
+tickEnd         .fp_set:N   = \l__end_fp,
+tickEnd         .initial:n  = { 5 },
+axisRotate      .fp_set:N   = \l__axis_rotate_angle,
+axisRotate      .initial:n  = { 0 },
+% tick dimension spec
+mainStep        .fp_set:N   = \l__main_step_fp,
+mainStep        .initial:n  = { 1.0 },
+subStep         .fp_set:N   = \l__sub_step_fp,
+subStep         .initial:n  = { 0.1 },
+tickLabelShift  .dim_set:N  = \l__tick_label_shift_dim,
+tickLabelShift  .initial:n  = { 0pt },
+mainTickLenght  .dim_set:N  = \l__main_tick_length_dim,
+mainTickLenght  .initial:n  = { 4pt },
+subTickLenght   .dim_set:N  = \l__sub_tick_length_dim,
+subTickLenght   .initial:n  = { 2pt },
+mainTickLabelPosition .tl_set:N  = \l__main_tick_label_position_tl,
+mainTickLabelPosition .initial:n = { below },
+% color spec
+axisColor       .tl_set:N   = \l__axis_color_tl,
+axisColor       .initial:n  = { black },
+mainTickColor   .tl_set:N   = \l__main_tick_color_tl,
+mainTickColor   .initial:n  = { black },
+subTickColor    .tl_set:N   = \l__sub_tick_color_tl,
+subTickColor    .initial:n  = { black },
+mainTickLabelColor .tl_set:N  = \l__main_tick_label_color_tl,
+mainTickLabelColor .initial:n = { black },
+% tick cross type spec
+tickStyle       .choice:,
+tickStyle/cross .code:n     = \tl_set:Nn \l__tick_spec_tl { cross },
+tickStyle/above .code:n     = \tl_set:Nn \l__tick_spec_tl { above },
+tickStyle/below .code:n     = \tl_set:Nn \l__tick_spec_tl { below },
 \end{codeprint}
 
-上述的\cmd{<dot style>}通过\cmd{<key>-<value>}的格式进行指定, 可用的\cmd{<key>-<value>}列表为:
+一个自定义\cmd{\ShowAxis}命令示例如下:
+\begin{codeprint}
+\NewDocumentCommand{\xAxis}{O{-2}O{8}}{
+    \ShowAxis[
+        tickStart=\fp_eval:n {#1+1}, tickEnd=\fp_eval:n {#2-0.75}, 
+        mainStep=1, subStep=.25, 
+        axisRotate=0, axisColor=black,
+        mainTickColor=black, subTickColor=black,
+        mainTickLenght=10pt, subTickLenght=5pt,
+        tickLabelShift=0pt, tickStyle=below, 
+        mainTickLabelPosition=below
+    ]{(#1, 0); (#2, 0)}
+}
+\end{codeprint}
+
+从上述zTikZ内置的\cmd{\xAxis}\index{\cmd{\xAxis}}命令可以看出，我们可以指定坐标轴的如下属性:
+\begin{itemize}
+    \item 主(子)刻度绘制起点/终点
+    \item 主(子)刻度颜色设置
+    \item 主刻度标签颜色/位置，可选位置有:\cmd{above, below, left, right}
+    \item 主(子)刻度长度
+    \item 主(子)刻度间隔
+    \item 主刻度坐标偏移量
+    \item 主(子)刻度旋转角度，请注意调整旋转后标签的位置.
+    \item 主(子)刻度样式:\cmd{cross, above, below},分别代表ticks在坐标轴的两侧还是某一侧.
+\end{itemize}
+
+\cmd{\ShowAxis}中的第二个参数表示绘制的坐标轴的起点和终点，使用``\cmd{;}''进行分割(zTikZ 中凡是单个参数中含有多个对象的，
+分割对象所用到的符号都是``\cmd{;}''). zTikZ内置\cmd{\xAxis,\yAxis}\index{\cmd{\yAxis}}命令，用于绘制两条标准的坐标轴.命令的参数格式为：
+\begin{codeprint}
+\xAxis[<start>][<end>]
+\yAxis[<start>][<end>]
+\end{codeprint}
+
+上面的\cmd{<start>, <end>}分别表示$x,y$轴对应的坐标轴绘制的起始,终止点.对应 $x$轴即为:\cmd{(<start>, 0) -- (<end>, 0)}.
+$y$轴即交换坐标.
+
+\begin{remark}
+    如果在使用\cmd{\ShowAxis}命令时,没有指定可选参数中键\cmd{tickStyle}的值时，那么此时并不会绘制任何的刻度.
+\end{remark}
+
+在绘制完坐标轴之后，便可以绘制网格;使用\cmd{\ShowGrid}命令.\cmd{\ShowGrid}\index{\cmd{\ShowGrid}}命令的参数也是和\cmd{\ShowAxis}
+命令的参数一样的，只不过此命令中可以指定一个\cmd{step}关键字，用于指定绘制网格的步长(间隔), 如\cmd{step=.5},设置步长为0.5. 
+对应的\cmd{\ShowPoint}\index{\cmd{\ShowPoint}}命令的参数格式为:
+
+\begin{codeprint}
+\ShowPoint[<marker option>]{(coordinate 1); (coordinate 2); ...}[<label 1>; <label2>; ...][<position>]
+\end{codeprint}
+
+上述的\cmd{<marker option>>}\index{\cmd{<marker option>}}通过\cmd{<key>-<value>}的格式进行指定, 可用的\cmd{<key>-<value>}列表为:
 
 \begin{itemize}
-    \item \cmd{type}: \cmd{circle, rectangle}, 显示点的形状为圆形/矩形, 默认为circle.
+    \item \cmd{type}: zTikZ库已经加载\cmd{pgfmarkers}库，所以任何在此库中的形状均为有效值, 
+        默认为实心circle.\cmd{type=*}. 可以参见\cref{fig:point-marker},截取自pgf手册.
     \item \cmd{radius}: \cmd{<dimension>}, 点的半径，默认为 1pt.
     \item \cmd{color}: \cmd{<color>}, 点的颜色, 默认为black.
     \item \cmd{opacity}: \cmd{<float value>}, 点的透明度,默认为1，即不透明.
+    \item \cmd{rotate}: marker的旋转角度, 默认为0.
 \end{itemize}
 
+\begin{figure}[!htb]
+    \centering
+    \includegraphics[width=.75\linewidth]{./pics/point_marker.pdf}
+    \caption{Point Marker}
+    \label{fig:point-marker}
+\end{figure}
 
-
-终于，现在我们可以给出一个相对完整的代码:
+终于，现在我们可以给出一个相对完整的代码(包括\cmd{<marker option>}对应的用法):
 
 \begin{codeprint}
 \begin{tikzpicture}[>=Latex]
+    \xAxis[-5][5]
+    \yAxis[-2][5]
     \Plot[-1.5*pi:pi][red, thick]{sin(x)}
-    \ShowAxis{(-5, 0); (5, 0)}
-    \ShowAxis{(0, -2); (0, 2)}
-    \ShowGrid[gray, step=1, opacity=.5]{(-5, -2); (5, 2)}
-    \ShowPoint[color=orange, radius=1.5pt]{(0, 0); (3.1415926, 0)}[$O=(0, 0)$; $(\pi, 0)$][below right=.5em and .5em]
+    \ShowGrid[gray, step=1, opacity=.5]{(-5, -2); (5, 5)}
+    % marker option
+    \PlotPrecise{plot}{10}
+    \Plot[-1.5*pi:pi][red, thick][type=ball, color=red]{sin(x)+.75}
+    % show point
+    \ShowPoint[color=teal, radius=2pt, type=pentagon*, opacity=.8, rotate=60]
+        {(0, 0); (3.1415926, 0)}[$O=(0, 0)$; $(\pi, 0)$][above right=4em and 0em, font=\small]
 \end{tikzpicture}
 \end{codeprint}
 
 \begin{center}
-    \begin{tikzpicture}[>=Latex]
-        \Plot[-1.5*pi:pi][red, thick]{sin(x)}
-        \ShowAxis{(-5, 0); (5, 0)}
-        \ShowAxis{(0, -2); (0, 2)}
-        \ShowGrid[gray, step=1, opacity=.5]{(-5, -2); (5, 2)}
-        \ShowPoint[color=orange, radius=1.5pt]{(0, 0); (3.1415926, 0)}[$O=(0, 0)$; $(\pi, 0)$][below right=.5em and .5em]
-    \end{tikzpicture}
+\begin{tikzpicture}[>=Latex]
+    \xAxis[-5][5]
+    \yAxis[-2][5]
+    \Plot[-1.5*pi:pi][red, thick]{sin(x)}
+    \ShowGrid[gray, step=1, opacity=.5]{(-5, -2); (5, 5)}
+    % marker option
+    \PlotPrecise{plot}{10}
+    \Plot[-1.5*pi:pi][red, thick][type=ball, color=red]{sin(x)+.75}
+    % show point
+    \ShowPoint[color=teal, radius=2pt, type=pentagon*, opacity=.8, rotate=60]
+        {(0, 0); (3.1415926, 0)}[$O=(0, 0)$; $(\pi, 0)$][above right=4em and 0em, font=\small]
+\end{tikzpicture}
 \end{center}
 
 \begin{leftbar}
 \noindent \textbf{注意:}zTikZ中的命令都不需要你使用``\cmd{;}''去结束绘制.
 \end{leftbar}
 
+更多的关于Marker的选项和用法，请参见如下示例:
+\begin{codeprint}
+\begin{tikzpicture}[>=Latex]
+    \xAxis[-5][5]
+    \yAxis[-5][5]
+    \ShowGrid[gray, step=1, opacity=.5]{(-5, -2); (5, 5)}
+    \PlotPrecise{plot}{10}
+    \Plot[-1.5*pi:pi][red, thick][type=ball, color=red]{sin(x)}
+
+    \PlotPrecise{polar}{20}
+    \PolarPlot[0:10*pi][orange][type=ball, color=red]{0.1*t}
+
+    \PlotPrecise{contour}{40}
+    \ContourPlot[-4:4][green][type=ball, color=red]{x**2/9+y**2/4-1}
+
+    \PlotPrecise{param}{40}
+    \ParamPlot[0:2*pi][red, name path=ellipse][type=ball, color=red]{2*sin(t), 3*cos(t)}
+\end{tikzpicture}
+\end{codeprint}
+
 其余的几个函数绘制命令，稍微值得一提的是命令\cmd{\ContourPlot}\index{\cmd{\ContourPlot}}, 其参数格式为:
 
 \begin{codeprint}
-\ContourPlot[<plot domain>][<plot style>]{<function>}
+\ContourPlot[<plot domain>][<plot style>][<marker options>]{<function>}
 \end{codeprint}
 
 但是因为是 contour plot, 所以它的定义域的指定格式是比较特别的； 比如绘制的定义为:
@@ -1614,6 +1738,10 @@ $15$ & $0.6503$ &  $-0.7597$ & $-0.856$\\
     当然,本环境目前具有缓存机制.
 \end{remark}
 
+\begin{remark}
+    推荐用户使用最新的由\LaTeX3编写的宏包:\href{https://mirror-hk.koddos.net/CTAN/macros/latex/contrib/csvsimple/csvsimple-l3.pdf}{csvsimple-l3},
+    或者是\href{https://mirror-hk.koddos.net/CTAN/macros/latex/contrib/tabularray/tabularray.pdf}{tabularray}用于在\LaTeX{}中进行表格的排版.
+\end{remark}
 
 \subsection{mathematica}
 使用Mathematica进行数值计算这一部分和后面的\cmd{\wolfram}\index{\cmd{\wolfram}}指令是有一部分重合的,详细的使用参见后面一节的
