@@ -10,8 +10,8 @@
 % ----------------------------------------------------------------------
 \ExplSyntaxOn
 \tl_const:Nn \c__zlatex_class_name_tl            {zlatex}
-\tl_const:Nn \c__zlatex_class_version_tl         {0.3}
-\tl_const:Nn \c__zlatex_class_date_tl            {2024/03/21}
+\tl_const:Nn \c__zlatex_class_version_tl         {0.4}
+\tl_const:Nn \c__zlatex_class_date_tl            {2024/04/04}
 \tl_const:Nn \c__zlatex_class_description_tl     {a~latex3~document~class}
 
 \ProvidesExplClass{\c__zlatex_class_name_tl}         % Class
@@ -48,8 +48,11 @@
     margin                .bool_gset:N  =  \g__zlatex_margin_bool,
     margin                .initial:n    =  { true },
     % font size
-    fontsize              .str_gset:N   =  \g__zlatex_fontsize_str,
-    fontsize              .initial:n    =  { 11pt },
+    font-size             .str_gset:N   =  \g__zlatex_fontsize_str,
+    font-size             .initial:n    =  { 11pt },
+    % math env type
+    math-env-theme         .tl_gset:N    =  \g__zlatex_math_env_theme_tl,
+    math-env-theme         .initial:n    =  { leftbar },
     % math alias
     math-alias            .bool_gset:N  =  \g__zlatex_math_alias_bool,
     math-alias            .initial:n    =  { false },
@@ -193,16 +196,10 @@
 \RequirePackage{amsfonts, amsmath}          
 \RequirePackage{amsthm}             
 \RequirePackage{xcolor}
-\RequirePackage[backend=biber,style=numeric]{biblatex}
+\RequirePackage[backend=biber]{biblatex}
 \exp_args:Nx \addbibresource{\str_use:N \g__zlatex_bib_source_str}
 \RequirePackage{indextools}
 \RequirePackage{hyperref}
-\hypersetup{
-    colorlinks=true,
-    urlcolor=purple,
-    linkcolor=purple,
-    citecolor=blue,
-}
 \RequirePackage[nameinlink]{cleveref}
 
 % figure and table prefix for \cref 
@@ -226,7 +223,7 @@
 % ----------------------------------------------------------------------
 %                           Math Environments 
 % ----------------------------------------------------------------------
-% theorem-like env's colors
+% pre-defined color
 \definecolor{mathaxiomColor}{HTML}{000000}
 \definecolor{mathdefinitionColor}{HTML}{bdc3c7}
 \definecolor{maththeoremColor}{HTML}{27ae60}
@@ -234,6 +231,59 @@
 \definecolor{mathcorollaryColor}{HTML}{8e44ad}
 \definecolor{mathpropositionColor}{HTML}{f39c12}
 \definecolor{mathremarkColor}{HTML}{c92a2a}
+\definecolor{RoyalRed}{RGB}{157,16, 45}
+
+% color spec for zlatex
+\zlatex_define:nn {color}{
+    % structure color
+    link            .tl_set:N     =  \l__zlatex_link_color_tl,
+    link            .initial:n    =  { purple },
+    cite            .tl_set:N     =  \l__zlatex_cite_color_tl,
+    cite            .initial:n    =  { teal },
+    url             .tl_set:N     =  \l__zlatex_url_color_tl,
+    url             .initial:n    =  { RoyalRed  },
+    chapter         .tl_set:N     =  \l__zlatex_chapter_color_tl,
+    chapter         .initial:n    =  { RoyalRed },  
+    chapter-rule    .tl_set:N     =  \l__zlatex_chapter_rule_color_tl,
+    chapter-rule    .initial:n    =  { black },
+    % math envs      color
+    axiom           .tl_set:N     =  \l__zlatex_axiom_color_tl,
+    axiom           .initial:n    =  { mathaxiomColor },
+    definition      .tl_set:N     =  \l__zlatex_definition_color_tl,
+    definition      .initial:n    =  { mathdefinitionColor },
+    theorem         .tl_set:N     =  \l__zlatex_theorem_color_tl,
+    theorem         .initial:n    =  { maththeoremColor },
+    lemma           .tl_set:N     =  \l__zlatex_lemma_color_tl,
+    lemma           .initial:n    =  { mathlemmaColor },
+    corollary       .tl_set:N     =  \l__zlatex_corollary_color_tl,
+    corollary       .initial:n    =  { mathcorollaryColor },
+    proposition     .tl_set:N     =  \l__zlatex_proposition_color_tl,
+    proposition     .initial:n    =  { mathpropositionColor },
+    remark          .tl_set:N     =  \l__zlatex_remark_color_tl,
+    remark          .initial:n    =  { mathremarkColor },
+}
+\NewDocumentCommand{\zlatexColorSetup}{m}{
+    \zlatex_set:nn {color}{#1}
+    % hyperref set up (may change in future)
+    \hypersetup{
+        colorlinks = true,
+        urlcolor   = \tl_use:N \l__zlatex_url_color_tl,
+        linkcolor  = \tl_use:N \l__zlatex_link_color_tl,
+        citecolor  = \tl_use:N \l__zlatex_cite_color_tl,
+    }
+}
+\zlatexColorSetup{link=purple, cite=teal, url=RoyalRed}
+
+% framed env for user interface
+\cs_new_protected:Npn \zlatexFramed:nn #1#2 {
+    \NewDocumentEnvironment{#1}{O{#2}}{
+        \def\FrameCommand{{\color{##1}\vrule width 3pt}\colorbox{##1!10}}
+        \MakeFramed{\advance\hsize-\width\FrameRestore}\noindent   
+    }{\endMakeFramed}
+}
+\NewDocumentCommand\zlatexFramed{mO{black}}{
+    \zlatexFramed:nn {#1}{#2}
+}
 
 % theorem/proof-like envs list 
 \clist_gset:Nn \g__zlatex_theoremlike_envs_clist  { 
@@ -248,7 +298,7 @@
 % math envs' name accrodingt to language
 \msg_new:nnn {zlatex}{mathenv-name}{Current~math~env~name~is~:~'#1'~,which~is-invalid.}
 \msg_new:nnn {zlatex}{mathenv-lang}{Current~math~envs~language~option~is~:~'#1'~,which~is-invalid.~default~'en'~substitute.}
-\str_case:VnTF \g__zlatex_lang_str{ 
+\str_case:VnTF \g__zlatex_lang_str { 
     {en}{
         \zlatex_define:nn {math-env}{
             math-env                .multichoice:,
@@ -293,25 +343,43 @@
 {\msg_error:nn {zlatex}{mathenv-lang}}
 
 % math env's style
-\NewDocumentEnvironment{zlatexTheoremLikeFrame}{O{black}}{
-    \def\FrameCommand{{\color{#1}\vrule width 3pt} \hspace{10pt}}%
-    \MakeFramed {\advance\hsize-\width \FrameRestore}}%
-{\endMakeFramed}
-\newtheoremstyle{zlatexTheorem}
+\newtheoremstyle{zlatexMathEnv}
     {2pt}{2pt}{}
-    {-3pt}{\bfseries}{}
+    {0pt}{\bfseries}{}
     {.25em}{\thmname{#1}~ \thmnumber{#2}~ \thmnote{(#3)}}
-\theoremstyle{zlatexTheorem}
+\theoremstyle{zlatexMathEnv}
 
 % theorem-like env declaration
-\clist_map_inline:Nn \g__zlatex_theoremlike_envs_clist{
+\msg_new:nnn {zlatex}{mathenv-type}{Current~math~env~is~:~'#1'~,only~'none',~'leftbar',~'background'~types~are-valid.}
+\str_case:VnF \g__zlatex_math_env_theme_tl {
+    {none}{
+        \NewDocumentEnvironment{zlatexTheoremLikeFrame}{O{}}{\vspace*{5pt}}{\vspace*{5pt}}
+    }
+    {leftbar}{
+        \NewDocumentEnvironment{zlatexTheoremLikeFrame}{O{black}}{
+            \def\FrameCommand{{\color{#1}\vrule width 3pt}\hspace{5pt}}
+            \MakeFramed {\advance\hsize-\width \FrameRestore}
+        }{\endMakeFramed}
+    }
+    {all}{
+        \NewDocumentEnvironment{zlatexTheoremLikeFrame}{O{black}}{
+            \def\FrameCommand{{\color{#1}\vrule width 3pt}\colorbox{#1!10}}
+            \MakeFramed{\advance\hsize-\width \FrameRestore}
+        }{\endMakeFramed}
+    }
+}{\msg_error:nn {zlatex}{mathenv-type}}
+
+% loop to create math env, setup \cref
+\clist_map_inline:Nn \g__zlatex_theoremlike_envs_clist {
     % theorem create
     \newtheorem{zlatex#1}{\tl_use:c {zlatex#1Name}}[section]
-    % env create
+
+    % env create (3 types: 'leftbar', 'none' and 'backgroud')
     \NewDocumentEnvironment{#1}{O{}}{
-        \begin{zlatexTheoremLikeFrame}[math#1Color]
+        \begin{zlatexTheoremLikeFrame}[\tl_use:c {l__zlatex_#1_color_tl}]
         \begin{zlatex#1}[##1]
     }{\end{zlatex#1}\end{zlatexTheoremLikeFrame}}
+
     % cref settings
     \cs_generate_variant:Nn \exp_args:Nnnx {Nxxx}
     \str_case:VnF \g__zlatex_lang_str {
@@ -324,20 +392,6 @@
             \creflabelformat{zlatex#1}{##2(##1)##3}
         }
     }{\msg_error:nn {zlatex}{mathenv-lang}}
-}
-
-% framed env for user interface
-\cs_new_protected:Npn \zlatexFramed:nn #1#2 {
-    \NewDocumentEnvironment{#1}{O{#2}}{
-        \def\FrameCommand{
-            {\color{##1}\vrule width 1.5pt}\colorbox{##1!10}
-        }
-        \MakeFramed{\advance\hsize-\width\FrameRestore}
-        \noindent   
-    }{\endMakeFramed}
-}
-\NewDocumentCommand\zlatexFramed{mO{black}}{
-    \zlatexFramed:nn {#1}{#2}
 }
 
 % proof-like env decalration
@@ -425,14 +479,13 @@
 
 % chapter head style
 \RequirePackage{titlesec}
-\definecolor{RoyalRed}{RGB}{157,16, 45}
 \titleformat{\chapter}[display]
-    {\bfseries\huge\color{black}}%
-    {\flushright\Large\color{RoyalRed}%
-    \MakeUppercase{\chaptertitlename}\hspace{1ex}%
-    {\fontsize{60}{60}\selectfont\thechapter}}%
-    {10pt}%
-    {\titlerule\vspace{1ex}}
+    {\bfseries\huge\color{black}}
+    {\flushright\Large\color{\tl_use:N \l__zlatex_chapter_color_tl}
+    \MakeUppercase{\chaptertitlename}\hspace{1ex}
+    {\fontsize{60}{60}\selectfont\thechapter}}
+    {10pt}
+    {\color{\tl_use:N \l__zlatex_chapter_rule_color_tl}\titlerule\vspace{1ex}}
 % chapter space
 \titlespacing{\chapter}{0pt}{-30pt}{40pt}
 
@@ -446,8 +499,8 @@
     \noindent\hspace*{134pt}\rule[-75pt]{6pt}{95pt}{\hspace*{10pt}\fontsize{25}{25}\selectfont\bfseries\@title}\par
     \vspace*{-15pt}
     \noindent\hspace*{150pt}{\Large\bfseries\@author}\par
-    \vspace*{400pt}
-    \noindent\hspace*{150pt}{\Large\bfseries\textcolor{gray}{\@date}}
+    \vspace*{480pt}
+    \noindent\hspace*{150pt}{\Large\textcolor{gray}{\@date}}
     \vfill
 \end{titlepage}} 
 
