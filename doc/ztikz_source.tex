@@ -1,14 +1,7 @@
-\NeedsTeXFormat{LaTeX2e}
-\RequirePackage{expl3}
-\ProvidesExplPackage{ztikz}{2024/03/06}{0.2}{plot package}
-
-
-
-
-
-% ----------------------------------------------------------------------
-%                        Init ztikz's Environment
-% ----------------------------------------------------------------------
+\chapter{zTikZ部分源码说明}
+\section{Set up Env}
+\subsection{Set up}
+\begin{source}
 \RequirePackage{l3sys-shell}
 \NewDocumentCommand\ztikzMkdir{m}{ \sys_shell_mkdir:n {#1} }
 \ExplSyntaxOff
@@ -110,14 +103,10 @@ plot t
 \end{filecontents}
 \fi\endgroup
 \ExplSyntaxOn
+\end{source}
 
-
-
-
-
-% ----------------------------------------------------------------------
-%                           ztikz config 
-% ----------------------------------------------------------------------
+\subsection{config}
+\begin{source}
 % data or picture path
 \tl_const:Nn \g__ztikz_gnu_path_tl      {./ztikz_output/gnuplot_data} 
 \tl_const:Nn \g__ztikz_python_path_tl   {./ztikz_output/python_data} 
@@ -144,43 +133,11 @@ plot t
 % io read/write interface
 \ior_new:N \g__file_read_ior
 \tl_new:N  \g__file_content_tl
+\end{source}
 
-
-
-
-
-% ----------------------------------------------------------------------
-%                            basic packages
-% ----------------------------------------------------------------------
-\RequirePackage{xparse}
-\RequirePackage{xsimverb}
-\RequirePackage{tikz}
-\RequirePackage{etoolbox}
-\patchcmd{\pgfutil@InputIfFileExists}{\input #1}{%
-    \@pushfilename
-    \xdef\@currname{#1}%
-    \input #1 %
-    \@popfilename
-}{}{}
-\usetikzlibrary{arrows.meta}
-\usetikzlibrary{intersections}
-\usetikzlibrary{patterns}
-\usetikzlibrary{plotmarks}
-\usetikzlibrary{positioning}
-\usetikzlibrary{external}
-\tikzexternalize[prefix=ztikz_output/tikz_data/]
-
-% get tikz environment's index
-\pretocmd{\tikzpicture}{\int_gincr:N \g__tikz_env_index_int}{}{}
-\NewDocumentCommand{\currentTikzIndex}{}{\int_use:N \g__tikz_env_index_int}
-
-
-
-
-
-% ----------------------------------------------------------------------
-%                          ztikz's cache mechanism 
-% ----------------------------------------------------------------------
+\section{tikz}
+\subsection{Cache mechanism}
+\begin{source}
 % generate md5 hash (history) of a file
 \ior_new:N \g__ztikz_file_ior
 \seq_new:N \g__ztikz_file_hash_seq
@@ -215,14 +172,10 @@ plot t
     }
 }
 \cs_generate_variant:Nn \ztikz_hash_if_change_cs:n { x }
+\end{source}
 
-
-
-
-
-% ----------------------------------------------------------------------
-%                       coordinate basic components
-% ----------------------------------------------------------------------
+\subsection{Basic components}
+\begin{source}
 % ==> show point
 \keys_define:nn { ztikz / point }{
     type    .str_set:N  = \l__point_type_str,
@@ -399,14 +352,11 @@ plot t
         \ShowPoint[#1]{(intersection-##1)}
     }
 }
+\end{source}
 
 
-
-
-
-% ----------------------------------------------------------------------
-%                          precision of plot
-% ----------------------------------------------------------------------
+\subsection{Plot precise}
+\begin{source}
 % change precise of each plot type
 \NewDocumentCommand\PlotPrecise{ mO{once}m }{
     \str_if_eq:nnTF {#2}{once}{
@@ -432,14 +382,10 @@ plot t
         \msg_error:nn {ztikz}{ztikz-plot-type}
     }
 }
+\end{source}
 
-
-
-
-
-% ----------------------------------------------------------------------
-%                           2d function plot
-% ----------------------------------------------------------------------
+\subsection{plot}
+\begin{source}
 % escape shell commands 
 \cs_generate_variant:Nn \sys_shell_mv:nn {xx}
 \cs_generate_variant:Nn \sys_shell_now:n {x}
@@ -459,7 +405,7 @@ plot t
     }
     \tl_set:Nx \l__gnu_data_full_path_tl {\g__ztikz_gnu_path_tl/\l__gnu_data_new_name_tl}
     \sys_shell_mv:xx {\g__ztikz_gnu_path_tl/gnu_data.table}
-                     {\l__gnu_data_full_path_tl}
+                    {\l__gnu_data_full_path_tl}
     % plot data file
     \tl_if_empty:nTF {#3}{
         \draw[#2] plot[smooth] file {\l__gnu_data_full_path_tl};
@@ -480,7 +426,7 @@ plot t
     }
     % reset precise (default 300 for plot precise)
     \bool_if:cTF {g__#1_precise_bool}{
-        \PlotPrecise{#1}{100}
+        \PlotPrecise{#1}{300}
     }{\relax}
 }
 
@@ -532,22 +478,14 @@ plot t
     % plot data, reset precise
     \ztikz_gnu_data_plot_cs:nnn {polar}{#2}{#3}
 }
+\end{source}
 
 
 
 
-
-% ----------------------------------------------------------------------
-%                           3d function plot
-% ----------------------------------------------------------------------
-
-
-
-
-
-% ----------------------------------------------------------------------
-%                          Interactive with Python
-% ----------------------------------------------------------------------
+\section{Python}
+\subsection{matplotlib}
+\begin{source}
 \cs_generate_variant:Nn \xsim_file_write_start:nn {nx}
 \cs_generate_variant:Nn \sys_shell_mv:nn {xx}
 % ==> python-matplotlib
@@ -579,8 +517,60 @@ plot t
         \includegraphics[#1]{\g__ztikz_python_path_tl/\pyfile.pdf}
         \typeout{skip~recompile~by~python,~using~the~cache~picture~\int_use:N \g__picture_index_int}
     }
-}
+}    
+\end{source}
 
+\subsection{pycode}
+\begin{source}
+% ==> python-code-env
+\NewDocumentEnvironment{pycode}{ m }{
+    \newcommand{\pyfile}{#1}
+    \xsim_file_write_start:nx {\c_true_bool}{\g__ztikz_python_path_tl/#1}
+    }{ 
+    \xsim_file_write_stop:
+    % step picture index
+    \int_gadd:Nn \g__picture_index_int {1}   
+    % check if hash changed
+    \ztikz_hash_if_change_cs:x {\g__ztikz_python_path_tl/\pyfile}   
+    \bool_if:NTF \g__hash_change_bool {
+        % excute python source
+        \exp_args:Nx \sys_shell_now:n {python~ \g__ztikz_python_path_tl/\pyfile} 
+        \input{\g__ztikz_python_path_tl/\pyfile.out}
+        \typeout{Writing~ 'pycode'~environment~source~to~\tl_use:N \g__ztikz_python_path_tl/\pyfile}
+    }{
+        \input{\g__ztikz_python_path_tl/\pyfile.out}
+        \typeout{skip~recompile~by~python,~using~the~cache~pycode~result~\int_use:N \g__picture_index_int}
+    }
+}
+\end{source}
+
+\subsection{sympy}
+\begin{source}
+% ==> python-sympy
+\NewDocumentCommand\sympy{m}{
+    % step sympy result index
+    \int_gadd:Nn \g__sympy_index_int {1}  
+    \tl_set:Nx \l__current_sympy_index_tl {\int_use:N \g__sympy_index_int}
+    % sympy source write
+    \sys_shell_now:x {sed~ -i~ "8s|F_res~ =~ .*|F_res~ =~  #1|"~ \g__ztikz_scripts_path_tl/sympy_script.py}
+    % check hash
+    \ztikz_hash_if_change_cs:x {\g__ztikz_scripts_path_tl/sympy_script.py}
+    \bool_if:NTF \g__hash_change_bool {
+        \sys_shell_now:x {python~ \g__ztikz_scripts_path_tl/sympy_script.py}
+        \sys_shell_mv:xx
+            {\g__ztikz_python_path_tl/sympy.out}
+            {\g__ztikz_python_path_tl/sympy_\int_use:N \g__sympy_index_int .out}
+        \typeout{using~python~sympy~calculating~question~\l__current_sympy_index_tl ...}
+        \exp_args:Nx \input{\g__ztikz_python_path_tl/sympy_\l__current_sympy_index_tl.out}
+    }{
+        \exp_args:Nx \input{\g__ztikz_python_path_tl/sympy_\l__current_sympy_index_tl.out}
+        \typeout{skip~recompile,~using~the~cache~sympy~result~\l__current_sympy_index_tl}
+    }
+}
+\end{source}
+
+\subsection{python eval}
+\begin{source}
 % read from external file 
 \cs_new_protected:Npn \zlatex_Readlines_cs:nn #1#2 {
     \ior_open:Nn \g__file_read_ior {#2}
@@ -608,57 +598,15 @@ plot t
     % ---> cause bug that can't write ToC to file
     % \iow_close:N \g__file_read_ior
 }
-
-% ==> python-sympy
-\NewDocumentCommand\sympy{m}{
-    % step sympy result index
-    \int_gadd:Nn \g__sympy_index_int {1}  
-    \tl_set:Nx \l__current_sympy_index_tl {\int_use:N \g__sympy_index_int}
-    % sympy source write
-    \sys_shell_now:x {sed~ -i~ "8s|F_res~ =~ .*|F_res~ =~  #1|"~ \g__ztikz_scripts_path_tl/sympy_script.py}
-    % check hash
-    \ztikz_hash_if_change_cs:x {\g__ztikz_scripts_path_tl/sympy_script.py}
-    \bool_if:NTF \g__hash_change_bool {
-        \sys_shell_now:x {python~ \g__ztikz_scripts_path_tl/sympy_script.py}
-        \sys_shell_mv:xx
-            {\g__ztikz_python_path_tl/sympy.out}
-            {\g__ztikz_python_path_tl/sympy_\int_use:N \g__sympy_index_int .out}
-        \typeout{using~python~sympy~calculating~question~\l__current_sympy_index_tl ...}
-        \exp_args:Nx \input{\g__ztikz_python_path_tl/sympy_\l__current_sympy_index_tl.out}
-    }{
-        \exp_args:Nx \input{\g__ztikz_python_path_tl/sympy_\l__current_sympy_index_tl.out}
-        \typeout{skip~recompile,~using~the~cache~sympy~result~\l__current_sympy_index_tl}
-    }
-}
-
-% ==> python-code-env
-\NewDocumentEnvironment{pycode}{ m }{
-    \newcommand{\pyfile}{#1}
-    \xsim_file_write_start:nx {\c_true_bool}{\g__ztikz_python_path_tl/#1}
-    }{ 
-    \xsim_file_write_stop:
-    % step picture index
-    \int_gadd:Nn \g__picture_index_int {1}   
-    % check if hash changed
-    \ztikz_hash_if_change_cs:x {\g__ztikz_python_path_tl/\pyfile}   
-    \bool_if:NTF \g__hash_change_bool {
-        % excute python source
-        \exp_args:Nx \sys_shell_now:n {python~ \g__ztikz_python_path_tl/\pyfile} 
-        \input{\g__ztikz_python_path_tl/\pyfile.out}
-        \typeout{Writing~ 'pycode'~environment~source~to~\tl_use:N \g__ztikz_python_path_tl/\pyfile}
-    }{
-        \input{\g__ztikz_python_path_tl/\pyfile.out}
-        \typeout{skip~recompile~by~python,~using~the~cache~pycode~result~\int_use:N \g__picture_index_int}
-    }
-}
+\end{source}
 
 
 
 
 
-% ----------------------------------------------------------------------
-%                          Interactive with Mathematica
-% ----------------------------------------------------------------------
+\section{Mathematica}
+\subsection{picture}
+\begin{source}
 % wolfram graphicx
 \NewDocumentEnvironment{mmafig}{ O{width=.75\linewidth}m }{
     \newcommand{\mmafile}{#2}
@@ -679,7 +627,11 @@ plot t
         \typeout{skip~recompile~by~wolframscript,~using~the~cache~picture~\int_use:N \g__picture_index_int}
     }
 }
+\end{source}
 
+
+\subsection{Symbols Calculation}
+\begin{source}
 % input result of wolfram
 \cs_new_protected:Nn \ztikz_wolfram_input_result_cs: {
     % write export command
@@ -715,7 +667,10 @@ plot t
     % cache and input result
     \ztikz_wolfram_input_result_cs:
 }
+\end{source}
 
+\subsection{equation Solve}
+\begin{source}
 % equation solve
 \NewDocumentCommand\wolframsolve{O{part}mO{}O{}}{ 
     % write mathamatica code
@@ -755,3 +710,4 @@ plot t
     % cache and input result
     \ztikz_wolfram_input_result_cs:
 }
+\end{source}

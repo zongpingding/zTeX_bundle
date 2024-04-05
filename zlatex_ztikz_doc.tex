@@ -1,0 +1,80 @@
+\documentclass[
+    lang=cn, 
+    layout=oneside, 
+    margin=false, 
+    math-alias=true,
+    toc={rename, 2column},
+]{zlatex}
+\zlatexColorSetup{
+    % link        = teal,
+    definition  = blue
+}
+\usepackage{ztikz}
+
+% optional 
+\usepackage{amsmath}
+\usepackage{booktabs}
+\usepackage{verbatim}
+\usepackage{multicol}
+\usepackage{framed}
+\usepackage[bottom]{footmisc}
+\usepackage{listings}
+\definecolor{gray}{rgb}{0.5,0.5,0.5}
+% 15.1 listing Env setting
+\lstset{
+    basicstyle=\tt,
+    showstringspaces=true,
+    frame=tb,
+    breaklines=true,
+}
+% 15.2 normal code Env
+\lstnewenvironment{codeprint}[1][10]{
+    \lstset{%
+        backgroundcolor=\color{gray!10},
+        numbers=none,
+        frame=tlbr,
+        aboveskip=1em,
+        basicstyle=\fontsize{#1pt}{#1pt}\selectfont\ttfamily,
+        postbreak=\raisebox{0ex}[0ex][0ex]{\ensuremath{\hookrightarrow\space}},
+    }
+}{}
+\lstnewenvironment{source}[1][10]{
+    \lstset{%
+        backgroundcolor=\color{white},
+        frame=tlbr,
+        numbers=left,
+        numbersep=5pt,
+        aboveskip=1em,
+        basicstyle=\fontsize{#1pt}{#1pt}\selectfont\ttfamily,
+    }
+}{}
+\let\cmd\zlatexVerb
+\newcommand{\Footnote}[1]{\stepcounter{footnote}\footnote[\thefootnote]{#1}}
+% index make
+\makeindex[title=部分命令/名词索引, columns=2]
+\zlatexFramed{leftbar}[gray]
+
+\title{z\LaTeX{}/zTikZ Series}
+\author{Eureka}
+\date{\today}
+\begin{document}
+\maketitle
+\frontmatter
+\tableofcontents
+\mainmatter
+\part{Document}
+% zlatex
+\input{./doc/zlatex_doc.tex}
+% ztikz
+\input{./doc/ztikz_doc.tex}
+% Index
+\addcontentsline{toc}{part}{部分命令/名词索引}
+\printindex
+
+
+% Appendix
+\part{Appendix}
+\input{./doc/zlatex_source.tex}
+\input{./doc/ztikz_source.tex}
+
+\end{document}
