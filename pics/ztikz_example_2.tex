@@ -21,6 +21,16 @@
     \ContourPlot[-7:7; -7:7][teal]{sin(x**2+y**2)-exp(-x*y)}
 
     % polar plot
-    \PolarPlot[0:10*pi][orange]{0.2*t}
+    \begin{scope}[xshift=4cm, yshift=-5cm]
+        \PolarPlot[0:10*pi][orange]{0.1*t}
+    \end{scope}
+    \begin{scope}[xshift=-4cm, yshift=5cm]
+        \PolarPlot{2*(1-sin(t))}
+        \fill[gray, opacity=.5] plot file {\gnudata{8}};
+    \end{scope}
+
+    % node annotate
+    \ShowPoint[opacity=0]{(-4, 3); (4, 5); (5, -5); (3, -1)}
+        [$\rho=2(1-\sin\theta)$; $\sin(x^2+y^2)-\exp(-xy)=0$; $\rho=0.1\theta$; $\frac{x^2}{9} + \frac{y^2}{4}=1$]
 \end{tikzpicture}
 \end{document}

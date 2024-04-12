@@ -26,6 +26,12 @@ tikz的\cmd{external}库实现的,感兴趣的可以去看看}, Python/sympy, Py
 结束. 每一个部分的源代码被修改后，对应的部分都会重新计算，重新生成结果，并记录下新的Hash值为下一次的
 缓存做准备。
 
+目前zTikZ可以在加载宏包时指定是否开启\cmd{tikzpicture}环境的缓存机制，如果你不想使用缓存机制，那么可以
+使用如下格式加载宏包(zTikZ默认缓存所有环境内容):
+\begin{codeprint}
+\usepackage[external=false]{ztikz}
+\end{codeprint}
+
 \section{Set Up zTikZ}
 \subsection{兼容情况}
 目前\cmd{zTikZ}模块已经可以做到跨平台, 在各个平台中的兼容性如下:
@@ -38,14 +44,21 @@ tikz的\cmd{external}库实现的,感兴趣的可以去看看}, Python/sympy, Py
 \end{itemize}}
 
 在Linux平台上并没有什么需要注意的事项，重点是Windows平台上的兼容性; 使用\cmd{zTikZ}正常运行，
-那么在里的系统中(默认添加了环境变量)须有以下软件:
+那么在你的系统中(默认添加了环境变量)须有以下软件:
 \begin{itemize}
+    \item \cmd{gnuplot}: zTikZ库的二维绘图功能均基于gnuplot，所以你需要在你的本地安装gnuplot.
     \item \cmd{python}: 用于运行python脚本进行符号计算与绘图，需要Python库\cmd{sympy, scipy}.
     \item \cmd{sed}: 主要用于绘图脚本中的函数以及绘制样式替换，后续可能会考虑去除\cmd{sed}依赖.
     \item \cmd{wolframscript}(可选):如果需要使用本模块的Mathematica功能，那么需要安装WolframScript以及
         对应的Mathematica软件.或者只安装wolframscript，但是在执行命令时选择在云端执行，这样就不用
         本地的Mathematica计算内核了. 
 \end{itemize}
+
+\begin{remark}
+    因会使用到\cmd{gnuplot}，所以在Windows下需要在系统环境变量中添加\cmd{gnuplot}的路径.并且
+    在编译此文档时需要加上对应的 \cmd{--shell-esape}参数；在Windows平台，由于\TeX{}Live的编译配置，
+    需确保系统环境变量\cmd{PATHEXT}中已经删除\cmd{.PY}后缀.
+\end{remark}
 
 \subsection{环境配置}
 \subsubsection{Linux}
@@ -161,12 +174,32 @@ zTikZ中的Cache 机制和这个是十分的类似的，也可以说是一样的
 的用法(在后面区域填充时是即为有用的):
 
 \begin{codeprint}
-\gnudata{1_2} = ./ztikz_output/gnuplot_data/gnu_data_1_2.table
+\gnudata{2} = ./ztikz_output/gnuplot_data/gnu_data_1_2.table
 \end{codeprint}
 
-\cmd{\gnudata}参数中的``1''表示此数据在第一个tikzpicture环境中生成，``2''表示此数据是在第1个tikzpicture
-环境中的第二个绘图数据; 后面我们再解释这个文件夹中其他文件的作用，目前我们先把函数绘制命令\cmd{\Plot}的参数解释清楚。
-如果想要设置绘制的函数图形的样式，只需要对其第二个可选项参数进行设置即可，比如设置为``\textcolor{red}{红色}, \textbf{加粗}''.
+\cmd{\gnudata}参数中的``2''表示此数据是在当前tikzpicture环境中的第二个函数绘图数据; 
+每一个已经绘制的函数都会在对应的文件夹下生成一个对应的数据文件，你可以使用此数据文件进行
+多种操作：
+\begin{itemize}
+    \item 绘制此文件:\cmd{\draw plot file{\gnudata{<index>}}}.
+    \item 填充此文件对应的曲线:\cmd{\fill[<style>] plot file{\gnudata{<index>}}}.
+    \item 绘制此文件对应的散点图:只需在绘制散点图前指定绘制精度即可.
+\end{itemize}
+
+\begin{remark}
+    目前由于技术原因，\cmd{\ContourPlot}命令生成的数据暂时不可用于后续的填充操作.可以考虑将对应隐函数转化为参数方程形式或极坐标形式. 
+    如果你强行使用此类型数据，那么会得到如下的不良输出:
+    \begin{figure}[H]
+        \centering
+        \includegraphics[width=.5\linewidth]{./pics/contour_data_bug.pdf}
+        \caption{ContourPlot Fill Bug}
+        \label{fig:ContourPlot Fill Bug}
+    \end{figure}
+\end{remark}
+
+后续我会解释这个文件夹中其他文件的作用，目前我们先把函数绘制命令\cmd{\Plot}的参数解释清楚。
+如果想要设置绘制的函数图形的样式，只需要对其第二个可选项参数进行设置即可，
+比如设置为``\textcolor{red}{红色}, \textbf{加粗}''.
 
 \begin{codeprint}
 \begin{tikzpicture}
@@ -186,18 +219,37 @@ zTikZ中的Cache 机制和这个是十分的类似的，也可以说是一样的
 
 \begin{codeprint}
 % gnuplot data rename, plot and precise reset
-\cs_new_protected:Npn \ztikz_gnu_data_plot_cs:n #1#2 {
+\cs_new_protected:Npn \ztikz_gnu_data_plot_cs:nnn #1#2#3 {
     % rename data file
     \int_gadd:Nn \g__gnu_data_index_int {1}
-    \tl_set:Nx \l__gnu_data_new_name_tl {gnu_data_\int_use:N \g__gnu_data_index_int.table}
+    \tl_set:Nx \l__gnu_data_new_name_tl {
+        gnu_data_\int_use:N \g__tikz_env_index_int _
+        \int_use:N \g__gnu_data_index_int.table
+    }
     \tl_set:Nx \l__gnu_data_full_path_tl {\g__ztikz_gnu_path_tl/\l__gnu_data_new_name_tl}
     \sys_shell_mv:xx {\g__ztikz_gnu_path_tl/gnu_data.table}
                     {\l__gnu_data_full_path_tl}
     % plot data file
-    \draw[#2] plot[smooth] file {\l__gnu_data_full_path_tl};
+    \tl_if_empty:nTF {#3}{
+        \draw[#2] plot[smooth] file {\l__gnu_data_full_path_tl};
+    }{
+        \group_begin:
+        \keys_set:nn { ztikz / point } { #3 }
+        \draw plot [
+            mark = \str_use:N \l__point_type_str, 
+            mark~ size = \dim_use:N \l__point_radius_dim,
+            mark~ options = {
+                rotate  = \fp_use:N \l__point_rotate_angle, 
+                opacity = \tl_use:N \l__point_opacity_tl, 
+                color   = \tl_use:N \l__point_color_tl,
+                ball~ color = \tl_use:N \l__point_color_tl,
+            }
+        ] file {\l__gnu_data_full_path_tl};
+        \group_end:
+    }
     % reset precise (default 300 for plot precise)
     \bool_if:cTF {g__#1_precise_bool}{
-        \PlotPrecise{#1}{300}
+        \PlotPrecise{#1}{100}
     }{\relax}
 }
 \end{codeprint}
@@ -286,6 +338,21 @@ $y$轴即交换坐标.
     如果在使用\cmd{\ShowAxis}命令时,没有指定可选参数中键\cmd{tickStyle}的值时，那么此时并不会绘制任何的刻度.
 \end{remark}
 
+今后读者若需要多次绘制坐标轴及其对应的标签，可以在导言区自定义一个\cmd{\ShowXYAxis}命令，
+自动完成坐标轴绘制以及对应的标签。
+\begin{codeprint}
+\newcommand{\ShowXYAxis}[2]{
+    \ShowAxis{(-#1, 0); (#1, 0)}
+    \ShowAxis{(0, -#2); (0, #2)}
+    \ShowPoint[opacity=0]{(0, 0)}[$O$][below left]
+    \ShowPoint[opacity=0]{(#1, 0)}[$x$][below]
+    \ShowPoint[opacity=0]{(0, #2)}[$y$][left]
+}
+\end{codeprint}
+
+然后使用命令\cmd{\ShowXYAxis}即可完成坐标轴的绘制以及对应的标注.第一个参数:$x$的绘制范围为\cmd{[-\#1, \#1]},
+第二个参数:$y$的绘制范围为\cmd{[-\#2, \#2]}.默认两轴对称，如果需要更多的样式，请使用\cmd{\ShowAxis}命令进行自定义.
+
 在绘制完坐标轴之后，便可以绘制网格;使用\cmd{\ShowGrid}命令.\cmd{\ShowGrid}\index{\cmd{\ShowGrid}}命令的参数也是和\cmd{\ShowAxis}
 命令的参数一样的，只不过此命令中可以指定一个\cmd{step}关键字，用于指定绘制网格的步长(间隔), 如\cmd{step=.5},设置步长为0.5. 
 对应的\cmd{\ShowPoint}\index{\cmd{\ShowPoint}}命令的参数格式为:
@@ -305,7 +372,7 @@ $y$轴即交换坐标.
     \item \cmd{rotate}: marker的旋转角度, 默认为0.
 \end{itemize}
 
-\begin{figure}[!htb]
+\begin{figure}
     \centering
     \includegraphics[width=.75\linewidth]{./pics/point_marker.pdf}
     \caption{Point Marker}
@@ -475,20 +542,19 @@ $-3<x<\pi$ 并且 $-1.5<y<e$. 那么在指定其\cmd{<plot domain>}时应该写�
 }
 
 下面我们给出几个运用到zTikZ这部分命令的一些综合绘图案例:
-\begin{figure}[H]
+\begin{figure}
     \centering
     \includegraphics[width=.65\linewidth]{./pics/ztikz_example_1.pdf}
     \caption{绘制示例 1}
     \label{fig:zTikZ-plot—example-1}
 \end{figure}
 
-\begin{figure}[H]
+\begin{figure}
     \centering
     \includegraphics[width=.65\linewidth]{./pics/ztikz_example_2.pdf}
     \caption{绘制示例 2}
     \label{fig:zTikZ-plot—example-2}
 \end{figure}
-
 
 \begin{figure}[H]
     \centering
