@@ -100,11 +100,17 @@ zTiKZ中把坐标``对齐''? 试想这么一个情景：你在Geogebra中找到�
             \item \cmd{\ParamPlot}\index{\cmd{\ParamPlot}}: 绘制参数方程
             \item \cmd{\ContourPlot}\index{\cmd{\ContourPlot}}: 绘制等高线图
             \item \cmd{\PolarPlot}\index{\cmd{\PolarPlot}}: 绘制极坐标图
+            \item \cmd{\ListPlot}\index{\cmd{\ListPlot}}: 绘制散点图，只需要指定绘制参数中\cmd{opacity=0}
+            \item \cmd{\StairsPlot}\index{\cmd{\StairsPlot}}: 绘制阶梯图
+            \item \cmd{\StemPlot}\index{\cmd{\StemPlot}}: 绘制火柴棒图
+            \item \cmd{\BarPlot}\index{\cmd{\BarPlot}}: 绘制条形图
+            \item \cmd{\ShadePlot}\index{\cmd{\ShadePlot}}: 绘制渐变曲线(直线)
             \item \cmd{\PlotPrecise}\index{\cmd{\PlotPrecise}}: 函数绘制精度
         \end{itemize}
     \item 欧几里得几何 
         \begin{itemize}
             \item \cmd{\ShowPoint}\index{\cmd{\ShowPoint}}: 绘制点
+            \item \cmd{\Polygon}\index{\cmd{\Polygon}}: 绘制正多边形
             \item \cmd{\ShowGrid}\index{\cmd{\ShowGrid}}: 绘制网格 
             \item \cmd{\ShowAxis}\index{\cmd{\ShowAxis}}: 绘制坐标轴
             \item \cmd{\ShowIntersection}\index{\cmd{\ShowIntersection}}: 绘制交点
@@ -113,6 +119,12 @@ zTiKZ中把坐标``对齐''? 试想这么一个情景：你在Geogebra中找到�
 \end{itemize}
 \end{multicols}
 
+\begin{remark}
+    上述的\cmd{\StairsPlot, \StemPlot, \BarPlot, \ShadePlot}在绘制时只能够传入具体的数据文件，而非
+    对应的方程.
+\end{remark}
+
+\subsection{Intruduction to Plot}
 我们首先来介绍上面和函数绘制相关的命令,因为它们的参数结构几乎都是一摸一样的, 无论是参数的含义(定义域-样式-函数)，
 对应参数的位置(均为\cmd{{OOm}}形式的参数).所以下面就以\cmd{\Plot}命令为例, 讲解这一系列命令的用法:
 
@@ -191,7 +203,7 @@ zTikZ中的Cache 机制和这个是十分的类似的，也可以说是一样的
     如果你强行使用此类型数据，那么会得到如下的不良输出:
     \begin{figure}[H]
         \centering
-        \includegraphics[width=.5\linewidth]{./pics/contour_data_bug.pdf}
+        \includegraphics[width=.3\linewidth]{./pics/contour_data_bug.pdf}
         \caption{ContourPlot Fill Bug}
         \label{fig:ContourPlot Fill Bug}
     \end{figure}
@@ -254,8 +266,10 @@ zTikZ中的Cache 机制和这个是十分的类似的，也可以说是一样的
 }
 \end{codeprint}
 
-上述函数\cmd{\ztikz_gnu_data_plot_cs:n} 的第二个参数即为\cmd{\Plot}命令的第二个参数;最后给我们的
-图像加上坐标轴等细节: 需要用到绘制坐标轴的\cmd{\ShowAxis}命令, 绘制网格用的\cmd{\ShowGrid}命令，以及
+上述函数\cmd{\ztikz_gnu_data_plot_cs:n} 的第二个参数即为\cmd{\Plot}命令的第二个参数;
+
+\subsection{Show Axis}
+最后给我们的图像加上坐标轴等细节: 需要用到绘制坐标轴的\cmd{\ShowAxis}命令, 绘制网格用的\cmd{\ShowGrid}命令，以及
 绘制点用的\cmd{\ShowPoint}命令.
 
 其中\cmd{\ShowAxis}\index{\cmd{\ShowAxis}}的参数格式为:\cmd{\ShowAxis[<plot style>]{(start coordinate);(end coordinate)}}.
@@ -354,7 +368,9 @@ $y$轴即交换坐标.
 第二个参数:$y$的绘制范围为\cmd{[-\#2, \#2]}.默认两轴对称，如果需要更多的样式，请使用\cmd{\ShowAxis}命令进行自定义.
 
 在绘制完坐标轴之后，便可以绘制网格;使用\cmd{\ShowGrid}命令.\cmd{\ShowGrid}\index{\cmd{\ShowGrid}}命令的参数也是和\cmd{\ShowAxis}
-命令的参数一样的，只不过此命令中可以指定一个\cmd{step}关键字，用于指定绘制网格的步长(间隔), 如\cmd{step=.5},设置步长为0.5. 
+命令的参数一样的，只不过此命令中可以指定一个\cmd{step}关键字，用于指定绘制网格的步长(间隔), 如\cmd{step=.5},设置步长为0.5.
+
+\subsection{Show Point}
 对应的\cmd{\ShowPoint}\index{\cmd{\ShowPoint}}命令的参数格式为:
 
 \begin{codeprint}
@@ -435,6 +451,7 @@ $y$轴即交换坐标.
 \end{tikzpicture}
 \end{codeprint}
 
+\subsection{Contour Plot}
 其余的几个函数绘制命令，稍微值得一提的是命令\cmd{\ContourPlot}\index{\cmd{\ContourPlot}}, 其参数格式为:
 
 \begin{codeprint}
@@ -477,7 +494,7 @@ $-3<x<\pi$ 并且 $-1.5<y<e$. 那么在指定其\cmd{<plot domain>}时应该写�
 \ContourPlot[0:2; -1:1][red, dashed]{x-1}
 \end{codeprint}
 
-
+\subsection{Intersection and Plot Precise}
 我们还有两个命令没有讲到:\cmd{\ShowIntersection}\index{\cmd{\ShowIntersection}}, \cmd{\PlotPrecise}\index{\cmd{\PlotPrecise}};
 其中\cmd{\ShowIntersection}
 命令的参数格式为:
@@ -541,6 +558,376 @@ $-3<x<\pi$ 并且 $-1.5<y<e$. 那么在指定其\cmd{<plot domain>}时应该写�
     \end{tikzpicture}
 }
 
+
+\section{Statistic Plot}
+\subsection{Stairs Plot}
+了解完用户曲线绘制的一系列Plot命令后，现在开始介绍和统计相关的几个绘图命令:
+\cmd{\ListPlot}\index{\cmd{\ListPlot}}, \cmd{\StairsPlot}\index{\cmd{\StairsPlot}}, 
+\cmd{\StemPlot}\index{\cmd{\StemPlot}}, \cmd{\BarPlot}\index{\cmd{\BarPlot}}, \cmd{\ShadePlot}\index{\cmd{\ShadePlot}}.
+这几个命令在本节开篇已经介绍了其大致的功能. 本节主要聚焦于怎么使用这几个命令. 由于除\cmd{\ShadePlot,\ListPlot}外，其余3者的用法完全一致，
+不同的仅仅为第一个可选参数的意义. 其中\cmd{\ListPlot}仅仅只需把对应的绘制命令中\cmd{opacity=0}即可，本节便以\cmd{\StairsPlot}为例，
+讲解这三者的用法。同时也会给出3者的具体示例.
+
+\cmd{\StairsPlot}主要用于绘制阶梯图,命令格式为:
+\begin{codeprint}
+\StairsPlot[<stairs option>][<draw option>][<marker option>]{<data>}
+\end{codeprint}
+
+第一个可选参数的可选值有:\cmd{plot-left(plot-right);jump-right(plot-left)}，我们以``;''进行两个配置项的分割.
+第一个配置项\cmd{plot-<.>}表示在绘制数据点时水平线取值为左值还是右值.第二个配置项\cmd{jump-<.>}表示在绘制数据点时
+跳过左侧还是右侧的垂直线，为空时默认绘制两侧的垂直线. 
+
+\begin{remark}
+    如果两个配置项\cmd{plot-<.>, jump-<.>}均为空，那么此时绘制的图像为通过线段相连的散点图
+\end{remark}
+
+其中必选参数\cmd{<data>}表示要可视化的数据文件,可以手动输入数据文件地址，也可以使用前文定义的\cmd{\gnudata{<index>}}命令
+用于引用前面已经生成的数据,\textbf{这也就意味着要使用此命令，必须先产生对应的数据}.一个绘制样例如\cref{fig:stairs-plot}:
+
+\begin{codeprint}
+\begin{tikzpicture}
+    \ShowGrid[step=1]{(-5, -5); (5, 5)}
+    %% \StairsPlot
+    % 1. connected using piecewise constant series of lines
+    \begin{scope}[yshift=1cm]
+        \StairsPlot[plot-left;][red]{./data/sine.data}
+        \node[left] at (-3.14, 0) {plot left(default)};
+    \end{scope}
+    \begin{scope}[yshift=-1cm]
+        \StairsPlot[plot-right;][orange]{./data/sine.data}
+        \node[left] at (-3.14, 0) {plot right};
+    \end{scope}
+    % 2. plot segment (non-connected series of lines)      
+    \begin{scope}[yshift=2cm]
+        \StairsPlot[;jump-left][teal][type=ball, color=teal]{./data/sine.data}
+        \node[left] at (-3.14, 0) {jump left};
+    \end{scope}
+    \begin{scope}[yshift=-2cm]
+        \StairsPlot[;jump-right][cyan][type=ball, color=cyan]{./data/sine.data}
+        \node[left] at (-3.14, 0) {jump right};
+    \end{scope}
+\end{tikzpicture}
+\end{codeprint}
+
+\begin{figure}
+    \centering
+    \begin{tikzpicture}
+        \ShowGrid[step=1]{(-5, -5); (5, 5)}
+        %% \StairsPlot
+        % 1. connected using piecewise constant series of lines
+        \begin{scope}[yshift=1cm]
+            \StairsPlot[plot-left;][red]{./data/sine.data}
+            \node[left] at (-3.14, 0) {plot left(default)};
+        \end{scope}
+        \begin{scope}[yshift=-1cm]
+            \StairsPlot[plot-right;][orange]{./data/sine.data}
+            \node[left] at (-3.14, 0) {plot right};
+        \end{scope}
+        % 2. plot segment (non-connected series of lines)      
+        \begin{scope}[yshift=2cm]
+            \StairsPlot[;jump-left][teal][type=ball, color=teal]{./data/sine.data}
+            \node[left] at (-3.14, 0) {jump left};
+        \end{scope}
+        \begin{scope}[yshift=-2cm]
+            \StairsPlot[;jump-right][cyan][type=ball, color=cyan]{./data/sine.data}
+            \node[left] at (-3.14, 0) {jump right};
+        \end{scope}
+    \end{tikzpicture}
+    \caption{stairs-plot}
+    \label{fig:stairs-plot}
+\end{figure}
+
+其余的两个相似命令\cmd{\StemPlot, \BarPlot}的参数格式为:
+\begin{codeprint}
+\StairsPlot[<stem/bar option>][<draw option>][<marker option>]{<data>}
+\end{codeprint}
+
+这里主要说明第一个可选参数的可选值列表,默认值以及其对应的实际含义:
+
+\begin{multicols}{2}
+\begin{itemize}
+    \item \cmd{\StemPlot}
+        \begin{itemize}
+            \item \cmd{x}:表示绘制一个垂直于$x$轴上的火柴棍图
+            \item \cmd{x}:表示绘制一个垂直于$y$轴上的火柴棍图
+            \item \cmd{o}:表示绘制一个中心为原点 $O=(0,0)$的火柴棍图
+            \item 若为空值，那么默认和\cmd{x}参数时的情形一致
+        \end{itemize}
+    \item \cmd{\BarPlot}
+        \begin{itemize}
+            \item \cmd{x}:表示绘制一个垂直于$x$轴上的{\bf 离散}柱形图
+            \item \cmd{y}:表示绘制一个垂直于$y$轴上的{\bf 离散}柱形图
+            \item \cmd{xc}:表示绘制一个垂直于$x$轴上的{\bf 连续}柱形图
+            \item \cmd{yc}:表示绘制一个垂直于$y$轴上的{\bf 连续}柱形图
+            \item 若为空值，那么默认和\cmd{x}参数时的情形一致
+        \end{itemize}
+\end{itemize}
+\end{multicols}
+
+\subsection{Stem/Bar Plot}
+下面各处这两个命令的一个简单示例,见\cref{fig:bar-plot}, \cref{fig:stem-plot}:
+\begin{codeprint}
+\begin{tikzpicture}
+    \ShowGrid[step=1]{(-5, -5); (5, 5)}
+    %% \StemPlot
+    % 1. xcomb
+    \begin{scope}[yshift=-3cm]
+        \StemPlot[x][red][type=*, color=red]{./data/sine.data}
+        \node[left] at (-3.14, 0) {xcomb};
+    \end{scope}
+    % 2. ycomb
+    \begin{scope}[yshift=0cm]
+        \StemPlot[y][orange][type=*, color=orange]{./data/sine.data}
+        \node[left] at (-3.14, 0) {ycomb};
+    \end{scope}
+    % 3. polar comb
+    \begin{scope}[yshift=3cm]
+        \StemPlot[o][cyan][type=*, color=cyan]{./data/sine.data}
+        \node[left] at (-2, 0) {polar comb};
+    \end{scope}
+\end{tikzpicture}
+\end{codeprint}
+
+\begin{figure}[!htb]
+    \centering
+    \begin{tikzpicture}
+        \ShowGrid[step=1]{(-5, -5); (5, 5)}
+        %% \StemPlot
+        % 1. xcomb
+        \begin{scope}[yshift=-3cm]
+            \StemPlot[x][red][type=*, color=red]{./data/sine.data}
+            \node[left] at (-3.14, 0) {xcomb};
+        \end{scope}
+        % 2. ycomb
+        \begin{scope}[yshift=0cm]
+            \StemPlot[y][orange][type=*, color=orange]{./data/sine.data}
+            \node[left] at (-3.14, 0) {ycomb};
+        \end{scope}
+        % 3. polar comb
+        \begin{scope}[yshift=3cm]
+            \StemPlot[o][cyan][type=*, color=cyan]{./data/sine.data}
+            \node[left] at (-2, 0) {polar comb};
+        \end{scope}
+    \end{tikzpicture}
+    \caption{stem-plot}
+    \label{fig:stem-plot}
+\end{figure}
+
+\begin{codeprint}
+\begin{tikzpicture}
+    \ShowGrid[step=1, color=gray, opacity=.5]{(-5, -5); (5, 5)}
+    % 1. xbar
+    \begin{scope}[yshift=-1cm]
+        \BarPlot[x][red, pattern=north west lines, pattern color=red]{./data/sine.data}
+        \node[left] at (-3.14, 0) {xbar};
+    \end{scope}
+    % 2. ybar
+    \begin{scope}[yshift=1cm]
+        \BarPlot[y][orange, pattern=north west lines, pattern color=orange]{./data/sine.data}
+        \node[left] at (-3.14, 0) {ybar};
+    \end{scope}
+    % 3. xbar interval (fill) 
+    \begin{scope}[yshift=4cm]
+        \BarPlot[xc][cyan, pattern=north west lines, pattern color=cyan]{./data/sine.data}
+        \node[left] at (-3.14, 0) {xbar continuous};
+    \end{scope}
+    % 3. ybar interval (fill) 
+    \begin{scope}[yshift=-3cm]
+        \BarPlot[yc][green, pattern=north west lines, pattern color=green]{./data/sine.data}
+        \node[left] at (-3.14, 0) {ybar continuous};
+    \end{scope}
+    % annotate
+    \node at (2.25 ,-4.5) {Optional args:bar width, bar shift};
+\end{tikzpicture}    
+\end{codeprint}
+
+\begin{figure}[!htb]
+    \centering
+    \begin{tikzpicture}
+        \ShowGrid[step=1, color=gray, opacity=.5]{(-5, -5); (5, 5)}
+        % 1. xbar
+        \begin{scope}[yshift=-1cm]
+            \BarPlot[x][red, pattern=north west lines, pattern color=red]{./data/sine.data}
+            \node[left] at (-3.14, 0) {xbar};
+        \end{scope}
+        % 2. ybar
+        \begin{scope}[yshift=1cm]
+            \BarPlot[y][orange, pattern=north west lines, pattern color=orange]{./data/sine.data}
+            \node[left] at (-3.14, 0) {ybar};
+        \end{scope}
+        % 3. xbar interval (fill) 
+        \begin{scope}[yshift=4cm]
+            \BarPlot[xc][cyan, pattern=north west lines, pattern color=cyan]{./data/sine.data}
+            \node[left] at (-3.14, 0) {xbar continuous};
+        \end{scope}
+        % 3. ybar interval (fill) 
+        \begin{scope}[yshift=-3cm]
+            \BarPlot[yc][green, pattern=north west lines, pattern color=green]{./data/sine.data}
+            \node[left] at (-3.14, 0) {ybar continuous};
+        \end{scope}
+        % annotate
+        \node at (0, -4.5) {Optional args for the Second:bar width, bar shift};
+    \end{tikzpicture}
+    \caption{bar-plot}
+    \label{fig:bar-plot}
+\end{figure}
+
+\subsection{List Plot}
+然后讲解一下怎么绘制散点图，以\cmd{\Plot, \PolarPlot}命令为例,见\cref{fig:list-plot}:
+\begin{codeprint}
+\begin{tikzpicture}
+    \ShowGrid[step=1, color=gray, opacity=.5]{(-5, -5); (5, 5)}
+    \begin{scope}[yshift=-2cm]
+        \PlotPrecise{plot}{10}
+        \Plot[-pi:pi][opacity=0, red][type=o, color=red]{sin(x)}
+    \end{scope}
+    \begin{scope}[yshift=3cm]
+        \PlotPrecise{polar}{15}
+        \PolarPlot[0:2*pi][opacity=0, orange][type=square, color=orange]{1-sin(t)}
+    \end{scope}
+    % continuous condition
+    \Plot[-pi:pi][red]{sin(x)}
+    \PolarPlot[0:2*pi][orange]{1-sin(t)}
+\end{tikzpicture}
+\end{codeprint}
+
+\begin{figure}[!htb]
+    \centering
+    \begin{tikzpicture}
+        \ShowGrid[step=1, color=gray, opacity=.5]{(-5, -5); (5, 5)}
+        \begin{scope}[yshift=-2cm]
+            \PlotPrecise{plot}{10}
+            \Plot[-pi:pi][opacity=0, red][type=o, color=red]{sin(x)}
+        \end{scope}
+        \begin{scope}[yshift=3cm]
+            \PlotPrecise{polar}{15}
+            \PolarPlot[0:2*pi][opacity=0, orange][type=square, color=orange]{1-sin(t)}
+        \end{scope}
+        % continuous condition
+        \Plot[-pi:pi][red]{sin(x)}
+        \PolarPlot[0:2*pi][orange]{1-sin(t)}
+    \end{tikzpicture}
+    \caption{list-plot}
+    \label{fig:list-plot}
+\end{figure}
+
+\subsection{Shade Plot}
+最后讲解\cmd{\ShadePlot}命令,参数格式为:
+\begin{codeprint}
+\ShadePlot[<shade mode>][<box distance>]{<data>}
+\end{codeprint}
+
+其中第一个参数\cmd{<shade mode>}使用命令\cmd{\ztikzShadeMode}命令进行声明，此命令的一个样例为(zTikZ默认shade模式):
+\begin{codeprint}
+\ztikzShadeMode{defaultMode}{horizontal}{white,black}
+\end{codeprint}
+
+\cmd{\ztikzShadeMode}的第二个参数可以为\cmd{vertical}，表示垂直渐变.第三个参数中的颜色也可以超过两个。一个具体的
+使用样例,见\cref{fig:shade-plot}:
+
+\begin{codeprint}
+% compile with "\usepackage[external=false]{ztikz}"
+\ztikzShadeMode{newyMode}{vertical}{white,black}
+\begin{tikzpicture}
+    \ShowGrid[step=1, color=gray, opacity=.5]{(-5, -5); (5, 5)}
+    \ShadePlot[newyMode][10pt]{./data/sine.data}
+\end{tikzpicture} 
+\end{codeprint}
+
+\begin{figure}[!htb]
+    \centering
+    \includegraphics[width=.75\linewidth]{./pics/ztikz_example_5.pdf}
+    \caption{shade-plot}
+    \label{fig:shade-plot}
+\end{figure}
+
+\begin{remark}
+目前此命令可能会存在部分的潜在问题，请谨慎使用此命令(比如此命令不支持\cmd{external}库的缓存功能). 
+如果想要创建一个shade区域，直接使用 \cmd{\shade}命令来代替\cmd{\fill}命令即可.在指定\cmd{\shade[<shade mode>] ...}命令
+中的\cmd{<shade mode>}时可以为:\cmd{top color=red, bottom color=blue}或者是\cmd{left color=red, right color=blue}.
+\end{remark}
+
+
+\section{Polygon}
+目前zTikZ的\cmd{Polygon}命令已经开发完毕, 此命令主要用于绘制正多边形。命令格式如下:
+\begin{codeprint}
+\Polygon[<options>]{<edges>}
+\end{codeprint}
+
+第二个参数是比较简单的，只需要输入一个正整数即可，表示多边形的边数. 第一个参数是一个可选参数，可以指定旋转角度,多边形的边长,边的颜色
+多边形填充样式与颜色，顶点样式等.可用的键值对以及默认值如下:
+
+\begin{codeprint}
+\keys_define:nn { ztikz / polygon }{
+    radius       .fp_set:N  = \l__polygon_radius_fp,
+    radius       .initial:n = { 1 },
+    edgeColor    .tl_set:N  = \l__polygon_edge_color_tl,
+    edgeColor    .initial:n = { black },
+    fillColor    .tl_set:N  = \l__polygon_fill_color_tl,
+    fillColor    .initial:n = { white },
+    fillOpacity  .fp_set:N  = \l__polygon_fill_opacity_fp,
+    fillOpacity  .initial:n = { 0 },
+    rotate       .fp_set:N  = \l__polygon_rotate_angle,
+    rotate       .initial:n = { 0 },
+    shift        .tl_set:N  = \l__polygon_shift_tl,
+    shift        .initial:n = { (0,0) },
+    marker       .tl_set:N  = \l__polygon_marker_option_tl,
+    marker       .initial:n = { },
+}
+\end{codeprint}
+
+这里指的说一下的参数是:\cmd{marker},此参数中可以填入任意合法的\cmd{<marker option>}键值对,一下为一个简单示例:
+\begin{codeprint}
+\Polygon [
+    radius=2, 
+    shift={(3,0)}, 
+    rotate=60, 
+    marker={type=ball, color=red}, 
+    edgeColor=teal, 
+    fillColor=red, 
+    fillOpacity=0.5
+]{3}
+\end{codeprint}
+
+\begin{remark}
+    多边形的变数必须为整数，同时再说明一下键\cmd{shift}的含义:合法的值为一个使用``()''包括的向量，表示 
+    整个多边形的平移量.比如\cmd{shift={(3,-4)}}表示整个多边形向右平移3个单位,象下平移4个单位. 不要忘记向量
+    外层的\texttt{\{\}}.
+\end{remark}
+
+在讲述了\cmd{\Polygon}命令的用法后，下面给出一个简单的使用样例,见\cref{fig:polygon}:
+\begin{codeprint}
+\begin{tikzpicture}
+    \ShowGrid[step=1, color=gray, opacity=.5]{(-5, -5); (5, 5)}
+    \Polygon[shift={(0, 0)}]{3}
+    \Polygon[shift={(3, 0)}, fillColor=red, fillOpacity=.5]{4}
+    \Polygon[shift={(0, 3)}, edgeColor=green, fillOpacity=.3, marker={type=ball, color=green}, rotate=18]{5}
+    \Polygon[shift={(-3,0)}, fillColor=orange, fillOpacity=.75]{6}
+    \Polygon[shift={(0,-3)}, fillColor=teal, fillOpacity=.5, marker={type=oplus*, color=teal}]{8}
+\end{tikzpicture}
+\end{codeprint}
+
+\begin{figure}[!htb]
+    \centering
+    \begin{tikzpicture}
+        \ShowGrid[step=1, color=gray, opacity=.5]{(-5, -5); (5, 5)}
+        \Polygon[shift={(0, 0)}]{3}
+        \Polygon[shift={(3, 0)}, fillColor=red, fillOpacity=.5]{4}
+        \Polygon[shift={(0, 3)}, edgeColor=green, fillOpacity=1, marker={type=ball, color=green}, rotate=18]{5}
+        \Polygon[shift={(-3,0)}, fillColor=orange, fillOpacity=.75]{6}
+        \Polygon[shift={(0,-3)}, fillColor=teal, fillOpacity=.5, marker={type=diamond*, color=red}]{8}
+    \end{tikzpicture}
+    \caption{polygon}
+    \label{fig:polygon}
+\end{figure}
+
+
+\begin{remark}
+    在填充多边形时，必须同时指定键\cmd{fillOpacity}的值,因为此值默认为0;
+    如果你想要填充一个透明度为50\%的多边形，那么你可以使用\cmd{fillOpacity=0.5}来实现.
+\end{remark}
+
+\section{Plot Gallery}
 下面我们给出几个运用到zTikZ这部分命令的一些综合绘图案例:
 \begin{figure}
     \centering
@@ -579,10 +966,12 @@ $-3<x<\pi$ 并且 $-1.5<y<e$. 那么在指定其\cmd{<plot domain>}时应该写�
     \item 使用了多个\cmd{\ContourPlot}函数，在默认的精度 100下，多个此函数也可能导致内存超出
     \item 最后一点耗时的点就是\cmd{\ShowIntersecion}命令，可以先用Geogebra得到交点后再使用
         \cmd{\ShowPoint}命令进行点的绘制.
+    \item 更严重的如果出现了编译错误，请考虑去掉\cmd{\ShadePlot}命令,或在\cmd{\usepackage[external=false]{ztikz}}
+        的情况下使用此命令.
 \end{itemize}
 \end{leftbar}
 
-\subsection{python/matplotlib}
+\section{python/matplotlib}
 python绘图是比较就简单的，zTikZ提供了用于python绘图的\cmd{pyfig}\index{\cmd{pyfig}}环境。
 此环境需要填入两个参数，参数格式为:
 
@@ -680,7 +1069,7 @@ plt.plot(x, y)
 \end{remark}
 
 
-\subsection{mathematica}
+\section{mathematica}
 其实使用mathematica进行绘图这个部分和前面的使用Python绘图是差不多的，zTikZ提供了一个
 \cmd{mmafig}\index{\cmd{mmafig}}环境用于使用mathematica绘图. 与之前的\cmd{pyfig}环境不同的是,此时你需要手动加入
 图片的保存路径；路径的前缀为:\cmd{./ztikz_output/mma_data/<figure name>}. 为何这里这个部分
@@ -822,7 +1211,7 @@ wolframscript -script test.wls
     \label{fig:mma-fig-2}
 \end{figure}
 
-\subsection{matlab}
+\section{matlab}
 目前zTikZ中的Matlab模块还在开发中, 但是目前你可以使用\cmd{matlab2tikz}这个Matlab插件来把你的Matlab
 图形转换为对应的tikz代码,效果也是很好的.
 
