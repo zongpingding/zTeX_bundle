@@ -9,8 +9,9 @@
 
 
 --> All cached
+Output written on zlatex_ztikz_doc.pdf (114 pages).
 Transcript written on zlatex_ztikz_doc.log.
-xelatex --shell-escape zlatex_ztikz_doc.tex  14.73s user 1.07s system 105% cpu 11.175 total
+xelatex --shell-escape zlatex_ztikz_doc  35.11s user 3.11s system 105% cpu 36.295 total
 
 
 
@@ -25,6 +26,6 @@ xelatex --shell-escape zlatex_ztikz_doc.tex  14.73s user 1.07s system 105% cpu 1
 
 
 --> None cached
-Output written on zlatex_ztikz_doc.pdf (63 pages).
+Output written on zlatex_ztikz_doc.pdf (111 pages).
 Transcript written on zlatex_ztikz_doc.log.
-xelatex --shell-escape zlatex_ztikz_doc  136.90s user 9.06s system 75% cpu 3:14.52 total
+xelatex --shell-escape zlatex_ztikz_doc  643.19s user 55.61s system 93% cpu 12:26.38 total

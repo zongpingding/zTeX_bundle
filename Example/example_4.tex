@@ -1,0 +1,38 @@
+\ExplSyntaxOn
+\clist_new:N \l__color_clist
+\clist_set:Nn \l__color_clist {red, orange, yellow, green, blue, purple, brown, black}
+\newcommand{\colorItem}[1]{
+    \clist_item:Nn \l__color_clist {#1}
+}
+\ExplSyntaxOff
+\begin{tikzpicture}[scale=8, >=Latex, font=\scriptsize]
+    % plot and annotate
+    \node at (.55, 0.15) [left] {$f(x)=\frac{1}{n}\sin(n+5)x$};
+    \foreach \i in {6, 7, 8, 9, 10, 11, 12, 13}{
+        \Plot[0:pi/3][\colorItem{\fpeval{\i-5}}]{\fpeval{1/\i}*sin(\fpeval{\i+5}*x)}
+        \node[color=\colorItem{\fpeval{\i-5}}] at (1, \fpeval{(\i-6)*0.03}) [right] {$n=\i$};
+    }
+    % axis
+    \ShowAxis [
+        axisColor=gray,
+        tickStart=-0.15,
+        tickEnd=0.18,
+        mainStep=0.05,
+        mainTickColor=gray,
+        tickStyle=above, 
+        mainTickLabelPosition=left,
+        mainTickLength=.5pt,
+        axisRotate=90,
+    ]{(-0.18, 0); (0.18, 0)}
+    \ShowAxis [
+        axisColor=gray,
+        tickStart=0,
+        tickEnd=1.22,
+        mainStep=\fpeval{3.1415926/18},
+        mainTickColor=gray,
+        tickStyle=below,
+        subTickLength=0pt, 
+        mainTickLength=.5pt,
+        mainTickLabel={\fpeval{\CurrentFp/(3.1415926/18)*10}$^\circ$}
+    ]{(0, 0); (1.25, -0)}
+\end{tikzpicture}

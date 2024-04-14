@@ -6,7 +6,7 @@ A LaTeX template for writing notes, books, drawing diagrams, and interactive wor
 The document class `zlatex` can be used on Windows and Linux (TeXLive >= 2023), MacOS is under test.
 For some reason, the `ztikz` package can be only used on Linux. 
 
-More infomation please refer document `release.pdf`.
+More infomation please refer document `zlatex_ztikz_doc.pdf`.
 
 
 # Need help

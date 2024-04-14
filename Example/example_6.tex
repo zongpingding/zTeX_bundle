@@ -1,0 +1,17 @@
+\begin{tikzpicture}[>=Latex]
+    % grid and axis
+    \ShowGrid[step=1, color=gray, opacity=.5]{(0, 0); (10, 10)}
+    \xAxis[-1][10]
+    \yAxis[-1][10]
+    % plot
+    \Plot[0:10][red, jump mark right, very thick, xshift=2pt][type=*, opacity=0]{floor(x)}
+    \Plot[0:10][dashed, blue]{x}
+    \Plot[1:10][dashed, orange]{x-1}
+    % plot points
+    \PlotPrecise{plot}{11}
+    \Plot[0:10][opacity=0, jump mark right][type=o, color=blue]{x}
+    \PlotPrecise{plot}{11}
+    \Plot[0:10][opacity=0, jump mark right][type=*, color=red]{x-1}
+    % annotate 
+    \ShowPoint[opacity=0]{(2, 9); (2, 8); (2, 7)}[$y=\lfloor x\rfloor$; $y=x$; $y=x-1$][right]
+\end{tikzpicture}

@@ -349,12 +349,14 @@ plot t
     mainStep        .initial:n  = { 1.0 },
     subStep         .fp_set:N   = \l__sub_step_fp,
     subStep         .initial:n  = { 0.1 },
+    mainTickLabel   .tl_set:N   = \l__main_tick_label_tl,
+    mainTickLabel   .initial:n  = { \fp_use:N {\CurrentFp} },
     tickLabelShift  .dim_set:N  = \l__tick_label_shift_dim,
     tickLabelShift  .initial:n  = { 0pt },
-    mainTickLenght  .dim_set:N  = \l__main_tick_length_dim,
-    mainTickLenght  .initial:n  = { 4pt },
-    subTickLenght   .dim_set:N  = \l__sub_tick_length_dim,
-    subTickLenght   .initial:n  = { 2pt },
+    mainTickLength  .dim_set:N  = \l__main_tick_length_dim,
+    mainTickLength  .initial:n  = { 4pt },
+    subTickLength   .dim_set:N  = \l__sub_tick_length_dim,
+    subTickLength   .initial:n  = { 2pt },
     mainTickLabelPosition .tl_set:N  = \l__main_tick_label_position_tl,
     mainTickLabelPosition .initial:n = { below },
     % color spec
@@ -384,7 +386,7 @@ plot t
         {main}{
             \dim_set_eq:NN \l__tick_length_dim\l__main_tick_length_dim
             \tl_set:NV \l__tick_color_tl\l__main_tick_color_tl
-            \tl_set:Nn \l__node_text_tl {#1}
+            \tl_set:Nn \l__node_text_tl {\tl_use:N \l__main_tick_label_tl}
         }
         {sub}{
             \dim_set_eq:NN \l__tick_length_dim\l__sub_tick_length_dim
@@ -413,6 +415,7 @@ plot t
 } 
 % draw axis
 \int_new:N \l__substep_num_int
+\fp_new:N \CurrentFp
 \NewDocumentCommand\ShowAxis{O{}m}{
         \group_begin:
         \keys_set:nn { ztikz / axis } { #1 }
@@ -423,6 +426,7 @@ plot t
         \fp_step_inline:nnnn {\fp_eval:n {\l__start_fp}}{\fp_use:N \l__main_step_fp}{\fp_use:N \l__end_fp}{
             % main ticks
             \tl_set:Nn \l__tick_type_tl {main}
+            \fp_gset:Nn \CurrentFp {##1}
             \ztikz_draw_axis_ticks_cs:n {##1}
             % sub ticks
             \tl_set:Nn \l__tick_type_tl {sub}
@@ -444,7 +448,7 @@ plot t
         mainStep=1, subStep=.25, 
         axisRotate=0, axisColor=black,
         mainTickColor=black, subTickColor=black,
-        mainTickLenght=10pt, subTickLenght=5pt,
+        mainTickLength=10pt, subTickLength=5pt,
         tickLabelShift=0pt, tickStyle=below, 
         mainTickLabelPosition=below
     ]{(#1, 0); (#2, 0)}
@@ -455,7 +459,7 @@ plot t
         mainStep=1, subStep=.25, 
         axisRotate=90, axisColor=black,
         mainTickColor=black, subTickColor=black,
-        mainTickLenght=10pt, subTickLenght=5pt,
+        mainTickLength=10pt, subTickLength=5pt,
         tickLabelShift=0pt, tickStyle=above, 
         mainTickLabelPosition=left
     ]{(#1, 0); (#2, 0)}

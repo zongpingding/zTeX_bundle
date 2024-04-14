@@ -10,6 +10,9 @@
     definition  = blue
 }
 \usepackage{ztikz}
+\usepackage{expl3}
+\usepackage{xfp}
+\usetikzlibrary{calc}
 
 % optional 
 \usepackage{amsmath}
@@ -18,6 +21,28 @@
 \usepackage{multicol}
 \usepackage{framed}
 \usepackage[bottom]{footmisc}
+
+\usepackage{minted}
+\definecolor{bg}{rgb}{0.95,0.95,0.95}
+\setminted{
+    fontsize=\small,
+    bgcolor=bg, 
+    breaklines=true, 
+    tabsize=2,
+    breakanywhere=true,
+    breakanywheresymbolpre=,
+    breaksymbolleft=,
+}
+
+% xyaxis
+\newcommand{\ShowXYAxis}[2]{
+    \ShowAxis{(-#1, 0); (#1, 0)}
+    \ShowAxis{(0, -#2); (0, #2)}
+    \ShowPoint[opacity=0]{(0, 0)}[$O$][below left]
+    \ShowPoint[opacity=0]{(#1, 0)}[$x$][below]
+    \ShowPoint[opacity=0]{(0, #2)}[$y$][left]
+}
+
 \usepackage{listings}
 \definecolor{gray}{rgb}{0.5,0.5,0.5}
 % 15.1 listing Env setting
@@ -67,6 +92,7 @@
 \input{./doc/zlatex_doc.tex}
 % ztikz
 \input{./doc/ztikz_doc.tex}
+\input{./gallery.tex}
 % Index
 \addcontentsline{toc}{part}{部分命令/名词索引}
 \printindex

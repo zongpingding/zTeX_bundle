@@ -927,49 +927,7 @@ $-3<x<\pi$ 并且 $-1.5<y<e$. 那么在指定其\cmd{<plot domain>}时应该写�
     如果你想要填充一个透明度为50\%的多边形，那么你可以使用\cmd{fillOpacity=0.5}来实现.
 \end{remark}
 
-\section{Plot Gallery}
-下面我们给出几个运用到zTikZ这部分命令的一些综合绘图案例:
-\begin{figure}
-    \centering
-    \includegraphics[width=.65\linewidth]{./pics/ztikz_example_1.pdf}
-    \caption{绘制示例 1}
-    \label{fig:zTikZ-plot—example-1}
-\end{figure}
 
-\begin{figure}
-    \centering
-    \includegraphics[width=.65\linewidth]{./pics/ztikz_example_2.pdf}
-    \caption{绘制示例 2}
-    \label{fig:zTikZ-plot—example-2}
-\end{figure}
-
-\begin{figure}[H]
-    \centering
-    \includegraphics[width=.75\linewidth]{./pics/ztikz_example_3.pdf}
-    \caption{绘制示例 3}
-    \label{fig:zTikZ-plot—example-3}
-\end{figure}
-
-\begin{figure}[H]
-    \centering
-    \includegraphics[width=.75\linewidth]{./pics/ztikz_example_4.pdf}
-    \caption{绘制示例 4}
-    \label{fig:zTikZ-plot—example-4}
-\end{figure}
-
-\begin{leftbar}
-\noindent 如果你修改了绘图代码，但是发现得到的pdf中的图像并没有改变，那么极有可能是因为
-你指定的精度过高，超出了\TeX{}的内存使用限制.(而且由于采用了external库用于缓存，有可能你在编译时并不会抛出
-这个错误) 其实比较耗费内存的点主要有3个:
-\begin{itemize}
-    \item 指定的精度过高, 一般情况下在区间长度$<5$时指定精度为100就已经足够了
-    \item 使用了多个\cmd{\ContourPlot}函数，在默认的精度 100下，多个此函数也可能导致内存超出
-    \item 最后一点耗时的点就是\cmd{\ShowIntersecion}命令，可以先用Geogebra得到交点后再使用
-        \cmd{\ShowPoint}命令进行点的绘制.
-    \item 更严重的如果出现了编译错误，请考虑去掉\cmd{\ShadePlot}命令,或在\cmd{\usepackage[external=false]{ztikz}}
-        的情况下使用此命令.
-\end{itemize}
-\end{leftbar}
 
 \section{python/matplotlib}
 python绘图是比较就简单的，zTikZ提供了用于python绘图的\cmd{pyfig}\index{\cmd{pyfig}}环境。
