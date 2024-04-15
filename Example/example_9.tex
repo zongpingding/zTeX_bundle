@@ -1,9 +1,7 @@
 \begin{tikzpicture}[>=Latex, font=\small, scale=1.5]
     % basic
     \clip (-6, -1) rectangle (3, 6);
-    \ShowAxis{(-8, 0); (3, 0)}
-    \ShowAxis{(0, -1.5); (0, 6)}
-
+    \ShowAxis{(-8, 0); (3, 0)}      \ShowAxis{(0, -1.5); (0, 6)}
     % functions
     \Plot[-8:5][red]                {exp(x)}
     \Plot[-8:5][blue]               {exp(1)/4*(x+1)**2}
@@ -15,8 +13,5 @@
     \Plot[-8:8]                     {exp(1)*x}
     \ContourPlot[0:2;-6:6][dashed]  {x-1}
     % points
-    \ShowPoint[color=red, radius=1pt]
-            {(-1, 0); (0, 1); (1, 2.71828)}
-            [$A$; $B$; $C$]
-            [above left]
+    \ShowPoint[color=red, radius=1pt]{(-1, 0); (0, 1); (1, 2.71828)}[$A$; $B$; $C$][above left]
 \end{tikzpicture}

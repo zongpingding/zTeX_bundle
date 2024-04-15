@@ -12,27 +12,20 @@
         \Plot[0:pi/3][\colorItem{\fpeval{\i-5}}]{\fpeval{1/\i}*sin(\fpeval{\i+5}*x)}
         \node[color=\colorItem{\fpeval{\i-5}}] at (1, \fpeval{(\i-6)*0.03}) [right] {$n=\i$};
     }
-    % axis
+    % axis draw
     \ShowAxis [
-        axisColor=gray,
-        tickStart=-0.15,
-        tickEnd=0.18,
+        tickStyle=above,    axisColor=gray,
+        tickStart=-0.15,    tickEnd=0.18,
         mainStep=0.05,
-        mainTickColor=gray,
-        tickStyle=above, 
-        mainTickLabelPosition=left,
-        mainTickLength=.5pt,
-        axisRotate=90,
+        mainTickColor=gray, mainTickLabelPosition=left,
+        mainTickLength=.5pt,axisRotate=90,
     ]{(-0.18, 0); (0.18, 0)}
     \ShowAxis [
-        axisColor=gray,
-        tickStart=0,
-        tickEnd=1.22,
+        tickStyle=below,    axisColor=gray,
+        tickStart=0,        tickEnd=1.22,
         mainStep=\fpeval{3.1415926/18},
-        mainTickColor=gray,
-        tickStyle=below,
-        subTickLength=0pt, 
-        mainTickLength=.5pt,
+        mainTickColor=gray, subTickLength=0pt, 
+        mainTickLength=.5pt, 
         mainTickLabel={\fpeval{\CurrentFp/(3.1415926/18)*10}$^\circ$}
     ]{(0, 0); (1.25, -0)}
 \end{tikzpicture}

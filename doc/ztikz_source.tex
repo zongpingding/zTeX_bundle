@@ -862,10 +862,38 @@ plot t
 
 
 \section{Mathematica}
+\subsection{SetUp}
+\begin{source}
+% temp var for manipulate
+\tl_new:N \l__temp_arg_tl
+\tl_new:N \l__wolfram_temp_res_tl
+\ior_new:N \l__temp_io
+\seq_new:N \l__wolfram_temp_res_seq
+
+% macro storage the mma-result
+\NewDocumentCommand\wolframResult{O{raw}O{}}{
+    \tl_if_eq:nnTF {#1}{raw}{
+        \seq_use:Nnnn \l__wolfram_temp_res_seq {#2}{#2}{#2}
+    }{
+        \if_is_int:xTF {\int_eval:n {#1}}
+            {\seq_item:Nn \l__wolfram_temp_res_seq {#1}}
+            {}
+    }
+}
+
+% check if integer
+\prg_new_protected_conditional:Npnn \if_is_int:n #1 { T, F, TF }{
+    \regex_match:nnTF { ^[\+\-]?[\d]+$ } {#1} % $
+      { \prg_return_true: }
+      { \prg_return_false: }
+}
+\cs_generate_variant:Nn \if_is_int:nTF {xTF}
+\end{source}
+
 \subsection{picture}
 \begin{source}
 % wolfram graphicx
-\NewDocumentEnvironment{mmafig}{ O{width=.75\linewidth}m }{
+\NewDocumentEnvironment{wolframGraphics}{ O{width=.75\linewidth}m }{
     \newcommand{\mmafile}{#2}
     \xsim_file_write_start:nx {\c_true_bool}{\g__ztikz_mma_path_tl/#2}
     }{ 
@@ -890,6 +918,7 @@ plot t
 \subsection{Symbols Calculation}
 \begin{source}
 % input result of wolfram
+\cs_generate_variant:Nn \ior_open:Nn {Nx}
 \cs_new_protected:Nn \ztikz_wolfram_input_result_cs: {
     % write export command
     \iow_now:Nx \g_tmpa_iow {Export["\g__ztikz_mma_path_tl/mma_res_\int_use:N \g__mma_index_int.txt", TeXResult]}
@@ -898,16 +927,23 @@ plot t
     \ztikz_hash_if_change_cs:x {\g__ztikz_mma_path_tl/mma_calc_\int_use:N \g__mma_index_int.wls}   
     \bool_if:NTF \g__hash_change_bool {
         \sys_shell_now:x {wolframscript~ -script~ \g__ztikz_mma_path_tl/mma_calc_\int_use:N \g__mma_index_int.wls}
-        \exp_args:Nx \input{\g__ztikz_mma_path_tl/mma_res_\int_use:N \g__mma_index_int.txt}
+        % \exp_args:Nx \input{\g__ztikz_mma_path_tl/mma_res_\int_use:N \g__mma_index_int.txt}
         \typeout{using~wolframscript~calculating~question~\int_use:N \g__mma_index_int ...}
     }{
-        \exp_args:Nx \input{\g__ztikz_mma_path_tl/mma_res_\int_use:N \g__mma_index_int.txt}
+        % \exp_args:Nx \input{\g__ztikz_mma_path_tl/mma_res_\int_use:N \g__mma_index_int.txt}
         \typeout{skip~recompile,~using~the~cache~wolframscript~result~\int_use:N \g__mma_index_int}
     }
+    % split result to seq and storage result to a macro
+    \ior_open:Nx \l__temp_io {\g__ztikz_mma_path_tl/mma_res_\int_use:N \g__mma_index_int.txt}
+    \ior_get:NN  \l__temp_io \l__wolfram_temp_res_tl
+    \seq_set_split:NnV \l__wolfram_temp_res_seq{,}\l__wolfram_temp_res_tl
     % step counter, add export command
     \int_gadd:Nn \g__mma_index_int {1}  
 }
+\end{source}
 
+\subsection{wolfram code}
+\begin{source}
 % wolfram code
 \cs_generate_variant:Nn \iow_open:Nn {Nx}
 \NewDocumentCommand\wolfram{O{tex}m}{
@@ -929,18 +965,24 @@ plot t
 \subsection{equation Solve}
 \begin{source}
 % equation solve
-\NewDocumentCommand\wolframsolve{O{part}mO{}O{}}{ 
+\NewDocumentCommand\wolframSolve{O{part}mO{}O{}}{
+    % prepend ',' to #4 if not empty
+    \tl_if_empty:nTF {#4}{
+        \tl_set:Nn \l__temp_arg_tl {}
+    }{
+        \tl_set:Nn \l__temp_arg_tl {,#4} 
+    }
     % write mathamatica code
     \iow_open:Nx \g_tmpa_iow {\g__ztikz_mma_path_tl/mma_calc_\int_use:N \g__mma_index_int.wls}
     \str_case:nnF {#1}{
         {part} {
             \iow_now:Nx \g_tmpa_iow {
-                TeXResult = StringReplace[Row[Solve[#2, {#3}, #4]//Flatten, ","]//TeXForm//ToString, "\\to"->"="];
+                TeXResult = Row[Solve[#2, {#3} \l__temp_arg_tl]//Flatten, ","]/.{Rule -> Equal}//TeXForm//ToString;
             }
         }
         {full} {
             \iow_now:Nx \g_tmpa_iow {
-                TeXResult = StringReplace[Row[Solve[#2]//Flatten, ","]//TeXForm//ToString, "\\to"->"="];
+                TeXResult = Row[Solve[#2]//Flatten, ","]/.{Rule -> Equal}//TeXForm//ToString;
             }
         }
     }{\relax}
@@ -949,18 +991,24 @@ plot t
 }
 
 % differential equation solve
-\NewDocumentCommand\wolframdsolve{O{part}mO{}O{}}{
+\NewDocumentCommand\wolframDSolve{O{part}mO{}O{}}{
+    % prepend ',' to #4 if not empty
+    \tl_if_empty:nTF {#4}{
+        \tl_set:Nn \l__temp_arg_tl {}
+    }{
+        \tl_set:Nn \l__temp_arg_tl {,#4} 
+    }
     % write mathamatica code
     \iow_open:Nx \g_tmpa_iow {\g__ztikz_mma_path_tl/mma_calc_\int_use:N \g__mma_index_int.wls}
     \str_case:nnF {#1}{
         {part} {
             \iow_now:Nx \g_tmpa_iow {
-                TeXResult = StringReplace[Row[DSolve[#2, #3, #4]//Flatten, ","]//TeXForm//ToString, "\\to"->"="];
+                TeXResult = Row[DSolve[#2, #3 \l__temp_arg_tl]//Flatten, ","]/.{Rule -> Equal}//TeXForm//ToString;
             }
         }
         {full} {
             \iow_now:Nx \g_tmpa_iow {
-                TeXResult = StringReplace[Row[DSolve[#2]//Flatten, ","]//TeXForm//ToString, "\\to"->"="];
+                TeXResult = Row[DSolve[#2]//Flatten, ","]/.{Rule -> Equal}//TeXForm//ToString;
             }
         }
     }{\relax}

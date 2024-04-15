@@ -1,4 +1,4 @@
-\begin{mmafig}[width=.35\linewidth]{mma_3.wls}
+\begin{wolframGraphics}[width=.35\linewidth]{mma_3.wls}
 figure = ContourPlot[{x^2 + y^2 == 4, x^2 + Sin[y] == 1}, 
     {x, -2.5, 2.5}, {y, -3, 3}, 
     ContourStyle->{
@@ -12,4 +12,4 @@ figure = ContourPlot[{x^2 + y^2 == 4, x^2 + Sin[y] == 1},
     AxesStyle->Arrowheads[{0,0.03}]
 ]
 Export["./ztikz_output/mma_data/mma_3.wls.pdf", figure]
-\end{mmafig}
+\end{wolframGraphics}

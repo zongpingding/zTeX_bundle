@@ -54,12 +54,6 @@ tikz的\cmd{external}库实现的,感兴趣的可以去看看}, Python/sympy, Py
         本地的Mathematica计算内核了. 
 \end{itemize}
 
-\begin{remark}
-    因会使用到\cmd{gnuplot}，所以在Windows下需要在系统环境变量中添加\cmd{gnuplot}的路径.并且
-    在编译此文档时需要加上对应的 \cmd{--shell-esape}参数；在Windows平台，由于\TeX{}Live的编译配置，
-    需确保系统环境变量\cmd{PATHEXT}中已经删除\cmd{.PY}后缀.
-\end{remark}
-
 \subsection{环境配置}
 \subsubsection{Linux}
 在Linux下除了wolfram应该都是很好安装的, 直接使用Linux发行版自带的包管理器即可.在这里我提供一个在
@@ -76,6 +70,12 @@ ln -sf "/mnt/c/Program Files/Wolfram Research/WolframScript/wolframscript.exe" /
 是出于搁置状态的\Footnote{但是zTiKZ中的Wolfram模块是可以在Windwos上使用的,这一点弥补了 
 \href{https://github.com/stevenliuyi/latex-alpha2}{latexalpha2} 的不足}.
 也许等一段时间，在我装上\TeX{}Live 2024后，我也许会试一试zTikZ模块的跨平台兼容性.
+
+因会使用到\cmd{gnuplot}，所以在Windows下需要在系统环境变量中添加\cmd{gnuplot}的路径.并且
+在编译此文档时需要加上对应的 \cmd{--shell-esape}参数；在Windows平台，由于\TeX{}Live的编译配置，
+需确保系统环境变量\cmd{PATHEXT}中已经删除\cmd{.PY}后缀. zTiKZ在Windows下的适配是没有Linux下那么好的,
+建议在Linux下使用本宏包.\Footnote{但是zTiKZ中的Wolfram模块是可以在Windwos上使用的,这一点弥补了 
+\href{https://github.com/stevenliuyi/latex-alpha2}{latexalpha2} 的不足}.
 
 \section{绘图功能}
 \subsection{tikz/gnuplot}
@@ -124,10 +124,87 @@ zTiKZ中把坐标``对齐''? 试想这么一个情景：你在Geogebra中找到�
     对应的方程.
 \end{remark}
 
+\subsection{Support Functions}
+在开始介绍之前，我想介绍一下gnuplot中支持的函数，见\cref{tab:gnuplot-functions},
+摘录自\href{http://www.bersch.net/gnuplot-doc/expressions.html#expressions-functions-floor}{gnuplot-support-functions}:
+
+\begin{leftbar}
+    Arguments to math functions in gnuplot can be integer, real, or complex unless otherwise noted.
+    Functions that accept or return angles (e.g. sin(x)) treat angle values as radians, but this may 
+    be changed to degrees using the command set angles.
+\end{leftbar}
+
+\begin{center}
+    \begin{longtable}{lll}
+        \caption{\textbf{Math library functions}}\\
+        \toprule
+        \textbf{Function} & \textbf{Arguments} & \textbf{Returns} \\
+        \midrule
+        \(\text{abs}(x)\) & any & $|x|$, absolute value of $x$; same type \\
+        \(\text{abs}(x)\) & complex & length of $x$, $\sqrt{\text{Re}(x)^2 + \text{Im}(x)^2}$ \\
+        \(\text{acos}(x)\) & any & $\cos^{-1} x$ (inverse cosine) \\
+        \(\text{acosh}(x)\) & any & $\cosh^{-1} x$ (inverse hyperbolic cosine) in radians \\
+        \(\text{airy}(x)\) & any & Airy function $\text{Ai}(x)$ \\
+        \(\text{arg}(x)\) & complex & the phase of $x$ \\
+        \(\text{asin}(x)\) & any & $\sin^{-1} x$ (inverse sine) \\
+        \(\text{asinh}(x)\) & any & $\sinh^{-1} x$ (inverse hyperbolic sine) in radians \\
+        \(\text{atan}(x)\) & any & $\tan^{-1} x$ (inverse tangent) \\
+        \(\text{atan2}(y,x)\) & int or real & $\tan^{-1}(y/x)$ (inverse tangent) \\
+        \(\text{atanh}(x)\) & any & $\tanh^{-1} x$ (inverse hyperbolic tangent) in radians \\
+        \(\text{EllipticK}(k)\) & real  $k$ in $(-1:1)$ & $K(k)$ complete elliptic integral of the first kind \\
+        \(\text{EllipticE}(k)\) & real  $k$ in $[-1:1]$ & $E(k)$ complete elliptic integral of the second kind \\
+        \(\text{EllipticPi}(n,k)\) & real $n<1$, $k$ in $(-1:1)$ & $\Pi(n,k)$ complete elliptic integral of the third kind \\
+        \(\text{besj0}(x)\) & int or real & $J_0$ Bessel function of $x$, in radians \\
+        \(\text{besj1}(x)\) & int or real & $J_1$ Bessel function of $x$, in radians \\
+        \(\text{besy0}(x)\) & int or real & $Y_0$ Bessel function of $x$, in radians \\
+        \(\text{besy1}(x)\) & int or real & $Y_1$ Bessel function of $x$, in radians \\
+        \(\text{ceil}(x)\) & any & $\lceil x \rceil$, smallest integer not less than $x$ (real part) \\
+        \(\text{cos}(x)\) & radians & $\cos x$, cosine of $x$ \\
+        \(\text{cosh}(x)\) & any & $\cosh x$, hyperbolic cosine of $x$ in radians \\
+        \(\text{erf}(x)\) & any & $\text{erf}(\text{Re}(x))$, error function of $\text{Re}(x)$ \\
+        \(\text{erfc}(x)\) & any & $\text{erfc}(\text{Re}(x))$, $1.0 - $ error function of $\text{Re}(x)$ \\
+        \(\text{exp}(x)\) & any & $e^x$, exponential function of $x$ \\
+        \(\text{expint}(n,x)\) & any & $E_n(x)$, exponential integral function of $x$ \\
+        \(\text{floor}(x)\) & any & $\lfloor x \rfloor$, largest integer not greater than $x$ (real part) \\
+        \(\text{gamma}(x)\) & any & $\Gamma(\text{Re}(x))$, gamma function of $\text{Re}(x)$ \\
+        \(\text{ibeta}(p,q,x)\) & any & $\text{ibeta}(\text{Re}(p,q,x))$, ibeta function of $\text{Re}(p,q,x)$ \\
+        \(\text{inverf}(x)\) & any & inverse error function $\text{Re}(x)$ \\
+        \(\text{igamma}(a,x)\) & any & $\text{igamma}(\text{Re}(a,x))$, igamma function of $\text{Re}(a,x)$ \\
+        \(\text{imag}(x)\) & complex & $\text{Im}(x)$, imaginary part of $x$ as a real number \\
+        \(\text{invnorm}(x)\) & any & inverse normal distribution function $\text{Re}(x)$ \\
+        \(\text{int}(x)\) & real & integer part of $x$, truncated toward zero \\
+        \(\text{lambertw}(x)\) & real & Lambert $W$ function \\
+        \(\text{lgamma}(x)\) & any & $\text{lgamma}(\text{Re}(x))$, lgamma function of $\text{Re}(x)$ \\
+        \(\text{log}(x)\) & any & $\ln x$, natural logarithm (base $e$) of $x$ \\
+        \(\text{log10}(x)\) & any & $\log_{10} x$, logarithm (base 10) of $x$ \\
+        \(\text{norm}(x)\) & any & $\text{norm}(x)$, normal distribution function of $\text{Re}(x)$ \\
+        \(\text{rand}(x)\) & int & pseudo random number in the interval $(0:1)$ \\
+        \(\text{real}(x)\) & any & $\text{Re}(x)$, real part of $x$ \\
+        \(\text{sgn}(x)\) & any & $1$ if $x > 0$, $-1$ if $x < 0$, $0$ if $x = 0$. $\Im(x)$ ignored \\
+        \(\text{sin}(x)\) & any & $\sin x$, sine of $x$ \\
+        \(\text{sinh}(x)\) & any & $\sinh x$, hyperbolic sine of $x$ in radians \\
+        \(\text{sqrt}(x)\) & any & $\sqrt{x}$, square root of $x$ \\
+        \(\text{tan}(x)\) & any & $\tan x$, tangent of $x$ \\
+        \(\text{tanh}(x)\) & any & $\tanh x$, hyperbolic tangent of $x$ in radians \\
+        \(\text{voigt}(x,y)\) & real & convolution of Gaussian and Lorentzian \\
+        \(\text{cerf}(z)\) & complex & complex error function \\
+        \(\text{cdawson}(z)\) & complex & complex Dawson's integral \\
+        \(\text{faddeeva}(z)\) & complex & $w(z) = \exp(-z^2) \times \text{erfc}(-iz)$ \\
+        \(\text{erfi}(x)\) & real & imaginary error function $\text{erfi}(x) = -i \times \text{erf}(ix)$ \\
+        \(\text{VP}(x,\sigma,\gamma)\) & real & Voigt profile \\
+        \bottomrule 
+        \label{tab:gnuplot-functions}\\
+    \end{longtable}
+\end{center}
+\vspace*{-4em}
+
+\begin{remark}
+    \(\text{faddeeva}(z)\): rescaled complex error function
+\end{remark}
+
 \subsection{Intruduction to Plot}
 我们首先来介绍上面和函数绘制相关的命令,因为它们的参数结构几乎都是一摸一样的, 无论是参数的含义(定义域-样式-函数)，
-对应参数的位置(均为\cmd{{OOm}}形式的参数).所以下面就以\cmd{\Plot}命令为例, 讲解这一系列命令的用法:
-
+对应参数的位置(均为\cmd{{OOm}}形式的参数). 下面以\cmd{\Plot}命令为例, 讲解这一系列Plot命令的参数格式以及用法:
 \begin{codeprint}
 \Plot[<plot domain>][<plot style>][<marker options>]{<function>}
 \end{codeprint}
@@ -287,12 +364,14 @@ mainStep        .fp_set:N   = \l__main_step_fp,
 mainStep        .initial:n  = { 1.0 },
 subStep         .fp_set:N   = \l__sub_step_fp,
 subStep         .initial:n  = { 0.1 },
+mainTickLabel   .tl_set:N   = \l__main_tick_label_tl,
+mainTickLabel   .initial:n  = { \fp_use:N {\CurrentFp} },
 tickLabelShift  .dim_set:N  = \l__tick_label_shift_dim,
 tickLabelShift  .initial:n  = { 0pt },
-mainTickLenght  .dim_set:N  = \l__main_tick_length_dim,
-mainTickLenght  .initial:n  = { 4pt },
-subTickLenght   .dim_set:N  = \l__sub_tick_length_dim,
-subTickLenght   .initial:n  = { 2pt },
+mainTickLength  .dim_set:N  = \l__main_tick_length_dim,
+mainTickLength  .initial:n  = { 4pt },
+subTickLength   .dim_set:N  = \l__sub_tick_length_dim,
+subTickLength   .initial:n  = { 2pt },
 mainTickLabelPosition .tl_set:N  = \l__main_tick_label_position_tl,
 mainTickLabelPosition .initial:n = { below },
 % color spec
@@ -319,7 +398,7 @@ tickStyle/below .code:n     = \tl_set:Nn \l__tick_spec_tl { below },
         mainStep=1, subStep=.25, 
         axisRotate=0, axisColor=black,
         mainTickColor=black, subTickColor=black,
-        mainTickLenght=10pt, subTickLenght=5pt,
+        mainTickLength=10pt, subTickLength=5pt,
         tickLabelShift=0pt, tickStyle=below, 
         mainTickLabelPosition=below
     ]{(#1, 0); (#2, 0)}
@@ -364,8 +443,8 @@ $y$轴即交换坐标.
 }
 \end{codeprint}
 
-然后使用命令\cmd{\ShowXYAxis}即可完成坐标轴的绘制以及对应的标注.第一个参数:$x$的绘制范围为\cmd{[-\#1, \#1]},
-第二个参数:$y$的绘制范围为\cmd{[-\#2, \#2]}.默认两轴对称，如果需要更多的样式，请使用\cmd{\ShowAxis}命令进行自定义.
+然后使用命令\cmd{\ShowXYAxis}即可完成坐标轴的绘制以及对应的标注.第一个参数:$x$的绘制范围为\texttt{[-\#1, \#1]},
+第二个参数:$y$的绘制范围为\texttt{[-\#2, \#2]}.默认两轴对称，如果需要更多的样式，请使用\cmd{\ShowAxis}命令进行自定义.
 
 在绘制完坐标轴之后，便可以绘制网格;使用\cmd{\ShowGrid}命令.\cmd{\ShowGrid}\index{\cmd{\ShowGrid}}命令的参数也是和\cmd{\ShowAxis}
 命令的参数一样的，只不过此命令中可以指定一个\cmd{step}关键字，用于指定绘制网格的步长(间隔), 如\cmd{step=.5},设置步长为0.5.
@@ -390,7 +469,7 @@ $y$轴即交换坐标.
 
 \begin{figure}
     \centering
-    \includegraphics[width=.75\linewidth]{./pics/point_marker.pdf}
+    \includegraphics[width=.85\linewidth]{./pics/point_marker.pdf}
     \caption{Point Marker}
     \label{fig:point-marker}
 \end{figure}
@@ -1029,7 +1108,7 @@ plt.plot(x, y)
 
 \section{mathematica}
 其实使用mathematica进行绘图这个部分和前面的使用Python绘图是差不多的，zTikZ提供了一个
-\cmd{mmafig}\index{\cmd{mmafig}}环境用于使用mathematica绘图. 与之前的\cmd{pyfig}环境不同的是,此时你需要手动加入
+\cmd{wolframGraphics}\index{\cmd{wolframGraphics}}环境用于使用mathematica绘图. 与之前的\cmd{pyfig}环境不同的是,此时你需要手动加入
 图片的保存路径；路径的前缀为:\cmd{./ztikz_output/mma_data/<figure name>}. 为何这里这个部分
 我不使用zTikZ自动完成? 由于mathematica绘图代码中可能存在着多幅图形的情况，需要使用\cmd{Show}命令
 组合成为一个图，那么这个组合方式就是千变万化的了。所以为了给用户提供给更多的自由操作的空间。
@@ -1039,7 +1118,7 @@ plt.plot(x, y)
 下面给出一个具体的使用案例:
 
 \begin{codeprint}
-\begin{mmafig}[width=.4\linewidth]{mma_1.wls}
+\begin{wolframGraphics}[width=.4\linewidth]{mma_1.wls}
     plotFunction[fun_, xlimits_, ylimits_] := ContourPlot[fun, 
         xlimits, ylimits,
         ContourStyle->{
@@ -1063,7 +1142,7 @@ plt.plot(x, y)
     figure = Show[fp2, fp1];
     (* 1.保存的图片格式为:*.wls.pdf; 2.保存路径在:./ztikz_output/mma_data *)
     Export["./ztikz_output/mma_data/mma_1.wls.pdf", figure];
-\end{mmafig}
+\end{wolframGraphics}
 \end{codeprint}
 
 因为mathematica中的代码是允许用户自由添加缩进的，所以你可以自己添加Mathematica代码的缩进.
@@ -1127,7 +1206,7 @@ wolframscript -script test.wls
 
 \begin{figure}[!htb]
     \centering
-    \begin{mmafig}[width=.5\linewidth]{mma_1.wls}
+    \begin{wolframGraphics}[width=.5\linewidth]{mma_1.wls}
         plotFunction[fun_, xlimits_, ylimits_] := ContourPlot[fun, 
             xlimits, ylimits,
             ContourStyle->{
@@ -1151,7 +1230,7 @@ wolframscript -script test.wls
         figure = Show[fp2, fp1];
         (* 1.保存的图片格式为:*.wls.pdf; 2.保存路径在:./ztikz_output/mma_data *)
         Export["./ztikz_output/mma_data/mma_1.wls.pdf", figure];
-    \end{mmafig}
+    \end{wolframGraphics}
     \caption{Mathematica 绘图示例}
     \label{fig:mma-fig-1}
 \end{figure}
@@ -1456,32 +1535,49 @@ zTikZ模块提供和Mathematica相关的符号计算，数值运算和知识查�
         \TeX{}格式的代码，可以把\cmd{<option>}设为\cmd{text},让其返回一个文本对象. 可以在这个命令中执行
         任何的wolfram指令，但是需要注意的一点是，所有和wolfram相关的命令是不会自动进入数学模式的，需要手动
         添加数学模式的标记.
-    \item \cmd{\wolframsolve[<cmd style>]{<expression>}[<varible>][<domain>]}:其中第一个可选参数默认值为:
+    \item \cmd{\wolframSolve[<cmd style>]{<expression>}[<varible>][<domain>]}:其中第一个可选参数默认值为:
         \cmd{part},意味着你的命令需要分拆为3个部分:表达式 -- (求解)变量名 -- 求解范围，对应上面的参数，分别填入。
         如果指定第一个参数为\cmd{full},那么此时只需要给出对应的\cmd{<expresion>},不用再次指定后续参数.(毕竟在
         第二个(强制性-Mandatory)参数中就已经包含了这些信息,参见后面的具体使用样例).
-    \item \cmd{\wolframdsolve[<cmd style>]{<equation>}[<independent varible>][<dependent variablei>]}:
-        此命令用于求解微分方程，其中的第一个可选参数和上面的\cmd{\wolframsolve}的意义一致,不再赘述.第二个参数表示
+    \item \cmd{\wolframDSolve[<cmd style>]{<equation>}[<independent varible>][<dependent variablei>]}:
+        此命令用于求解微分方程，其中的第一个可选参数和上面的\cmd{\wolframSolve}的意义一致,不再赘述.第二个参数表示
         要求解的微分方程，第三个参数表示求解的独立变量(函数)，最后一个参数表示此微分方程求解函数的自变量.
 \end{itemize}
 
 \subsubsection{wolfram}
-首先给出\cmd{\wolfram}\index{\cmd{\wolfram}}命令的部分使用样例:
+此命令会把求解结果保存到一个临时变量\cmd{\wolframResult}中，所以可以不用把此命令置于公式环境中，
+直接在公式环境中使用命令\cmd{\wolframResult}引用对应的结果即可，引用方式有两种:
+
+\begin{itemize}
+    \item \cmd{\wolframResult[raw][<separator>]}: 直接引用全部结果(默认不同的结果使用``,''进行分割)，
+        不同的结果之间使用\cmd{<separator>}进行分割. 第一个可选参数默认为\cmd{raw}，也就是你可以直接使用
+        \cmd{\wolframResult}引用上一步的计算结果.
+    \item \cmd{\wolframResult[<integer expresion>]}:引用单个结果，可以是任何合法的整数运算表达式.
+\end{itemize}
+
+在这里给出\cmd{\wolfram}\index{\cmd{\wolfram}}命令的部分使用样例:
 
 \begin{codeprint}
-\wolfram{Series[Exp[x], {x, 0, 5}]}
+\wolfram{Series[Exp[x], {x, 0, 5}]} 
+\[\wolframResult\]
+
 \wolfram{LaplaceTransform[t^4 Sin[t],t,s]}  
+\[\wolframResult\]
+
 \wolfram[text]{WolframAlpha["Shanghai population", "ShortAnswer"]} 
+\[\wolframResult\]
 \end{codeprint}
 
 函数 $y=\mathrm{e}^x$的5阶Taylor展开式为:
+\wolfram{Series[Exp[x], {x, 0, 5}]}
 \[
-    \wolfram{Series[Exp[x], {x, 0, 5}]}    
+    \wolframResult    
 \]
 
 函数 $x=t^4 \sin(t)$的Laplace变换为:
+\wolfram{LaplaceTransform[t^4 Sin[t],t,s]}
 \[
-    \C{L}[t^4 \sin(t)] = \wolfram{LaplaceTransform[t^4 Sin[t],t,s]}    
+    \C{L}[t^4 \sin(t)] = \wolframResult    
 \]
 
 在\cmd{\wolfram}指令中执行Mathematica中的\cmd{WolframAlpha}命令进行查询，比如这里查询
@@ -1491,8 +1587,9 @@ zTikZ模块提供和Mathematica相关的符号计算，数值运算和知识查�
 这里仅以内置的函数\cmd{N[<expression>]}为例: 
 
 比如我们求解 $\pi$的截取前30小数的近似值为:
+\wolfram{N[Pi, 30]}
 \[
-    \pi \approx \wolfram{N[Pi, 30]}    
+    \pi \approx \wolframResult    
 \]
 
 \begin{leftbar}
@@ -1500,58 +1597,79 @@ zTikZ模块提供和Mathematica相关的符号计算，数值运算和知识查�
 运算，而不会计算表达式的精确值.
 \end{leftbar}
 
-\subsubsection{wolframsolve}
-\cmd{\wolframsolve}\index{\cmd{\wolframsolve}}命令可以用于多项式方程根的求解以及方程组的求解，并且可以给定求解的范围.
-和前面的\cmd{\wolfram}命令类似，此命令\textbf{只}返回求解结果的\TeX{}代码，所以请把此命令置于公式环境中; 
-下面给出几个比较简单的求解示例:
+\subsubsection{wolframSolve}
+\cmd{\wolframSolve}\index{\cmd{\wolframSolve}}命令可以用于多项式方程根的求解以及方程组的求解，并且可以给定求解的范围.
+和前面的\cmd{\wolfram}命令类似,下面给出几个比较简单的求解示例:
 
 \begin{codeprint}
-\wolframsolve{x^4 - x^2 - 5 == 0}{x}
-\wolframsolve{a x + y == 7 && b x - y == 1}{x, y}
-\wolframsolve{x^2 + 2 y^3 == 3681 && x > 0 && y > 0}[x, y][Integers] 
-\wolframsolve[full]{x^2 + y^2 == 5^2 && y > x > 0, {x, y}, Integers}  
+\wolframSolve{x^4 - x^2 - 5 == 0}[x]
+\begin{align}
+    \left\{\begin{aligned}
+        & \wolframResult[raw][\\ &] 
+    \end{aligned}\right.
+\end{align}
+
+\wolframSolve{a x + y == 7 && b x - y == 1}[x, y]
+\[\wolframResult[raw][,\;]\]
+
+\wolframSolve{x^2 + 2 y^3 == 3681 && x > 0 && y > 0}[x, y][Integers] 
+\[\wolframResult[raw][\;||\;]\]
+
+\wolframSolve[full]{x^2 + y^2 == 5^2 && y > x > 0, {x, y}, Integers}  
+\[\wolframResult[raw][\leftrightarrow]\]
 \end{codeprint}
     
-方程 $x^4 - x^2 - 5 == 0$的所有根为:
+方程 $x^4 - x^2 - 5 = 0$的所有根为:
+\wolframSolve{x^4 - x^2 - 5 == 0}[x]
+\begin{align}
+    \left\{\begin{aligned}
+        & \wolframResult[raw][\\ &] 
+    \end{aligned}\right.
+\end{align}
+
+方程组 $\left\{\begin{aligned}& a x + y = 7\\ & b x - y = 1\end{aligned}\right.$ 的解为:
+\wolframSolve{a x + y == 7 && b x - y == 1}[x, y]
 \[
-    \wolframsolve{x^4 - x^2 - 5 == 0}[x]
+    \wolframResult[raw][,\;]
 \]
 
-方程组 $\left\{\begin{aligned}& a x + y == 7\\ & b x - y == 1\end{aligned}\right.$ 的解为:
+不定方程 $\left\{\begin{aligned}& x^2 + 2 y^3 = 3681 \\ & x > 0, y>0\end{aligned}\right.$ 的整数解为:
+\wolframSolve{x^2 + 2 y^3 == 3681 && x > 0 && y > 0}[x, y][Integers]
 \[
-    \wolframsolve{a x + y == 7 && b x - y == 1}[x, y]
+    \wolframResult[raw][\;||\;]  
 \]
 
-不定方程 $\left\{\begin{aligned}& x^2 + 2 y^3 == 3681 \\ & x > 0, y>0\end{aligned}\right.$ 的整数解为:
+不定方程 $\left\{\begin{aligned}& x^2 + y^2 = 5^2 \\ & x > y > 0\end{aligned}\right.$ 的整数解为:
+\wolframSolve[full]{x^2 + y^2 == 5^2 && y > x > 0, {x, y}, Integers}
 \[
-    \wolframsolve{x^2 + 2 y^3 == 3681 && x > 0 && y > 0}[x, y][Integers]    
-\]
-
-不定方程 $\left\{\begin{aligned}& x^2 + y^2 == 5^2 \\ & x > y > 0\end{aligned}\right.$ 的整数解为:
-\[
-    \wolframsolve[full]{x^2 + y^2 == 5^2 && y > x > 0, {x, y}, Integers}    
+    \wolframResult[raw][\leftrightarrow] 
 \]
 
 \begin{leftbar}
-\noindent 后续可能会考虑加入解的筛选功能，其实就是根据不同解之间的分隔符 `,'来对返回的字符串进行一个划分.
-根据划分的结果生成一个列表，然后采用一个整数进行索引. 但是目前还在读取文件时的catcode问题中挣扎.
+\noindent 目前解的筛选功能仅支持类似数组的访问形式，引用形式比较有限. 背后其实就是根据不同解之间分隔符`,'，把
+返回结果中的TokenList分割为一个sequence. 根据划分的结果生成一个sequence列表，然后采用一个整数进行索引. 
 \end{leftbar}
 
-\subsubsection{wolframdsolve}
-命令\cmd{\wolframdsolve}\index{\cmd{\wolframdsolve}}和命令\cmd{\wolframsolve}完全相同, 只是这个命令是用于求解微分方程的.
+\subsubsection{wolframDSolve}
+命令\cmd{\wolframDSolve}\index{\cmd{\wolframDSolve}}和命令\cmd{\wolframSolve}完全相同, 只是这个命令是用于求解微分方程的.
 下面是几个示例:
 
 \begin{codeprint}
-\wolframdsolve{{y'[x] + y[x] == a*Sin[x], y[0] == 0}}[y[x]][x]   
-\wolframdsolve[full]{{y'[x]==Exp[z[x]]+1, z'[x]==y[x]-x}, {y,z}, x}
+\wolframDSolve{{y'[x] + y[x] == a*Sin[x], y[0] == 0}}[y[x]][x]   
+\wolframDSolve[full]{{y'[x] == Exp[z[x]] + 1, z'[x] == y[x] - x}, {y[x], z[x]}, x}
 \end{codeprint}
 
 微分方程 $y' + y = a\sin(x), y(0)=0$的解为:
+\wolframDSolve{{y'[x] + y[x] == a*Sin[x], y[0] == 0}}[y[x]][x]
 \[
-    \wolframdsolve{{y'[x] + y[x] == a*Sin[x], y[0] == 0}}[y[x]][x]     
+    \wolframResult    
 \]
 
 非线性系统微分方程组$y'(x) + y(x) = \mathrm{Exp}(z(x))+1, z'(x) = y(x)-x$的解为:
-\[
-    \wolframdsolve[full]{{y'[x] == Exp[z[x]] + 1, z'[x] == y[x] - x}, {y[x], z[x]}, x}
-\]
+\wolframDSolve[full]{{y'[x] == Exp[z[x]] + 1, z'[x] == y[x] - x}, {y[x], z[x]}, x}
+\begin{align}
+    \left\{\begin{aligned}
+        & \wolframResult[1]\\ 
+        & \wolframResult[2] 
+    \end{aligned}\right.
+\end{align}
