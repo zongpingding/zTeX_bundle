@@ -1,8 +1,18 @@
 \chapter{zTikZ{}宏包}
-目前zTikZ宏包能够在Linux下编译运行,在Windows上还未进行完整的测试. 但是对于\TeX{}Live版本 $\ge$2023的
-用户来说，本宏包应该是可以在Linux和Windows下运行的. 实际的兼容情况应该得等到足够的用户反馈时才能够确定.
+目前zTikZ宏包能够在Linux/Windows下编译运行,在MacOS上进行了部分的测试，部分功能不能使用.
+详细的测试信息或者是兼容情况请参见后续 SetUp 章节.
 
 \section{基本介绍}
+\subsection{开发背景}
+其实还有很多的TikZ宏包的和ZTikZ宏包中的绘图功能差不多，这其中就有:
+\begin{itemize}
+    \item 一个TiKZ的常见命令封装:\href{https://ctan.org/tex-archive/graphics/pgf/contrib/tzplot}{tzplot}
+    \item 一个3D绘图的TiKZ库:\href{https://ctan.org/pkg/tikz-3dplot}{tikz-3dplot}
+    \item 最后还有一个基于PSTricks的函数绘图包:\href{https://ctan.org/pkg/pst-func}{pst-func},可以绘制许多的特殊的函数
+\end{itemize}
+
+读者如果觉得zTikZ库并不符合你的胃口，不妨试试上面的几个宏包，或者是直接使用原始的pgf/tikz命令进行绘图.
+
 \subsection{zTikZ{}功能}
 zTikZ宏包主要用于绘图与计算, 其中的绘图功能支持\cmd{python, mathematica, gnuplot}, 但是
 这并不意味着你需要安装以上给的所有软件，每一个软件(模块)之间是独立的。当你需要什么功能的时候
@@ -28,9 +38,15 @@ tikz的\cmd{external}库实现的,感兴趣的可以去看看}, Python/sympy, Py
 
 目前zTikZ可以在加载宏包时指定是否开启\cmd{tikzpicture}环境的缓存机制，如果你不想使用缓存机制，那么可以
 使用如下格式加载宏包(zTikZ默认缓存所有环境内容):
-\begin{codeprint}
+\begin{minted}{latex}
 \usepackage[external=false]{ztikz}
-\end{codeprint}
+\end{minted}
+
+\begin{remark}
+    目前的缓存机制存在一个BUG：如果一个环境最开始的Hash值为``A'', 在你修改了这个环境的内容后，使得此环境中
+    代码的Hash值变为 ``B''. 但是如果你现在再次修改会Hash值为 ``A''时对应的源代码，此刻的Hash值已经缓存在了
+    \cmd{ztikz.hash} 中，所以再次编译时此环境对应的绘制结果并不会改变。仍然为Hash值为``B''时的结果. 
+\end{remark}
 
 \section{Set Up zTikZ}
 \subsection{兼容情况}
@@ -59,30 +75,30 @@ tikz的\cmd{external}库实现的,感兴趣的可以去看看}, Python/sympy, Py
 在Linux下除了wolfram应该都是很好安装的, 直接使用Linux发行版自带的包管理器即可.在这里我提供一个在
 WSL中使用Windows下Mathematica 的方法. 其实就是在Linux下创建一个从Linux到Windows的软连接,如下:
 
-\begin{codeprint}
+\begin{minted}{shell}
 ln -sf "/mnt/c/Program Files/Wolfram Research/WolframScript/wolframscript.exe" /usr/bin/wolframscript    
-\end{codeprint}
+\end{minted}
 
 具体的wolframscript的路径根据实际情况而定.
 
 \subsubsection{Windows}
-由于目前我的Windows环境中的\TeX{}Live版本过低，无法测试相关的功能,所以目前zTiKZ在Windows下
-是出于搁置状态的\Footnote{但是zTiKZ中的Wolfram模块是可以在Windwos上使用的,这一点弥补了 
-\href{https://github.com/stevenliuyi/latex-alpha2}{latexalpha2} 的不足}.
-也许等一段时间，在我装上\TeX{}Live 2024后，我也许会试一试zTikZ模块的跨平台兼容性.
-
 因会使用到\cmd{gnuplot}，所以在Windows下需要在系统环境变量中添加\cmd{gnuplot}的路径.并且
 在编译此文档时需要加上对应的 \cmd{--shell-esape}参数；在Windows平台，由于\TeX{}Live的编译配置，
 需确保系统环境变量\cmd{PATHEXT}中已经删除\cmd{.PY}后缀. zTiKZ在Windows下的适配是没有Linux下那么好的,
 建议在Linux下使用本宏包.\Footnote{但是zTiKZ中的Wolfram模块是可以在Windwos上使用的,这一点弥补了 
 \href{https://github.com/stevenliuyi/latex-alpha2}{latexalpha2} 的不足}.
 
+\subsubsection{MacOS}
+在MacOS下由于缺少\cmd{l3sys-shell}宏包(或者是不适配),所以并不兼容.后续我可能会考虑重ZTikZ中用到的
+部分\cmd{l3sys-shell}宏包中的命令，如果此需求比较大的话。当然，欢迎各位提 PR, 一起完善这个宏包.
+
 \section{绘图功能}
 \subsection{tikz/gnuplot}
 zTikZ提供了绘制绝大部分函数的命令，同时zTikZ的命令可以和\cmd{tikz}中的命令``融合''，它们
 可以在同一个\cmd{tikzpicture}环境中使用. 而且，zTikZ对函数绘制时的坐标进行了``对齐''. 
-也就是zTikZ中命令的坐标，和\cmd{TiKZ}中的命令的坐标, Geogebra中的坐标是一致的. 为何要在
-zTiKZ中把坐标``对齐''? 试想这么一个情景：你在Geogebra中找到了两个函数图像的交点为 $P(1, 2)$,
+也就是zTikZ中命令的坐标，和\cmd{TiKZ}中的命令的坐标, Geogebra中的坐标是一致的. 
+
+为何要在zTiKZ中把坐标``对齐''? 试想这么一个情景：你在Geogebra中找到了两个函数图像的交点为 $P(1, 2)$,
 你首先使用TiKZ自带的\cmd{\filldraw}命令把这个 $P$点绘制出来了, 但是然后你使用zTikZ中的
 \cmd{\ShowPoint}命令也是绘制这个 $P$点，但是这两个 $P$点却没有重合，尽管我们指定的坐标
 都是 $(1, 2)$. 这就是为什么zTikZ要把坐标``对齐''. 这样还有一个好处，当你不方便使用 zTikZ 
@@ -153,7 +169,7 @@ zTiKZ中把坐标``对齐''? 试想这么一个情景：你在Geogebra中找到�
         \(\text{atanh}(x)\) & any & $\tanh^{-1} x$ (inverse hyperbolic tangent) in radians \\
         \(\text{EllipticK}(k)\) & real  $k$ in $(-1:1)$ & $K(k)$ complete elliptic integral of the first kind \\
         \(\text{EllipticE}(k)\) & real  $k$ in $[-1:1]$ & $E(k)$ complete elliptic integral of the second kind \\
-        \(\text{EllipticPi}(n,k)\) & real $n<1$, $k$ in $(-1:1)$ & $\Pi(n,k)$ complete elliptic integral of the third kind \\
+        \(\text{EllipticPi}(n,k)\) & real $n,|k|<1$ & $\Pi(n,k)$ complete elliptic integral of the third kind \\
         \(\text{besj0}(x)\) & int or real & $J_0$ Bessel function of $x$, in radians \\
         \(\text{besj1}(x)\) & int or real & $J_1$ Bessel function of $x$, in radians \\
         \(\text{besy0}(x)\) & int or real & $Y_0$ Bessel function of $x$, in radians \\
@@ -205,9 +221,9 @@ zTiKZ中把坐标``对齐''? 试想这么一个情景：你在Geogebra中找到�
 \subsection{Intruduction to Plot}
 我们首先来介绍上面和函数绘制相关的命令,因为它们的参数结构几乎都是一摸一样的, 无论是参数的含义(定义域-样式-函数)，
 对应参数的位置(均为\cmd{{OOm}}形式的参数). 下面以\cmd{\Plot}命令为例, 讲解这一系列Plot命令的参数格式以及用法:
-\begin{codeprint}
+\begin{minted}{latex}
 \Plot[<plot domain>][<plot style>][<marker options>]{<function>}
-\end{codeprint}
+\end{minted}
 
 其中\cmd{<plot domain>}就是绘制的定义域,比如\cmd{-3:4}; \cmd{<plot style>}为绘制函数的样式，
 包括图形的颜色，线型，粗细等等;\cmd{<marker option>}表示是否绘制散点图(意味着此时你要把对应绘制命令的精度降低，
@@ -216,18 +232,18 @@ zTiKZ中把坐标``对齐''? 试想这么一个情景：你在Geogebra中找到�
 \cmd{<function>}就是你要绘制的函数,比如\cmd{sin(x)}. 以下为一个具体的例子,首先创建一个\cmd{tikzpicture}环境，
 在其中写上我们的\cmd{\Plot}命令和对应的绘制参数.
 
-\begin{codeprint}
+\begin{minted}{latex}
 \begin{tikzpicture}
     \Plot[-1.5*pi:2*pi]{sin(x)}
 \end{tikzpicture}
-\end{codeprint}
+\end{minted}
 
 假如你是在命令行编译文档，那么你会看到如下的日志输出:
 
-\begin{codeprint}
+\begin{minted}{latex}
 \write18 enabled.
 entering extended mode
-\end{codeprint}
+\end{minted}
 
 编译结束后，你会得到这样的一个函数图形\Footnote{自然目前这个效果我们是不满意的，
 没有坐标轴，网格,刻度等元素.后面我们会慢慢补充这幅图}. 
@@ -253,18 +269,18 @@ entering extended mode
 \cmd{tikz_data}中的\cmd{release-figure0.pdf}即为缓存的\cmd{tikzpicture}环境的pdf文件，
 对应的\cmd{.md5}文件中:
 
-\begin{codeprint}
+\begin{minted}{latex}
 \def \tikzexternallastkey {AE7F2539E81C96848ADCCEE3994993D1}%
-\end{codeprint}
+\end{minted}
 
 即保存了\cmd{tikzpicture}环境中代码的Hash Value,当我们改变了\cmd{tikzpicture}环境中的代码时，
 这个Hash value就会改变，从而tikz就会再次运行此环境，重新生成图片. 虽说这是tikz自带的功能，但是 
 zTikZ中的Cache 机制和这个是十分的类似的，也可以说是一样的. 顺便这里说明命令\cmd{\gnudata}
 的用法(在后面区域填充时是即为有用的):
 
-\begin{codeprint}
+\begin{minted}{latex}
 \gnudata{2} = ./ztikz_output/gnuplot_data/gnu_data_1_2.table
-\end{codeprint}
+\end{minted}
 
 \cmd{\gnudata}参数中的``2''表示此数据是在当前tikzpicture环境中的第二个函数绘图数据; 
 每一个已经绘制的函数都会在对应的文件夹下生成一个对应的数据文件，你可以使用此数据文件进行
@@ -290,11 +306,11 @@ zTikZ中的Cache 机制和这个是十分的类似的，也可以说是一样的
 如果想要设置绘制的函数图形的样式，只需要对其第二个可选项参数进行设置即可，
 比如设置为``\textcolor{red}{红色}, \textbf{加粗}''.
 
-\begin{codeprint}
+\begin{minted}{latex}
 \begin{tikzpicture}
     \Plot[-1.5*pi:pi][red, thick]{sin(x)}
 \end{tikzpicture}
-\end{codeprint}
+\end{minted}
 
 \begin{center}
     \begin{tikzpicture}
@@ -306,7 +322,7 @@ zTikZ中的Cache 机制和这个是十分的类似的，也可以说是一样的
 其实上面的第二个参数的值可以是任何合法的\cmd{\draw[<plot style>]}值, 因为每一个函数
 绘制命令均是通过如下的命令实现的:
 
-\begin{codeprint}
+\begin{minted}{latex}
 % gnuplot data rename, plot and precise reset
 \cs_new_protected:Npn \ztikz_gnu_data_plot_cs:nnn #1#2#3 {
     % rename data file
@@ -317,14 +333,14 @@ zTikZ中的Cache 机制和这个是十分的类似的，也可以说是一样的
     }
     \tl_set:Nx \l__gnu_data_full_path_tl {\g__ztikz_gnu_path_tl/\l__gnu_data_new_name_tl}
     \sys_shell_mv:xx {\g__ztikz_gnu_path_tl/gnu_data.table}
-                    {\l__gnu_data_full_path_tl}
+                        {\l__gnu_data_full_path_tl}
     % plot data file
     \tl_if_empty:nTF {#3}{
         \draw[#2] plot[smooth] file {\l__gnu_data_full_path_tl};
     }{
         \group_begin:
         \keys_set:nn { ztikz / point } { #3 }
-        \draw plot [
+        \draw[#2] plot [
             mark = \str_use:N \l__point_type_str, 
             mark~ size = \dim_use:N \l__point_radius_dim,
             mark~ options = {
@@ -341,7 +357,7 @@ zTikZ中的Cache 机制和这个是十分的类似的，也可以说是一样的
         \PlotPrecise{#1}{100}
     }{\relax}
 }
-\end{codeprint}
+\end{minted}
 
 上述函数\cmd{\ztikz_gnu_data_plot_cs:n} 的第二个参数即为\cmd{\Plot}命令的第二个参数;
 
@@ -351,7 +367,7 @@ zTikZ中的Cache 机制和这个是十分的类似的，也可以说是一样的
 
 其中\cmd{\ShowAxis}\index{\cmd{\ShowAxis}}的参数格式为:\cmd{\ShowAxis[<plot style>]{(start coordinate);(end coordinate)}}.
 这里的\cmd{<plot style>}参数采用键值对的形式指定，可用键值对列表以及不同键的默认值可参见如下源码声明:
-\begin{codeprint}
+\begin{minted}{latex}
 % basic tick args
 tickStart       .fp_set:N   = \l__start_fp,
 tickStart       .initial:n  = { -5 },
@@ -388,10 +404,10 @@ tickStyle       .choice:,
 tickStyle/cross .code:n     = \tl_set:Nn \l__tick_spec_tl { cross },
 tickStyle/above .code:n     = \tl_set:Nn \l__tick_spec_tl { above },
 tickStyle/below .code:n     = \tl_set:Nn \l__tick_spec_tl { below },
-\end{codeprint}
+\end{minted}
 
 一个自定义\cmd{\ShowAxis}命令示例如下:
-\begin{codeprint}
+\begin{minted}{latex}
 \NewDocumentCommand{\xAxis}{O{-2}O{8}}{
     \ShowAxis[
         tickStart=\fp_eval:n {#1+1}, tickEnd=\fp_eval:n {#2-0.75}, 
@@ -403,7 +419,7 @@ tickStyle/below .code:n     = \tl_set:Nn \l__tick_spec_tl { below },
         mainTickLabelPosition=below
     ]{(#1, 0); (#2, 0)}
 }
-\end{codeprint}
+\end{minted}
 
 从上述zTikZ内置的\cmd{\xAxis}\index{\cmd{\xAxis}}命令可以看出，我们可以指定坐标轴的如下属性:
 \begin{itemize}
@@ -419,10 +435,10 @@ tickStyle/below .code:n     = \tl_set:Nn \l__tick_spec_tl { below },
 
 \cmd{\ShowAxis}中的第二个参数表示绘制的坐标轴的起点和终点，使用``\cmd{;}''进行分割(zTikZ 中凡是单个参数中含有多个对象的，
 分割对象所用到的符号都是``\cmd{;}''). zTikZ内置\cmd{\xAxis,\yAxis}\index{\cmd{\yAxis}}命令，用于绘制两条标准的坐标轴.命令的参数格式为：
-\begin{codeprint}
+\begin{minted}{latex}
 \xAxis[<start>][<end>]
 \yAxis[<start>][<end>]
-\end{codeprint}
+\end{minted}
 
 上面的\cmd{<start>, <end>}分别表示$x,y$轴对应的坐标轴绘制的起始,终止点.对应 $x$轴即为:\cmd{(<start>, 0) -- (<end>, 0)}.
 $y$轴即交换坐标.
@@ -433,7 +449,7 @@ $y$轴即交换坐标.
 
 今后读者若需要多次绘制坐标轴及其对应的标签，可以在导言区自定义一个\cmd{\ShowXYAxis}命令，
 自动完成坐标轴绘制以及对应的标签。
-\begin{codeprint}
+% xyaxis
 \newcommand{\ShowXYAxis}[2]{
     \ShowAxis{(-#1, 0); (#1, 0)}
     \ShowAxis{(0, -#2); (0, #2)}
@@ -441,7 +457,16 @@ $y$轴即交换坐标.
     \ShowPoint[opacity=0]{(#1, 0)}[$x$][below]
     \ShowPoint[opacity=0]{(0, #2)}[$y$][left]
 }
-\end{codeprint}
+
+\begin{minted}{latex}
+\newcommand{\ShowXYAxis}[2]{
+    \ShowAxis{(-#1, 0); (#1, 0)}
+    \ShowAxis{(0, -#2); (0, #2)}
+    \ShowPoint[opacity=0]{(0, 0)}[$O$][below left]
+    \ShowPoint[opacity=0]{(#1, 0)}[$x$][below]
+    \ShowPoint[opacity=0]{(0, #2)}[$y$][left]
+}
+\end{minted}
 
 然后使用命令\cmd{\ShowXYAxis}即可完成坐标轴的绘制以及对应的标注.第一个参数:$x$的绘制范围为\texttt{[-\#1, \#1]},
 第二个参数:$y$的绘制范围为\texttt{[-\#2, \#2]}.默认两轴对称，如果需要更多的样式，请使用\cmd{\ShowAxis}命令进行自定义.
@@ -452,9 +477,9 @@ $y$轴即交换坐标.
 \subsection{Show Point}
 对应的\cmd{\ShowPoint}\index{\cmd{\ShowPoint}}命令的参数格式为:
 
-\begin{codeprint}
+\begin{minted}{latex}
 \ShowPoint[<marker option>]{(coordinate 1); (coordinate 2); ...}[<label 1>; <label2>; ...][<position>]
-\end{codeprint}
+\end{minted}
 
 上述的\cmd{<marker option>>}\index{\cmd{<marker option>}}通过\cmd{<key>-<value>}的格式进行指定, 可用的\cmd{<key>-<value>}列表为:
 
@@ -469,14 +494,14 @@ $y$轴即交换坐标.
 
 \begin{figure}
     \centering
-    \includegraphics[width=.85\linewidth]{./pics/point_marker.pdf}
+    \includegraphics[width=.95\linewidth]{./pics/point_marker.pdf}
     \caption{Point Marker}
     \label{fig:point-marker}
 \end{figure}
 
 终于，现在我们可以给出一个相对完整的代码(包括\cmd{<marker option>}对应的用法):
 
-\begin{codeprint}
+\begin{minted}{latex}
 \begin{tikzpicture}[>=Latex]
     \xAxis[-5][5]
     \yAxis[-2][5]
@@ -484,12 +509,12 @@ $y$轴即交换坐标.
     \ShowGrid[gray, step=1, opacity=.5]{(-5, -2); (5, 5)}
     % marker option
     \PlotPrecise{plot}{10}
-    \Plot[-1.5*pi:pi][red, thick][type=ball, color=red]{sin(x)+.75}
+    \Plot[-1.5*pi:pi][thick][type=ball, color=red]{sin(x)+.75}
     % show point
     \ShowPoint[color=teal, radius=2pt, type=pentagon*, opacity=.8, rotate=60]
         {(0, 0); (3.1415926, 0)}[$O=(0, 0)$; $(\pi, 0)$][above right=4em and 0em, font=\small]
 \end{tikzpicture}
-\end{codeprint}
+\end{minted}
 
 \begin{center}
 \begin{tikzpicture}[>=Latex]
@@ -499,7 +524,7 @@ $y$轴即交换坐标.
     \ShowGrid[gray, step=1, opacity=.5]{(-5, -2); (5, 5)}
     % marker option
     \PlotPrecise{plot}{10}
-    \Plot[-1.5*pi:pi][red, thick][type=ball, color=red]{sin(x)+.75}
+    \Plot[-1.5*pi:pi][thick][type=ball, color=red]{sin(x)+.75}
     % show point
     \ShowPoint[color=teal, radius=2pt, type=pentagon*, opacity=.8, rotate=60]
         {(0, 0); (3.1415926, 0)}[$O=(0, 0)$; $(\pi, 0)$][above right=4em and 0em, font=\small]
@@ -510,32 +535,13 @@ $y$轴即交换坐标.
 \noindent \textbf{注意:}zTikZ中的命令都不需要你使用``\cmd{;}''去结束绘制.
 \end{leftbar}
 
-更多的关于Marker的选项和用法，请参见如下示例:
-\begin{codeprint}
-\begin{tikzpicture}[>=Latex]
-    \xAxis[-5][5]
-    \yAxis[-5][5]
-    \ShowGrid[gray, step=1, opacity=.5]{(-5, -2); (5, 5)}
-    \PlotPrecise{plot}{10}
-    \Plot[-1.5*pi:pi][red, thick][type=ball, color=red]{sin(x)}
-
-    \PlotPrecise{polar}{20}
-    \PolarPlot[0:10*pi][orange][type=ball, color=red]{0.1*t}
-
-    \PlotPrecise{contour}{40}
-    \ContourPlot[-4:4][green][type=ball, color=red]{x**2/9+y**2/4-1}
-
-    \PlotPrecise{param}{40}
-    \ParamPlot[0:2*pi][red, name path=ellipse][type=ball, color=red]{2*sin(t), 3*cos(t)}
-\end{tikzpicture}
-\end{codeprint}
 
 \subsection{Contour Plot}
 其余的几个函数绘制命令，稍微值得一提的是命令\cmd{\ContourPlot}\index{\cmd{\ContourPlot}}, 其参数格式为:
 
-\begin{codeprint}
+\begin{minted}{latex}
 \ContourPlot[<plot domain>][<plot style>][<marker options>]{<function>}
-\end{codeprint}
+\end{minted}
 
 但是因为是 contour plot, 所以它的定义域的指定格式是比较特别的； 比如绘制的定义为:
 $-3<x<\pi$ 并且 $-1.5<y<e$. 那么在指定其\cmd{<plot domain>}时应该写为
@@ -557,34 +563,34 @@ $-3<x<\pi$ 并且 $-1.5<y<e$. 那么在指定其\cmd{<plot domain>}时应该写�
     \end{tikzpicture}
 \end{center}
 
-\begin{codeprint}
+\begin{minted}{latex}
 \begin{tikzpicture}[>=Latex, scale=.5]
     \ShowAxis{(-5, 0); (5, 0)}
     \ShowAxis{(0, -5); (0, 5)}
     \ContourPlot[-3:pi; -3:exp(1)][red]{x**2/16 + y**2/10 - 1}
 \end{tikzpicture}
-\end{codeprint}
+\end{minted}
 
 对于\cmd{\ContourPlot}还有一点提醒：如果要绘制 $x^2/4+y^2/9=1$,那么你只需要输入\cmd{x**2/4+y**2/9-1}即可;
 所以由此也暗示了此命令的另一个用法，用于绘制水平线($y=c$)和竖直线($x=c$). 仍然可以使用前面的\cmd{<plot domain>}
 控制 $x,y$的范围，比如绘制 $x=1, -1<y<1$. 那么对应的命令就是(第一个参数范围只要包含 $x=1$即可):
 
-\begin{codeprint}
+\begin{minted}{latex}
 \ContourPlot[0:2; -1:1][red, dashed]{x-1}
-\end{codeprint}
+\end{minted}
 
 \subsection{Intersection and Plot Precise}
 我们还有两个命令没有讲到:\cmd{\ShowIntersection}\index{\cmd{\ShowIntersection}}, \cmd{\PlotPrecise}\index{\cmd{\PlotPrecise}};
 其中\cmd{\ShowIntersection}
 命令的参数格式为:
 
-\begin{codeprint}
+\begin{minted}{latex}
 \ShowIntersection{<path 1>; <path 2>}[<number of points>]
-\end{codeprint}
+\end{minted}
 
 指定tikz中path名称并显示交点方法示例, 我们分别指定两条叫做\cmd{line1, line2}的路径，并显示它们二者的交点.
 
-\begin{codeprint}
+\begin{minted}{latex}
 \begin{tikzpicture}[>=Latex]
     \ShowAxis{(-2, 0); (4, 0)}
     \ShowAxis{(0, -2); (0, 4)}
@@ -596,7 +602,7 @@ $-3<x<\pi$ 并且 $-1.5<y<e$. 那么在指定其\cmd{<plot domain>}时应该写�
     % \path[name intersections={of=line1 and line2}];
     % \ShowPoint[color=red] {(intersection-1)}
 \end{tikzpicture}
-\end{codeprint}
+\end{minted}
 
 
 \begin{center}
@@ -611,31 +617,31 @@ $-3<x<\pi$ 并且 $-1.5<y<e$. 那么在指定其\cmd{<plot domain>}时应该写�
 
 
 \cmd{\PlotPrecise}\index{\cmd{\PlotPrecise}}命令的参数格式为:
-\begin{codeprint}
+\begin{minted}{latex}
 \PlotPrecise{<plot type>}[<change domain>]{<samples-int>}
-\end{codeprint}
+\end{minted}
 
 支持的\cmd{<plot type>}有 \cmd{plot, param, contour, polar}, 分别设置对应的
 命令\cmd{\Plot, \ParamPlot, \ContourPlot, \PolarPlot}的采样精度. 采样精度的设置
 分为两种，临时和永久，临时改变(只改变下一个命令的采样精度)的方法是在命令的第二个参数中
 填入\cmd{[once]}, 而如果填入不是\cmd{once},那么接下来的所有同种\cmd{<plot type>}的命令
 的采样精度都会改变. 下面给出一个采样精度设置的例子, 绘制在区间$[-2, 2]$上的
-函数 $y=3\sin(1/x)$在采样精度分别为50和1000的图像:
+函数 $y=3\sin(1/x)$在采样精度分别为50和1000的图像, 见\cref{fig:plot-precise}:
 
-\parbox{.48\linewidth}{
+\begin{figure}[!htb]
     \centering
     \begin{tikzpicture}
         \PlotPrecise{plot}{50}
         \Plot[-2:2]{3*sin(1/x)}
     \end{tikzpicture}
-}
-\parbox{.48\linewidth}{
-    \centering
+    \;
     \begin{tikzpicture}
         \PlotPrecise{plot}{1000}
         \Plot[-2:2]{3*sin(1/x)}
     \end{tikzpicture}
-}
+    \caption{绘制精度设置}
+    \label{fig:plot-precise}
+\end{figure}
 
 
 \section{Statistic Plot}
@@ -648,9 +654,9 @@ $-3<x<\pi$ 并且 $-1.5<y<e$. 那么在指定其\cmd{<plot domain>}时应该写�
 讲解这三者的用法。同时也会给出3者的具体示例.
 
 \cmd{\StairsPlot}主要用于绘制阶梯图,命令格式为:
-\begin{codeprint}
+\begin{minted}{latex}
 \StairsPlot[<stairs option>][<draw option>][<marker option>]{<data>}
-\end{codeprint}
+\end{minted}
 
 第一个可选参数的可选值有:\cmd{plot-left(plot-right);jump-right(plot-left)}，我们以``;''进行两个配置项的分割.
 第一个配置项\cmd{plot-<.>}表示在绘制数据点时水平线取值为左值还是右值.第二个配置项\cmd{jump-<.>}表示在绘制数据点时
@@ -663,7 +669,7 @@ $-3<x<\pi$ 并且 $-1.5<y<e$. 那么在指定其\cmd{<plot domain>}时应该写�
 其中必选参数\cmd{<data>}表示要可视化的数据文件,可以手动输入数据文件地址，也可以使用前文定义的\cmd{\gnudata{<index>}}命令
 用于引用前面已经生成的数据,\textbf{这也就意味着要使用此命令，必须先产生对应的数据}.一个绘制样例如\cref{fig:stairs-plot}:
 
-\begin{codeprint}
+\begin{minted}{latex}
 \begin{tikzpicture}
     \ShowGrid[step=1]{(-5, -5); (5, 5)}
     %% \StairsPlot
@@ -686,7 +692,7 @@ $-3<x<\pi$ 并且 $-1.5<y<e$. 那么在指定其\cmd{<plot domain>}时应该写�
         \node[left] at (-3.14, 0) {jump right};
     \end{scope}
 \end{tikzpicture}
-\end{codeprint}
+\end{minted}
 
 \begin{figure}
     \centering
@@ -717,9 +723,9 @@ $-3<x<\pi$ 并且 $-1.5<y<e$. 那么在指定其\cmd{<plot domain>}时应该写�
 \end{figure}
 
 其余的两个相似命令\cmd{\StemPlot, \BarPlot}的参数格式为:
-\begin{codeprint}
+\begin{minted}{latex}
 \StairsPlot[<stem/bar option>][<draw option>][<marker option>]{<data>}
-\end{codeprint}
+\end{minted}
 
 这里主要说明第一个可选参数的可选值列表,默认值以及其对应的实际含义:
 
@@ -728,7 +734,7 @@ $-3<x<\pi$ 并且 $-1.5<y<e$. 那么在指定其\cmd{<plot domain>}时应该写�
     \item \cmd{\StemPlot}
         \begin{itemize}
             \item \cmd{x}:表示绘制一个垂直于$x$轴上的火柴棍图
-            \item \cmd{x}:表示绘制一个垂直于$y$轴上的火柴棍图
+            \item \cmd{y}:表示绘制一个垂直于$y$轴上的火柴棍图
             \item \cmd{o}:表示绘制一个中心为原点 $O=(0,0)$的火柴棍图
             \item 若为空值，那么默认和\cmd{x}参数时的情形一致
         \end{itemize}
@@ -745,7 +751,7 @@ $-3<x<\pi$ 并且 $-1.5<y<e$. 那么在指定其\cmd{<plot domain>}时应该写�
 
 \subsection{Stem/Bar Plot}
 下面各处这两个命令的一个简单示例,见\cref{fig:bar-plot}, \cref{fig:stem-plot}:
-\begin{codeprint}
+\begin{minted}{latex}
 \begin{tikzpicture}
     \ShowGrid[step=1]{(-5, -5); (5, 5)}
     %% \StemPlot
@@ -765,7 +771,7 @@ $-3<x<\pi$ 并且 $-1.5<y<e$. 那么在指定其\cmd{<plot domain>}时应该写�
         \node[left] at (-2, 0) {polar comb};
     \end{scope}
 \end{tikzpicture}
-\end{codeprint}
+\end{minted}
 
 \begin{figure}[!htb]
     \centering
@@ -792,7 +798,7 @@ $-3<x<\pi$ 并且 $-1.5<y<e$. 那么在指定其\cmd{<plot domain>}时应该写�
     \label{fig:stem-plot}
 \end{figure}
 
-\begin{codeprint}
+\begin{minted}{latex}
 \begin{tikzpicture}
     \ShowGrid[step=1, color=gray, opacity=.5]{(-5, -5); (5, 5)}
     % 1. xbar
@@ -818,7 +824,7 @@ $-3<x<\pi$ 并且 $-1.5<y<e$. 那么在指定其\cmd{<plot domain>}时应该写�
     % annotate
     \node at (2.25 ,-4.5) {Optional args:bar width, bar shift};
 \end{tikzpicture}    
-\end{codeprint}
+\end{minted}
 
 \begin{figure}[!htb]
     \centering
@@ -853,7 +859,7 @@ $-3<x<\pi$ 并且 $-1.5<y<e$. 那么在指定其\cmd{<plot domain>}时应该写�
 
 \subsection{List Plot}
 然后讲解一下怎么绘制散点图，以\cmd{\Plot, \PolarPlot}命令为例,见\cref{fig:list-plot}:
-\begin{codeprint}
+\begin{minted}{latex}
 \begin{tikzpicture}
     \ShowGrid[step=1, color=gray, opacity=.5]{(-5, -5); (5, 5)}
     \begin{scope}[yshift=-2cm]
@@ -868,7 +874,7 @@ $-3<x<\pi$ 并且 $-1.5<y<e$. 那么在指定其\cmd{<plot domain>}时应该写�
     \Plot[-pi:pi][red]{sin(x)}
     \PolarPlot[0:2*pi][orange]{1-sin(t)}
 \end{tikzpicture}
-\end{codeprint}
+\end{minted}
 
 \begin{figure}[!htb]
     \centering
@@ -892,26 +898,26 @@ $-3<x<\pi$ 并且 $-1.5<y<e$. 那么在指定其\cmd{<plot domain>}时应该写�
 
 \subsection{Shade Plot}
 最后讲解\cmd{\ShadePlot}命令,参数格式为:
-\begin{codeprint}
+\begin{minted}{latex}
 \ShadePlot[<shade mode>][<box distance>]{<data>}
-\end{codeprint}
+\end{minted}
 
 其中第一个参数\cmd{<shade mode>}使用命令\cmd{\ztikzShadeMode}命令进行声明，此命令的一个样例为(zTikZ默认shade模式):
-\begin{codeprint}
+\begin{minted}{latex}
 \ztikzShadeMode{defaultMode}{horizontal}{white,black}
-\end{codeprint}
+\end{minted}
 
 \cmd{\ztikzShadeMode}的第二个参数可以为\cmd{vertical}，表示垂直渐变.第三个参数中的颜色也可以超过两个。一个具体的
 使用样例,见\cref{fig:shade-plot}:
 
-\begin{codeprint}
+\begin{minted}{latex}
 % compile with "\usepackage[external=false]{ztikz}"
 \ztikzShadeMode{newyMode}{vertical}{white,black}
 \begin{tikzpicture}
     \ShowGrid[step=1, color=gray, opacity=.5]{(-5, -5); (5, 5)}
     \ShadePlot[newyMode][10pt]{./data/sine.data}
 \end{tikzpicture} 
-\end{codeprint}
+\end{minted}
 
 \begin{figure}[!htb]
     \centering
@@ -928,22 +934,23 @@ $-3<x<\pi$ 并且 $-1.5<y<e$. 那么在指定其\cmd{<plot domain>}时应该写�
 
 
 \section{Polygon}
+\subsection{基本介绍}
 目前zTikZ的\cmd{Polygon}命令已经开发完毕, 此命令主要用于绘制正多边形。命令格式如下:
-\begin{codeprint}
+\begin{minted}{latex}
 \Polygon[<options>]{<edges>}
-\end{codeprint}
+\end{minted}
 
 第二个参数是比较简单的，只需要输入一个正整数即可，表示多边形的边数. 第一个参数是一个可选参数，可以指定旋转角度,多边形的边长,边的颜色
 多边形填充样式与颜色，顶点样式等.可用的键值对以及默认值如下:
 
-\begin{codeprint}
+\begin{minted}{latex}
 \keys_define:nn { ztikz / polygon }{
     radius       .fp_set:N  = \l__polygon_radius_fp,
     radius       .initial:n = { 1 },
     edgeColor    .tl_set:N  = \l__polygon_edge_color_tl,
     edgeColor    .initial:n = { black },
     fillColor    .tl_set:N  = \l__polygon_fill_color_tl,
-    fillColor    .initial:n = { white },
+    fillColor    .initial:n = {  },
     fillOpacity  .fp_set:N  = \l__polygon_fill_opacity_fp,
     fillOpacity  .initial:n = { 0 },
     rotate       .fp_set:N  = \l__polygon_rotate_angle,
@@ -953,10 +960,10 @@ $-3<x<\pi$ 并且 $-1.5<y<e$. 那么在指定其\cmd{<plot domain>}时应该写�
     marker       .tl_set:N  = \l__polygon_marker_option_tl,
     marker       .initial:n = { },
 }
-\end{codeprint}
+\end{minted}
 
 这里指的说一下的参数是:\cmd{marker},此参数中可以填入任意合法的\cmd{<marker option>}键值对,一下为一个简单示例:
-\begin{codeprint}
+\begin{minted}{latex}
 \Polygon [
     radius=2, 
     shift={(3,0)}, 
@@ -964,27 +971,27 @@ $-3<x<\pi$ 并且 $-1.5<y<e$. 那么在指定其\cmd{<plot domain>}时应该写�
     marker={type=ball, color=red}, 
     edgeColor=teal, 
     fillColor=red, 
-    fillOpacity=0.5
 ]{3}
-\end{codeprint}
+\end{minted}
 
 \begin{remark}
-    多边形的变数必须为整数，同时再说明一下键\cmd{shift}的含义:合法的值为一个使用``()''包括的向量，表示 
+    多边形的变数必须为整数. 同时再说明一下键\cmd{shift}的含义:合法的值为一个使用``()''包括的向量，表示 
     整个多边形的平移量.比如\cmd{shift={(3,-4)}}表示整个多边形向右平移3个单位,象下平移4个单位. 不要忘记向量
-    外层的\texttt{\{\}}.
+    外层的\texttt{\{\}}. 
 \end{remark}
 
+\subsection{使用样例}
 在讲述了\cmd{\Polygon}命令的用法后，下面给出一个简单的使用样例,见\cref{fig:polygon}:
-\begin{codeprint}
+\begin{minted}{latex}
 \begin{tikzpicture}
     \ShowGrid[step=1, color=gray, opacity=.5]{(-5, -5); (5, 5)}
     \Polygon[shift={(0, 0)}]{3}
     \Polygon[shift={(3, 0)}, fillColor=red, fillOpacity=.5]{4}
     \Polygon[shift={(0, 3)}, edgeColor=green, fillOpacity=.3, marker={type=ball, color=green}, rotate=18]{5}
-    \Polygon[shift={(-3,0)}, fillColor=orange, fillOpacity=.75]{6}
-    \Polygon[shift={(0,-3)}, fillColor=teal, fillOpacity=.5, marker={type=oplus*, color=teal}]{8}
+    \Polygon[shift={(-3,0)}, fillColor=orange]{6}
+    \Polygon[shift={(0,-3)}, fillColor=teal, marker={type=oplus*, color=teal}]{8}
 \end{tikzpicture}
-\end{codeprint}
+\end{minted}
 
 \begin{figure}[!htb]
     \centering
@@ -992,9 +999,9 @@ $-3<x<\pi$ 并且 $-1.5<y<e$. 那么在指定其\cmd{<plot domain>}时应该写�
         \ShowGrid[step=1, color=gray, opacity=.5]{(-5, -5); (5, 5)}
         \Polygon[shift={(0, 0)}]{3}
         \Polygon[shift={(3, 0)}, fillColor=red, fillOpacity=.5]{4}
-        \Polygon[shift={(0, 3)}, edgeColor=green, fillOpacity=1, marker={type=ball, color=green}, rotate=18]{5}
-        \Polygon[shift={(-3,0)}, fillColor=orange, fillOpacity=.75]{6}
-        \Polygon[shift={(0,-3)}, fillColor=teal, fillOpacity=.5, marker={type=diamond*, color=red}]{8}
+        \Polygon[shift={(0, 3)}, edgeColor=green, fillOpacity=.3, marker={type=ball, color=green}, rotate=18]{5}
+        \Polygon[shift={(-3,0)}, fillColor=orange]{6}
+        \Polygon[shift={(0,-3)}, fillColor=teal, marker={type=oplus*, color=teal}]{8}
     \end{tikzpicture}
     \caption{polygon}
     \label{fig:polygon}
@@ -1002,26 +1009,26 @@ $-3<x<\pi$ 并且 $-1.5<y<e$. 那么在指定其\cmd{<plot domain>}时应该写�
 
 
 \begin{remark}
-    在填充多边形时，必须同时指定键\cmd{fillOpacity}的值,因为此值默认为0;
-    如果你想要填充一个透明度为50\%的多边形，那么你可以使用\cmd{fillOpacity=0.5}来实现.
+    在填充多边形时,如果没有指定\cmd{fillColor}时，默认不填充任何色彩。当指定了\cmd{fillColor}时，
+    这是默认的填充透明度为 0.75,如果不满意默认人透明度，用户可以重新指定其透明度值，Override It.
+    比如,你想要填充一个透明度为50\%的多边形，那么你可以使用\cmd{fillOpacity=0.5}来实现.
 \end{remark}
-
 
 
 \section{python/matplotlib}
 python绘图是比较就简单的，zTikZ提供了用于python绘图的\cmd{pyfig}\index{\cmd{pyfig}}环境。
 此环境需要填入两个参数，参数格式为:
 
-\begin{codeprint}
+\begin{minted}{latex}
 \begin{pyfig}[<width>]{<export file name>}
 % your code
 \end{pyfig}
-\end{codeprint}
+\end{minted}
 
 其中的\cmd{<width>}参数是命令\cmd{\includegraphics[<width>]{}}中的参数,比如你可以输入\cmd{width=.75\linewidth}. 
 再指定必要的参数后，你可以直接在环境中输入Python代码. 下面即为一个示例:
 
-\begin{codeprint}
+\begin{minted}{latex}
 \begin{pyfig}[width=.45\linewidth]{pycode.py}
 import matplotlib 
 matplotlib.use('Agg')
@@ -1034,24 +1041,24 @@ x = np.linspace(0, 2*np.pi, num = 80)
 y = np.sin(x)*np.cos(x)+.2
 plt.plot(x, y)
 \end{pyfig}
-\end{codeprint}
+\end{minted}
 
 你不需要在其中输入图片的保存指令\cmd{plt.savefig("")}, zTikZ会自动在此环境后面加上对应的
 图片保存指令。这个环境的返回结果为:\cmd{\includegraphics[width=.45\linewidth]{pycode.py.pdf}},
 所以你可以把这个环境嵌套在任何的浮动环境，比如\cmd{figure, table}中. 
 
 在命令行中第一次编译时你会看到如下的日志:
-\begin{codeprint}
+\begin{minted}{latex}
 current hash is FF7B5ECDBF52AA95DF921FCC076F9021
 current hash is unique --> recorded
-\end{codeprint}
+\end{minted}
 
 上述日志说明，zTikZ已经识别到这是一个新的python环境，并且保存了这个环境中绘图代码的Hash值；
 然后，第二次编译此文档时，你会在输出的日志中定位到如下的输出:
-\begin{codeprint}
+\begin{minted}{latex}
 current hash is FF7B5ECDBF52AA95DF921FCC076F9021
 skip recompile by python, using the cache picture 1
-\end{codeprint}
+\end{minted}
 
 这就说明，由于你的python绘图部分的源代码没有改变，然后zTikZ就直接采用了上一次编译的缓存图片,跳过了重新编译这一步;
 上面环境的运行结果为:
@@ -1095,18 +1102,19 @@ plt.plot(x, y)
 
 如果你实在是需要缩进，那么在这里我推荐另外一种可以使用缩进的方法：把\cmd{pyfig}环境连同其内部代码保存在另外一个文件中，
 比如这里我保存为\cmd{pycode.mpl},然后在\cmd{figure}环境中使用\cmd{\input{pycode.mpl}}引入此部分的代码。如下:
-\begin{codeprint}
+\begin{minted}{latex}
 \begin{figure}
     \centering
     \input{./data/pycode.mpl}
     \caption{Python Figure}
     \label{fig:pyfig-1}
 \end{figure}
-\end{codeprint}
+\end{minted}
 \end{remark}
 
 
 \section{mathematica}
+\subsection{基本介绍}
 其实使用mathematica进行绘图这个部分和前面的使用Python绘图是差不多的，zTikZ提供了一个
 \cmd{wolframGraphics}\index{\cmd{wolframGraphics}}环境用于使用mathematica绘图. 与之前的\cmd{pyfig}环境不同的是,此时你需要手动加入
 图片的保存路径；路径的前缀为:\cmd{./ztikz_output/mma_data/<figure name>}. 为何这里这个部分
@@ -1117,7 +1125,7 @@ plt.plot(x, y)
 \cmd{mma_1.wls.pdf},其中的图片格式可以自己指定，比如为\cmd{.png, .jpg, .mbp}等. 此环境同样是加入了Cache机制的,
 下面给出一个具体的使用案例:
 
-\begin{codeprint}
+\begin{minted}{latex}
 \begin{wolframGraphics}[width=.4\linewidth]{mma_1.wls}
     plotFunction[fun_, xlimits_, ylimits_] := ContourPlot[fun, 
         xlimits, ylimits,
@@ -1143,8 +1151,9 @@ plt.plot(x, y)
     (* 1.保存的图片格式为:*.wls.pdf; 2.保存路径在:./ztikz_output/mma_data *)
     Export["./ztikz_output/mma_data/mma_1.wls.pdf", figure];
 \end{wolframGraphics}
-\end{codeprint}
+\end{minted}
 
+\subsection{注意事项}
 因为mathematica中的代码是允许用户自由添加缩进的，所以你可以自己添加Mathematica代码的缩进.
 和前面的Python绘图代码类似，你可以把此部分代码保存在一个单独的文件中，然后通过\cmd{\input}
 进行引入,这里不再给出对应的案例.
@@ -1166,10 +1175,9 @@ plt.plot(x, y)
 无法识别此脚本，也就不会去执行此脚本了.
 \end{leftbar}
 
-\begin{remark}
 用户如果要使用zTikZ的Mathematica模块，请务必确保wolframscript在命令行中能够正常运行.可以使用如下
 文件作为测试用例，检测wolframscript是否正常工作; 
-\begin{codeprint}
+\begin{minted}{mathematica}
 plotFunction[fun_, xlimits_, ylimits_] := ContourPlot[fun, 
     xlimits, ylimits,
     ContourStyle->{
@@ -1193,16 +1201,15 @@ fp2 = plotFunction[x^2/4 + y^2/3 == 5, {x, -5, 5}, {y, -5, 5}];
 figure = Show[fp2, fp1];
 (* 1.保存的图片格式为:*.wls.pdf; 2.保存路径在:./ztikz_output/mma_data *)
 Export["works_well.pdf", figure];
-\end{codeprint}
+\end{minted}
 
 把这里的源码保存为\cmd{test.wls},然后在命令行运行:
-\begin{codeprint}
+\begin{minted}{shell}
 wolframscript -script test.wls
-\end{codeprint}
+\end{minted}
+
 如果正常工作的话，那么在你的当前工作目录下会产生一个名为\cmd{works_well.pdf}的pdf文件.反之，你的wolframscript没有
 正常配置或者是激活,也就不能够使用本模块.
-\end{remark}
-
 
 \begin{figure}[!htb]
     \centering
@@ -1249,11 +1256,12 @@ wolframscript -script test.wls
 \end{figure}
 
 \section{matlab}
+\subsection{基本介绍}
 目前zTikZ中的Matlab模块还在开发中, 但是目前你可以使用\cmd{matlab2tikz}这个Matlab插件来把你的Matlab
 图形转换为对应的tikz代码,效果也是很好的.
 
 但是目前你可以在命令行中调用Matlab运行自己的Matlab脚本, 一个测试脚本如下:
-\begin{codeprint}
+\begin{minted}{matlab}
 x = 1:0.1:2*pi;
 y = sin(x);
 
@@ -1261,15 +1269,19 @@ figure('visible','off')
 plot(x, y, 'r-');
 
 exportgraphics(gcf, 'myfig.pdf') 
-\end{codeprint}
+\end{minted}
 
 然后在命令行中使用如下命令进行运行:
-\begin{codeprint}
+\begin{minted}{shell}
 matlab -batch "run('matlab.m')"
-\end{codeprint}
+\end{minted}
 
 运行完后，你便可以在当前目录下看到一个pdf文件，名为\cmd{myfig.pdf};在运行方式这一点上,Matlab和
 Wolframscriprt的运行命令:\cmd{wolframscript -script mma.wls}是有一点区别的.
+
+\subsection{现状}
+似乎在\TeX{}中无法正常的调用Matlab进行计算与绘图，Matlab日志显示错误. 但是目前此功能应该不会在短时间内开发出来。
+如果有比较多的需求，我可能会考虑.
 
 \section{数值计算}
 \subsection{xfp}
@@ -1302,15 +1314,15 @@ Wolframscriprt的运行命令:\cmd{wolframscript -script mma.wls}是有一点区
 zTikZ提供了命令\cmd{\py}\index{\cmd{\py}}用于浮点数运算, 这部分的结果并不会被缓存，也就是说每次编译此文档时，Python都会重新
 计算此部分的结果. \cmd{\py}的参数说明如下:
 
-\begin{codeprint}
+\begin{minted}{latex}
 \py[<return type>]{<expression>}
-\end{codeprint}
+\end{minted}
 
-上述的第一个默认参数值为:\cmd{hold},可选值有\cmd{str},二者的区别可以简单的认为，返回的Token的类别码不同.
+上述的第一个默认参数值为:\cmd{raw},可选值有\cmd{str},二者的区别可以简单的认为，返回的Token的类别码不同.
 比如当外部文件中的内容为:
-\begin{codeprint}
+\begin{minted}{latex}
 \[ a^2 + b^2 = c^2 \]
-\end{codeprint}
+\end{minted}
 
 默认情况才下，\cmd{\py}返回此命令的结果为:
 \[
@@ -1321,16 +1333,16 @@ zTikZ提供了命令\cmd{\py}\index{\cmd{\py}}用于浮点数运算, 这部分�
 下的排版公式.
 
 值得说明的是，\cmd{\py}命令和\cmd{xfp}宏包提供的\cmd{\inteval, \fpeval}是类似的；也就是你可以把
-\cmd{\py}命令嵌套到你自己定义的一个命令中.同样是使用\cmd{#1}来表示接收到的参数. 比如你可以创建下面这几个命令:
+\cmd{\py}命令嵌套到你自己定义的一个命令中.同样是使用\texttt{\#1}来表示接收到的参数. 比如你可以创建下面这几个命令:
 
 \newcommand{\pypow}[1]{\py{#1}}
 \newcommand{\pyreverse}[1]{\py{'#1'[::-1]}}
 \newcommand{\pyuppercase}[1]{\py{'#1'.upper()}}
-\begin{codeprint}
+\begin{minted}{latex}
 \newcommand{\pypow}[1]{\py{#1}}
 \newcommand{\pyreverse}[1]{\py{'#1'[::-1]}}
 \newcommand{\pyuppercase}[1]{\py{'#1'.upper()}}
-\end{codeprint}
+\end{minted}
 
 分别用于数值计算(乘方计算), 字符串反转输出, 字符串大写输出. 使用效果如下:
 \begin{itemize}
@@ -1338,20 +1350,23 @@ zTikZ提供了命令\cmd{\py}\index{\cmd{\py}}用于浮点数运算, 这部分�
     \item Reverse a string using Python: \pyreverse{Hello-LaTeX}
     \item Uppercase a string: \pyuppercase{hello-latex}
     \item Modulus: $102 = \py{102\%8}\quad \text{mod } 8$
-    \item Return string Options: \py[str]{'\\$\\$'+str(2**10)+'\\$\\$'}
+    \item Return string Options: \py[str]{'\$\$'+str(2**10)+'\$\$'}
 \end{itemize}
 
-\begin{remark}
-    如果你想要使用Python中的求模运算需要输入\texttt{\%}时,在\cmd{\py}命令中你应该写为:
-\begin{codeprint}
+如果你想要使用Python中的求模运算需要输入\texttt{\%}时,在\cmd{\py}命令中你应该写为:
+\begin{minted}{latex}
 \py{102\%8}
-\end{codeprint}
+\end{minted}
     
-    或者是如果你需要在\cmd{\py}命令中传入\texttt{\$},请像下面这样书写:
-\begin{codeprint}
-\py{'\\$\\$'+str(2**10)+'\\$\\$'}
-\end{codeprint}
-\end{remark}
+或者是如果你需要在\cmd{\py}命令中传入\texttt{\$},请像下面这样书写:
+\begin{minted}{latex}
+\py{'\$\$'+str(2**10)+'\$\$'}
+\end{minted}
+
+毕竟在命令行中，如下的命令才可以正常的工作:
+\begin{minted}{shell}
+sed -i "6s|Float_res = .*|Float_res = '\$\$'+str(2**10)+'\$\$'|" ./ztikz_output/scripts/python_script.py
+\end{minted}
 
 \begin{remark}
 目前由于Windows上的sed命令(又或者是平台差异)和Linux下的差异,所以可能导致在Windows上使用时，
@@ -1362,10 +1377,9 @@ zTikZ提供了命令\cmd{\py}\index{\cmd{\py}}用于浮点数运算, 这部分�
 \subsubsection{python environment}
 zTikZ同时也提供了一个用于自由书写Python代码的环境\cmd{pycode}\index{pycode},可以用于生成复杂且规律的表格代码等排版元素.
 比如下面的示例:
-\begin{codeprint}
+\begin{minted}{latex}
 \begin{pycode}{pycode_1.py}
 import numpy as np
-
 
 # write file
 with open ('./ztikz_output/python_data/pycode_1.py.out', 'w') as file:
@@ -1381,11 +1395,11 @@ with open ('./ztikz_output/python_data/pycode_1.py.out', 'w') as file:
     file.write("\\hline\n")
     file.write("\\end{tabular}\n")
 \end{pycode}
-\end{codeprint}
+\end{minted}
 
 
 那么在运行此命令后，在zTikZ的缓存文件夹中会生成一个名为\cmd{pycode_1.py.out}的文件，其内容为:
-\begin{codeprint}
+\begin{minted}{latex}
 \begin{tabular}{p{3cm}ccc}
 \hline
 number/function & $\sin$ & $\cos$ & $\tan$\\
@@ -1407,7 +1421,7 @@ $14$ & $0.9906$ &  $0.1367$ & $7.2446$\\
 $15$ & $0.6503$ &  $-0.7597$ & $-0.856$\\
 \hline
 \end{tabular}
-\end{codeprint}
+\end{minted}
 
 所以这段代码的具体效果如下:
 \begin{table}[H]
@@ -1473,9 +1487,9 @@ Python的Sympy是一个\textbf{免费，开源，轻量}的符号计算模块，
 
 % zTikZ中针对Sympy提供了命令:\cmd{\sympy}\index{\cmd{\sympy}},其参数格式为:
 
-\begin{codeprint}
+\begin{minted}{latex}
 \sympy{<expression>}
-\end{codeprint}
+\end{minted}
 
 和之前的使用Python进行数值计算不同的是，zTikZ针对此命令提供了Cache机制，此命令对应的结果会被保存在文件:
 \cmd{./ztikz_output/python_data/sympy_<index>.out}文件中. 此文件名中的\cmd{<index>}表示的是对应的
@@ -1487,7 +1501,7 @@ Python的Sympy是一个\textbf{免费，开源，轻量}的符号计算模块，
 zTikZ模块的\cmd{\sympy}命令在进行符号运算时，默认的符号变量有:\cmd{x, y, z, u, v, t},这些变量你不需声明
 便可以直接使用; 下面给出使用\cmd{\sympy}命令进行符号计算的部分示例:
 
-\begin{codeprint}
+\begin{minted}{latex}
 % 定积分
 \sympy{integrate(sin(x)/x, (x, -oo, oo))}
 % 不定积分
@@ -1496,7 +1510,7 @@ zTikZ模块的\cmd{\sympy}命令在进行符号运算时，默认的符号变量
 \sympy{Matrix([[1, 2], [2, 2]]).eigenvals()}  
 % 极限计算
 \sympy{limit(sin(x)/x, x, 0)}
-\end{codeprint}
+\end{minted}
 
 计算定积分的例子:
 \[
@@ -1557,7 +1571,7 @@ zTikZ模块提供和Mathematica相关的符号计算，数值运算和知识查�
 
 在这里给出\cmd{\wolfram}\index{\cmd{\wolfram}}命令的部分使用样例:
 
-\begin{codeprint}
+\begin{minted}{latex}
 \wolfram{Series[Exp[x], {x, 0, 5}]} 
 \[\wolframResult\]
 
@@ -1566,7 +1580,7 @@ zTikZ模块提供和Mathematica相关的符号计算，数值运算和知识查�
 
 \wolfram[text]{WolframAlpha["Shanghai population", "ShortAnswer"]} 
 \[\wolframResult\]
-\end{codeprint}
+\end{minted}
 
 函数 $y=\mathrm{e}^x$的5阶Taylor展开式为:
 \wolfram{Series[Exp[x], {x, 0, 5}]}
@@ -1601,7 +1615,7 @@ zTikZ模块提供和Mathematica相关的符号计算，数值运算和知识查�
 \cmd{\wolframSolve}\index{\cmd{\wolframSolve}}命令可以用于多项式方程根的求解以及方程组的求解，并且可以给定求解的范围.
 和前面的\cmd{\wolfram}命令类似,下面给出几个比较简单的求解示例:
 
-\begin{codeprint}
+\begin{minted}{latex}
 \wolframSolve{x^4 - x^2 - 5 == 0}[x]
 \begin{align}
     \left\{\begin{aligned}
@@ -1617,7 +1631,7 @@ zTikZ模块提供和Mathematica相关的符号计算，数值运算和知识查�
 
 \wolframSolve[full]{x^2 + y^2 == 5^2 && y > x > 0, {x, y}, Integers}  
 \[\wolframResult[raw][\leftrightarrow]\]
-\end{codeprint}
+\end{minted}
     
 方程 $x^4 - x^2 - 5 = 0$的所有根为:
 \wolframSolve{x^4 - x^2 - 5 == 0}[x]
@@ -1654,10 +1668,10 @@ zTikZ模块提供和Mathematica相关的符号计算，数值运算和知识查�
 命令\cmd{\wolframDSolve}\index{\cmd{\wolframDSolve}}和命令\cmd{\wolframSolve}完全相同, 只是这个命令是用于求解微分方程的.
 下面是几个示例:
 
-\begin{codeprint}
+\begin{minted}{latex}
 \wolframDSolve{{y'[x] + y[x] == a*Sin[x], y[0] == 0}}[y[x]][x]   
 \wolframDSolve[full]{{y'[x] == Exp[z[x]] + 1, z'[x] == y[x] - x}, {y[x], z[x]}, x}
-\end{codeprint}
+\end{minted}
 
 微分方程 $y' + y = a\sin(x), y(0)=0$的解为:
 \wolframDSolve{{y'[x] + y[x] == a*Sin[x], y[0] == 0}}[y[x]][x]

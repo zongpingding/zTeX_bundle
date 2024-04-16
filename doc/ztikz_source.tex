@@ -1,7 +1,7 @@
 \chapter{zTikZ部分源码说明}
 \section{Set up Env}
 \subsection{Set up}
-\begin{source}
+\begin{minted}[linenos=true]{latex}
 \RequirePackage{l3sys-shell}
 \NewDocumentCommand\ztikzMkdir{m}{ \sys_shell_mkdir:n {#1} }
 \ExplSyntaxOff
@@ -103,10 +103,10 @@ plot t
 \end{filecontents}
 \fi\endgroup
 \ExplSyntaxOn
-\end{source}
+\end{minted}
 
 \subsection{config}
-\begin{source}
+\begin{minted}[linenos=true]{latex}
 % data or picture path
 \tl_const:Nn \g__ztikz_gnu_path_tl      {./ztikz_output/gnuplot_data} 
 \tl_const:Nn \g__ztikz_python_path_tl   {./ztikz_output/python_data} 
@@ -133,11 +133,11 @@ plot t
 % io read/write interface
 \ior_new:N \g__file_read_ior
 \tl_new:N  \g__file_content_tl
-\end{source}
+\end{minted}
 
 \section{tikz}
 \subsection{Cache mechanism}
-\begin{source}
+\begin{minted}[linenos=true]{latex}
 % generate md5 hash (history) of a file
 \ior_new:N \g__ztikz_file_ior
 \seq_new:N \g__ztikz_file_hash_seq
@@ -172,10 +172,10 @@ plot t
     }
 }
 \cs_generate_variant:Nn \ztikz_hash_if_change_cs:n { x }
-\end{source}
+\end{minted}
 
 \subsection{externalize for tikzpicture}
-\begin{codeprint}
+\begin{minted}[linenos=true]{latex}
 % set options
 \cs_new_protected:Npn \ztikz_define_option:n
     { \keys_define:nn { ztikz / option } }
@@ -193,7 +193,7 @@ plot t
 \end{codeprint}
 
 \subsection{ShowPoint}
-\begin{source}
+\begin{minted}[linenos=true]{latex}
 % ==> show point
 \keys_define:nn { ztikz / point }{
     type    .str_set:N  = \l__point_type_str,
@@ -233,10 +233,10 @@ plot t
     \seq_set_split:Nnn \l__grid_param_ii_seq { ; }{#2}
     \draw[#1] \seq_item:Nn \l__grid_param_ii_seq{1}  grid \seq_item:Nn \l__grid_param_ii_seq{2};
 }
-\end{source}
+\end{minted}
 
 \subsection{ShowAxis}
-\begin{source}
+\begin{minted}[linenos=true]{latex}
 % ==> show axis
 \keys_define:nn { ztikz / axis }{
     % basic tick args
@@ -377,10 +377,10 @@ plot t
         \ShowPoint[#1]{(intersection-##1)}
     }
 }
-\end{source}
+\end{minted}
 
 \subsection{Polygon}
-\begin{source}
+\begin{minted}[linenos=true]{latex}
 % ==> polygon
 \keys_define:nn { ztikz / polygon }{
     radius       .fp_set:N  = \l__polygon_radius_fp,
@@ -388,7 +388,7 @@ plot t
     edgeColor    .tl_set:N  = \l__polygon_edge_color_tl,
     edgeColor    .initial:n = { black },
     fillColor    .tl_set:N  = \l__polygon_fill_color_tl,
-    fillColor    .initial:n = { white },
+    fillColor    .initial:n = { },
     fillOpacity  .fp_set:N  = \l__polygon_fill_opacity_fp,
     fillOpacity  .initial:n = { 0 },
     rotate       .fp_set:N  = \l__polygon_rotate_angle,
@@ -423,7 +423,12 @@ plot t
         % mark coordinates
         \coordinate (p##1) at (\fp_eval:n {\l__polygon_radius_fp*cos(\l_angle_fp)}, \fp_eval:n {\l__polygon_radius_fp*sin(\l_angle_fp)});
     }
-    % fill polygon
+    % fill polygon (none-color -> opacity=1; or opacity=.75)
+    \tl_if_empty:NTF \l__polygon_fill_color_tl {
+        \fp_set:Nn \l__polygon_fill_opacity_fp {0}
+    }{
+        \fp_set:Nn \l__polygon_fill_opacity_fp {.75}
+    }
     \fill [\tl_use:N \l__polygon_fill_color_tl, fill~opacity=\fp_use:N \l__polygon_fill_opacity_fp] \l__poly_path_tl;
     % show markers
     \int_step_inline:nnn {1}{#2}{
@@ -432,11 +437,11 @@ plot t
     \end{scope} 
     \group_end:
 }
-\end{source}
+\end{minted}
 
 
 \subsection{Plot precise}
-\begin{source}
+\begin{minted}[linenos=true]{latex}
 % change precise of each plot type
 \NewDocumentCommand\PlotPrecise{ mO{once}m }{
     \str_if_eq:nnTF {#2}{once}{
@@ -462,10 +467,10 @@ plot t
         \msg_error:nn {ztikz}{ztikz-plot-type}
     }
 }
-\end{source}
+\end{minted}
 
 \subsection{curve plot}
-\begin{source}
+\begin{minted}[linenos=true]{latex}
 % escape shell commands 
 \cs_generate_variant:Nn \sys_shell_mv:nn {xx}
 \cs_generate_variant:Nn \sys_shell_now:n {x}
@@ -558,10 +563,10 @@ plot t
     % plot data, reset precise
     \ztikz_gnu_data_plot_cs:nnn {polar}{#2}{#3}
 }
-\end{source}
+\end{minted}
 
 \subsection{Statistic Plot}
-\begin{source}
+\begin{minted}[linenos=true]{latex}
 % ==> statistic plot function
 \cs_new_protected:Npn \ztikz_statistic_plot_cs:nnnn #1#2#3#4 {
     \tl_if_empty:nTF {#3}{
@@ -641,10 +646,10 @@ plot t
     }
     \ztikz_statistic_plot_cs:xnnn {\l__tempa_tl}{#2}{#3}{#4}
 }
-\end{source}
+\end{minted}
 
 \subsection{ShadePlot}
-\begin{source}
+\begin{minted}[linenos=true]{latex}
 % 5. shade plot
 \NewDocumentCommand\ShadePlot{ O{defaultMode}O{2pt}m }{
     \path [shading=#1, shading~ path={draw=transparent!0, line~ width=#2}] plot file {#3};
@@ -737,12 +742,12 @@ plot t
 }
 \ztikzShadeMode{defaultMode}{horizontal}{white,black}
 \ExplSyntaxOn
-\end{source}
+\end{minted}
 
 
 \section{Python}
 \subsection{matplotlib}
-\begin{source}
+\begin{minted}[linenos=true]{latex}
 \cs_generate_variant:Nn \xsim_file_write_start:nn {nx}
 \cs_generate_variant:Nn \sys_shell_mv:nn {xx}
 % ==> python-matplotlib
@@ -775,10 +780,10 @@ plot t
         \typeout{skip~recompile~by~python,~using~the~cache~picture~\int_use:N \g__picture_index_int}
     }
 }    
-\end{source}
+\end{minted}
 
 \subsection{pycode}
-\begin{source}
+\begin{minted}[linenos=true]{latex}
 % ==> python-code-env
 \NewDocumentEnvironment{pycode}{ m }{
     \newcommand{\pyfile}{#1}
@@ -799,10 +804,10 @@ plot t
         \typeout{skip~recompile~by~python,~using~the~cache~pycode~result~\int_use:N \g__picture_index_int}
     }
 }
-\end{source}
+\end{minted}
 
 \subsection{sympy}
-\begin{source}
+\begin{minted}[linenos=true]{latex}
 % ==> python-sympy
 \NewDocumentCommand\sympy{m}{
     % step sympy result index
@@ -824,10 +829,10 @@ plot t
         \typeout{skip~recompile,~using~the~cache~sympy~result~\l__current_sympy_index_tl}
     }
 }
-\end{source}
+\end{minted}
 
 \subsection{python eval}
-\begin{source}
+\begin{minted}[linenos=true]{latex}
 % read from external file 
 \cs_new_protected:Npn \zlatex_Readlines_cs:nn #1#2 {
     \ior_open:Nn \g__file_read_ior {#2}
@@ -844,9 +849,9 @@ plot t
 \cs_generate_variant:Nn \zlatex_Readlines_cs:nn {xx}
 
 % ==> 1-line python command
-\NewDocumentCommand\py{O{hold}m}{
+\NewDocumentCommand\py{O{raw}m}{
     % sympy source write
-    \sys_shell_now:x {sed~ -i~ "6s|Float_res~ =~ .*|Float_res~ =~ #2|"~ \g__ztikz_scripts_path_tl/python_script.py}
+    \sys_shell_now:x {sed~ -i~ "6s|Float_res~ =~ .*|Float_res~ =~ \tl_to_str:n {#2}|"~ \g__ztikz_scripts_path_tl/python_script.py}
     % calculation
     \typeout{using~python~float~module~calculating...}
     \sys_shell_now:x {python~ \g__ztikz_scripts_path_tl/python_script.py}
@@ -855,7 +860,7 @@ plot t
     % ---> cause bug that can't write ToC to file
     % \iow_close:N \g__file_read_ior
 }
-\end{source}
+\end{minted}
 
 
 
@@ -863,7 +868,7 @@ plot t
 
 \section{Mathematica}
 \subsection{SetUp}
-\begin{source}
+\begin{minted}[linenos=true]{latex}
 % temp var for manipulate
 \tl_new:N \l__temp_arg_tl
 \tl_new:N \l__wolfram_temp_res_tl
@@ -888,10 +893,10 @@ plot t
       { \prg_return_false: }
 }
 \cs_generate_variant:Nn \if_is_int:nTF {xTF}
-\end{source}
+\end{minted}
 
 \subsection{picture}
-\begin{source}
+\begin{minted}[linenos=true]{latex}
 % wolfram graphicx
 \NewDocumentEnvironment{wolframGraphics}{ O{width=.75\linewidth}m }{
     \newcommand{\mmafile}{#2}
@@ -912,11 +917,11 @@ plot t
         \typeout{skip~recompile~by~wolframscript,~using~the~cache~picture~\int_use:N \g__picture_index_int}
     }
 }
-\end{source}
+\end{minted}
 
 
 \subsection{Symbols Calculation}
-\begin{source}
+\begin{minted}[linenos=true]{latex}
 % input result of wolfram
 \cs_generate_variant:Nn \ior_open:Nn {Nx}
 \cs_new_protected:Nn \ztikz_wolfram_input_result_cs: {
@@ -940,10 +945,10 @@ plot t
     % step counter, add export command
     \int_gadd:Nn \g__mma_index_int {1}  
 }
-\end{source}
+\end{minted}
 
 \subsection{wolfram code}
-\begin{source}
+\begin{minted}[linenos=true]{latex}
 % wolfram code
 \cs_generate_variant:Nn \iow_open:Nn {Nx}
 \NewDocumentCommand\wolfram{O{tex}m}{
@@ -960,10 +965,10 @@ plot t
     % cache and input result
     \ztikz_wolfram_input_result_cs:
 }
-\end{source}
+\end{minted}
 
 \subsection{equation Solve}
-\begin{source}
+\begin{minted}[linenos=true]{latex}
 % equation solve
 \NewDocumentCommand\wolframSolve{O{part}mO{}O{}}{
     % prepend ',' to #4 if not empty
@@ -1015,4 +1020,4 @@ plot t
     % cache and input result
     \ztikz_wolfram_input_result_cs:
 }
-\end{source}
+\end{minted}

@@ -1,6 +1,6 @@
 \NeedsTeXFormat{LaTeX2e}
 \RequirePackage{expl3}
-\ProvidesExplPackage{ztikz}{2024/03/06}{0.2}{plot package}
+\ProvidesExplPackage{ztikz}{2024/04/16}{0.5}{plot package}
 
 
 
@@ -284,7 +284,7 @@ plot t
     edgeColor    .tl_set:N  = \l__polygon_edge_color_tl,
     edgeColor    .initial:n = { black },
     fillColor    .tl_set:N  = \l__polygon_fill_color_tl,
-    fillColor    .initial:n = { white },
+    fillColor    .initial:n = { },
     fillOpacity  .fp_set:N  = \l__polygon_fill_opacity_fp,
     fillOpacity  .initial:n = { 0 },
     rotate       .fp_set:N  = \l__polygon_rotate_angle,
@@ -319,7 +319,12 @@ plot t
         % mark coordinates
         \coordinate (p##1) at (\fp_eval:n {\l__polygon_radius_fp*cos(\l_angle_fp)}, \fp_eval:n {\l__polygon_radius_fp*sin(\l_angle_fp)});
     }
-    % fill polygon
+    % fill polygon (none-color -> opacity=1; or opacity=.75)
+    \tl_if_empty:NTF \l__polygon_fill_color_tl {
+        \fp_set:Nn \l__polygon_fill_opacity_fp {0}
+    }{
+        \fp_set:Nn \l__polygon_fill_opacity_fp {.75}
+    }
     \fill [\tl_use:N \l__polygon_fill_color_tl, fill~opacity=\fp_use:N \l__polygon_fill_opacity_fp] \l__poly_path_tl;
     % show markers
     \int_step_inline:nnn {1}{#2}{
@@ -785,7 +790,6 @@ plot t
 
 
 
-
 % ----------------------------------------------------------------------
 %                           3d function plot
 % ----------------------------------------------------------------------
@@ -834,7 +838,7 @@ plot t
 \cs_new_protected:Npn \zlatex_Readlines_cs:nn #1#2 {
     \ior_open:Nn \g__file_read_ior {#2}
     \str_case:nnF {#1}{
-        {hold}{
+        {raw}{
             \ior_get:NN \g__file_read_ior \g__file_content_tl
         }
         {str}{
@@ -846,9 +850,9 @@ plot t
 \cs_generate_variant:Nn \zlatex_Readlines_cs:nn {xx}
 
 % ==> 1-line python command
-\NewDocumentCommand\py{O{hold}m}{
+\NewDocumentCommand\py{O{raw}m}{
     % sympy source write
-    \sys_shell_now:x {sed~ -i~ "6s|Float_res~ =~ .*|Float_res~ =~ #2|"~ \g__ztikz_scripts_path_tl/python_script.py}
+    \sys_shell_now:x {sed~ -i~ "6s|Float_res~ =~ .*|Float_res~ =~ \tl_to_str:n {#2}|"~ \g__ztikz_scripts_path_tl/python_script.py}
     % calculation
     \typeout{using~python~float~module~calculating...}
     \sys_shell_now:x {python~ \g__ztikz_scripts_path_tl/python_script.py}

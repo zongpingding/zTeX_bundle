@@ -1,143 +1,9 @@
-\chapter{z\LaTeX{}系列}
-\section{简介}
-\subsection{为何叫z?}
-也不知道为什么这个系列名称要加以`z'的前缀，可能是因为个人爱好，或是因为觉得这个字母对自己而言有着一些别的意味。
-最开始此系列中此包含一个基本的文档类，叫做 $\pi$\LaTeX{}, 但是后面自己想开发一个用于绘图的宏包，主要基于TiKZ.
-用于常见平面图形的绘制以及外部程序的交互. 也许是看到了\cmd{tikz}库名称中的``z''，于是便以`z'为前缀，产生了
-z\LaTeX{}\index{z\LaTeX{}}系列。
-
-
-\subsection{项目地址}
-目前本项目已经在GitHub, Gitlab, Gitee上开源，地址如下:
-\begin{itemize}
-    \item GitHub: \href{https://github.com/zongpingding/ZLaTeX_ZTikZ}{https://github.com/zongpingding/ZLaTeX\_ZTikZ}
-    \item Gitlab: \href{https://gitlab.com/zongpingding/ZLaTeX_ZTikZ}{https://gitlab.com/zongpingding/ZLaTeX\_ZTikZ}
-    \item Gitee:  \href{https://gitee.com/zongpingding/ZLaTeX_ZTikZ}{https://gitee.com/zongpingding/ZLaTeX\_ZTikZ}
-\end{itemize}
-
-项目中包含z\LaTeX{}文档类源码\cmd{zlatex.cls}，zTikZ宏包源码\cmd{zTikZ.sty}，以及二者的说明文档. 后续在开发过程中，
-可能会保证Github的同步更新，至于Gitlab与Gitee则不一定会同步本系列的最新版.
-
-\subsection{基本组成}
-本系列目前包含以下的两个组成部分，一个文档类和一个绘图库:
-\begin{itemize}
-    \item z\LaTeX{}文档类
-    \item zTikZ\index{zTikZ}宏包
-\end{itemize}
-
-其中前者主要用于指定排版文档的基本属性，后者主要用于绘图\Footnote{众所周知的，在\LaTeX{}中绘图是一件十分痛苦的事情，
-于是乎你会看到很多书籍或笔记中的图形都是手绘或者是截图，并非矢量图}。其实从这个介绍文档就可以看出，本模板是十分的朴素的，
-没有十分华丽的色彩和精美的页面布局，但是在折腾了许久的\LaTeX{}之后，现在这个模板才是最对我胃口的；至于，是否适合你，
-那就不得而知了。你可以去使用更加精美的模板，比如 \href{https://github.com/ElegantLaTeX}{Elegant\LaTeX{}}, 
-\href{https://github.com/BeautyLaTeX/Beautybook}{Beauty\LaTeX{}} 等优秀的模板. 
-
-\section{模板设计}
-\subsection{设计历程}
-本模板的设计经历了相当长的一个周期，从最开始的初始\LaTeX{},我把自己常用的宏扔到了一个\cmd{.sty}文件中，以为这就是
-一个宏包了；之后了解到了\href{https://github.com/ElegantLaTeX}{Elegant\LaTeX{}}系列模板，也使用这个系列中的book文档类写了一点
-自己的笔记，但是用了一段时间之后总归是不满意，很多地方都想要自己定制，不喜欢模板默认的样式；奈何自己当时的水平不够，打开模板，看到的就是
-一堆的乱码。但是，后来也知道了有知乎上的优秀文章，所以就去看这些文章，慢慢的积累，渐渐的对\LaTeX{}熟悉了一些，于是就着手设计属于
-自己的模板。
-
-第一版的z\LaTeX{}其实是完全仿照Elegant\LaTeX{}的book文档类，然后一步一步的慢慢加东西，进行一些简单的修改，比如字体，颜色等等。
-但是写到后面，发现这个代码的的结构太不好控制了\Footnote{其实最开始这个zTikZ宏包和z\LaTeX{}是一体的，当时的代码是极其混乱的}.
-尤其是其中的模板语言切换，那个\cmd{\ifdefstring}语句写起来是极其痛苦的。下面就是当初写的代码片段:
-
-\begin{codeprint}
-\DeclareVoidOption{cn}{\kvs{lang=cn}}
-\DeclareVoidOption{en}{\kvs{lang=en}}
-\DeclareStringOption[cn]{lang}
-\end{codeprint}
-
-再加上当时的基本文档类是\cmd{article},很多\cmd{book}文档类的内部计数器和章节命令都没有,需要自己去声明；但是结果往往是自己设计的命令
-和别的宏包还不协调，冲突. 其中最重要的就是\cmd{hyperref}宏包了，初代模板中它的跳转功能是不正常的，由于自己定义的计数器不正确，
-在使用\cmd{\label}命令时，激活的章节元素(跳转位置)根本不对。当初的目录结构也是自己设计，但是也有着同样的跳转为题.
-初代z\LaTeX{}文档类全部采用\LaTeX{}2$\varepsilon$进行构建，很多的宏展开的地方都写的很繁琐，而且大部分的实现方案都是在
-\TeX-StackExchange上找到的,很多时候都是处于一种能跑就行的状态，并不知道其背后的原理. 
-
-后来自己便把zTiKZ从中z\LaTeX{}文档类中剥离出来，同时使用\LaTeX{}3对原始文档类和zTikZ进行重构.其中z\LaTeX{}文档类继承自\cmd{book}
-文档类，之后几乎所有命令几乎都自己书写，知道它们的具体作用，对其他的宏包的影响。于是z\LaTeX{}系列就诞生了，
-果然，在使用\LaTeX3对原始项目进行重构之后，整个项目的代码清爽了许多,比如下面的z\LaTeX{}文档类选项声明:
-
-\begin{codeprint}
-\zlatex_define_option:n {
-    % language
-    lang                  .str_gset:N   =  \g__zlatex_lang_str,
-    lang                  .initial:n    =  { en },
-    % page layout
-    layout                .str_gset:N   =  \g__zlatex_layout_str,
-    layout                .initial:n    =  { twoside },
-    % margin option
-    margin                .bool_gset:N  =  \g__zlatex_margin_bool,
-    margin                .initial:n    =  { true },
-}
-\ProcessKeysOptions {zlatex / option}
-\end{codeprint}
-
-\subsection{设计参考}
-这个模板自然不可能是我一个人独立开发，在开发过程中参考了诸多优秀文档类/模板，参考最多的{C\TeX{}art}文档类，几乎是
-本项目的大部分代码思路来源。此文档类完全采用\LaTeX3语法写成，本文档类中的\textbf{选项配置}模块主要参见\TeX-StackExchange上
-的讨论，采用了\LaTeX3的\cmd{key-value}模块；这样的好处有:选项配置简洁，符合人们习惯，模板维护方便.
-
-
-\subsection{设计原则}
-其实这个标题有一点太大了，什么是设计原则，我也不知道，但是我就只是想让我的模板看着舒服。怎么才能让自己的模板看着舒服呢？
-我也不知道，但是我觉得肯定和页边距，字体大小，字体样式等的有关。并且这三者一定是相互影响的. 
-
-比如你的页边距变大之后，压缩了你的版心大小，那么此时你的正文字体一定得做相应的改变. 那么一行多少个字合适呢?
-去查了一下\TeX.SE, 针对于英文,一行的字母个数在65-90是比较合适的，并且字体尺寸一般为\cmd{10pt,11pt,12pt}；
-页边距到底设置多少呢? 自己去比对了Elegan\LaTeX{}和其它模板的页边距(就差用尺子量了); 好歹后面发现了一个宏包，
-可以在生成的PDF中查看页面布局尺寸等信息, 这个宏包就是\cmd{fgruler}, 使用语法也是很简单的,如下:
-
-\begin{codeprint}
-\usepackage[hshift=0mm,vshift=0mm]{fgruler}
-\end{codeprint}
-
-当你在导言区引入之后，便可以在你的每一个页面的看到如\cref{fig:fgruler-example}的效果, 这样就 
-不用打印出来用尺子量了.
-
-\begin{figure}[!htb]
-    \centering
-    \includegraphics[width=.75\linewidth]{./pics/fgruler_example.pdf}
-    \caption{页面布局示意图}
-    \label{fig:fgruler-example}
-\end{figure}
-
-在设计本模板的时，我也一直在纠结字体的问题，我应该把字体打包进入模板吗? 或者是我应该在模板中给用户进行默认的字体设置吗?
-在这个系列的上一版中我就去找了一些免费的中文字体和西文字体，直接放在模板的文件夹下，但是这样产生的问题就很多了:
-
-\begin{itemize}
-    \item 用户需要这个字体吗, 增加的字体会变成这个模板的负担吗 ?
-    \item 这个字体真的免费吗 ?
-    \item 中文字体的字形往往是不全的,怎么解决 ? 
-\end{itemize}
-
-于是最终的办法就是，我的模板不负责字体的设置，不添加任何和字体相关的配置，所有的字体由用户指定. 
-
-
-最后参考这这些标准，一步一步的调整，使得整体的页面布局稍微的合理些. 在设计这个模板时，还要考虑行距等各种元素。
-但是设计一个模板，你考虑的还不只这些，反正就是，如果你不会的话，那么就一切保持默认; 
-
-\vspace*{10em}
-\begin{center}
-{\huge Be simple, Be fool}
-\end{center}
-\vspace*{10em}
-
-\section{兼容性}
-目前本系列已经实现Windows和Linux下的兼容; 但是MacOS下:目前仅支持z\LaTeX{}文档类.
-zTikZ还未进行适配(参见下文了解具体原因)，所以不保证本系列中的zTikZ文档类可以在MacOS下正常运行.
-具体的兼容情况请参见后续的兼容性章节.
-
 \chapter{z\LaTeX{}文档类}
 \section{基本介绍}
 本文档类z\LaTeX{}基于\cmd{book}类，主要用于满足和方便使用\LaTeX{}使用者进行书籍和笔记的排版需求。
 z\LaTeX{}全部由\LaTeX3进行编写，采用\cmd{key-value}的方式进行选项配置，方便后续的模板拓展和维护.
 如果使用者熟悉\LaTeX{}，那么花费不到10min的时间，你便可以轻松使用本文档类用于日常的笔记撰写或者是正常的
 书籍的排版. 
-
-z\LaTeX{}的源代码完全开放，欢迎各位对源代码的修改以及二次分发.
-
 
 \section{Set Up z\LaTeX{}}
 \subsection{兼容情况}
@@ -169,7 +35,7 @@ z\LaTeX{}引入的宏包机制请参见\cref{tab:basic-package}.
 z\LaTeX{}的最小工作示例如下\Footnote{可能需要根据自己的实际情况加以调整}.
 首先是中文写作示例:
 
-\begin{codeprint}
+\begin{minted}{latex}
 % compile engine: xelatex 
 \documentclass[lang=cn]{zlatex}
 
@@ -186,12 +52,12 @@ z\LaTeX{}的最小工作示例如下\Footnote{可能需要根据自己的实际�
 
 % wrting your document here ...
 \end{document}
-\end{codeprint}
+\end{minted}
 
 其次是英文写作示例,你需要修改的地方只有两处; 首先就是把语言选项改为\cmd{lang=en}，
 其次便是把编译方式改为\cmd{pdflatex}.
 
-\begin{codeprint}
+\begin{minted}{latex}
 % compile engine: pdflatex 
 \documentclass[lang=en]{zlatex}
 
@@ -208,7 +74,7 @@ z\LaTeX{}的最小工作示例如下\Footnote{可能需要根据自己的实际�
 
 % wrting your document here ...
 \end{document}
-\end{codeprint}
+\end{minted}
 
 \section{宏包机制}
 z\LaTeX{}文档类会根据用户指定的选项自动处理和加载对应的宏包，所以z\LaTeX{}文档类在不同的导言区选项声明下
@@ -318,7 +184,7 @@ z\LaTeX{}文档类会根据用户指定的选项自动处理和加载对应的�
 \subsection{数学指令}
 关于文档类选项\cmd{math-alias}\index{\cmd{math-alias}}的进一步说明,默认的自定义命令可能并不一定符合每一个人的习惯,所以请谨慎加载此选项.
 在\cmd{math-alias=true}后,z\LaTeX{}会进行如下命令的声明/重定义,以及宏包的加载:
-\begin{codeprint}
+\begin{minted}{latex}
 \RequirePackage{amssymb, mathtools}
 \RequirePackage{bm}          
 % Math Font 
@@ -348,7 +214,7 @@ z\LaTeX{}文档类会根据用户指定的选项自动处理和加载对应的�
 \newcommand{\grad}{\ensuremath{\mathrm{grad}\;}}
 \newcommand{\trace}{\ensuremath{\mathrm{trace}\;}}
 \renewcommand{\div}{\ensuremath{\mathrm{div}\;}}
-\end{codeprint}
+\end{minted}
 
 \section{z\LaTeX{}接口}
 z\LaTeX{}的接口正在不断的完善中，所以目前的接口可能并不是那么稳定。(我已经尽力让接口规范和稳定了)
@@ -374,21 +240,21 @@ theorem, definition, corollary, example, axiom, remark.
 
 目前z\LaTeX{}提供了一个命令\cmd{\zlatexUpdateCounterAfter}\index{\cmd{\zlatexUpdateCounterAfter}}用于设置
 计数器的更新，使用格式为:
-\begin{codeprint}
+\begin{minted}{latex}
 \zlatexUpdateCounterAfter{<child>}{<father>}
-\end{codeprint}
+\end{minted}
 
 也就是让上述的\cmd{<child>}计数器随着\cmd{<father>}父计数器的更新而更新,本命令的实现原型为:
-\begin{codeprint}
+\begin{minted}{latex}
 \NewDocumentCommand{\zlatexUpdateCounterAfter}{mm}{
     \@addtoreset{#1}{#2}
 }
-\end{codeprint}
+\end{minted}
 
 关于本文档类的公式计数器的说明,本文档类公式计数器默认跟随\cmd{section}计数器更新，在z\LaTeX{}的源码中的声明为:
-\begin{codeprint}
+\begin{minted}{latex}
 \counterwithin{equation}{section}
-\end{codeprint}
+\end{minted}
 
 \subsection{模板配色}
 z\LaTeX{}提供了\cmd{\zlatexColorSetup}\index{\cmd{\zlatexColorSetup}}用于设置整个模板的配色。
@@ -401,14 +267,14 @@ z\LaTeX{}提供了\cmd{\zlatexColorSetup}\index{\cmd{\zlatexColorSetup}}用于�
 \end{itemize}
 
 下面给出设置具体色彩的示例代码以及模板的默认配色:
-\begin{codeprint}
+\begin{minted}{latex}
 \zlatexColorSetup{
     link            = purple,
     chapter-rule    = black,
     axiom           = purple,
     definition      = blue
 }
-\end{codeprint}
+\end{minted}
 
 \newcommand{\block}[1]{{\color{#1}\rule{1em}{1em}}}
 \begin{table}[H]
@@ -417,7 +283,7 @@ z\LaTeX{}提供了\cmd{\zlatexColorSetup}\index{\cmd{\zlatexColorSetup}}用于�
         \toprule
         结构元素 & chapter & chapter-rule & link & url & cite \\
         \midrule 
-        颜色 & \block{RoyalRed} & \block{black} & \block{purple}& \block{RoyalRed} & \block{teal}\\
+        颜色 & \block{RoyalRed} & \block{black} & \block{purple}& \block{RoyalRed} & \block{blue}\\
         \midrule
         数学环境 & axiom & definition & theorem & lemma & corollary & proposition & remark & \\  
         \midrule 
@@ -434,14 +300,14 @@ z\LaTeX{}提供了\cmd{\zlatexColorSetup}\index{\cmd{\zlatexColorSetup}}用于�
 的彩色引用环境. 参数中的\cmd{<name>}表示声明环境的名称\footnote{如果此环境已存在，那么该环境会被Override},
 \cmd{<color>}表示此环境的背景颜色.一个简单的使用样例如下:
 
-\begin{codeprint}
+\begin{minted}{latex}
 % 环境 'refer' 声明
 \zlatexFramed{refer}[orange]
 % 使用环境 'refer'
 \begin{refer}%
 % something wrting here
 \end{refer}
-\end{codeprint}
+\end{minted}
 
 \zlatexFramed{refer}[orange]
 \begin{refer}%
@@ -460,7 +326,7 @@ reason is a representation of, as far as I know, the things in themselves;
 \subsection{封面}
 本文档类并没有内建复杂的封面格式，只是简单的重定义了\cmd{\maketitle}命令用于生成封面. 
 声明如下:
-\begin{codeprint}
+\begin{minted}{latex}
 \renewcommand{\maketitle}{
     \begin{titlepage}
         \vfill\vspace*{40pt}
@@ -472,7 +338,7 @@ reason is a representation of, as far as I know, the things in themselves;
         \vfill
     \end{titlepage}
 } 
-\end{codeprint}
+\end{minted}
 
 如果使用者想要使用更加美观的封面，请手动加载\cmd{tikz}宏包，自己定义.
 
@@ -531,31 +397,31 @@ z\LaTeX{}中的数学环境有3套主题\index{数学环境主题}，分别为\c
 \cmd{leftbar}的同时设置其背景颜色为对应颜色的10\%. 
 
 只需要用户在加载本文档类时指定\cmd{math-env-theme}选项即可，比如本示例文档的数学环境主题为\cmd{leftbar}(默认主题):
-\begin{codeprint}
+\begin{minted}{latex}
 \documentclass[math-env-theme=leftbar]{zlatex}
-\end{codeprint}
+\end{minted}
 
 \subsection{定理类环境}
 现在介绍怎么使用这些具体的内置数学环境,上述的每一个环境的基本调用格式如下:
-\begin{codeprint}
+\begin{minted}{latex}
 \begin{<theorem like env>}[<theorem name>]
 你的定理内容就写在这个环境的内部.
 
 your theorem writing here. 
 \end{<theorem like env>}
-\end{codeprint}
+\end{minted}
 
 下面为定理类数学环境的简单示例，本模板的数学环境支持跨页，支持hyperref的跳转；同时需要注意，
 不同的数学环境并没有共用一个计数器, 但是在本文档类的后续开发中，可能会考虑加上此功能.
 
 想要对定理类环境添加\cmd{label}的语法如下:
-\begin{codeprint}
+\begin{minted}{latex}
 \begin{<theorem like env>}[<theorem name>]\label{thm:test}
 你的定理内容就写在这个环境的内部.
     
 your theorem writing here. 
 \end{<theorem like env>}
-\end{codeprint}
+\end{minted}
 
 后续引用直接使用命令\cmd{\cref{thm:test}}, 比如引用刚才标记的 \cref{thm:test},
 可以看到，这个是可以精确跳转到对应的定理处的. 同时本模板中的\cmd{\cref}\index{\cmd{\cref}} 命令会自动根据计数器的类别
@@ -636,12 +502,12 @@ reason is a representation of, as far as I know, the things in themselves;
 证明类环境的使用方法和前者几乎差不多，比较朴素，没有彩色的左边界竖线, 也没有可选的默认参数; 
 一般建议空一行再开始此类环境，下面给出两个个示例,剩下的环境便不一一例举了;
 
-\begin{codeprint}
+\begin{minted}{latex}
 \begin{<proof like env>}
     你 的 定 理 内 容 就 写 在 这 个 环 境 的 内 部 .
     your proof writing here.
 \end{<proof like env>}
-\end{codeprint}
+\end{minted}
 
 \vspace*{4em}
 \begin{proof}
@@ -656,20 +522,20 @@ reason is a representation of, as far as I know, the things in themselves;
 
 你可以自行定制Proof环境的结束标志，但是需要注意的一点是：你的标志必须放入公式环境，如果你的结束标志
 只能用于公式环境时. 例如，把证明结束符从 \(\blacksquare\) 替换为 $\square$:
-\begin{codeprint}
+\begin{minted}{latex}
 \renewcommand{\qedsymbol}{\ensuremath{\square}}
-\end{codeprint}
+\end{minted}
 
 
 \subsection{注意事项}
 默认的数学类环境均采用正体\cmd{\upshape}，如果使用者不喜欢前者默认的``正体''字体样式，
 可以直接在数学类环境开始时使用字体命令\cmd{\itshape}进行原有字体样式的覆盖，示例如下:
 
-\begin{codeprint}
+\begin{minted}{latex}
 \begin{theorem}[test theorem]\itshape
     你好, Hello world !
 \end{theorem}
-\end{codeprint}
+\end{minted}
 
 \begin{remark}\itshape
     \boomen \par 
@@ -686,9 +552,9 @@ reason is a representation of, as far as I know, the things in themselves;
 \subsection{footnote}
 可能有人不喜欢默认的脚注没有在页脚的位置，而是在页脚偏上的位置，用户可以独立加载宏包\cmd{footmisc}用于
 强制脚注位于页面底部，本文档类不打算添加此宏包，用户可以自行在导言区添加如下命令:
-\begin{codeprint}
+\begin{minted}{latex}
 \usepackage[bottom]{footmisc}
-\end{codeprint}
+\end{minted}
 
 \subsection{Cleveref}
 z\LaTeX{}文档类加载了\cmd{cleveref}宏包来构建标签-引用系统。常规的\cmd{\label{}}操作并没有什么变化，
@@ -696,11 +562,11 @@ z\LaTeX{}文档类加载了\cmd{cleveref}宏包来构建标签-引用系统。�
 使用\cmd{\figref}进行图片的索引,使用\cmd{\tabref}进行表格的索引... 使用此命令可以避免书写如下
 格式的引用代码:
 
-\begin{codeprint}
+\begin{minted}{latex}
 定理:\ref{thm:test}
 % or 
 \newcommand\thmref{定理:\ref{#1}}
-\end{codeprint}
+\end{minted}
 
 在z\LaTeX{}中，引用格式预设值如下(至于多个标签引用时，只有\cmd{lang=en}时采用部分变化，对应的前缀变为复数):
 \begin{table}[H]
@@ -729,7 +595,7 @@ z\LaTeX{}采用\cmd{cleveref}提供的引用命令，本文档类内置的\cmd{\
 比如\cmd{\Cref, \crefrange, \Crefrange}等等.更多的详细信息可以参见\cmd{cleveref}的
 官方文档.
 
-\subsection{列表环境}
+\section{列表环境}
 z\LaTeX{}对\cmd{book}文档类的无编号计数器进行了定制，有序列表和无序列表现在的具体样式如下:
 
 \begin{multicols}{2}
@@ -758,19 +624,19 @@ z\LaTeX{}对\cmd{book}文档类的无编号计数器进行了定制，有序列�
 \section{文献引用}
 \subsection{基本设置}
 本模板采用的文献引擎是\cmd{biber}, 这说明，你在编译你的文档时应该采用\cmd{biber}, 而非
-\cmd{bibtex}. 如果你想要把``参考文献''栏目加入目录，可以使用命令:
+\cmd{bibtex}. 如果你想要把``参考文献''栏目加入目录，可以使用命令\cite{ahlfors1953complex}:
 
-\begin{codeprint}
+\begin{minted}{latex}
 \addcontentsline{toc}{chapter}{参考文献} % or
 \addcontentsline{toc}{chapter}{Bibliography}
-\end{codeprint}
+\end{minted}
 
 
 \subsection{使用样例}
-使用\cmd{\cite{<ref>}}进行参考文献的引用, 然后使用命令\cmd{\printbibliography}输出参考文献.
-下面举一个简单的例子:
+使用\cmd{\cite{<ref>}}进行参考文献的引用, 然后使用命令\cmd{\printbibliography}输出参考文献,
+或者是使用\cmd{\nocite{*}}输出\cmd{.bib}中的所有条目.下面是一个简单的例子:
 
-\begin{codeprint}
+\begin{minted}{latex}
 % 参考文献: ref.bib
 @book{ahlfors1953complex,
     title={Complex Analysis},
@@ -782,7 +648,13 @@ z\LaTeX{}对\cmd{book}文档类的无编号计数器进行了定制，有序列�
 
 % 正文引用
 \cite{ahlfors1953complex}
-\end{codeprint}
+\end{minted}
+
+默认参考文献页的名称为:Bibliography，若想要自定义名称，可以在输出参考文献前使用如下命令:
+\begin{minted}{latex}
+\renewcommand{\bibname}{参考文献}
+\printbibliography
+\end{minted}
 
 
 \section{索引}
@@ -790,38 +662,38 @@ z\LaTeX{}对\cmd{book}文档类的无编号计数器进行了定制，有序列�
 z\LaTeX{}文档类采用\cmd{indextools}宏包进行索引的生成，并不没有采用传统的\cmd{makeidx}宏包.
 具体的用法和\cmd{indextools}宏包的一致，这里给一个简单的示例:
 
-\begin{codeprint}
+\begin{minted}{latex}
 % 导言区
 \makeindex[title=Concept index]
 % 添加索引到目录,生成索引
 \addcontentsline{toc}{part}{Index}
 \printindex
-\end{codeprint}
+\end{minted}
 
 或者是你可以在你文档的导言区声明某种\cmd{index}的类型，比如\cmd{person},然后就可以在文中使用
 \cmd{\index[person]{<the person>}} 来进行索引，最后使用如下命令进行索引的打印和索引的导言区
 定制:
 
-\begin{codeprint}
+\begin{minted}{latex}
 % 导言区
 \makeindex[name=person, title=Index of names, columns=3]
 % 文档末尾
 \indexprologue{In this index you’ll find only famous people’s names}
 \printindex[person]
-\end{codeprint}
+\end{minted}
 
 使用\cmd{\index}命令时在此命令中的名词是不会显示在PDF文档中的，所以如果你要添加一个``函数''
 的index项目时，在你的\TeX{}文档中应该这样写:
 
-\begin{codeprint}
+\begin{minted}{latex}
 函数\index{函数}是从集合到 ...
-\end{codeprint}
+\end{minted}
 
 \subsection{Bug}
 目前的index生成工具\cmd{indextools}宏包和tikz的\cmd{external}库有冲突，具体表现为：
 当\cmd{indextools}和\cmd{external}库同时使用时，在第一次编译此文档时会抛出如下错误信息:
 
-\begin{codeprint}
+\begin{minted}{latex}
 ===== 'mode=convert with system call': Invoking 'pdflatex -halt-on-error -inter
 action=batchmode -jobname "tikzdatamain-figure0" "\def\tikzexternalrealjob{release
 }\input{release}"' ========
@@ -834,7 +706,7 @@ ected one of .pdf:.jpg:.jpeg:.png:). Please verify that you have enabled system
 med 'write 18' or something like that. Or maybe the command simply failed? Erro
 r messages can be found in 'tikzdata/release-figure0.log'. If you continue now, I'l
 l try to typeset the picture.
-\end{codeprint}
+\end{minted}
 
 关于此问题我已经在Github上给作者提了\href{https://github.com/maieul/indextools/issues/17}{Issue},
 同时也在\TeX-SE上发出了\href{https://tex.stackexchange.com/questions/712716/indextools-confilict-with-tikz-library-external}{提问}.
@@ -844,13 +716,13 @@ l try to typeset the picture.
 \begin{itemize}
     \item 取消加载indextools宏包，改用传统的\cmd{makeidx}宏包.(需自行去修改\cmd{zlatex.cls}中的加载项)
     \item 仍然使用此宏包，但是在第一遍(tikz图片还没有缓存时)取消导言区以及文档末尾的如下命令:
-\begin{codeprint}
+\begin{minted}{latex}
 % 导言区
 \makeindex[title=Test Title, columns=3]
 % 文末
 \addcontentsline{toc}{chapter}{部分名词索引}
 \printindex
-\end{codeprint}
+\end{minted}
         然后在文档的第二次编译时取消两处命令的注释,以此达到正常编译的目的.
 \end{itemize}
 

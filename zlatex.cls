@@ -10,8 +10,8 @@
 % ----------------------------------------------------------------------
 \ExplSyntaxOn
 \tl_const:Nn \c__zlatex_class_name_tl            {zlatex}
-\tl_const:Nn \c__zlatex_class_version_tl         {0.4}
-\tl_const:Nn \c__zlatex_class_date_tl            {2024/04/04}
+\tl_const:Nn \c__zlatex_class_version_tl         {0.5}
+\tl_const:Nn \c__zlatex_class_date_tl            {2024/04/16}
 \tl_const:Nn \c__zlatex_class_description_tl     {a~latex3~document~class}
 
 \ProvidesExplClass{\c__zlatex_class_name_tl}         % Class
@@ -239,7 +239,7 @@
     link            .tl_set:N     =  \l__zlatex_link_color_tl,
     link            .initial:n    =  { purple },
     cite            .tl_set:N     =  \l__zlatex_cite_color_tl,
-    cite            .initial:n    =  { teal },
+    cite            .initial:n    =  { blue },
     url             .tl_set:N     =  \l__zlatex_url_color_tl,
     url             .initial:n    =  { RoyalRed  },
     chapter         .tl_set:N     =  \l__zlatex_chapter_color_tl,
@@ -272,7 +272,7 @@
         citecolor  = \tl_use:N \l__zlatex_cite_color_tl,
     }
 }
-\zlatexColorSetup{link=purple, cite=teal, url=RoyalRed}
+\zlatexColorSetup{link=purple, cite=blue, url=RoyalRed}
 
 % framed env for user interface
 \cs_new_protected:Npn \zlatexFramed:nn #1#2 {

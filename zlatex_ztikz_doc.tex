@@ -3,7 +3,7 @@
     layout=oneside, 
     margin=false, 
     math-alias=true,
-    toc={rename, 2column},
+    toc={rename, 2column}
 ]{zlatex}
 \zlatexColorSetup{
     % link        = teal,
@@ -34,46 +34,7 @@
     breakanywheresymbolpre=,
     breaksymbolleft=,
 }
-
-% xyaxis
-\newcommand{\ShowXYAxis}[2]{
-    \ShowAxis{(-#1, 0); (#1, 0)}
-    \ShowAxis{(0, -#2); (0, #2)}
-    \ShowPoint[opacity=0]{(0, 0)}[$O$][below left]
-    \ShowPoint[opacity=0]{(#1, 0)}[$x$][below]
-    \ShowPoint[opacity=0]{(0, #2)}[$y$][left]
-}
-
-\usepackage{listings}
-\definecolor{gray}{rgb}{0.5,0.5,0.5}
-% 15.1 listing Env setting
-\lstset{
-    basicstyle=\tt,
-    showstringspaces=true,
-    frame=tb,
-    breaklines=true,
-}
-% 15.2 normal code Env
-\lstnewenvironment{codeprint}[1][10]{
-    \lstset{%
-        backgroundcolor=\color{gray!10},
-        numbers=none,
-        frame=tlbr,
-        aboveskip=1em,
-        basicstyle=\fontsize{#1pt}{#1pt}\selectfont\ttfamily,
-        postbreak=\raisebox{0ex}[0ex][0ex]{\ensuremath{\hookrightarrow\space}},
-    }
-}{}
-\lstnewenvironment{source}[1][10]{
-    \lstset{%
-        backgroundcolor=\color{white},
-        frame=tlbr,
-        numbers=left,
-        numbersep=5pt,
-        aboveskip=1em,
-        basicstyle=\fontsize{#1pt}{#1pt}\selectfont\ttfamily,
-    }
-}{}
+% print macro
 \let\cmd\zlatexVerb
 \newcommand{\Footnote}[1]{\stepcounter{footnote}\footnote[\thefootnote]{#1}}
 % index make
@@ -89,14 +50,21 @@
 \tableofcontents
 \mainmatter
 \part{Document}
+% series overview
+\input{./doc/series_intro.tex}
 % zlatex
 \input{./doc/zlatex_doc.tex}
 % ztikz
 \input{./doc/ztikz_doc.tex}
-\input{./gallery.tex}
-% Index
-\addcontentsline{toc}{part}{部分命令/名词索引}
+\input{./doc/gallery.tex}
+% Index and Bibliography
+\part{索引与参考文献}
+\addcontentsline{toc}{chapter}{部分命令/名词索引}
 \printindex
+\addcontentsline{toc}{chapter}{参考文献}
+\nocite{*}
+\renewcommand{\bibname}{参考文献}
+\printbibliography
 
 
 % Appendix

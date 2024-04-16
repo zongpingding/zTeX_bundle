@@ -1,7 +1,7 @@
 \chapter{z\LaTeX{}部分源码说明}
 \section{文档选项}
 \subsection{Key-Value}
-\begin{source}
+\begin{minted}[linenos=true]{latex}
 \cs_new_protected:Npn \zlatex_define_option:n
     { \keys_define:nn { zlatex / option } }
 \cs_new_protected:Npn \zlatex_define:nn #1
@@ -10,10 +10,10 @@
     { \keys_set:nn { zlatex / #1 } }
 \cs_new_protected:Npn \zlatex_load_after:n #1
     { \AtBeginDocument {#1} }
-\end{source}
+\end{minted}
 
 \subsection{Load Options}
-\begin{source}
+\begin{minted}[linenos=true]{latex}
 % setup option for class 
 \zlatex_define_option:n {
     % language
@@ -61,10 +61,10 @@
     },
 }
 \ProcessKeysOptions {zlatex / option}
-\end{source}
+\end{minted}
 
 \section{compile engine}
-\begin{source}
+\begin{minted}[linenos=true]{latex}
 \msg_new:nnn {zlatex}{compile-engine-pdftex}{Current~compile~engine~is~XETEX,~use~PDFTEX~instead.}
 \msg_new:nnn {zlatex}{compile-engine-xetex }{Current~compile~engine~is~PDFTEX,~use~XETEX~instead.}
 \msg_new:nnn {zlatex}{option-language}{Current~language~option~is:~'\g__zlatex_lang_str',~which~is~invalid.}
@@ -90,11 +90,11 @@
         \linespread{1.3}
     }
 }{\msg_error:nn {zlatex}{option-language}}  
-\end{source}
+\end{minted}
 
 \section{Layout}
 \subsection{geometry}
-\begin{source}
+\begin{minted}[linenos=true]{latex}
 \RequirePackage{geometry}
 % page layout 
 \str_case:VnF \g__zlatex_layout_str {
@@ -115,10 +115,10 @@
         }
     }
 }{}
-\end{source}
+\end{minted}
 
 \subsection{fancyhdr}
-\begin{source}
+\begin{minted}[linenos=true]{latex}
 % fancy page settings
 \RequirePackage{fancyhdr}
 \fancypagestyle{fancy}{
@@ -159,12 +159,12 @@
     \@mainmattertrue
     \pagenumbering{arabic}
 }
-\end{source}
+\end{minted}
 
 
 \section{math}
 \subsection{math env theme}
-\begin{source}
+\begin{minted}[linenos=true]{latex}
 % color spec for zlatex
 \zlatex_define:nn {color}{
     % structure color
@@ -205,10 +205,10 @@
     }
 }
 \zlatexColorSetup{link=purple, cite=teal, url=RoyalRed}
-\end{source}
+\end{minted}
 
 \subsection{math environment}
-\begin{source}
+\begin{minted}[linenos=true]{latex}
 % framed env for user interface
 \cs_new_protected:Npn \zlatexFramed:nn #1#2 {
     \DeclareDocumentEnvironment{#1}{O{#2}}{
@@ -337,10 +337,10 @@
         \tl_set:Nn \l__arg_one_tl {#1}
     }{\str_if_eq:VnTF \l__arg_one_tl{proof}{\hfill\qedsymbol\par}{\par}}
 }
-\end{source}
+\end{minted}
 
 \subsection{Math alias}
-\begin{source}
+\begin{minted}[linenos=true]{latex}
 % math related cmds alias
 \bool_if:NTF \g__zlatex_math_alias_bool{
     \RequirePackage{amssymb, mathtools}
@@ -373,11 +373,11 @@
     \newcommand{\trace}{\ensuremath{\mathrm{trace}\;}}
     \renewcommand{\div}{\ensuremath{\mathrm{div}\;}}
 }{}
-\end{source}
+\end{minted}
 
 \section{structure Style}
 \subsection{contents}
-\begin{source}
+\begin{minted}[linenos=true]{latex}
 % partial ToC
 \RequirePackage{titletoc}
 \NewDocumentCommand{\partialToC}{O{}}{
@@ -391,10 +391,10 @@
     \startcontents[chapters]
     \printcontents[chapters]{p}{1}{}
 }
-\end{source}
+\end{minted}
 
 \subsection{Chapter and section}
-\begin{source}
+\begin{minted}[linenos=true]{latex}
 % chapter head style
 \RequirePackage{titlesec}
 \titleformat{\chapter}[display]
@@ -424,4 +424,4 @@
 
 % reset counter command
 \NewDocumentCommand{\zlatexUpdateCounterAfter}{mm}{\@addtoreset{#1}{#2}}
-\end{source}
+\end{minted}

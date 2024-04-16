@@ -1,0 +1,191 @@
+\chapter{z\LaTeX{}系列}
+\section{简介}
+\subsection{为何叫z?}
+也不知道为什么这个系列名称要加以`z'的前缀，可能是因为个人爱好，或是因为觉得这个字母对自己而言有着一些别的意味。
+最开始此系列中此包含一个基本的文档类，叫做 $\pi$\LaTeX{}, 但是后面自己想开发一个用于绘图的宏包，主要基于TiKZ.
+用于常见平面图形的绘制以及外部程序的交互. 也许是看到了\cmd{tikz}库名称中的``z''，于是便以`z'为前缀，产生了
+z\LaTeX{}\index{z\LaTeX{}}系列。
+
+
+\subsection{项目地址}
+目前本项目已经在GitHub, Gitlab, Gitee上开源，地址如下:
+\begin{itemize}
+    \item GitHub: \href{https://github.com/zongpingding/ZLaTeX_ZTikZ}{https://github.com/zongpingding/ZLaTeX\_ZTikZ}
+    \item Gitlab: \href{https://gitlab.com/zongpingding/ZLaTeX_ZTikZ}{https://gitlab.com/zongpingding/ZLaTeX\_ZTikZ}
+    \item Gitee:  \href{https://gitee.com/zongpingding/ZLaTeX_ZTikZ}{https://gitee.com/zongpingding/ZLaTeX\_ZTikZ}
+\end{itemize}
+
+项目中包含z\LaTeX{}文档类源码\cmd{zlatex.cls}，zTikZ宏包源码\cmd{ztikz.sty}，以及二者的说明文档. 后续在开发过程中，
+可能会保证Github的同步更新，至于Gitlab与Gitee则不一定会同步本系列的最新版.
+
+z\LaTeX{}系列源代码完全开放，欢迎各位对源代码的修改以及二次分发. 如果想要和我一同改进此模板，请在
+Github提Issue或者是PR. 不要在Gitee或者是Gitlab上提问，本人只维护Github上的仓库，尽管有时可能会为了
+国内用户下载方便，把Github上的仓库同步到这两处. 
+
+作为一个完全免费(为爱发电)的项目，我不对任何本模板的使用者负责，如果使用者在使用后遇到任何的严重后果，我不负
+任何责任. 我很乐意给大家解决问题，但是在提问前请先了解\LaTeX{}提问规范，一起营造一个愉快的讨论氛围. 
+
+想要体验本模板请到Github仓库:\href{https://github.com/zongpingding/ZLaTeX_ZTikZ/releases}{Release界面}下载 
+对应的最新模板. 由于本模板现在正处于早期开发阶段，所以很多的接口并不稳定，不保证模板的向后兼容性,请各位见谅.
+
+\subsection{基本组成}
+本系列目前包含以下的两个组成部分，一个文档类和一个绘图库:
+\begin{itemize}
+    \item z\LaTeX{}文档类
+    \item zTikZ\index{zTikZ}宏包
+\end{itemize}
+
+其中前者主要用于指定排版文档的基本属性，后者主要用于绘图\Footnote{众所周知的，在\LaTeX{}中绘图是一件十分痛苦的事情，
+于是乎你会看到很多书籍或笔记中的图形都是手绘或者是截图，并非矢量图}。其实从这个介绍文档就可以看出，本模板是十分的朴素的，
+没有十分华丽的色彩和精美的页面布局，但是在折腾了许久的\LaTeX{}之后，现在这个模板才是最对我胃口的；至于，是否适合你，
+那就不得而知了。你可以去使用更加精美的模板，比如 \href{https://github.com/ElegantLaTeX}{Elegant\LaTeX{}}, 
+\href{https://github.com/BeautyLaTeX/Beautybook}{Beauty\LaTeX{}} 等优秀的模板. 
+
+\section{模板设计}
+\subsection{设计历程}
+本模板的设计经历了相当长的一个周期，从最开始的初始\LaTeX{},我把自己常用的宏扔到了一个\cmd{.sty}文件中，以为这就是
+一个宏包了；之后了解到了\href{https://github.com/ElegantLaTeX}{Elegant\LaTeX{}}系列模板，也使用这个系列中的book文档类写了一点
+自己的笔记，但是用了一段时间之后总归是不满意，很多地方都想要自己定制，不喜欢模板默认的样式；奈何自己当时的水平不够，打开模板，看到的就是
+一堆的乱码。但是，后来也知道了有知乎上的优秀文章，所以就去看这些文章，慢慢的积累，渐渐的对\LaTeX{}熟悉了一些，于是就着手设计属于
+自己的模板。
+
+第一版的z\LaTeX{}其实是完全仿照Elegant\LaTeX{}的book文档类，然后一步一步的慢慢加东西，进行一些简单的修改，比如字体，颜色等等。
+但是写到后面，发现这个代码的的结构太不好控制了\Footnote{其实最开始这个zTikZ宏包和z\LaTeX{}是一体的，当时的代码是极其混乱的}.
+尤其是其中的模板语言切换，那个\cmd{\ifdefstring}语句写起来是极其痛苦的。下面就是当初写的代码片段:
+
+\begin{minted}{latex}
+\DeclareVoidOption{cn}{\kvs{lang=cn}}
+\DeclareVoidOption{en}{\kvs{lang=en}}
+\DeclareStringOption[cn]{lang}
+\end{minted}
+
+再加上当时的基本文档类是\cmd{article},很多\cmd{book}文档类的内部计数器和章节命令都没有,需要自己去声明；但是结果往往是自己设计的命令
+和别的宏包还不协调，冲突. 其中最重要的就是\cmd{hyperref}宏包了，初代模板中它的跳转功能是不正常的，由于自己定义的计数器不正确，
+在使用\cmd{\label}命令时，激活的章节元素(跳转位置)根本不对。当初的目录结构也是自己设计，但是也有着同样的跳转为题.
+初代z\LaTeX{}文档类全部采用\LaTeX{}2$\varepsilon$进行构建，很多的宏展开的地方都写的很繁琐，而且大部分的实现方案都是在
+\TeX-StackExchange上找到的,很多时候都是处于一种能跑就行的状态，并不知道其背后的原理. 
+
+后来自己便把zTiKZ从中z\LaTeX{}文档类中剥离出来，同时使用\LaTeX{}3对原始文档类和zTikZ进行重构.其中z\LaTeX{}文档类继承自\cmd{book}
+文档类，之后几乎所有命令几乎都自己书写，知道它们的具体作用，对其他的宏包的影响。于是z\LaTeX{}系列就诞生了，
+果然，在使用\LaTeX3对原始项目进行重构之后，整个项目的代码清爽了许多,比如下面的z\LaTeX{}文档类选项声明:
+
+\begin{minted}{latex}
+\zlatex_define_option:n {
+    % language
+    lang                  .str_gset:N   =  \g__zlatex_lang_str,
+    lang                  .initial:n    =  { en },
+    % page layout
+    layout                .str_gset:N   =  \g__zlatex_layout_str,
+    layout                .initial:n    =  { twoside },
+    % margin option
+    margin                .bool_gset:N  =  \g__zlatex_margin_bool,
+    margin                .initial:n    =  { true },
+}
+\ProcessKeysOptions {zlatex / option}
+\end{minted}
+
+\subsection{设计参考}
+这个模板自然不可能是我一个人独立开发，在开发过程中参考了诸多优秀文档类/模板，参考最多的{C\TeX{}art}文档类，几乎是
+本项目的大部分代码思路来源。此文档类完全采用\LaTeX3语法写成，本文档类中的\textbf{选项配置}模块主要参见\TeX-StackExchange上
+的讨论，采用了\LaTeX3的\cmd{key-value}模块；这样的好处有:选项配置简洁，符合人们习惯，模板维护方便.
+
+
+\subsection{设计原则}
+其实这个标题有一点太大了，什么是设计原则，我也不知道，但是我就只是想让我的模板看着舒服。怎么才能让自己的模板看着舒服呢？
+我也不知道，但是我觉得肯定和页边距，字体大小，字体样式等的有关。并且这三者一定是相互影响的. 
+
+比如你的页边距变大之后，压缩了你的版心大小，那么此时你的正文字体一定得做相应的改变. 那么一行多少个字合适呢?
+去查了一下\TeX.SE, 针对于英文,一行的字母个数在65-90是比较合适的，并且字体尺寸一般为\cmd{10pt,11pt,12pt}；
+页边距到底设置多少呢? 自己去比对了Elegan\LaTeX{}和其它模板的页边距(就差用尺子量了); 好歹后面发现了一个宏包，
+可以在生成的PDF中查看页面布局尺寸等信息, 这个宏包就是\cmd{fgruler}, 使用语法也是很简单的,如下:
+
+\begin{minted}{latex}
+\usepackage[hshift=0mm,vshift=0mm]{fgruler}
+\end{minted}
+
+当你在导言区引入之后，便可以在你的每一个页面的看到如\cref{fig:fgruler-example}的效果, 这样就 
+不用打印出来用尺子量了.
+
+\begin{figure}[!htb]
+    \centering
+    \includegraphics[width=.75\linewidth]{./pics/fgruler_example.pdf}
+    \caption{页面布局示意图}
+    \label{fig:fgruler-example}
+\end{figure}
+
+在设计本模板的时，我也一直在纠结字体的问题，我应该把字体打包进入模板吗? 或者是我应该在模板中给用户进行默认的字体设置吗?
+在这个系列的上一版中我就去找了一些免费的中文字体和西文字体，直接放在模板的文件夹下，但是这样产生的问题就很多了:
+
+\begin{itemize}
+    \item 用户需要这个字体吗, 增加的字体会变成这个模板的负担吗 ?
+    \item 这个字体真的免费吗 ?
+    \item 中文字体的字形往往是不全的,怎么解决 ? 
+\end{itemize}
+
+于是最终的办法就是，我的模板不负责字体的设置，不添加任何和字体相关的配置，所有的字体由用户指定. 
+
+
+最后参考这这些标准，一步一步的调整，使得整体的页面布局稍微的合理些. 在设计这个模板时，还要考虑行距等各种元素。
+但是设计一个模板，你考虑的还不只这些，反正就是，如果你不会的话，那么就一切保持默认:\textcolor{red}{Be simple, Be fool}.
+
+\section{兼容性}
+目前本系列已经实现Windows和Linux下的兼容; 但是MacOS下:目前仅支持z\LaTeX{}文档类.
+zTikZ还未进行适配(参见下文了解具体原因)，所以不保证本系列中的zTikZ文档类可以在MacOS下正常运行.
+具体的兼容情况请参见后续的兼容性章节.
+
+
+\section{阅前提示}
+\subsection{文档编译}
+本文档对应的源文件可以在Github仓库下载，如果想要编译此文档请遵守如下步骤:
+\begin{itemize}
+    \item 首先清除之前的编译文件，比如\cmd{.aux}, \cmd{.log}, \cmd{.toc}等文件以及
+        \cmd{ztikz_output/}文件夹。
+    \item 使用\cmd{xelatex}编译此文档，编译两次。(如果第一次编译报错\cmd{missing \begin{document}...})
+        那么请注释掉主文件\cmd{zlatex_ztikz_doc.tex}中和\cmd{indextool}相关的两行语句:\cmd{\makeindex[]{}},
+        \cmd{\printindex[]{}},然后再次编译. 如果你想要生成索引，请取消注释上一步中的两行语句，
+        然后再次编译.
+    \item Want Build From Scratch? 那么需要本地环境中有配置好的: WolframScript, gnuplot, Python, Sed.
+\end{itemize}
+
+\subsection{复制样例}
+本文档中给出了相当部分的样例及其对应的代码，在书写本文当时为了读者的阅读体验，对代码抄录环境中的部分符号进行了
+重写。比如你会在代码中看到换行符为:$\hookrightarrow$,那么在复制此环境代码时，请删掉此符号。亦或者是源代码中有行号，
+那么在复制后，请删掉多余的行号.
+
+\subsection{键值参数}
+本系列中的大部分命令均采用键值对的形式进行调用，所以如果一个命令的可用键太多，那么此时我并不一定会在正文中全部说明
+其可用键。我会在对应的命令下方插入一个源代码抄录，用于说明此命令对应的声明原型，其中就包含了此命令可用的键值以及不同键
+的默认值.
+
+比如如下的命令:
+\begin{minted}{latex}
+% key-value setup
+\keys_define:nn { ztikz / polygon }{
+    radius       .fp_set:N  = \l__polygon_radius_fp,
+    radius       .initial:n = { 1 },
+    edgeColor    .tl_set:N  = \l__polygon_edge_color_tl,
+    edgeColor    .initial:n = { black },
+    fillColor    .tl_set:N  = \l__polygon_fill_color_tl,
+    fillColor    .initial:n = { white },
+    fillOpacity  .fp_set:N  = \l__polygon_fill_opacity_fp,
+    fillOpacity  .initial:n = { 0 },
+    rotate       .fp_set:N  = \l__polygon_rotate_angle,
+    rotate       .initial:n = { 0 },
+    shift        .tl_set:N  = \l__polygon_shift_tl,
+    shift        .initial:n = { (0,0) },
+    marker       .tl_set:N  = \l__polygon_marker_option_tl,
+    marker       .initial:n = { },
+}
+% command
+\NewDocumentCommand\Polygon{ O{}m }{
+    \group_begin:
+    \keys_set:nn { ztikz / polygon } { #1 }
+    ... 
+}
+\end{minted}
+
+上述的\cmd{\Polygon}命令即表示：此命令的第一个参数为一个可选参数(\cmd{O}类型)，对应的选项设置为键值对.
+可用的键有:\cmd{radius, edgeColor, fillColor, fillOpacity, rotate, shift, marker}等等. 
+其中\cmd{radius}表示可以接受一个浮点数(\cmd{\fp_set:N}), 默认值为1(\cmd{.initial:n = { 1 }}); 
+再比如第二和键\cmd{edgeColor}表示可以接受一个TokenList(\cmd{\tl_set:N}), 默认值为
+黑色(\cmd{.initial:n = { black }}). 其余类似的键不在说明.
