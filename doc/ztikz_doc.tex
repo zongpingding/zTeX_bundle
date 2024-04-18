@@ -12,6 +12,8 @@
 \end{itemize}
 
 读者如果觉得zTikZ库并不符合你的胃口，不妨试试上面的几个宏包，或者是直接使用原始的pgf/tikz命令进行绘图.
+和TikZ相关的网站是十分的丰富的，以下推荐一个TikZ绘图的网站:\href{https://texample.net/tikz/examples/}{TikZ Example}.
+这个网站中有着丰富的绘制样例以及对应的源代码.
 
 \subsection{zTikZ{}功能}
 zTikZ宏包主要用于绘图与计算, 其中的绘图功能支持\cmd{python, mathematica, gnuplot}, 但是
@@ -85,15 +87,62 @@ ln -sf "/mnt/c/Program Files/Wolfram Research/WolframScript/wolframscript.exe" /
 因会使用到\cmd{gnuplot}，所以在Windows下需要在系统环境变量中添加\cmd{gnuplot}的路径.并且
 在编译此文档时需要加上对应的 \cmd{--shell-esape}参数；在Windows平台，由于\TeX{}Live的编译配置，
 需确保系统环境变量\cmd{PATHEXT}中已经删除\cmd{.PY}后缀. zTiKZ在Windows下的适配是没有Linux下那么好的,
-建议在Linux下使用本宏包.\Footnote{但是zTiKZ中的Wolfram模块是可以在Windwos上使用的,这一点弥补了 
-\href{https://github.com/stevenliuyi/latex-alpha2}{latexalpha2} 的不足}.
+建议在Linux下使用本宏包.\Footnote{zTiKZ中的Wolfram模块可以在Windwos上使用并且可以输入\texttt{\textbackslash, \#, \$}等特殊字符
+,这一点弥补了 \href{https://github.com/stevenliuyi/latex-alpha2}{latexalpha2} 的不足}.
 
 \subsubsection{MacOS}
 在MacOS下由于缺少\cmd{l3sys-shell}宏包(或者是不适配),所以并不兼容.后续我可能会考虑重ZTikZ中用到的
 部分\cmd{l3sys-shell}宏包中的命令，如果此需求比较大的话。当然，欢迎各位提 PR, 一起完善这个宏包.
 
 \section{绘图功能}
-\subsection{tikz/gnuplot}
+\subsection{Built-in TikZ Function}
+zTikZ目前的绘图逻辑为:
+\begin{itemize}
+    \item 通过sed修改脚本中的函数或定义域范围
+    \item 通过\cmd{write18}调用gnuplot运行修改后的脚本
+    \item 然后使用命令\cmd{\draw[<style>] plot file {<data>};} 绘制生成的数据文件
+\end{itemize}
+
+但是TikZ内部已经提供了直接调用gnuplot程序的命令，格式如下:
+\begin{minted}{latex}
+\draw[<draw style>] plot[<id>] function{<function>};
+\end{minted}
+
+当指定内置命令中为\cmd{<id>}时，在\cmd{<name>.tex} 文件的根路径下会产生两个文件;第一个是、
+gnuplot绘制的样式文件\cmd{<name>.<id>.gnuplot},第二个是gnuplot产生的数据文件\cmd{<name>.<id>.table}.
+其中的\cmd{<function>}可用值可以参见\cref{tab:gnuplot-functions}. 
+
+内置的命令也支持另外两种格式:\cmd{parametric, raw gnuplot}. 第一个表示绘制参数方程，第二个表示直接
+在文档中输入gnuplot绘图代码. 两者的基本格式如下：
+\begin{minted}{latex}
+% 启用参数方程绘制，默认变量为 t
+\draw[<draw style>] plot[parametric, <id>] function{<function (t)>};
+
+% 启用直接输入gnuplot代码绘制
+\draw[<draw style>] plot[<id>] function{set samples 25; plot sin(x)};
+\end{minted}
+
+目前为了几个绘图命令的统一，zTikZ并没有采用内置的这一命令，而是直接调用了另一个外部程序sed用于辅助.
+在后续去除sed依赖时可能会考虑重写这一部分命令。但是，并不会改变已有的命令接口,所以请放心. 在这里给出一个
+这些内置命令的绘图样例:
+
+\begin{figure}[!htb]
+    \centering
+    \input{./Example/example_12.tex}
+    \caption{12 Using Built-in TikZ Function}
+    \label{fig:12-inverse-function-2}
+\end{figure}
+
+\inputminted{latex}{./Example/example_12.tex}
+
+后续的统计图绘制命令也是继承自TikZ中内建的命令,比如后续的\cmd{\BarPlot}命令是如下内建命令的缩写:
+\begin{minted}{latex}
+\draw[<style>] plot[ycomb, <other style>] file{<data>};
+\end{minted}
+
+更多的关于TikZ中这几个原生命令的使用方法请参见附录\cref{chap:tikz_function_plot}中TikZ官方文档中截取的说明。
+
+\subsection{gnuplot}
 zTikZ提供了绘制绝大部分函数的命令，同时zTikZ的命令可以和\cmd{tikz}中的命令``融合''，它们
 可以在同一个\cmd{tikzpicture}环境中使用. 而且，zTikZ对函数绘制时的坐标进行了``对齐''. 
 也就是zTikZ中命令的坐标，和\cmd{TiKZ}中的命令的坐标, Geogebra中的坐标是一致的. 

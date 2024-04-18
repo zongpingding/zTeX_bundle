@@ -191,6 +191,7 @@ plot t
 
 \bool_if:NT \l__ztikz_external_bool {
     \usetikzlibrary{external}
+    % fixed confilct to 'pdfpages':https://github.com/tuna/thuthesis/issues/693
     \tikzexternalize[prefix=ztikz_output/tikz_data/]
 }
 

@@ -1,9 +1,7 @@
 \ExplSyntaxOn
 \clist_new:N \l__color_clist
 \clist_set:Nn \l__color_clist {red, orange, yellow, green, blue, purple, brown, black}
-\newcommand{\colorItem}[1]{
-    \clist_item:Nn \l__color_clist {#1}
-}
+\newcommand{\colorItem}[1]{\clist_item:Nn \l__color_clist {#1}}
 \ExplSyntaxOff
 \begin{tikzpicture}[scale=10, >=Latex, font=\scriptsize]
     % plot and annotate

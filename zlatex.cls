@@ -102,7 +102,6 @@
             {\RequirePackage[utf8]{inputenc}}
         \LoadClass[\clist_use:Nn \g__zlatex_book_options_clist{,}]{book} 
         \RequirePackage[T1]{fontenc}
-        \RequirePackage{csquotes}
         \RequirePackage[english]{babel} 
     }
     {cn} {
@@ -488,20 +487,19 @@
     {\color{\tl_use:N \l__zlatex_chapter_rule_color_tl}\titlerule\vspace{1ex}}
 % chapter space
 \titlespacing{\chapter}{0pt}{-30pt}{40pt}
-
-% toc page
-\RequirePackage{tocloft}
+\titleformat{name=\chapter, numberless}
+    {\normalfont\bfseries\Huge}
+    {}{0pt}{}
 
 % title page
 \renewcommand{\maketitle}{
 \begin{titlepage}
     \vfill\vspace*{40pt}
-    \noindent\hspace*{134pt}\rule[-75pt]{6pt}{95pt}{\hspace*{10pt}\fontsize{25}{25}\selectfont\bfseries\@title}\par
+    \noindent\hspace*{134pt}\rule[-75pt]{6pt}{95pt}{\hspace*{10pt}\leavevmode\parbox[t]{25em}{\fontsize{25}{25}\selectfont\bfseries\@title}}\par
     \vspace*{-15pt}
-    \noindent\hspace*{150pt}{\Large\bfseries\@author}\par
-    \vspace*{480pt}
-    \noindent\hspace*{150pt}{\Large\textcolor{gray}{\@date}}
+    \noindent\hspace*{150pt}{\leavevmode\parbox[t]{30em}{\Large\bfseries\@author}}\par
     \vfill
+    \noindent\hspace*{150pt}{\Large\textcolor{gray}{\@date}}
 \end{titlepage}} 
 
 % reset counter command

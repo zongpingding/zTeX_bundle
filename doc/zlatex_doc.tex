@@ -76,6 +76,12 @@ z\LaTeX{}的最小工作示例如下\Footnote{可能需要根据自己的实际�
 \end{document}
 \end{minted}
 
+\subsection{在线体验}
+为了让用户能够直接体验到本文档类，免去部分的环境配置阶段。我已将本模板部署在Overleaf上，
+地址:\href{https://www.overleaf.com/project/661fd2772cafbff9df5e6fb4}{Overleaf ZLaTeX Project}.
+用户直接打开此地址即可体验本文档类。Overleaf上体验项目对应的内容为本文档的Z\LaTeX{}部分的说明文档已经源码说明，
+不含有zTikZ文档,由于部分的技术原因，zTikZ请在本地体验。
+
 \section{宏包机制}
 z\LaTeX{}文档类会根据用户指定的选项自动处理和加载对应的宏包，所以z\LaTeX{}文档类在不同的导言区选项声明下
 加载的宏包和命令是不同的。本文档类内置导言区选项输出命令:\cmd{\zlatexOptions}\index{\cmd{\zlatexOptions}},
@@ -97,7 +103,7 @@ z\LaTeX{}文档类会根据用户指定的选项自动处理和加载对应的�
         fancyhdr & amsfonts & amsmath & amsthm  \\
         xcolor & biblatex & indextools & hyperref \\ 
         cleveref & graphicx & float & titletoc \\
-        titlesec & tocloft & &\\
+        titlesec & & &\\
         \bottomrule
     \end{tabular}}
     \caption{z\LaTeX{}文档类基本宏包}
@@ -112,13 +118,19 @@ z\LaTeX{}文档类会根据用户指定的选项自动处理和加载对应的�
     \centering{\ttfamily
     \begin{tabular}{p{2cm}p{4cm}p{2cm}p{2cm}p{2cm}}
         \toprule
-        {\rmfamily lang=en} & inputenc(pdftex) & fontenc & csquotes & babel \\
+        {\rmfamily lang=en} & inputenc(pdftex) & fontenc &  babel \\
         {\rmfamily lang=cn} & fontspec & ctex \\
         \bottomrule
     \end{tabular}}
     \caption{z\LaTeX{}文档类语言宏包}
     \label{tab:lang-package}
 \end{table}
+
+在\LaTeX{}排版中，正确使用{\bf 引号}的方法是分别使用\cmd{`}和\cmd{\'}排版单引号`和'，
+分别用\cmd{``}和\cmd{\'\'}排版双引号``和''。虽然\cmd{"}也能表示双引号，但却没有没有合适的单个符号用来表示前双引号，
+所以在正文中并不常用(lshort-zh-cn.pdf, “2.3.5 标点符号”)。 另外，在排版要求中，当两层双引号嵌套使用时，
+其外层需要使用{\bf 双引号}，而内层则应该使用{\bf 单引号}，并且不同的语言中，用于表示引号的字符也不完全一致。
+为解决这些排版中的问题，可以使用\cmd{csquotes}宏包实现引号的灵活排版\Footnote{本内容摘自\href{https://wenda.latexstudio.net/article-5042.html}{latexstudio}}。
 
 \subsection{数学类宏包}
 从前面的导言区数学字体配置就可以看出，本模板会根据导言区设置不同的数学字体的功能了. 具体的加载
@@ -181,7 +193,7 @@ z\LaTeX{}文档类会根据用户指定的选项自动处理和加载对应的�
     \item \cmd{toc}\index{\cmd{toc}}选项可以同时指定\cmd{rename, 2column},分别代表重定义目录名(居中加粗),以及使用双栏目录排版.
 \end{itemize}
 
-\subsection{数学指令}
+\subsection{快捷命令}
 关于文档类选项\cmd{math-alias}\index{\cmd{math-alias}}的进一步说明,默认的自定义命令可能并不一定符合每一个人的习惯,所以请谨慎加载此选项.
 在\cmd{math-alias=true}后,z\LaTeX{}会进行如下命令的声明/重定义,以及宏包的加载:
 \begin{minted}{latex}
@@ -215,6 +227,9 @@ z\LaTeX{}文档类会根据用户指定的选项自动处理和加载对应的�
 \newcommand{\trace}{\ensuremath{\mathrm{trace}\;}}
 \renewcommand{\div}{\ensuremath{\mathrm{div}\;}}
 \end{minted}
+
+上述的几个常见的数学运算符声明可能并不是那么的规范，如果有必要，可以自行进行修改.
+可以参见命令\cmd{\DeclareMathOperator}.
 
 \section{z\LaTeX{}接口}
 z\LaTeX{}的接口正在不断的完善中，所以目前的接口可能并不是那么稳定。(我已经尽力让接口规范和稳定了)
@@ -330,32 +345,97 @@ reason is a representation of, as far as I know, the things in themselves;
 \renewcommand{\maketitle}{
     \begin{titlepage}
         \vfill\vspace*{40pt}
-        \noindent\hspace*{134pt}\rule[-75pt]{6pt}{95pt}{\hspace*{10pt}\fontsize{25}{25}\selectfont\bfseries\@title}\par
+        \noindent\hspace*{134pt}\rule[-75pt]{6pt}{95pt}{\hspace*{10pt}\leavevmode\parbox[t]{25em}{\fontsize{25}{25}\selectfont\bfseries\@title}}\par
         \vspace*{-15pt}
-        \noindent\hspace*{150pt}{\Large\bfseries\@author}\par
-        \vspace*{480pt}
-        \noindent\hspace*{150pt}{\Large\textcolor{gray}{\@date}}
+        \noindent\hspace*{150pt}{\leavevmode\parbox[t]{20em}{\Large\bfseries\@author}}\par
         \vfill
-    \end{titlepage}
-} 
+        \noindent\hspace*{150pt}{\Large\textcolor{gray}{\@date}}
+    \end{titlepage}} 
 \end{minted}
 
 如果使用者想要使用更加美观的封面，请手动加载\cmd{tikz}宏包，自己定义.
 
 \subsection{目录}
-尽管在z\LaTeX{}的加载选项一节便已经说明了z\LaTeX{}文档类默认加载了\cmd{titletoc, tocloft}宏包用于目录的格式定制，
+尽管在z\LaTeX{}的加载选项一节便已经说明了z\LaTeX{}文档类默认加载了\cmd{titletoc}宏包用于目录的格式定制，
 并且提供了对应的加载选项 \cmd{toc}已经对应的可选值\cmd{rename, 2column}, 但是在本文档类中并没有对目录的格式进行
-更加深度的定制,可能后续会开发对应的接口.
+更加深度的定制,可能后续会开发对应的接口. 
+
+如果用户想要定制目录的格式可以使用本文默认加载的\cmd{titlesec}宏包或者是自行加载\cmd{tikz}宏包对目录进行定制.
+这里给出第一种方案下的一个定制样例,效果可见\cref{fig:toc-example}:
+\begin{minted}{latex}
+% \RequirePackage{zhnumber}
+\titlecontents*{chapter}[0pc]{\large\bfseries}
+    {\textcolor{\tl_use:N \l__zlatex_link_color_tl}{\thecontentslabel}}{}
+    {\normalfont\titlerule*[1pc]{.}\contentspage}[]
+\titlecontents{section}[1.8pc]{\addvspace{3pt}\tl_use:N\g__sec_symbol_tl\,}
+    {\textcolor{\tl_use:N \l__zlatex_link_color_tl}{\S\;\thecontentslabel}}{}
+    {\titlerule*[1pc]{.}\contentspage}%[{\tocsym[sec]{}}]
+\titlecontents{subsection}[3pc]{\addvspace{3pt}\tl_use:N\g__subsec_symbol_tl\,}
+    {\textcolor{\tl_use:N \l__zlatex_link_color_tl}{\thecontentslabel}}{}
+    {\titlerule*[1pc]{.}\contentspage}%[{\tocsym[subsec]{}}]
+\titlecontents*{subsubsection}[5.8pc]{\small}
+    {\textcolor{\tl_use:N \l__zlatex_link_color_tl}{\thecontentslabel}}{}
+    {(\thecontentspage)}[\qquad]
+
+% append of prepend item to toc
+% switch left indent for subsection (none->3pc)
+\tl_new:N \g__sec_symbol_tl
+\tl_new:N \g__subsec_symbol_tl
+\tl_set:Nn \g__sec_symbol_tl {}
+\tl_set:Nn \g__subsec_symbol_tl {}
+\NewDocumentCommand\tocsym{O{sec}O{}}{
+    \str_case:nnF {#2}{
+        {star}{ \tl_set:cn {g__#1_symbol_tl}{\ding{73}} }
+        {=}{ \tl_set:cn {g__#1_symbol_tl}{\ding{104}} } %※
+    }{\tl_set:cn {g__#1_symbol_tl}{#2}}
+} 
+\end{minted}
+
+但是单独设置ToC中的样式往往是不够的，可能还需要设置不同计数器(章节)的格式,参见\cref{conter-settings}.
 
 \subsection{页眉页脚}
 本文档类采用\cmd{fancyhdr}进行页眉页脚的定制，目前已经写死在文档类中，如果使用者想要自定义页眉页脚，可以直接
 重定义\cmd{\fancyhead, \fancyfoot}命令.或者是页面样式(pagestyle)对应的\cmd{fancy}样式. 后续会考虑添加对应的接口.
 
-\subsection{章节格式}
-目前还不支持指定章节格式，等后续在添加. 使用者可以加载\cmd{titlesec}等宏包进行自定义. z\LaTeX{}
-文档类默认加载了\cmd{titlesec, titletoc, tocloft}宏包用于章节格式和目录的格式定制. 如果使用
+\subsection{章节格式}\label{conter-settings}
+目前还不支持指定章节格式，等后续在添加. 使用者可以加载\cmd{titlesec, tocloft}等宏包进行自定义. z\LaTeX{}
+文档类默认加载了\cmd{titlesec, titletoc}宏包用于章节格式和目录的格式定制. 如果使用
 者想要自定义章节格式，直接使用\cmd{titlesec}宏包的\cmd{\titleformat}命令覆盖本模板的原始定义即可，
 或者是其他的命令. 
+
+在前面我们已经提到可以使用\cmd{titletoc}宏包对目录进行定制，这里给出与之相配的计数器格式设置。
+\begin{minted}{latex}
+% title format
+\titleformat{\section}
+    {\bfseries\centering\Large}
+    {\thesection}
+    {0ex}{}{}
+\titleformat{\subsection}
+    {\bfseries\large}
+    {\thesubsection}
+    {0ex}{}{}
+\titleformat{\subsubsection}
+    {\bfseries}
+    {\thesubsubsection}
+    {0ex}{}{}
+
+% (sub)subsection number styel
+\setcounter{secnumdepth}{5}
+\renewcommand{\thesection}{{\thechapter.\arabic{section}\;}}
+\renewcommand{\thesubsection}{{\zhnum{subsection}、}\hspace*{-1ex}}
+\renewcommand{\thesubsubsection}{{\alph{subsubsection}.}\;}
+\end{minted}
+
+最终就可以得到如下样式的目录格式:
+\begin{figure}[!htb]
+    \centering
+    \includegraphics[width=.32\linewidth]{./pics/ToC_1.pdf}
+    \includegraphics[width=.32\linewidth]{./pics/ToC_2.pdf}
+    \includegraphics[width=.32\linewidth]{./pics/ToC_3.pdf} 
+    \caption{ToC Example}
+    \label{fig:toc-example}
+\end{figure}
+
 
 \begin{leftbar}
 但是本文档类默认不加载\cmd{tikz, pgf}宏包，想要使用这两个宏包定义更加复杂章节样式，请手动加载，并
@@ -631,6 +711,21 @@ z\LaTeX{}对\cmd{book}文档类的无编号计数器进行了定制，有序列�
 \addcontentsline{toc}{chapter}{Bibliography}
 \end{minted}
 
+或者是可以这样设置:
+\begin{minted}{latex}
+\printbibliography[heading=bibnumbered, title={参考文献}]
+\end{minted}
+
+其中\cmd{heading=bibnumbered}表示参考文献页的标题是编号的，\cmd{title}表示标题的名称.
+其实还有一种方法可用，不过没有前面的两种那么的便捷，而且也并不是那么的完美:
+\begin{minted}{latex}
+% \usepackage{zhnumber}
+\addtocounter{chapter}{1}
+\addcontentsline{toc}{chapter}{第\zhnum{chapter}章~~参考文献}
+\end{minted}
+
+这样做的缺点就是，在pdf书签和目录中均会会显示为\texttt{第五章  参考文献}，但是我们是不需要在
+前者中显示``第五章''的，所以这种方法并不是那么的完美.
 
 \subsection{使用样例}
 使用\cmd{\cite{<ref>}}进行参考文献的引用, 然后使用命令\cmd{\printbibliography}输出参考文献,
@@ -687,6 +782,21 @@ z\LaTeX{}文档类采用\cmd{indextools}宏包进行索引的生成，并不没�
 
 \begin{minted}{latex}
 函数\index{函数}是从集合到 ...
+\end{minted}
+
+若要定制\cmd{\printindex}输出索引条目格式，可以在导言区进行一定的设置，\cmd{indextools}
+宏包提供了命令\cmd{\indexsetup{}}用于格式设定, 采用键值对的格式进行指定. 可用的键有:
+\cmd{level, toclevel, ...}，详情请参见文档. 默认的\cmd{level}为\cmd{\chapter*(\section* 在article中)},
+表示此章节为无编号章节. 我们这里设置为有编号章节,level为chapter:
+\begin{minted}{latex}
+\indexsetup{level=\chapter}
+\end{minted}
+
+或者是和前面的\cmd{\printbibliography}类似，采用如下的不那么完美的做法:
+\begin{minted}{latex}
+% \usepackage{zhnumber}
+\addtocounter{chapter}{1}
+\addcontentsline{toc}{chapter}{第\zhnum{chapter}章~~部分命令/名词索引}
 \end{minted}
 
 \subsection{Bug}

@@ -9,20 +9,22 @@
     % link        = teal,
     definition  = blue
 }
-\usepackage{ztikz}
+\indexsetup{level=\chapter}
+\usepackage[external=true]{ztikz}
 \usepackage{expl3}
 \usepackage{xfp}
+\usepackage{zhnumber}
 \usetikzlibrary{calc}
 
 % optional 
-\usepackage{amsmath}
+\usepackage{pdfpages}
 \usepackage{booktabs}
 \usepackage{longtable}
 \usepackage{verbatim}
 \usepackage{multicol}
 \usepackage{framed}
 \usepackage[bottom]{footmisc}
-
+% minted setup
 \usepackage{minted}
 \definecolor{bg}{rgb}{0.95,0.95,0.95}
 \setminted{
@@ -58,17 +60,16 @@
 \input{./doc/ztikz_doc.tex}
 \input{./doc/gallery.tex}
 % Index and Bibliography
-\part{索引与参考文献}
-\addcontentsline{toc}{chapter}{部分命令/名词索引}
+\part{索引与参考}
+% index
 \printindex
-\addcontentsline{toc}{chapter}{参考文献}
+% bibliography
 \nocite{*}
-\renewcommand{\bibname}{参考文献}
-\printbibliography
+\printbibliography[heading=bibnumbered, title={参考文献}]
 
 
 % Appendix
-\part{Appendix}
+\input{./doc/tikz_function_plot.tex}
 \input{./doc/zlatex_source.tex}
 \input{./doc/ztikz_source.tex}
 
