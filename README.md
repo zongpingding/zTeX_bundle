@@ -1,5 +1,5 @@
 # ZLaTeX_ZTikZ
-A LaTeX template for writing notes, books, drawing diagrams, and interactive work with Python, gnuplot, and Mathematica. Enjoy it~
+A LaTeX template for writing notes, books, drawing diagrams, and interactive work with Python, gnuplot, and Mathematica. Enjoy it ~~
 
 
 # set up
@@ -8,7 +8,7 @@ The document class `zlatex` and package `ztikz` can be used on Windows and Linux
 
 More infomation please refer document `zlatex_ztikz_doc.pdf`.
 
-# optional packages 
+# optional packages or settings
 ``` latex
 % after `minted` package
 \usepackage{anyfontsize}

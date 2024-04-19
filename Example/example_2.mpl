@@ -1,4 +1,4 @@
-\begin{pyfig}[width=.75\linewidth]{example_1.mpl}
+\begin{pyfig}[width=.75\linewidth]{example_2.mpl}
 # https://matplotlib.org/stable/gallery/lines_bars_and_markers/histogram_demo.html
 
 import matplotlib
