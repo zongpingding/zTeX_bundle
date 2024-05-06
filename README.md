@@ -30,6 +30,8 @@ you may like to change the style of the `\maketitle`, use the following command
   \end{titlepage}}
 ```
 
+# font config
+there is some document about font config for main context and math.
 
 # Need help
 we need someone to translate the zlatex document into English or any other language, thanks.

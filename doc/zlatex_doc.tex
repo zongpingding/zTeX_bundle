@@ -442,7 +442,349 @@ reason is a representation of, as far as I know, the things in themselves;
 设置自己喜欢的章节格式. 也许后续我会在z\LaTeX{}的加载选项中添加一个tikz选项，从而可以让用户自定义章节格式.
 \end{leftbar}
 
+\section{字体配置}\index{字体配置}
+\subsection{一些术语}
+在字体上，国内环境可以说是一团浆糊，再加之M\$ word对用户的不断误导与溺爱，导致无数的用户不知道字体，字体族，
+字体系列,字形的区别. 下面给出一些常见注意事项:
+\begin{itemize}
+    \item 可以不正确的认为一个字体就是一个字体族，其中包好了一个字体系列
+    \item 一般这个字形是对于西文字体而言的，对于中文无效. 中文所谓的斜体概念都是 word 这个毒瘤产生的
+    \item 本来\TeX{}这玩意儿就是为了西文发明的，也就能理解对亚洲文字支持差
+    \item 部分字体是给西文设计的，所以对中文才没有起作用.
+    \item 做字体是一个吃力不讨好的活，没多少人愿意做
+    \item 其实我们常说的字体，是指的Font Face.
+    \item 深受M\$ Office迫害的用户很多喜欢Times New Roman字体，但是它并没有对应的数学字体(\cmd{newtxmath}不是).
+    \item \textbf{注意字体版权:} Windows默认的字体全部都是有商业版权的。原则上，只有正版Windows用户方才可以用于非商业用途。如需用于商业，必须获得授权
+\end{itemize} 
 
+\subsection{模板预设}\index{模板字体预设}
+字体配置一直以来都是一个比较头疼的问题，尤其是对于中文文档. z\LaTeX{}目前具有两套字体设置:英文和中文.
+英文(\cmd{lang=en})下的字体配置为:
+\begin{minted}{latex}
+\RequirePackage[utf8]{inputenc}
+\RequirePackage[T1]{fontenc}
+\RequirePackage[english]{babel} 
+\end{minted}
+
+在中文(\cmd{lang=cn})环境下的字体配置为:
+\begin{minted}{latex}
+\RequirePackage[UTF8, heading]{ctex}
+\end{minted}
+
+除了上述的设置外，本模板目前没有进行任意字体设置. 但是为了方便用户，后续,本模板可能会提供一个
+\cmd{\zlatexFontSetup}\index{\cmd{\zlatexFontSetup}}命令进行对应的模板字体设置,包含正文字体，数学字体等. 
+在介绍此命令之前，首先介绍\LaTeX{}中调用外部字体或者是系统字体的方法.
+
+\subsection{查看系统字体}\index{查看系统字体}
+首先介绍正文字体，正文字体的设置基于\cmd{fontspec}宏包, 可以解决在\XeLaTeX{}, Lua\LaTeX{}下的字体配置问题.
+此宏包提供了如下命令用于正文中各种字体族的设置\index{\cmd{\setmainfont}}\index{\cmd{\setsansfont}}\index{\cmd{\setmonofont}}:
+\begin{itemize}
+    \item \cmd{\setmainfont}: 设置正文的主要字体(罗马字体), 对应命令\cmd{\textrm}
+    \item \cmd{\setsansfont}: 设置正文的无衬线字体, 对应命令\cmd{\textsf}
+    \item \cmd{\setmonofont}: 设置正文的等宽字体(打字机字体), 对应命令\cmd{\texttt}
+\end{itemize}
+
+\begin{leftbar}
+在设置全文的中(日韩)字体时也请使用命令\cmd{\setCJKmainfont}命令，格式和上述的命令一样. 也许在设置文档的中文字体时你还需要在导言区
+加载如下命令:
+\end{leftbar}
+\begin{minted}{latex}
+\renewcommand\CJKrmdefault{}
+\end{minted}
+
+这几个命令可以用于设置整个文档的字体，但是同样的是，我们可以在一个文档中使用多个字体. 在讨论这个的时候，
+我们遇到了一个问题? 怎么查看自己电脑上有哪些可用的字体(包括数学字体)? 在Windows和Linux均可以通过如下命令进行
+查看:
+\begin{minted}{shell}
+fc-list 
+\end{minted}
+
+然后你就会看到如下的类似输出, 在Linux下可能是这样的:
+\begin{minted}{text}
+/usr/share/fonts/100dpi/lubI24.pcf.gz: B&H LucidaBright:style=Italic
+/usr/share/fonts/100dpi/UTBI__12-ISO8859-1.pcf.gz: Adobe Utopia:style=Bold Italic
+/usr/share/fonts/75dpi/luIS08-ISO8859-1.pcf.gz: B&H Lucida:style=Sans Italic
+/usr/share/fonts/75dpi/luIS10-ISO8859-1.pcf.gz: B&H Lucida:style=Sans Italic
+/usr/share/fonts/75dpi/luIS14-ISO8859-1.pcf.gz: B&H Lucida:style=Sans Italic
+/usr/share/fonts/100dpi/luRS18-ISO8859-1.pcf.gz: B&H Lucida:style=Sans
+/usr/share/fonts/75dpi/courB18-ISO8859-1.pcf.gz: Adobe Courier:style=Bold
+/usr/share/fonts/100dpi/lubBI24.pcf.gz: B&H LucidaBright:style=Italic
+/usr/share/fonts/100dpi/courO12.pcf.gz: Adobe Courier:style=Oblique
+\end{minted}
+
+在windows上可能是这样的(如果安装了\TeX{}Live):
+\begin{minted}{text}
+C:/WINDOWS/fonts/times.ttf: Times New Roman:style=Regular,Normal, ...
+C:/WINDOWS/fonts/GeoSlab703 Md BT Bold.ttf: GeoSlab703 Md BT:style=Bold
+C:/WINDOWS/fonts/vgasysr.fon: System:style=Regular
+C:/WINDOWS/fonts/seguibl.ttf: Segoe UI,Segoe UI Black:style=Black,Regular
+C:/texlive/2024/texmf-dist/fonts/opentype/public/drm/drmsl11.otf: drmsl11:style=Regular
+C:/texlive/2024/texmf-dist/fonts/opentype/public/fonts-tlwg/Garuda-Oblique.otf: Garuda:style=Oblique
+C:/texlive/2024/texmf-dist/fonts/truetype/public/junicodevf/JunicodeVF-Roman.ttf: Junicode VF:style=Exp Bold
+C:/texlive/2024/texmf-dist/fonts/opentype/public/qualitype/QTTechtone-BoldItalic.otf: QTTechtone:style=BoldItalic
+C:/texlive/2024/texmf-dist/fonts/opentype/public/tempora/Tempora-Italic.otf: Tempora:style=Italic
+C:/texlive/2024/texmf-dist/fonts/opentype/public/drm/drmsym11.otf: drmsym11:style=Regular
+\end{minted}
+
+我们可以通过 ``font name'' 和  ``file name'' 两种形式来调用字体. 比如我们想要调用 ``Times New Roman'' 字体,
+在第一个输出示例中，可以看到 ``Times New Roman'' 对应的文件名为 ``times.ttf'', 那么我们可以通过如下命令进行调用:
+\begin{minted}{latex}
+% by file name 
+\setmainfont{times.ttf}
+
+% by font name
+\setmainfont{Times New Roman}
+\end{minted}
+
+\begin{leftbar}
+如果你不想在你的本地安装过多的字体，我常常会建议使用``file name''的格式.只需要把对应的字体文件放到你的项目文件夹下就行了，
+免去了字体安装这一个步骤.这个时候你就需要在可选参数中指定键\cmd{Path}对应的值了，对应的是项目下的字体路径. 这里给出一个示例:
+假如你把字体放到了项目根路径下的\cmd{Fonts}文件夹,那么声明格式为:
+\end{leftbar}
+\begin{minted}{latex}
+\setmainfont[Path = Fonts/]{<font name or file name>}
+\end{minted}
+
+在安装字体后务必使用如下命令刷新系统字体缓存，否则\cmd{fontspec}或\cmd{xeCJK}宏包无法找到系统中对应的字体:
+\begin{minted}{shell}
+fc-cache -f -v
+\end{minted}
+
+通过上面的两条命令我们便可以轻松的设置文档中\cmd{\textrm{<content>}}对应的字体\Footnote{默认情况下，文档中的字体族即为roman family}
+为``Times New Roman''.
+
+\subsection{字体系列不全}\index{字体系列}
+但是你可能也会遇到如下的编译警告:
+\begin{minted}{text}
+LaTeX Font: Font shape `TU/AlegreyaSans-ExtraBoldItalic.otf(0)/b/n' undefined
+(Font)	using `TU/AlegreyaSans-ExtraBoldItalic.otf(0)/m/n' instead.
+\end{minted}
+
+上述的字体是我在导言区设置了如下字体命令导致的:
+\begin{minted}{latex}
+\setmainfont{AlegreyaSans-ExtraBoldItalic.otf}
+\end{minted}
+
+为什么会有这个警告? 其实就是出在一个字体加粗命令\cmd{\textbf}上，我并没有指定这个新的文章中字体族(rmfamily)所对应的
+粗体字体. 所以\TeX{}采用了默认的 ``m(edium)'', 而不是 ``b(old)''. 解决这个问题有两个方法：
+\begin{itemize}
+    \item 通过``font name''进行设置的情况下，如果你的本地字库够全，那么\TeX{}会自动处理这个问题.
+    \item 通过``file name''进行设置的情况下，你可以通过如下命令进行设置,这里以\cmd{comic.ttf}为例:
+\end{itemize}
+
+\begin{minted}{latex}
+\setmainfont{comic.ttf}[
+    BoldFont=comicbd.ttf,
+    ItalicFont=comici.ttf,
+    BoldItalicFont=comicz.ttf
+]
+\end{minted}
+
+如果你在Windows命令行使用如下命令:
+\begin{minted}{shell}
+fc-list | rg comic | rg WINDOWS
+\end{minted}
+
+那么可以得到如下的输出:
+\begin{minted}{shell}
+C:/WINDOWS/fonts/comicbd.ttf: Comic Sans MS:style=Bold
+C:/WINDOWS/fonts/comici.ttf: Comic Sans MS:style=Italic
+C:/WINDOWS/fonts/comicz.ttf: Comic Sans MS:style=Bold Italic
+\end{minted}
+
+说明在本地的名为``Comic Sans MS''的字体族具有``Bold, Italic, Bold Italic''三种字形. 通过下面的命令我们便可以
+简单的通过第一种方式解决这个字体加粗问题:
+\begin{minted}{latex}
+\setmainfont{Comic Sans MS}
+\end{minted}
+
+\begin{leftbar}%
+就像上述备注的第二种``file name''方式的好处外,By ``font name'' 也有上述的优点. 尽管对于字体的加粗和斜体你可以偷懒，
+在字体族声明的可选参数中加入\cmd{AutoFakeBold, AutoFakeSlant}参数，它会自动同时实现中英文伪粗体和伪斜体，不用你自己单独去指定。
+但是我并不推荐. 还是给出一个示例:
+\end{leftbar}
+
+\begin{minted}{latex}
+\setCJKfamilyfont{AutoFakeBoldSlant}{<font-name>.ttf}[AutoFakeBold , AutoFakeSlant]
+\end{minted}
+
+在通过 ``font name''进行字体的声明时，可以考虑把字体放到如下的位置，这样可以避免书写字体的路径:
+\begin{itemize}
+    \item MacOS:\cmd{~/Library/Fonts}
+    \item Windows:\cmd{C:\Windows\Fonts}
+    \item Linux 或 Windows: 放在TEXMF tree对应的路径, 见前文.
+\end{itemize}
+
+\subsection{字体族声明}\index{字体族声明}
+上述的三个命令都是设置全文对应的字体族，如果你想要改变局部的字体族，那么可以使用\cmd{fontspec}宏包提供的
+命令\cmd{\newfontfamily}和\cmd{XeCJK}宏包提供的\cmd{\setCJKfamilyfont}分别进行英文与中日韩文字的字体族声明.
+二者的声明方式为:
+\begin{minted}{latex}
+\newfontfamily{\FamilyA}{FontA.ttf}
+\setCJKfamilyfont{FamilyB}{FontB.ttf}
+\end{minted}
+
+上述两条命令声明了\cmd{FamilyA, FamilyB}两个字体族，分别对应了\cmd{FontA.ttf, FontB.ttf}两个字体文件.想要使用
+这两个字体族，在文档中按照如下方式使用:
+\begin{minted}{latex}
+{\FamilyA <Your Content>}
+{\CJKfamily{FamilyB} <你的内容>}
+\end{minted}
+
+\subsection{Emoji}\index{Emoji}
+如果用户想要使用Emoji，在阅读完上述的字体配置后，相信读者已经能够独自解决此问题了. 这里给出大致的解决思路:
+\begin{itemize}
+    \item 把对应的Emoji对应的unicode放到一个支持显示表情包的字体组环境中.
+    \item 加载\href{http://mirrors.ctan.org/fonts/fontawesome5/doc/fontawesome5.pdf}{fontawesome5}宏包.
+    \item 更换编译引擎为Lua\TeX.
+\end{itemize}
+
+
+\subsection{数学字体}\index{数学字体}
+目前z\LaTeX{}文档类提供了几种常见的数学字体宏包接口,分别是\cmd{computer moder math, newtxmath, eulervm, mtpro2}. 
+其中\cmd{computer modern math}即为默认的数学字体,推荐新手使用. 数学字体并不仅仅包含了我们普通群众任何的Glyph本生，
+一套数学字体往往还需要对应的``距离表'',用于指定各个数学符号之间的距离. 数学字体还包含很多复杂的东西，并没有你认为的那么简单.
+
+不想要折腾的用户可以直接看 \href{http://mirrors.ctan.org/info/Free_Math_Font_Survey/en/survey.pdf}{Free-Math-Font}这个 
+文档,你配置不来，但是你至少得做一个合格得调包侠吧.但是这里不回去介绍上述接口对应宏包的使用方法，下面重点介绍
+宏包\href{http://mirrors.ctan.org/macros/unicodetex/latex/unicode-math/unicode-math.pdf}{unicode-math}. 
+
+\cmd{unicode-math}\index{\cmd{unicode-math}}宏包的基本使用格式为:
+\begin{minted}{latex}
+% after \usepackage{fontspec}
+\usepackage{unicode-math}
+% set main math font (necessary)
+\setmathfont{Latin Modern Math}
+\end{minted}
+
+上述的命令\cmd{\setmathfont}\index{\cmd{\setmathfont}}由宏包\cmd{unicode-math}提供,用于设置文档中数学字体. 在指定文档的数学字体后，你可以
+再声明一系列的局部数学字体命令. 但是在这之前，请允许我先介绍一下怎么查看你的系统中有哪些数学字体. 
+
+以Windows为例，在命令行中运行命令:
+\begin{minted}{shell}
+fc-list | rg Math
+\end{minted}
+
+然后你可以得到大致如下的结果:
+\begin{minted}{text}
+C:/WINDOWS/fonts/eumat2.ttf: Euclid Math Two:style=Regular
+C:/WINDOWS/fonts/eumat2b.ttf: Euclid Math Two:style=Bold
+C:/WINDOWS/fonts/cambria.ttc: Cambria Math:style=Regular
+C:/texlive/2024/texmf-dist/fonts/opentype/public/xits/XITSMath-Bold.otf: XITS Math:style=Bold
+C:/texlive/2024/texmf-dist/fonts/opentype/public/xits/XITSMath-Regular.otf: XITS Math:style=Regular
+C:/texlive/2024/texmf-dist/fonts/opentype/public/tex-gyre-math/texgyretermes-math.otf: TeX Gyre Termes Math:style=Regular
+\end{minted}
+
+和前文的设置正文字体一样，可以通过``font name'' 或者是 ``file name''进行数学字体的设置, 所以在这里不再赘述. 
+这里介绍一下怎么设置局部数学字体. 通过如下命令:
+\begin{minted}{latex}
+\setmathfont[range={\mathscr,\mathbfscr}]{TeX Gyre Termes Math}
+\end{minted}
+
+在此命令之后的所有\cmd{\mathscr, \mathbfscr}命令均会使用``TeX Gyre Termes Math''字体. 其他不变, 比如\cmd{\mathrm, \mathbf}等.
+后续如果还想使用其他数学字体，只需要再次声明不同的\cmd{\setmathfont}命令即可.
+
+\begin{leftbar}
+值得注意的是：在加载宏包\cmd{unicode-math}后,数学字符的加粗请采用\cmd{\boldsymbol}或\cmd{\symbf, \symbfit, \symbfup}等命令.
+\end{leftbar}
+
+关于\cmd{unicode-math}宏包的更多功能，请参见对应的宏包手册. 
+
+
+\subsection{常见字体问题}\index{常见字体问题}
+有了上述的字体配置基础知识的介绍，你应该能看懂部分的模板中的字体配置命令了. 在看懂这些命令后，也就能够知道一些常见的字体问题的背后原因了:
+\begin{itemize}
+    \item 为什么Windows下中文加粗变成了黑体?
+    \item 为什么\TeX{}会报字体缺失的警告或这是错误?
+    \item 怎么在Windows上使用Linux下的字体?
+    \item 怎么使用Founder字体 ?
+    \item ...
+\end{itemize}
+
+就比如Windows下加粗便黑体的问题\Footnote{具体参考请见:\href{https://zhuanlan.zhihu.com/p/538459335}{LaTeX 中文字体配置基础指南}},
+如果你去看\cmd{ctex-fontset-windows.def}这个文件,由如下的声明:
+\begin{minted}{latex}
+% 中文默认字体：宋体，粗体以黑体代替，斜体以楷书代替
+\setCJKmainfont   { SimSun } [ BoldFont = SimHei , ItalicFont = KaiTi ]
+% 中文无衬线字体：微软雅黑，粗体为对应的微软雅黑粗体
+\setCJKsansfont   { Microsoft~YaHei } [ BoldFont = *~Bold ]
+% 中文等宽字体：仿宋
+\setCJKmonofont   { FangSong }
+% 设置中文字族
+\setCJKfamilyfont { zhsong  } { SimSun          }
+\setCJKfamilyfont { zhhei   } { SimHei          }
+\setCJKfamilyfont { zhfs    } { FangSong        }
+\setCJKfamilyfont { zhkai   } { KaiTi           }
+\setCJKfamilyfont { zhyahei } { Microsoft~YaHei } [ BoldFont = *~Bold ]
+\setCJKfamilyfont { zhli    } { LiSu            }
+\setCJKfamilyfont { zhyou   } { YouYuan         }
+% 字体命令，可用于文档中自由设置字体
+\NewDocumentCommand \songti   { } { \CJKfamily { zhsong  } }
+\NewDocumentCommand \heiti    { } { \CJKfamily { zhhei   } }
+\NewDocumentCommand \fangsong { } { \CJKfamily { zhfs    } }
+\NewDocumentCommand \kaishu   { } { \CJKfamily { zhkai   } }
+\NewDocumentCommand \lishu    { } { \CJKfamily { zhli    } }
+\NewDocumentCommand \youyuan  { } { \CJKfamily { zhyou   } }
+\NewDocumentCommand \yahei    { } { \CJKfamily { zhyahei } }
+\end{minted}
+
+上面有一句\cmd{BoldFont = SimHei}, 就表示\cmd{\textbf{<文字>}}中的内容是``黑体''。但是在Linux下对应的设置为:
+\texttt{BoldFont = FandolSong-Bold},这就是正真的粗体了.
+
+比如Elegant\LaTeX{}系列中的Book文档类,你能在其中看到如下的字体声明命令:
+\begin{minted}{latex}
+% 英文部分
+\setmainfont{TeXGyreTermesX}[
+    UprightFont = *-Regular ,
+    BoldFont = *-Bold ,
+    ItalicFont = *-Italic ,
+    BoldItalicFont = *-BoldItalic ,
+    Extension = .otf ,
+    Scale = 1.0
+]
+\setsansfont{texgyreheros}[
+    UprightFont = *-regular ,
+    BoldFont = *-bold ,
+    ItalicFont = *-italic ,
+    BoldItalicFont = *-bolditalic ,
+    Extension = .otf ,
+    Scale = 0.9
+]
+
+% 中文部分
+\RequirePackage[UTF8, scheme=plain, fontset=none]{ctex}
+\setCJKmainfont[BoldFont={FZHei-B01},ItalicFont={FZKai-Z03}]{FZShuSong-Z01}
+\setCJKsansfont[BoldFont={FZHei-B01}]{FZKai-Z03}
+\setCJKmonofont[BoldFont={FZHei-B01}]{FZFangSong-Z02}
+\setCJKfamilyfont{zhsong}{FZShuSong-Z01}
+\setCJKfamilyfont{zhhei}{FZHei-B01}
+\setCJKfamilyfont{zhkai}[BoldFont={FZHei-B01}]{FZKai-Z03}
+\setCJKfamilyfont{zhfs}[BoldFont={FZHei-B01}]{FZFangSong-Z02}
+\newcommand*{\songti}{\CJKfamily{zhsong}}
+\newcommand*{\heiti}{\CJKfamily{zhhei}}
+\newcommand*{\kaishu}{\CJKfamily{zhkai}}
+\newcommand*{\fangsong}{\CJKfamily{zhfs}}
+\end{minted}
+
+所以C\TeX{}还是给我们解决了很多的字体问题的，如果你的文档中加载了\cmd{ctex}宏包，不妨使用其提供的\cmd{<fontset>}
+选项进行字体的设置. 实在不行，在考虑自行配置字体.
+
+\subsection{About Future}
+本节并没有介绍在pdf\TeX{}下的字体配置方法，因为如果你想在此引擎下使用字体，那么你可能需要自己去做一些复杂的字体工作,
+自己去做对应的\texttt{tfm, map, enc, vf}文件，这并不简单. 
+
+将来我可能会介绍一点关于在PDF中抽取现成的字体，或者是虚拟字体相关的工作. 但是这些都是后话了.所以如果你想要了解更多字体相关的知识，
+可以多看看文档\cmd{fontspec, ctex}或者是{The \LaTeX{} Companion}这本书中的内容.
+
+还有一些FallBack字体(主字体文件中不存在字符的备用字体)的问题? 比如在Windows下可以使用其自带的一个超大字符集\cmd{SimSun-ExtB},设置命令
+如下:
+\begin{minted}{latex}
+\xeCJKsetup{AutoFallBack=true}
+\setCJKmainfont{SimSun}[FallBack=SimSun-ExtB]
+\end{minted}
+
+后续可能就是一些OpenTrueType字体或者是Unicode的坑了，即使是换了Lua\TeX{}这些坑你还是得踩的. 看看有生之年能不能
+用MetaFont或者是FontForge, Glyphs之类的工具设计一个自己的字体.
 
 \section{数学环境}
 \subsection{常用数学环境}
