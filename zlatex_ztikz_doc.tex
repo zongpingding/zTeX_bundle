@@ -5,6 +5,10 @@
     math-alias=true,
     toc={rename, 2column}
 ]{zlatex}
+\newfontfamily{\russia}[Path=./Fonts/]{cmunrm.ttf}[
+    BoldFont=cmunbx.ttf,
+    ItalicFont=cmunbi.ttf
+]
 \zlatexColorSetup{
     % link        = teal,
     definition  = blue
@@ -24,6 +28,8 @@
 \usepackage{multicol}
 \usepackage{framed}
 \usepackage[bottom]{footmisc}
+% TeX logo
+\usepackage{xltxtra} 
 % minted setup
 \usepackage{minted}
 \definecolor{bg}{rgb}{0.95,0.95,0.95}

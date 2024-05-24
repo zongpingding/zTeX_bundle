@@ -103,7 +103,7 @@ z\LaTeX{}文档类会根据用户指定的选项自动处理和加载对应的�
         fancyhdr & amsfonts & amsmath & amsthm  \\
         xcolor & biblatex & indextools & hyperref \\ 
         cleveref & graphicx & float & titletoc \\
-        titlesec & & &\\
+        titlesec & esint & sidenotes &\\
         \bottomrule
     \end{tabular}}
     \caption{z\LaTeX{}文档类基本宏包}
@@ -132,9 +132,9 @@ z\LaTeX{}文档类会根据用户指定的选项自动处理和加载对应的�
 其外层需要使用{\bf 双引号}，而内层则应该使用{\bf 单引号}，并且不同的语言中，用于表示引号的字符也不完全一致。
 为解决这些排版中的问题，可以使用\cmd{csquotes}宏包实现引号的灵活排版\Footnote{本内容摘自\href{https://wenda.latexstudio.net/article-5042.html}{latexstudio}}。
 
-\subsection{数学类宏包}
-从前面的导言区数学字体配置就可以看出，本模板会根据导言区设置不同的数学字体的功能了. 具体的加载
-宏包\index{math packages}规则如下:
+\subsection{数学字体类宏包}
+为了方便新手较为方便的使用不同的数学字体，本模板设置了几个简单的数字切换命令.从前面的导言区数学字体
+配置就可以看出，本模板会根据导言区设置不同的数学字体的功能了. 具体的加载宏包\index{math packages}规则如下:
 \begin{itemize}
     \item \cmd{math-font=<none>}: 不加载任何的数学字体宏包，采用默认数学字体
     \item \cmd{math-font=newtx}: 加载宏包 \cmd{newtxmath}
@@ -146,6 +146,20 @@ z\LaTeX{}文档类会根据用户指定的选项自动处理和加载对应的�
 如果使用者在导言区指定了选项\cmd{math-alias=true}, 那么z\LaTeX{}此时还会额外加载
 宏包\index{optional packages}:\cmd{amssymb, mathtools, bm}.
 
+z\LaTeX{}还默认加载了宏包\cmd{esint},用于提供更多的积分符号.下面仅举几例,更多的人信息请参见\cmd{esint}宏包：
+\[
+    \iiint\qquad 
+    \idotsint\qquad
+    \ointclockwise\qquad
+    \fint\qquad
+    \landdownint
+\]
+
+其实还有一个包和这个\cmd{esint}包类似，叫做\cmd{pdfMsym}. 关于后者的使用请参见官方文档\href{https://mirror-hk.koddos.net/CTAN/macros/generic/pdfmsym/pdfmsym-doc.pdf}{pdfMsym}.
+
+\begin{leftbar}
+如果你想要自己设置文档对应的数学字体，那么请参见"字体配置\cref{font-config}"中的数学字体配置部分.
+\end{leftbar}
 
 \section{文档类选项}
 本模板具有丰富的配置选项\index{配置选项}，包含页面设置\index{页面设置}，页边距，边注\index{边注}，数学字体\index{数学字体}，
@@ -162,9 +176,10 @@ z\LaTeX{}文档类会根据用户指定的选项自动处理和加载对应的�
     \cmd{lang} & \cmd{en, cn} & \cmd{en} \\
     \cmd{layout} & \cmd{oneside, twoside} & \cmd{twoside} \\
     \cmd{margin} & \cmd{false, true} & \cmd{true} \\
-    \cmd{fontsize} & \cmd{10pt, 11pt, 12pt} & \cmd{11pt} \\
+    \cmd{font-size} & \cmd{10pt, 11pt, 12pt} & \cmd{11pt} \\
     \cmd{math-alias} & \cmd{false, true} & \cmd{false} \\
     \cmd{math-font} & \cmd{newtx, mtpro2, euler} & \cmd{<none>} \\
+    \cmd{math-env-theme} & \cmd{none, leftbar, all} & \cmd{none} \\
     \cmd{bib-source} & \cmd{<自定义>} & \cmd{ref.bib} \\
     \cmd{toc} & \cmd{rename, 2column} &  \cmd{<none>}\\
     \bottomrule
@@ -172,6 +187,10 @@ z\LaTeX{}文档类会根据用户指定的选项自动处理和加载对应的�
     \caption{z\LaTeX{}配置选项}
     \label{table:zlatex-option}
 \end{table}
+
+\begin{leftbar}
+关于\cmd{math-env-theme}的详细信息请参见"常用数学环境\cref{常用数学环境}"
+\end{leftbar}
 
 目前的z\LaTeX{}接口还不够丰富，没有进行相关的\cmd{Hook}(钩子)的声明，所以用户可以配置的选项是比较少的，
 只要能够把导言区设置规范，那么剩下的内容你几乎是不用在设置了.
@@ -442,7 +461,7 @@ reason is a representation of, as far as I know, the things in themselves;
 设置自己喜欢的章节格式. 也许后续我会在z\LaTeX{}的加载选项中添加一个tikz选项，从而可以让用户自定义章节格式.
 \end{leftbar}
 
-\section{字体配置}\index{字体配置}
+\section{字体配置}\index{font-config}\label{font-config}
 \subsection{一些术语}
 在字体上，国内环境可以说是一团浆糊，再加之M\$ word对用户的不断误导与溺爱，导致无数的用户不知道字体，字体族，
 字体系列,字形的区别. 下面给出一些常见注意事项:
@@ -476,13 +495,28 @@ reason is a representation of, as far as I know, the things in themselves;
 在介绍此命令之前，首先介绍\LaTeX{}中调用外部字体或者是系统字体的方法.
 
 \subsection{查看系统字体}\index{查看系统字体}
-首先介绍正文字体，正文字体的设置基于\cmd{fontspec}宏包, 可以解决在\XeLaTeX{}, Lua\LaTeX{}下的字体配置问题.
-此宏包提供了如下命令用于正文中各种字体族的设置\index{\cmd{\setmainfont}}\index{\cmd{\setsansfont}}\index{\cmd{\setmonofont}}:
+首先介绍正文字体，正文字体的设置基于\cmd{fontspec}宏包, 可以解决在\XeLaTeX{}, Lua\LaTeX{}下的字体配置问题.此宏包提供了如下
+命令用于正文中各种字体族的设置\index{\cmd{\setmainfont}}\index{\cmd{\setsansfont}}\index{\cmd{\setmonofont}}:
 \begin{itemize}
     \item \cmd{\setmainfont}: 设置正文的主要字体(罗马字体), 对应命令\cmd{\textrm}
     \item \cmd{\setsansfont}: 设置正文的无衬线字体, 对应命令\cmd{\textsf}
     \item \cmd{\setmonofont}: 设置正文的等宽字体(打字机字体), 对应命令\cmd{\texttt}
 \end{itemize}
+
+\begin{leftbar}
+如果想要在pdf\TeX{}下使用别的字体(你自己下载的字体，系统中别的字体),那么最好的方法是使用别人写好的宏包。因为
+在pdf\TeX{}下使用别的字体，可能会需要一些\cmd{.tfm, .fd, .map, .sty}等文件，这个对于一般的\LaTeX{}使用者来说过于复杂了.
+可以参见网站：\href{https://tug.org/FontCatalogue/allfonts.html}{FontCatalogue}, 在这个网站上你可以看到很多的为pdf\TeX{}
+设计的字体宏包,然后你根据自己的喜好进行对应宏包的设置即可.
+\end{leftbar}
+
+\begin{figure}[!htb]
+    \centering
+    \includegraphics[width=.75\linewidth]{./pics/pdftex_font_config.png}
+    \caption{Font Catalogue}
+    \label{fig:FontCatalogue}
+\end{figure}
+
 
 \begin{leftbar}
 在设置全文的中(日韩)字体时也请使用命令\cmd{\setCJKmainfont}命令，格式和上述的命令一样. 也许在设置文档的中文字体时你还需要在导言区
@@ -631,6 +665,40 @@ C:/WINDOWS/fonts/comicz.ttf: Comic Sans MS:style=Bold Italic
 {\CJKfamily{FamilyB} <你的内容>}
 \end{minted}
 
+比如你需要在文档中输入俄语，由于\cmd{article}文档类默认的字体Computer modern并没有包含这些俄语字母字形(Glyph).
+所以你可能就需要使用一个含有这类字形的字体了,推荐\cmd{CMU Serif}。可以安装进系统也可以放在项目文件夹下，这里放在
+项目文件夹\cmd{./Fonts/}下为例:
+\begin{minted}{latex}
+\newfontfamily{\russia}[Path=./Fonts/]{cmunrm.ttf}[
+    BoldFont=cmunbx.ttf,
+    ItalicFont=cmunbi.ttf
+]
+\end{minted}
+
+然后使用如下格式调用:
+\begin{minted}{latex}
+{\russia <俄语内容>}
+\end{minted}
+
+\begin{leftbar}
+{\russia Жизнь, как прекрасная мелодия, только текст перепутались.}\par 
+\noindent{\kaishu 生命是首美丽的曲子，只是歌词有些纠结}
+\end{leftbar}
+
+
+当然了，你也可以通过\cmd{\setmainfont}命令，从而进行全局字体设置. 最后还是给出声明中文字体族的命令:
+\begin{minted}{latex}
+\setCJKfamilyfont{fangsong}{simfang.ttf}[
+    Path=./Fonts/,
+    BoldFont=simfangbold.ttf
+]
+\end{minted}
+
+然后使用如下格式调用:
+\begin{minted}{latex}
+{\CJKfamily{fangsong} <你的中文内容>}
+\end{minted}
+
 \subsection{Emoji}\index{Emoji}
 如果用户想要使用Emoji，在阅读完上述的字体配置后，相信读者已经能够独自解决此问题了. 这里给出大致的解决思路:
 \begin{itemize}
@@ -642,7 +710,7 @@ C:/WINDOWS/fonts/comicz.ttf: Comic Sans MS:style=Bold Italic
 
 \subsection{数学字体}\index{数学字体}
 目前z\LaTeX{}文档类提供了几种常见的数学字体宏包接口,分别是\cmd{computer moder math, newtxmath, eulervm, mtpro2}. 
-其中\cmd{computer modern math}即为默认的数学字体,推荐新手使用. 数学字体并不仅仅包含了我们普通群众任何的Glyph本生，
+其中\cmd{computer modern math}即为默认的数学字体,推荐新手使用. 数学字体并不仅仅包含我们普通群众认为的Glyph本身，
 一套数学字体往往还需要对应的``距离表'',用于指定各个数学符号之间的距离. 数学字体还包含很多复杂的东西，并没有你认为的那么简单.
 
 不想要折腾的用户可以直接看 \href{http://mirrors.ctan.org/info/Free_Math_Font_Survey/en/survey.pdf}{Free-Math-Font}这个 
@@ -787,7 +855,7 @@ C:/texlive/2024/texmf-dist/fonts/opentype/public/tex-gyre-math/texgyretermes-mat
 用MetaFont或者是FontForge, Glyphs之类的工具设计一个自己的字体.
 
 \section{数学环境}
-\subsection{常用数学环境}
+\subsection{常用数学环境}\label{常用数学环境}
 本文档类使用宏包\cmd{amsthm}定义了如下数学环境；大致分为两类: 定理类环境和证明类环境；其中 
 的定理类环境相较于证明类环境多一个带有颜色的\cmd{leftbar}\index{\cmd{leftbar}}. 具体的环境名称见下方:
 
@@ -863,6 +931,7 @@ reason is a representation of, as far as I know, the things in themselves;
 \def\boomcn{劳仑衣普桑，认至将指点效则机，最你更枝。想极整月正进好志次回总般，段然取向
 使张规军证回，世市总李率英茄持伴。}
 
+\subsection{定理类环境主题}
 \subsubsection{none主题}
 \ExplSyntaxOn
 \DeclareDocumentEnvironment{zlatexTheoremLikeFrame}{O{}}{\vspace*{5pt}}{\vspace*{5pt}}
@@ -971,7 +1040,7 @@ reason is a representation of, as far as I know, the things in themselves;
 
 
 \section{标签与引用}
-\subsection{footnote}
+\subsection{Footnote}
 可能有人不喜欢默认的脚注没有在页脚的位置，而是在页脚偏上的位置，用户可以独立加载宏包\cmd{footmisc}用于
 强制脚注位于页面底部，本文档类不打算添加此宏包，用户可以自行在导言区添加如下命令:
 \begin{minted}{latex}
@@ -993,12 +1062,12 @@ z\LaTeX{}文档类加载了\cmd{cleveref}宏包来构建标签-引用系统。�
 在z\LaTeX{}中，引用格式预设值如下(至于多个标签引用时，只有\cmd{lang=en}时采用部分变化，对应的前缀变为复数):
 \begin{table}[H]
     \centering
-    \begin{tabular}{p{3cm}p{3cm}p{3cm}p{3cm}}
+    \begin{tabular}{cccccccc}
         \toprule
-        语言 & 公式 & 图片 & 表格 \\
+        语言 & 公式 & 图片 & 表格 & part & chapter & section & subsection\\
         \midrule
-        \cmd{lang=en} & equation & figure & table \\
-        \cmd{lang=cn} & 方程 & 图 & 表 \\
+        \cmd{lang=en} & equation & figure & table & part & chapter & section & subsection \\
+        \cmd{lang=cn} & 方程 & 图 & 表 & 部分 & 章 & 节 & 小节\\
         \bottomrule
     \end{tabular}
     \caption{cref引用格式}

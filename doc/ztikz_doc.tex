@@ -1395,7 +1395,7 @@ zTikZ提供了命令\cmd{\py}\index{\cmd{\py}}用于浮点数运算, 这部分�
 
 分别用于数值计算(乘方计算), 字符串反转输出, 字符串大写输出. 使用效果如下:
 \begin{itemize}
-    \item Power Calculation: $2^{64} = \pypow{2**10}$
+    \item Power Calculation: $2^{10} = \pypow{2**10}$
     \item Reverse a string using Python: \pyreverse{Hello-LaTeX}
     \item Uppercase a string: \pyuppercase{hello-latex}
     \item Modulus: $102 = \py{102\%8}\quad \text{mod } 8$
@@ -1627,7 +1627,7 @@ zTikZ模块提供和Mathematica相关的符号计算，数值运算和知识查�
 \wolfram{LaplaceTransform[t^4 Sin[t],t,s]}  
 \[\wolframResult\]
 
-\wolfram[text]{WolframAlpha["Shanghai population", "ShortAnswer"]} 
+\wolfram[text]{WolframAlpha["Shanghai Population", "ShortAnswer"]} 
 \[\wolframResult\]
 \end{minted}
 
@@ -1644,7 +1644,8 @@ zTikZ模块提供和Mathematica相关的符号计算，数值运算和知识查�
 \]
 
 在\cmd{\wolfram}指令中执行Mathematica中的\cmd{WolframAlpha}命令进行查询，比如这里查询
-上海的人口数量，结果为:\wolfram[text]{WolframAlpha["Shanghai population", "ShortAnswer"]}
+上海的人口数量，结果为:\wolfram[text]{WolframAlpha["Shanghai Population", "ShortAnswer"]}%
+\wolframResult
 
 这里补充一个使用\cmd{\wolfram}就行数值运算的例子，因为Mathematica 中有着诸多和数值运算相关的函数，
 这里仅以内置的函数\cmd{N[<expression>]}为例: 

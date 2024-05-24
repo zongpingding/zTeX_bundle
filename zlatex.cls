@@ -10,8 +10,8 @@
 % ----------------------------------------------------------------------
 \ExplSyntaxOn
 \tl_const:Nn \c__zlatex_class_name_tl            {zlatex}
-\tl_const:Nn \c__zlatex_class_version_tl         {0.5}
-\tl_const:Nn \c__zlatex_class_date_tl            {2024/04/16}
+\tl_const:Nn \c__zlatex_class_version_tl         {0.6}
+\tl_const:Nn \c__zlatex_class_date_tl            {2024/05/24}
 \tl_const:Nn \c__zlatex_class_description_tl     {a~latex3~document~class}
 
 \ProvidesExplClass{\c__zlatex_class_name_tl}         % Class
@@ -193,7 +193,8 @@
 %                        Math package and hyperref
 % ----------------------------------------------------------------------
 \RequirePackage{amsfonts, amsmath}          
-\RequirePackage{amsthm}             
+\RequirePackage{amsthm}
+\RequirePackage{esint}             
 \RequirePackage{xcolor}
 \RequirePackage[backend=biber]{biblatex}
 \exp_args:Nx \addbibresource{\str_use:N \g__zlatex_bib_source_str}
@@ -204,11 +205,19 @@
 % figure and table prefix for \cref 
 \str_case:VnF \g__zlatex_lang_str {
     {en}{
+        \crefname{part}{part}{parts}
+        \crefname{chapter}{chapter}{chapters}
+        \crefname{section}{section}{sections}
+        \crefname{subsection}{subsection}{subsections}
         \crefname{figure}{figure}{figures}
         \crefname{table}{table}{tables}
         \crefname{equation}{equation}{equations}
     }
     {cn}{
+        \crefname{part}{部分}{部分}
+        \crefname{chapter}{章}{章}
+        \crefname{section}{节}{节}
+        \crefname{subsection}{小节}{小节}
         \crefname{figure}{图}{图}
         \crefname{table}{表}{表}
         \crefname{equation}{方程}{方程}
@@ -447,6 +456,7 @@
 % ----------------------------------------------------------------------
 \RequirePackage{graphicx}
 \RequirePackage{float}
+\RequirePackage{sidenotes}
 \graphicspath{
     {./figure/}{./figures/}{./image/}{./images/}
     {./Pictures/}{./picture/}{./Pics/}{./pics/}
@@ -482,7 +492,7 @@
     {\bfseries\huge\color{black}}
     {\flushright\Large\color{\tl_use:N \l__zlatex_chapter_color_tl}
     \MakeUppercase{\chaptertitlename}\hspace{1ex}
-    {\fontsize{60}{60}\selectfont\thechapter}}
+    {\scalebox{4}{\thechapter}}}
     {10pt}
     {\color{\tl_use:N \l__zlatex_chapter_rule_color_tl}\titlerule\vspace{1ex}}
 % chapter space
