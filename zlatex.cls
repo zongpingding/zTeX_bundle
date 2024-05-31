@@ -9,15 +9,20 @@
 %                       zlatex document class Metadata
 % ----------------------------------------------------------------------
 \ExplSyntaxOn
+% zlatex class info
 \tl_const:Nn \c__zlatex_class_name_tl            {zlatex}
-\tl_const:Nn \c__zlatex_class_version_tl         {0.6}
-\tl_const:Nn \c__zlatex_class_date_tl            {2024/05/24}
-\tl_const:Nn \c__zlatex_class_description_tl     {a~latex3~document~class}
+\tl_const:Nn \c__zlatex_class_version_tl         {0.8}
+\tl_const:Nn \c__zlatex_class_date_tl            {2024/05/30}
+\tl_const:Nn \c__zlatex_class_description_tl     {A~latex3~class~under~development}
 
 \ProvidesExplClass{\c__zlatex_class_name_tl}         % Class
                   {\c__zlatex_class_date_tl}         % Date
                   {\c__zlatex_class_version_tl}      % Version
                   {\c__zlatex_class_description_tl}  % Description
+
+% class message type
+\prop_gput:Nnn \g_msg_module_type_prop { zlatex } { Class }
+\msg_new:nnn {zlatex}{option-language}{Current~invalid~language~option~is:~'\g__zlatex_lang_str',zlatex~only~support~'en,~ cn'~now.}
 
 
 
@@ -27,6 +32,7 @@
 %                              Class Option 
 % ----------------------------------------------------------------------
 \RequirePackage {l3keys2e}
+% key-value alias
 \cs_new_protected:Npn \zlatex_define_option:n
     { \keys_define:nn { zlatex / option } }
 \cs_new_protected:Npn \zlatex_define:nn #1
@@ -34,84 +40,111 @@
 \cs_new_protected:Npn \zlatex_set:nn #1
     { \keys_set:nn { zlatex / #1 } }
 \cs_new_protected:Npn \zlatex_load_after:n #1
-  { \AtBeginDocument {#1} }
+    { \AtBeginDocument {#1} }
 
-% setup option for class 
+% setup options for class
 \zlatex_define_option:n {
-    % language
-    lang                  .str_gset:N   =  \g__zlatex_lang_str,
-    lang                  .initial:n    =  { en },
-    % page layout
-    layout                .str_gset:N   =  \g__zlatex_layout_str,
-    layout                .initial:n    =  { twoside },
-    % margin option
-    margin                .bool_gset:N  =  \g__zlatex_margin_bool,
-    margin                .initial:n    =  { true },
-    % font size
-    font-size             .str_gset:N   =  \g__zlatex_fontsize_str,
-    font-size             .initial:n    =  { 10pt },
-    % math env type
-    math-env-theme         .tl_gset:N    =  \g__zlatex_math_env_theme_tl,
-    math-env-theme         .initial:n    =  { leftbar },
-    % math alias
-    math-alias            .bool_gset:N  =  \g__zlatex_math_alias_bool,
-    math-alias            .initial:n    =  { false },
-    % math-fonts
-    math-font             .choice:,
-    math-font / newtx     .code:n       =  { \zlatex_load_after:n { \RequirePackage{newtxmath} } },
-    math-font / mtpro2    .code:n       =  { \zlatex_load_after:n { \RequirePackage[lite, subscriptcorrection, slantedGreek, nofontinfo]{mtpro2} } },
-    math-font / euler     .code:n       =  { \zlatex_load_after:n { \RequirePackage[OT1, euler-digits]{eulervm} } },
-    math-font / unknown   .code:n       =  {
-        \msg_new:nnn {zlatex}{option-mathfont}{Current~math~font~option~is~:~'#1'~,default~math-font~substitute.}
-        \msg_warning:nn {zlatex}{option-mathfont}
-    },
-    % bib source
-    bib-source            .str_gset:N   =  \g__zlatex_bib_source_str,
-    bib-source            .initial:n    = { ref.bib },
-    % toc setting
-    toc                   .multichoice:,
-    toc / 2column         .code:n       =  { \zlatex_load_after:n { \RequirePackage[toc]{multitoc} } },
-    toc / rename          .code:n       =  { 
-        \str_case:Vn \g__zlatex_lang_str {
+    % zlatex language
+    lang            .str_gset:N   =  \g__zlatex_lang_str,
+    lang            .initial:n    =  { en },
+    % class and options
+    class           .str_gset:N   = \g__zlatex_subclass_type_str,
+    class           .initial:n    = { book },
+    classOption     .clist_gset:N = \g__zlatex_subclass_option_clist,
+    classOption     .initial:n    = { oneside, 10pt },
+    % zlatex options meta key 
+    layout          .meta:nn      = {zlatex / layout}{#1},
+    mathSpec        .meta:nn      = {zlatex / mathSpec}{#1},
+    font            .meta:nn      = {zlatex / font}{#1},
+    bib             .meta:nn      = {zlatex / bib}{#1},
+    % toc setup
+    toc             .multichoice:,
+    toc / 2column   .code:n       =  { \zlatex_load_after:n { \RequirePackage[toc]{multitoc} } },
+    toc / redef     .code:n       =  { 
+        \str_case:VnF \g__zlatex_lang_str {
             {en}{ \zlatex_load_after:n {\renewcommand{\contentsname}{\hfill\bfseries\huge Contents \hfill}} }
             {cn}{ \zlatex_load_after:n {\renewcommand{\contentsname}{\hfill\bfseries\huge 目录     \hfill}} }
-        }{}
+        }{\msg_error:nn {zlatex}{option-language}}
     },
-    toc / unknown         .code:n       =  {
+    toc / unknown.code:n          =  {
         \msg_new:nnn {zlatex}{option-toc}{Current~toc~option~is~:~'#1'~,default~toc~settings~substitute.}
         \msg_warning:nn {zlatex}{option-toc}
     },
 }
+
+% sub-key for each option
+\zlatex_define:nn {layout}{
+    margin              .bool_gset:N  = \g__zlatex_margin_bool,
+    margin              .initial:n    = { false },
+}
+\zlatex_define:nn {mathSpec}{
+    alias               .bool_gset:N  = \g__zlatex_math_alias_bool,
+    alias               .initial:n    = { false },
+    envStyle            .tl_gset:N    = \g__zlatex_math_env_style_tl,
+    envStyle            .initial:n    = { plain },
+    font                .choice:,
+    font / newtx        .code:n       = { \zlatex_load_after:n { \RequirePackage{newtxmath} } },
+    font / mtpro2       .code:n       = { \zlatex_load_after:n { \RequirePackage[lite, subscriptcorrection, slantedGreek, nofontinfo]{mtpro2} } },
+    font / euler        .code:n       = { \zlatex_load_after:n { \RequirePackage[OT1, euler-digits]{eulervm} } },
+    font / mathpazo     .code:n       = { \let\rmbefore\rmdefault\zlatex_load_after:n { \RequirePackage{mathpazo} } \let\rmdefault\rmbefore},
+    font / unknown      .code:n       = {
+        \msg_new:nnn {zlatex}{option-mathfont}{Current~math~font~option~is~:~'#1'~,default~math-font~substitute.}
+        \msg_warning:nn {zlatex}{option-mathfont}
+    },
+}
+\zlatex_define:nn {font}{
+
+}
+\zlatex_define:nn {bib}{
+    source              .str_gset:N   =  \g__zlatex_bib_source_str,
+    source              .initial:n    =  { ref.bib },
+    backend             .str_gset:N   =  \g__zlatex_bib_backend_str,
+    backend             .initial:n    =  { biber },
+}
+
+% option setup
 \ProcessKeysOptions {zlatex / option}
+\NewDocumentCommand{\zlatexSetup}{m}{
+    \zlatex_set:nn {option}{#1}
+}
 
-% pass a clist options to 'book' 
-\clist_new:N \g__zlatex_book_options_clist
-\clist_gput_right:Nx \g__zlatex_book_options_clist { \g__zlatex_layout_str, \g__zlatex_fontsize_str }
-
-% setup messages for engin an language
-\prop_gput:Nnn \g_msg_module_type_prop { zlatex } { Class }
-\msg_new:nnn {zlatex}{compile-engine-pdftex}{Current~compile~engine~is~XETEX,~use~PDFTEX~instead.}
-\msg_new:nnn {zlatex}{compile-engine-xetex }{Current~compile~engine~is~PDFTEX,~use~XETEX~instead.}
-\msg_new:nnn {zlatex}{option-language}{Current~language~option~is:~'\g__zlatex_lang_str',~which~is~invalid.}
+% pass clist options main subclass: 'article', 'book', 'ctexbook'
+\str_case:VnF \g__zlatex_subclass_type_str {
+    {article}{
+        \PassOptionsToClass{\g__zlatex_subclass_option_clist}{ article }
+        \LoadClass{article}
+    }
+    {book}{
+        \PassOptionsToClass{\g__zlatex_subclass_option_clist}{ book }
+        \LoadClass{book}   
+    }
+    {ctexbook}{
+        \str_set:Nn \g__zlatex_lang_str {cn}
+        \PassOptionsToClass{\g__zlatex_subclass_option_clist}{ ctexbook }
+        \PassOptionsToPackage{quiet}{fontspec}
+        \LoadClass{ctexbook}    
+    }
+}{\relax}
 
 % baisc document class and packages option
-\str_case:VnF \g__zlatex_lang_str{
+\msg_new:nnn {zlatex}{compile-engine-pdftex}{Current~compile~engine~is~XETEX,~use~PDFTEX~instead.}
+\msg_new:nnn {zlatex}{compile-engine-xetex }{Current~compile~engine~is~PDFTEX,~use~XETEX~instead.}
+\str_case:VnF \g__zlatex_lang_str {
     {en} { 
         \sys_if_engine_xetex:TF 
             {\msg_warning:nn {zlatex}{compile-engine-pdftex}}
             {\RequirePackage[utf8]{inputenc}}
-        \LoadClass[\clist_use:Nn \g__zlatex_book_options_clist{,}]{book} 
         \RequirePackage[T1]{fontenc}
-        \RequirePackage[english]{babel} 
+        \RequirePackage[english]{babel}
     }
     {cn} {
         \sys_if_engine_xetex:TF {}{\msg_error:nn {zlatex}{compile-engine-xetex}}
         \PassOptionsToPackage{quiet}{fontspec}
         \PassOptionsToPackage{no-math}{fontspec}
-        \LoadClass[\clist_use:Nn \g__zlatex_book_options_clist{,}]{book}
-        % ctex should after 'book' class (or use 'scheme=plain', which chang nothing)
-        \RequirePackage[UTF8, heading]{ctex}
-        \linespread{1.3}
+        \str_if_eq:VnF \g__zlatex_subclass_type_str {ctexbook}{
+            \RequirePackage[UTF8, heading]{ctex}
+            \linespread{1.3}
+        }
     }
 }{\msg_error:nn {zlatex}{option-language}}   
 
@@ -125,24 +158,21 @@
 \RequirePackage{framed}
 \RequirePackage{geometry}
 % page layout 
-\str_case:VnF \g__zlatex_layout_str {
-    {twoside}{
+\if@twoside 
+    \geometry{a4paper, left=3cm, right=5.5cm, bottom=3.5cm, footskip=1.5cm, marginparsep=1em}
+    \bool_if:NTF \g__zlatex_margin_bool {}{
+        \msg_new:nnn {zlatex}{option-page-margin}{No~margin~option~is~only~accessible~in~oneside~layout,~margin~option~is~now~enabled~by~default.} 
+        \msg_warning:nn {zlatex}{option-page-margin}
+    }
+\else 
+    \bool_if:NTF \g__zlatex_margin_bool {
         \geometry{a4paper, left=3cm, right=5.5cm, bottom=3.5cm, footskip=1.5cm, marginparsep=1em}
-        \bool_if:NTF \g__zlatex_margin_bool {}{
-            \msg_new:nnn {zlatex}{option-page-margin}{No~margin~option~is~only~accessible~in~oneside~layout,~margin~option~is~now~enabled~by~default.} 
-            \msg_warning:nn {zlatex}{option-page-margin}
-        }
+        \dim_gset:Nn \marginparwidth{9.25em}
+    }{
+        \geometry{a4paper, left=3cm, right=3cm, bottom=3.5cm, footskip=1.5cm, marginparsep=1em}
+        \renewcommand{\marginpar}[1]{\leftbar\noindent#1\endleftbar}
     }
-    {oneside}{
-        \bool_if:NTF \g__zlatex_margin_bool {
-            \geometry{a4paper, left=3cm, right=5.5cm, bottom=3.5cm, footskip=1.5cm, marginparsep=1em}
-            \dim_gset:Nn \marginparwidth{9.25em}
-        }{
-            \geometry{a4paper, left=3cm, right=3cm, bottom=3.5cm, footskip=1.5cm, marginparsep=1em}
-            \renewcommand{\marginpar}[1]{\leftbar\noindent#1\endleftbar}
-        }
-    }
-}{}
+\fi
 
 % fancy page settings
 \RequirePackage{fancyhdr}
@@ -150,19 +180,20 @@
     \fancyhf{}  
     \dim_gset:Nn \headheight{15pt}
     \renewcommand{\headrule}{\hrule width\textwidth}
-    \msg_new:nnn {zlatex}{option-page-layout}{Current~page~layout~option~is~:'\clist_item:Nn \g__zlatex_book_options_clist{1}',~which~is~invalid.}
-    \str_case:VnF \g__zlatex_layout_str{
-        {twoside}{
-            \fancyhead[EL]{\leftmark}
-            \fancyhead[ER]{\thepage}
-            \fancyhead[OL]{\thepage}
-            \fancyhead[OR]{\rightmark}
-        }
-        {oneside}{
+    \if@twoside
+        \fancyhead[EL]{\leftmark}
+        \fancyhead[ER]{\thepage}
+        \fancyhead[OL]{\thepage}
+        \fancyhead[OR]{\rightmark}
+    \else
+        \IfClassLoadedTF{book}{
             \fancyhead[L]{\thepage}
             \fancyhead[R]{\rightmark}
+        }{
+            \fancyhead[L]{\thepage}
+            \fancyhead[R]{\leftmark}
         }
-    }{\msg_error:nn {zlatex}{option-page-layout}}
+    \fi
 }
 \fancypagestyle{plain}{
     \fancyhf{}  
@@ -171,19 +202,21 @@
     \fancyfoot[C]{\thepage}
 }
 
-% front and main matter cmds
-\renewcommand\frontmatter{%
-    \cleardoublepage
-    \pagestyle{plain}
-    \@mainmatterfalse
-    \pagenumbering{Roman}
-}
-\renewcommand\mainmatter{%
-    \cleardoublepage
-    \pagestyle{fancy}
-    \@mainmattertrue
-    \pagenumbering{arabic}
-}
+% front and main matter cmds in book class
+\IfClassLoadedTF{book}{
+    \renewcommand\frontmatter{
+        \cleardoublepage
+        \pagestyle{plain}
+        \@mainmatterfalse
+        \pagenumbering{Roman}
+    }
+    \renewcommand\mainmatter{
+        \cleardoublepage
+        \pagestyle{fancy}
+        \@mainmattertrue
+        \pagenumbering{arabic}
+    }
+}{\relax}
 
 
 
@@ -196,7 +229,10 @@
 \RequirePackage{amsthm}
 \RequirePackage{esint}             
 \RequirePackage{xcolor}
-\RequirePackage[backend=biber]{biblatex}
+\str_case:VnF \g__zlatex_bib_backend_str {
+    {bibtex}{\RequirePackage[backend=bibtex]{biblatex}}
+    {biber}{\RequirePackage[backend=biber]{biblatex}}
+}{\relax}
 \exp_args:Nx \addbibresource{\str_use:N \g__zlatex_bib_source_str}
 \RequirePackage{indextools}
 \RequirePackage{hyperref}
@@ -205,8 +241,10 @@
 % figure and table prefix for \cref 
 \str_case:VnF \g__zlatex_lang_str {
     {en}{
-        \crefname{part}{part}{parts}
-        \crefname{chapter}{chapter}{chapters}
+        \IfClassLoadedTF{book}{
+            \crefname{part}{part}{parts}
+            \crefname{chapter}{chapter}{chapters}
+        }{\relax}
         \crefname{section}{section}{sections}
         \crefname{subsection}{subsection}{subsections}
         \crefname{figure}{figure}{figures}
@@ -214,8 +252,10 @@
         \crefname{equation}{equation}{equations}
     }
     {cn}{
-        \crefname{part}{部分}{部分}
-        \crefname{chapter}{章}{章}
+        \IfClassLoadedTF{book}{
+            \crefname{part}{部分}{部分}
+            \crefname{chapter}{章}{章}
+        }{\relax}
         \crefname{section}{节}{节}
         \crefname{subsection}{小节}{小节}
         \crefname{figure}{图}{图}
@@ -305,7 +345,6 @@
 
 % math envs' name accrodingt to language
 \msg_new:nnn {zlatex}{mathenv-name}{Current~math~env~name~is~:~'#1'~,which~is-invalid.}
-\msg_new:nnn {zlatex}{mathenv-lang}{Current~math~envs~language~option~is~:~'#1'~,which~is-invalid.~default~'en'~substitute.}
 \str_case:VnTF \g__zlatex_lang_str { 
     {en}{
         \zlatex_define:nn {math-env}{
@@ -348,7 +387,7 @@
         }
     }
 }{\zlatex_set:nn {math-env}{math-env={axiom, definition, theorem, lemma, corollary, proposition, remark, proof, exercise, example, solution, problem}}}
-{\msg_error:nn {zlatex}{mathenv-lang}}
+{\msg_error:nn {zlatex}{option-lang}}
 
 % math env's style
 \newtheoremstyle{zlatexMathEnv}
@@ -358,9 +397,9 @@
 \theoremstyle{zlatexMathEnv}
 
 % theorem-like env declaration
-\msg_new:nnn {zlatex}{mathenv-type}{Current~math~env~is~:~'#1'~,only~'none',~'leftbar',~'background'~types~are-valid.}
-\str_case:VnF \g__zlatex_math_env_theme_tl {
-    {none}{
+\msg_new:nnn {zlatex}{mathenv-type}{Current~math~env~is~:~'\str_use:N \g__zlatex_math_env_style_tl'~,only~'plain',~'leftbar',~'background',~'fancy'~types~are-valid.}
+\str_case:VnF \g__zlatex_math_env_style_tl {
+    {plain}{
         \NewDocumentEnvironment{zlatexTheoremLikeFrame}{O{}}{\vspace*{5pt}}{\vspace*{5pt}}
     }
     {leftbar}{
@@ -369,7 +408,13 @@
             \MakeFramed {\advance\hsize-\width \FrameRestore}
         }{\endMakeFramed}
     }
-    {all}{
+    {background}{
+        \NewDocumentEnvironment{zlatexTheoremLikeFrame}{O{black}}{
+            \def\FrameCommand{\colorbox{#1!10}}
+            \MakeFramed {\advance\hsize-\width \FrameRestore}
+        }{\endMakeFramed}
+    }
+    {fancy}{
         \NewDocumentEnvironment{zlatexTheoremLikeFrame}{O{black}}{
             \def\FrameCommand{{\color{#1}\vrule width 3pt}\colorbox{#1!10}}
             \MakeFramed{\advance\hsize-\width \FrameRestore}
@@ -399,16 +444,21 @@
             \exp_args:Nxxx \crefname{zlatex#1}{\tl_use:c {zlatex#1Name}}{\tl_use:c {zlatex#1Name}}
             \creflabelformat{zlatex#1}{##2(##1)##3}
         }
-    }{\msg_error:nn {zlatex}{mathenv-lang}}
+    }{\msg_error:nn {zlatex}{option-lang}}
 }
 
 % proof-like env decalration
+\NewDocumentEnvironment{zlatexProofLikeFrame}{O{}}{
+    \def\FrameCommand{}
+    \MakeFramed {\advance\hsize-\width \FrameRestore}
+}{\endMakeFramed}
 \renewcommand{\qedsymbol}{\ensuremath{\blacksquare}}
 \clist_map_inline:Nn \g__zlatex_prooflike_envs_clist{
     \DeclareDocumentEnvironment{#1}{O{}}{
+        \begin{zlatexProofLikeFrame}[]
         {\noindent{\bfseries\tl_use:c {zlatex#1Name}:}}
         \tl_set:Nn \l__arg_one_tl {#1}
-    }{\str_if_eq:VnTF \l__arg_one_tl{proof}{\hfill\qedsymbol\par}{\par}}
+    }{\str_if_eq:VnTF \l__arg_one_tl{proof}{\hfill\qedsymbol\par}{\par}\end{zlatexProofLikeFrame}}
 }
 
 % equation number style
@@ -482,27 +532,35 @@
         {} {\contentslabel{3.2em}} {} {\titlerule*[1pc]{.}\contentspage}
     % print ToC
     \vspace*{-2em}
-    \startcontents[chapters]
-    \printcontents[chapters]{p}{1}{}
+    \IfClassLoadedTF{book}{
+        \startcontents[chapters]
+        \printcontents[chapters]{p}{1}{}
+    }{
+        \startcontents[sections]
+        \printcontents[sections]{p}{1}{}
+    }
 }
 
 % chapter head style
-\RequirePackage{titlesec}
-\titleformat{\chapter}[display]
-    {\bfseries\huge\color{black}}
-    {\flushright\Large\color{\tl_use:N \l__zlatex_chapter_color_tl}
-    \MakeUppercase{\chaptertitlename}\hspace{1ex}
-    {\scalebox{4}{\thechapter}}}
-    {10pt}
-    {\color{\tl_use:N \l__zlatex_chapter_rule_color_tl}\titlerule\vspace{1ex}}
-% chapter space
-\titlespacing{\chapter}{0pt}{-30pt}{40pt}
-\titleformat{name=\chapter, numberless}
-    {\normalfont\bfseries\Huge}
-    {}{0pt}{}
+\IfClassLoadedTF{book}{
+    \RequirePackage{titlesec}
+    \titleformat{\chapter}[display]
+        {\bfseries\huge\color{black}}
+        {\flushright\Large\color{\tl_use:N \l__zlatex_chapter_color_tl}
+        \MakeUppercase{\chaptertitlename}\hspace{1ex}
+        {\scalebox{4}{\thechapter}}}
+        {10pt}
+        {\color{\tl_use:N \l__zlatex_chapter_rule_color_tl}\titlerule\vspace{1ex}}
+    % chapter space
+    \titlespacing{\chapter}{0pt}{-30pt}{40pt}
+    \titleformat{name=\chapter, numberless}
+        {\normalfont\bfseries\Huge}
+        {}{0pt}{}
+}{\relax}
 
 % title page
 \renewcommand{\maketitle}{
+\hypersetup{pageanchor=false}
 \begin{titlepage}
     \vfill\vspace*{40pt}
     \noindent\hspace*{134pt}\rule[-75pt]{6pt}{95pt}{\hspace*{10pt}\leavevmode\parbox[t]{25em}{\fontsize{25}{25}\selectfont\bfseries\@title}}\par
@@ -510,7 +568,8 @@
     \noindent\hspace*{150pt}{\leavevmode\parbox[t]{30em}{\Large\bfseries\@author}}\par
     \vfill
     \noindent\hspace*{150pt}{\Large\textcolor{gray}{\@date}}
-\end{titlepage}} 
+\end{titlepage}
+\hypersetup{pageanchor=true}} 
 
 % reset counter command
 \NewDocumentCommand{\zlatexUpdateCounterAfter}{mm}{\@addtoreset{#1}{#2}}
@@ -526,7 +585,7 @@
 \newcommand{\zlatexOptions}{
     \textbf{Class~Options:}~
     \str_use:N \g__zlatex_lang_str~-~
-    \clist_use:Nn \g__zlatex_book_options_clist{~-~}
+    \clist_use:Nn \g__zlatex_subclass_option_clist{~-~}
     \par
 }
 % write cmd verbatim to output

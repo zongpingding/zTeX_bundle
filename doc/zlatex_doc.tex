@@ -1,4 +1,4 @@
-\chapter{z\LaTeX{}文档类}
+\chapter{z\LaTeX{}文档类}\label{start-use-class}
 \section{基本介绍}
 本文档类z\LaTeX{}基于\cmd{book}类，主要用于满足和方便使用\LaTeX{}使用者进行书籍和笔记的排版需求。
 z\LaTeX{}全部由\LaTeX3进行编写，采用\cmd{key-value}的方式进行选项配置，方便后续的模板拓展和维护.
@@ -37,7 +37,7 @@ z\LaTeX{}的最小工作示例如下\Footnote{可能需要根据自己的实际�
 
 \begin{minted}{latex}
 % compile engine: xelatex 
-\documentclass[lang=cn]{zlatex}
+\documentclass[lang=cn, class=article]{zlatex}
 
 \title{<title>}
 \author{<author>}
@@ -59,7 +59,7 @@ z\LaTeX{}的最小工作示例如下\Footnote{可能需要根据自己的实际�
 
 \begin{minted}{latex}
 % compile engine: pdflatex 
-\documentclass[lang=en]{zlatex}
+\documentclass[lang=en, class=article]{zlatex}
 
 \title{<title>}
 \author{<author>}
@@ -103,7 +103,7 @@ z\LaTeX{}文档类会根据用户指定的选项自动处理和加载对应的�
         fancyhdr & amsfonts & amsmath & amsthm  \\
         xcolor & biblatex & indextools & hyperref \\ 
         cleveref & graphicx & float & titletoc \\
-        titlesec & esint & sidenotes &\\
+        titlesec & esint & sidenotes & \\
         \bottomrule
     \end{tabular}}
     \caption{z\LaTeX{}文档类基本宏包}
@@ -118,7 +118,7 @@ z\LaTeX{}文档类会根据用户指定的选项自动处理和加载对应的�
     \centering{\ttfamily
     \begin{tabular}{p{2cm}p{4cm}p{2cm}p{2cm}p{2cm}}
         \toprule
-        {\rmfamily lang=en} & inputenc(pdftex) & fontenc &  babel \\
+        {\rmfamily lang=en} & inputenc(pdftex) & fontenc \\
         {\rmfamily lang=cn} & fontspec & ctex \\
         \bottomrule
     \end{tabular}}
@@ -136,14 +136,15 @@ z\LaTeX{}文档类会根据用户指定的选项自动处理和加载对应的�
 为了方便新手较为方便的使用不同的数学字体，本模板设置了几个简单的数字切换命令.从前面的导言区数学字体
 配置就可以看出，本模板会根据导言区设置不同的数学字体的功能了. 具体的加载宏包\index{math packages}规则如下:
 \begin{itemize}
-    \item \cmd{math-font=<none>}: 不加载任何的数学字体宏包，采用默认数学字体
-    \item \cmd{math-font=newtx}: 加载宏包 \cmd{newtxmath}
-    \item \cmd{math-font=euler}: 加载命令 \cmd{\RequirePackage[OT1, euler-digits]{eulervm}}
-    \item \cmd{math-font=mtpro2}: 加载命令 \par
+    \item \cmd{font=<none>}: 不加载任何的数学字体宏包，采用默认数学字体
+    \item \cmd{font=newtx}: 加载宏包 \cmd{newtxmath}
+    \item \cmd{font=euler}: 加载命令 \cmd{\RequirePackage[OT1, euler-digits]{eulervm}}
+    \item \cmd{font=mtpro2}: 加载命令 \par
         \cmd{\RequirePackage[lite,subscriptcorrection,slantedGreek,nofontinfo]{mtpro2}}
+    \item \cmd{font=mathpazo}: 加载命令 \cmd{\RequirePackage{mathpazo}},同时保留了文档类默认的正文字体样式.
 \end{itemize}
 
-如果使用者在导言区指定了选项\cmd{math-alias=true}, 那么z\LaTeX{}此时还会额外加载
+如果使用者在导言区指定了选项\cmd{alias=true}, 那么z\LaTeX{}此时还会额外加载
 宏包\index{optional packages}:\cmd{amssymb, mathtools, bm}.
 
 z\LaTeX{}还默认加载了宏包\cmd{esint},用于提供更多的积分符号.下面仅举几例,更多的人信息请参见\cmd{esint}宏包：
@@ -161,60 +162,116 @@ z\LaTeX{}还默认加载了宏包\cmd{esint},用于提供更多的积分符号.�
 如果你想要自己设置文档对应的数学字体，那么请参见"字体配置\cref{font-config}"中的数学字体配置部分.
 \end{leftbar}
 
-\section{文档类选项}
-本模板具有丰富的配置选项\index{配置选项}，包含页面设置\index{页面设置}，页边距，边注\index{边注}，数学字体\index{数学字体}，
-字体大小\index{字体大小}，模板语言\index{模板语言}; 采用键值对\cmd{[<key 1>=<value 1>, <key 2>=<value 2>]}的形式
-对各个选项就行指定, 和具体的指定顺序无关, 具体的可配置项和可用的配置值参见\cref{table:zlatex-option}:
+\section{文档类选项与命令}
+本模板具有丰富的配置选项\index{配置选项}, 采用键值对\cmd{[<key 1>=<value 1>, <key 2>=<value 2>]}的形式对各个选项就行指定, 和具体的指定顺序无关, 
+具体的可配置项和可用的配置值参见本节的后续内容以及\cref{fig:zlatex-options}. 现在先简要说明z\LaTeX{}文档类的主要配置内容:
 
-\subsection{配置方法}
-\begin{table}[H]
-    \centering
-    \begin{tabular}{p{4cm}p{5cm}p{3cm}}
-    \toprule
-    选项\cmd{<key>} & 可选值\cmd{<value>} & 默认值 \\[.25em]
-    \hline
-    \cmd{lang} & \cmd{en, cn} & \cmd{en} \\
-    \cmd{layout} & \cmd{oneside, twoside} & \cmd{twoside} \\
-    \cmd{margin} & \cmd{false, true} & \cmd{true} \\
-    \cmd{font-size} & \cmd{10pt, 11pt, 12pt} & \cmd{11pt} \\
-    \cmd{math-alias} & \cmd{false, true} & \cmd{false} \\
-    \cmd{math-font} & \cmd{newtx, mtpro2, euler} & \cmd{<none>} \\
-    \cmd{math-env-theme} & \cmd{none, leftbar, all} & \cmd{none} \\
-    \cmd{bib-source} & \cmd{<自定义>} & \cmd{ref.bib} \\
-    \cmd{toc} & \cmd{rename, 2column} &  \cmd{<none>}\\
-    \bottomrule
-    \end{tabular}
-    \caption{z\LaTeX{}配置选项}
-    \label{table:zlatex-option}
-\end{table}
-
-\begin{leftbar}
-关于\cmd{math-env-theme}的详细信息请参见"常用数学环境\cref{常用数学环境}"
-\end{leftbar}
-
-目前的z\LaTeX{}接口还不够丰富，没有进行相关的\cmd{Hook}(钩子)的声明，所以用户可以配置的选项是比较少的，
-只要能够把导言区设置规范，那么剩下的内容你几乎是不用在设置了.
-
-\subsection{注意事项}
-下面是一些你在指定文档类选项时应该注意到的问题:
 \begin{itemize}
-    \item \cmd{margin=false} 只有在指定 \cmd{layout=oneside}时才会启用，否则会抛出警告. 同时需要注意，如果原来
-        含有\cmd{\marginpar}命令的文档，在指定\cmd{margin=false}后，对应的\cmd{\marginpar}环境，会被替换为\cmd{framed}宏包
-        提供的\cmd{leftbar}环境.
-    \item \cmd{lang=cn} 时仅支持编译方式为 \cmd{xelatex}, 在指定 \cmd{lang=en}时，\cmd{pdflatex, xelatex}
-        二者都是可以接受的，但是建议采用 \cmd{pdflatex}, 因为在指定为 \cmd{en}时部分的西文宏包可能会有冲突的危险,
-        因为当\cmd{lang=en}, 并且采用\cmd{pdflatex}进行编译时，z\LaTeX{}会引入宏包\cmd{inputenc}, 然而此宏包
-        对\cmd{xelatex}是没有适配的.
-    \item 数学字体选项不一定符合每一个人，本模板的开发环境为 \cmd{WSL+Archlinux}. 同时其中的
-        \cmd{mtpro2}字体并非免费字体，请注意.
-    \item \cmd{math-alias}选项可以根据个人习惯进行选择，默认情况下并不会加载。但是在加载此选项后，默认的两个\LaTeX{}
-        指令\cmd{\S, \ll} 会被覆盖，分别被更名为 \cmd{\ss, \LL}:(\ss, $\LL$). 
-    \item \cmd{toc}\index{\cmd{toc}}选项可以同时指定\cmd{rename, 2column},分别代表重定义目录名(居中加粗),以及使用双栏目录排版.
+    \item 模板语言\index{模板语言}:目前本模板类仅支持中文和英文两种语言.
+    \item 文档类选择\index{文档类选择}:可以在加载本文档类时指定\cmd{article, book, ctexbook}.
+    \item 页面设置\index{页面设置}:页边距，版心，页眉页脚等的指定;目前本模板还未整理好对应的接口.
+    \item 边注\index{边注}(marging):包含编注图片或文字注释,其中边注图片依赖宏包\cmd{sidenotes}.
+    \item 数学字体\index{数学字体}:本模板预设了5种数学字体选相关:\cmd{}.
+    \item 字体配置\index{字体大小}:用户可以根据自己的字体喜好配置自己喜欢的中英文字体.
+\end{itemize} 
+
+\subsection{导言区}
+\newcommand{\zkey}[1]{\texttt{<#1>}}
+目前z\LaTeX{}可以从文档类的加载选项中指定，也可以通过命令\cmd{\zlatexSetup}进行设置. 配置的键值对目前的层级为两级. 第一级
+中主要的键为:\zkey{layout}, \zkey{mathSpec}, \zkey{font}, \zkey{bib}, \zkey{classOption}, \zkey{lang}, \zkey{toc}. 其中前
+四个键(key)具有自己的独立的子键(sub-key)，后面的两者具有不具有自己的子键，直接指定即可. 关于各层key-value的关系请见\cref{fig:zlatex-options}.
+
+\begin{figure}[!htb]
+    \centering
+    \includegraphics[width=.9\linewidth]{./pics/zlatex_options.pdf}
+    \caption{zlatex options map}
+    \label{fig:zlatex-options}
+\end{figure}
+
+从\cref{fig:zlatex-options}可以看出,z\LaTeX{} 的配置是比较复杂的，但是新手也不必担心，默认的选项配置下已经能够得到一个效果比较好的文档了.
+下面详细说明各个键的指定方式和作用. 
+
+\subsubsection{classOption}
+这里的\zkey{classOption}表示你加载的对应文档类对于的合法options. 比如对应\cmd{article}文档类，合法的一个\zkey{classOption}
+=\texttt{\{10pt, oneside, fleqn\}}. 如果你在加载文档类时指定的\zkey{class}为\cmd{ctexbook},那么此时你就可以在这个\zkey{classOption}
+中填入如下的内容:\cmd{zihao=5, 12pt, heading=false, linespread=1.3}等\cmd{ctex}手册中的合法选项. 如果对于默认的\cmd{article,book}
+文档类不熟悉，可以参见网站:\href{https://texblog.org/2013/02/13/latex-documentclass-options-illustrated/}{latex-documentclass-options}.
+
+\subsubsection{lang}
+键\zkey{lang}的合法值为\cmd{en, cn};第二个关于文档语言的指定是比较容易理解的,但是还是得说明对应的一些注意事项.\cmd{lang=cn}或者\cmd{class=ctexbook}时仅支持为\cmd{xelatex}
+编译;在指定\cmd{lang=en}时,\cmd{pdflatex, xelatex}二者都是可以接受的，但是建议采用\cmd{pdflatex}, 因为在指定为\cmd{en}时部分的西文宏包
+可能会有冲突的危险.当\cmd{lang=en}, 并且采用\cmd{pdflatex}进行编译时，z\LaTeX{}会引入宏包\cmd{inputenc}, 然而此宏包对\cmd{xelatex}是
+没有适配的.
+
+\subsubsection{toc}
+键\zkey{toc}的合法值为\cmd{redef, 2column},这一选项主要用于文档的目录格式设置，可以设置目录页对应的标题，目录的栏数.
+\zkey{toc}\index{\cmd{toc}}选项可以同时指定\cmd{redef, 2column},分别代表重定义目录名(居中加粗),以及使用双栏目录排版.
+后续可能会把这个键\zkey{toc}放入\zkey{layout}中，所以这个键目前接口还不稳定, 请谨慎使用.
+
+\subsubsection{bib}
+本模板采用的文献后端默认是\cmd{biber},可以在导言区通过\cmd{backend=bibtex}来更改后端为\cmd{bibtex}.这说明，在默认配置下，
+你编译文档时应采用\cmd{biber}命令, 而非\cmd{bibtex}命令. 同样的，你可以通过\zkey{bib}的子键\zkey{source}来指定存放参考文献的
+文件的名称，默认为\cmd{ref.bib}. 
+
+\subsubsection{layout}
+\zkey{layout}键可以用于指定整个文档的布局,包括版心,页边距,边注等.目前模板提供了其对的一个子键\zkey{margin}.
+此键的合法值均为bool值。指定方式如下:
+\begin{minted}{latex}
+% {margin} <=> {margin=true}
+\documentclass[
+    layout={margin}
+]{zlatex}
+\end{minted}
+
+默认情况下\zkey{margin}的值为\cmd{false}. 如果使用了上述的示例代码，那么此时的文档就会有边注. 一般情况下，使用者是不需要加载这个选项的. 
+一个需要注意的点就是:\cmd{margin=false} 只有在\cmd{oneside}时才有效，否则会抛出警告. 同时需要注意，如果原来含有\cmd{\marginpar}命令的
+文档，在指定\cmd{margin=false}后，对应的\cmd{\marginpar}环境，会被替换为\cmd{framed}宏包提供的\cmd{leftbar}环境.
+
+\subsubsection{mathSpec}
+此选项可以用于设置文档类的如下内容:
+\begin{itemize}
+    \item 数学字体(\zkey{font}=\cmd{<name>}):可用\cmd{<name>}:\cmd{newtx, mtpro2, euler, mathpazo}
+    \item 定理类环境样式(\zkey{envStyle}=\cmd{<name>}):可用\cmd{<name>}有:\cmd{plain, leftbar, background, fancy}
+    \item 字体命令别称加载(\zkey{alias}):可以直接输入\cmd{alias, alias=false}或者是输入\cmd{alias=true, alias=false}
 \end{itemize}
 
-\subsection{快捷命令}
-关于文档类选项\cmd{math-alias}\index{\cmd{math-alias}}的进一步说明,默认的自定义命令可能并不一定符合每一个人的习惯,所以请谨慎加载此选项.
-在\cmd{math-alias=true}后,z\LaTeX{}会进行如下命令的声明/重定义,以及宏包的加载:
+比如你想要设置键(\zkey{mathSpec})对应子键:\cmd{font, envStyle, alias}的值(value), 其中最后一个key为bool值.于是你
+可以在导言区中这样设置:
+
+\begin{minted}{latex}
+\documentclass[
+    mathSpec={
+        alias,
+        envStyle=background,  
+        font=newtx
+    },
+]{zlatex}
+\end{minted}
+
+上述的声明表示，文档类的数学环境样式为\cmd{background}，数学字体为\cmd{newtxmath}. 同时加载了数学命令别称.
+于是此时常用的如下命令:
+\begin{minted}{latex}
+\mathbb{X}    \mathcal{X}    \mathrm{X}   ...
+\end{minted}
+
+可以替换为如下更加简洁的形式:
+\begin{minted}{latex}
+\B{X}    \C{X}    \R{X}    ...
+\end{minted}
+
+关于\cmd{alias}的更加详细的使用，请参见如下的章节"快捷命令\cref{快捷命令}". \cmd{alias}选项可以根据个人习惯进行选择，默认
+情况下并不会加载。但是在加载此选项后，默认的两个\LaTeX{}指令\cmd{\S, \ll} 会被覆盖，分别被更名为 \cmd{\ss, \LL}:(\ss, $\LL$). 
+
+同时需要注意的是，本模板提供给的部分数学字体设置并不一定符合每一个人，且由于本模板的开发环境为\cmd{WSL+Archlinux}，所以在平台迁移后部分
+字体配置可能会出现问题. 其中的\cmd{mtpro2}字体并非免费字体，请注意. 如果想要自己配置数学字体可以参见后文``Unicode-math:\cref{数学字体}''
+
+\begin{leftbar}
+关于\cmd{envStyle}的详细信息请参见"常用数学环境\cref{常用数学环境}"
+\end{leftbar}
+
+\subsection{快捷命令}\label{快捷命令}
+关于文档类选项\cmd{alias}\index{\cmd{alias}}的进一步说明,默认的自定义命令可能并不一定符合每一个人的习惯,所以请谨慎加载此选项.
+在\cmd{alias=true}后,z\LaTeX{}会进行如下命令的声明/重定义,以及宏包的加载:
 \begin{minted}{latex}
 \RequirePackage{amssymb, mathtools}
 \RequirePackage{bm}          
@@ -250,47 +307,36 @@ z\LaTeX{}还默认加载了宏包\cmd{esint},用于提供更多的积分符号.�
 上述的几个常见的数学运算符声明可能并不是那么的规范，如果有必要，可以自行进行修改.
 可以参见命令\cmd{\DeclareMathOperator}.
 
-\section{z\LaTeX{}接口}
-z\LaTeX{}的接口正在不断的完善中，所以目前的接口可能并不是那么稳定。(我已经尽力让接口规范和稳定了)
-
-\subsection{命令声明}
-后面我可能会考虑建立一个用于自定义命令的接口，采用键值对的方式进行配置，而不是默认的位置参数或者是xparse提供的可选，
-默认，强制参数等。依托于\LaTeX3的\cmd{key-value}模块，这样的接口会更加的灵活，方便用户进行配置.
-
-\subsection{盒子接口}
-由于目前我还没有弄清楚\LaTeX3的盒子操作，所以z\LaTeX{}的盒子接口还没有进行完善，但是我会尽快的进行完善.
-
-\subsection{TikZ接口}
-本人并不打算在z\LaTeX{}中使用 \cmd{tikz} 宏包，因为我觉得这个宏包太过于庞大,很多的功能都不是一个文档类必须的.
-可能我会在后续引入\cmd{l3draw}\index{\cmd{l3draw}}模块用于TikZ操作. 
-
-\begin{leftbar}
-本文档类配套的\cmd{ztikz}库提供了丰富的和TikZ绘图，数值计算，以及部分的图像处理功能.具体使用请参见下一个单元.
-\end{leftbar}
-
-\subsection{计数器}
-目前的计数器部分继承自 \cmd{book}文档类和使用\cmd{amsthm}\index{\cmd{amsthm}}宏包定义的数学环境计数器 
-theorem, definition, corollary, example, axiom, remark.
-
-目前z\LaTeX{}提供了一个命令\cmd{\zlatexUpdateCounterAfter}\index{\cmd{\zlatexUpdateCounterAfter}}用于设置
-计数器的更新，使用格式为:
+\subsection{zlatexSetup}
+本模板同样也提供了命令\cmd{\zlatexSetup}用于在导言区对整个文档进行设置，其使用方法和前面的几乎是一致的. 如下的
+两段声明是等价的：
 \begin{minted}{latex}
-\zlatexUpdateCounterAfter{<child>}{<father>}
+\documentclass[
+    mathSpec={envStyle=background, alias, font=mathpazo},
+    toc={redef, 2column},
+    bib={backend=bibtex}
+]{zlatex}
 \end{minted}
 
-也就是让上述的\cmd{<child>}计数器随着\cmd{<father>}父计数器的更新而更新,本命令的实现原型为:
 \begin{minted}{latex}
-\NewDocumentCommand{\zlatexUpdateCounterAfter}{mm}{
-    \@addtoreset{#1}{#2}
+\zlatexSetup{
+    mathSpec={
+        envStyle=background,
+        font=mathpazo, 
+        alias
+    },
+    toc={redef, 2column},
+    bib={backend=bibtex}
 }
 \end{minted}
 
-关于本文档类的公式计数器的说明,本文档类公式计数器默认跟随\cmd{section}计数器更新，在z\LaTeX{}的源码中的声明为:
-\begin{minted}{latex}
-\counterwithin{equation}{section}
-\end{minted}
+但是命令\cmd{\zlatexSetup}并不能进行所有的选项指定，如\zkey{class}, \zkey{lang}这两者就只能在加载文档类时声明,不能再后续
+使用此命令声明. 同时，本命令不包含本模板的颜色主题设置，本模板的颜色主题设置请使用命令：\cmd{\zlatexColorSetup}，关于模板的
+色彩设置请参见``模板配色\cref{模板配色}''. 
 
-\subsection{模板配色}
+如果你加载了宏包\cmd{ctex}，那么此时你便可以使用此宏包提供的命令\cmd{\ctexset}进行对应项的设置.
+
+\subsection{zlatexColorSetup}\label{模板配色}
 z\LaTeX{}提供了\cmd{\zlatexColorSetup}\index{\cmd{\zlatexColorSetup}}用于设置整个模板的配色。
 可供用户配置的选项有:
 \begin{itemize}
@@ -329,7 +375,7 @@ z\LaTeX{}提供了\cmd{\zlatexColorSetup}\index{\cmd{\zlatexColorSetup}}用于�
 \end{table}
 
 
-\subsection{引用环境}
+\subsection{zlatexFramed}
 目前本系列提供命令\cmd{\zlatexFramed{<name>}[<color>]}\index{\cmd{\zlatexFramed}}用于创建类似MarkDown
 的彩色引用环境. 参数中的\cmd{<name>}表示声明环境的名称\footnote{如果此环境已存在，那么该环境会被Override},
 \cmd{<color>}表示此环境的背景颜色.一个简单的使用样例如下:
@@ -356,6 +402,72 @@ reason is a representation of, as far as I know, the things in themselves;
     在上面的refer环境开始时插入一个\%可以用于消除多余的空格
 \end{leftbar}
 
+\subsection{接口完善}
+目前的z\LaTeX{}接口还不够丰富，没有进行相关的\cmd{Hook}(钩子)的声明，所以用户可以配置的选项是比较少的，
+只要能够把导言区设置规范，那么剩下的内容你几乎是不用在设置了.
+
+\section{z\LaTeX{}接口}
+z\LaTeX{}的接口正在不断的完善中，所以目前的接口可能并不是那么稳定。(我已经尽力让接口规范和稳定了)
+
+\subsection{命令声明}
+后面我可能会考虑建立一个用于自定义命令的接口，采用键值对的方式进行配置，而不是默认的位置参数或者是xparse提供的可选，
+默认，强制参数等。依托于\LaTeX3的\cmd{key-value}模块，这样的接口会更加的灵活，方便用户进行配置.
+
+\subsection{盒子接口}
+目前我打算通过\LaTeX3的盒子接口进行接口的定制，主要基于宏包\cmd{xcoffins},目前此宏包的接口已经稳定,详细信息请参见
+\begin{itemize}
+    \item \href{https://ctan.org/pkg/l3experimental}{l3experimental}
+    \item \href{https://tex.stackexchange.com/a/397835/294585}{interface of xcoffins}
+\end{itemize}
+
+但是目前z\LaTeX{}的盒子接口还没有进行正式的配置. 如果用户能够学会使用盒子，(join box)拼接盒子.更进一步，用户能够对盒子进行
+一些常规的操作：包括盒子的resize, scale, rotate. 那么你其实已经能够完成大部分的复杂操作了(除去少部分必须使用tikz). 而且一般
+盒子操作对于\LaTeX{}的普通使用者来说可能是极为陌生的，于是要提供一个便于让用户使用，同时也要保证接口的稳定性的系列命令是不容易
+的.
+
+\subsection{TikZ接口}
+本人并不打算在z\LaTeX{}中引进 \cmd{tikz} 宏包，因为我觉得这个宏包太过于庞大,很多的功能都不是一个文档类所必须的.
+可能我会在后续引入\cmd{l3draw}\index{\cmd{l3draw}}模块用于TikZ操作. 
+
+由于本模板可能会抛弃\cmd{tikz, tcolorbox}等宏包，所以我会在后续的版本中我会加入\cmd{xcoffins,l3draw,l3opacity}
+等l3experimental宏包.然后基于这些宏包定制属于z\LaTeX{}文档类的命令，提供这些命令的用户接口,完善图形绘制功能.
+这些宏包大部分还处于experiment阶段，所以目前z\LaTeX{}提供的接口也不会过于的稳定,请见谅. 同样的，\cmd{l3draw}其实还没有
+完全实现PGF对应的全部功能，比如shade操作。
+
+一般情况下有了\cmd{xcoffins}宏包后便可以进行大部分的操作了，如果使用者还需要绘制部分复杂的图形只能够借用\cmd{tikz}
+宏包，不妨先在另一个文档类中生成对应的pdf文件，然后在正文中直接插入pdf即可.
+
+\begin{leftbar}
+本文档类配套的\cmd{ztikz}库提供了丰富的和TikZ绘图，数值计算，以及部分的图像处理功能.具体使用请参见下一个单元.
+\end{leftbar}
+
+\subsection{常用数据结构}
+在\LaTeX{}3中其实已经提供了很多的数据结构，我们可以据此构造:\textbf{列表, 字典, 整形数组, 浮点数组}
+等我们常用的数据结构.
+
+\subsection{计数器}
+目前的计数器部分继承自本文档类加载的子文档类(article, book),部分是使用\cmd{amsthm}\index{\cmd{amsthm}}宏包定义的
+数学环境计数器,如 theorem, definition, corollary, example, axiom, remark等. 用户在使用过程中可以按照自己的需要使用
+这部分已经声明的计数器.
+
+目前z\LaTeX{}提供了一个命令\cmd{\zlatexUpdateCounterAfter}\index{\cmd{\zlatexUpdateCounterAfter}}用于设置
+计数器的更新，使用格式为:
+\begin{minted}{latex}
+\zlatexUpdateCounterAfter{<child>}{<father>}
+\end{minted}
+
+也就是让上述的\cmd{<child>}计数器随着\cmd{<father>}父计数器的更新而更新,本命令的实现原型为:
+\begin{minted}{latex}
+\NewDocumentCommand{\zlatexUpdateCounterAfter}{mm}{
+    \@addtoreset{#1}{#2}
+}
+\end{minted}
+
+关于本文档类的公式计数器的说明,本文档类公式计数器默认跟随\cmd{section}计数器更新，在z\LaTeX{}的源码中的声明为:
+\begin{minted}{latex}
+\counterwithin{equation}{section}
+\end{minted}
+
 \section{自定义}
 \subsection{封面}
 本文档类并没有内建复杂的封面格式，只是简单的重定义了\cmd{\maketitle}命令用于生成封面. 
@@ -376,7 +488,7 @@ reason is a representation of, as far as I know, the things in themselves;
 
 \subsection{目录}
 尽管在z\LaTeX{}的加载选项一节便已经说明了z\LaTeX{}文档类默认加载了\cmd{titletoc}宏包用于目录的格式定制，
-并且提供了对应的加载选项 \cmd{toc}已经对应的可选值\cmd{rename, 2column}, 但是在本文档类中并没有对目录的格式进行
+并且提供了对应的加载选项 \cmd{toc}已经对应的可选值\cmd{redef, 2column}, 但是在本文档类中并没有对目录的格式进行
 更加深度的定制,可能后续会开发对应的接口. 
 
 如果用户想要定制目录的格式可以使用本文默认加载的\cmd{titlesec}宏包或者是自行加载\cmd{tikz}宏包对目录进行定制.
@@ -466,7 +578,7 @@ reason is a representation of, as far as I know, the things in themselves;
 在字体上，国内环境可以说是一团浆糊，再加之M\$ word对用户的不断误导与溺爱，导致无数的用户不知道字体，字体族，
 字体系列,字形的区别. 下面给出一些常见注意事项:
 \begin{itemize}
-    \item 可以不正确的认为一个字体就是一个字体族，其中包好了一个字体系列
+    \item 可以不正确的认为一个字体就是一个字体族，其中包含了一个字体系列
     \item 一般这个字形是对于西文字体而言的，对于中文无效. 中文所谓的斜体概念都是 word 这个毒瘤产生的
     \item 本来\TeX{}这玩意儿就是为了西文发明的，也就能理解对亚洲文字支持差
     \item 部分字体是给西文设计的，所以对中文才没有起作用.
@@ -488,6 +600,8 @@ reason is a representation of, as far as I know, the things in themselves;
 在中文(\cmd{lang=cn})环境下的字体配置为:
 \begin{minted}{latex}
 \RequirePackage[UTF8, heading]{ctex}
+% 如果加载了ctexbook则为:
+\LoadClass[oneside, 11pt]{book}
 \end{minted}
 
 除了上述的设置外，本模板目前没有进行任意字体设置. 但是为了方便用户，后续,本模板可能会提供一个
@@ -708,7 +822,7 @@ C:/WINDOWS/fonts/comicz.ttf: Comic Sans MS:style=Bold Italic
 \end{itemize}
 
 
-\subsection{数学字体}\index{数学字体}
+\subsection{数学字体}\label{数学字体}\index{数学字体}
 目前z\LaTeX{}文档类提供了几种常见的数学字体宏包接口,分别是\cmd{computer moder math, newtxmath, eulervm, mtpro2}. 
 其中\cmd{computer modern math}即为默认的数学字体,推荐新手使用. 数学字体并不仅仅包含我们普通群众认为的Glyph本身，
 一套数学字体往往还需要对应的``距离表'',用于指定各个数学符号之间的距离. 数学字体还包含很多复杂的东西，并没有你认为的那么简单.
@@ -856,8 +970,8 @@ C:/texlive/2024/texmf-dist/fonts/opentype/public/tex-gyre-math/texgyretermes-mat
 
 \section{数学环境}
 \subsection{常用数学环境}\label{常用数学环境}
-本文档类使用宏包\cmd{amsthm}定义了如下数学环境；大致分为两类: 定理类环境和证明类环境；其中 
-的定理类环境相较于证明类环境多一个带有颜色的\cmd{leftbar}\index{\cmd{leftbar}}. 具体的环境名称见下方:
+本文档类使用宏包\cmd{amsthm}定义了如下数学环境；大致分为两类: 定理类环境和证明类环境；默认情况下定理类环境和证明类环境
+相同.具体的环境名称见下方:
 
 \begin{multicols}{2}
 \begin{itemize}
@@ -882,16 +996,10 @@ C:/texlive/2024/texmf-dist/fonts/opentype/public/tex-gyre-math/texgyretermes-mat
 \end{itemize}    
 \end{multicols}
 
-z\LaTeX{}中的数学环境有3套主题\index{数学环境主题}，分别为\cmd{none,leftbar,all}. 其中\cmd{none}表示数学环境不加载任何的修饰，
-\cmd{leftbar}表示数学环境的左侧使用\cmd{framed}宏包提供的\cmd{leftbar}命令进行修饰，\cmd{all}表示数学环境加载
-\cmd{leftbar}的同时设置其背景颜色为对应颜色的10\%. 
+常用的数学环境本模板基本已经覆盖，如果你有其他的数学环境需求，可以自行添加. 但是在添加之前请先
+仔细阅读本文档，确保没有冲突之处。后续可能会开发一个对应的接口用于这类环境的统一声明和管理.
 
-只需要用户在加载本文档类时指定\cmd{math-env-theme}选项即可，比如本示例文档的数学环境主题为\cmd{leftbar}(默认主题):
-\begin{minted}{latex}
-\documentclass[math-env-theme=leftbar]{zlatex}
-\end{minted}
-
-\subsection{定理类环境}
+\subsection{使用方法}
 现在介绍怎么使用这些具体的内置数学环境,上述的每一个环境的基本调用格式如下:
 \begin{minted}{latex}
 \begin{<theorem like env>}[<theorem name>]
@@ -931,8 +1039,23 @@ reason is a representation of, as far as I know, the things in themselves;
 \def\boomcn{劳仑衣普桑，认至将指点效则机，最你更枝。想极整月正进好志次回总般，段然取向
 使张规军证回，世市总李率英茄持伴。}
 
-\subsection{定理类环境主题}
-\subsubsection{none主题}
+\subsection{定理类环境样式}
+z\LaTeX{}中的数学环境有3套样式\index{数学环境样式}，分别为\cmd{plain,leftbar,background,fancy}. 其中\cmd{plain}表示数学环境不加载任何的修饰，
+\cmd{leftbar}表示数学环境的左侧使用\cmd{framed}宏包提供的\cmd{leftbar}命令进行修饰，\cmd{background}表示给对应的段落加上色彩背景,\cmd{fancy}表示
+数学环境加载\cmd{leftbar}的同时设置其背景颜色为对应颜色的10\%. 
+
+只需要用户在加载本文档类时指定\cmd{env-style}选项即可，比如本示例文档的数学环境主题为\cmd{leftbar}(默认样式为\cmd{plain}):
+\begin{minted}{latex}
+\documentclass[
+    mathSpec={envStyle=leftbar}
+]{zlatex}
+\end{minted}
+
+本模板没有加载Tcolorbox宏包用于这部分盒子的设计, 仅使用了一个比较简单的framed宏包。但是对于一篇普通的笔记或者是自己的文章
+来说,你并不需要这些多余的色彩高亮盒子.
+
+\def\mstyle#1{\noindent\lower.25ex\hbox{\ding{224}}\;\textbf{#1}\par}
+\mstyle{plain样式}
 \ExplSyntaxOn
 \DeclareDocumentEnvironment{zlatexTheoremLikeFrame}{O{}}{\vspace*{5pt}}{\vspace*{5pt}}
 \ExplSyntaxOff
@@ -946,7 +1069,7 @@ reason is a representation of, as far as I know, the things in themselves;
     \boomcn
 \end{definition}
 
-\subsubsection{leftbar主题}
+\mstyle{leftbar样式}
 \ExplSyntaxOn
 \DeclareDocumentEnvironment{zlatexTheoremLikeFrame}{O{black}}{
     \def\FrameCommand{{\color{#1}\vrule width 3pt}\hspace{5pt}}
@@ -964,7 +1087,25 @@ reason is a representation of, as far as I know, the things in themselves;
 \end{remark}
 
 
-\subsubsection{all主题}
+\mstyle{background样式}
+\ExplSyntaxOn
+\DeclareDocumentEnvironment{zlatexTheoremLikeFrame}{O{black}}{
+    \def\FrameCommand{\colorbox{#1!10}}
+    \MakeFramed {\advance\hsize-\width \FrameRestore}
+}{\endMakeFramed}
+\ExplSyntaxOff
+\begin{lemma}[prime lemma]
+    \boomen \par 
+    \boomcn
+\end{lemma}
+
+\begin{remark}[prime remark]
+    \boomen \par 
+    \boomcn
+\end{remark}
+
+
+\mstyle{fancy样式}
 \ExplSyntaxOn
 \DeclareDocumentEnvironment{zlatexTheoremLikeFrame}{O{black}}{
     \def\FrameCommand{{\color{#1}\vrule width 3pt}\colorbox{#1!10}}
@@ -990,17 +1131,14 @@ reason is a representation of, as far as I know, the things in themselves;
 \ExplSyntaxOff
 
 \subsection{证明类环境}
-证明类环境的使用方法和前者几乎差不多，比较朴素，没有彩色的左边界竖线, 也没有可选的默认参数; 
-一般建议空一行再开始此类环境，下面给出两个个示例,剩下的环境便不一一例举了;
-
+证明类环境比较朴素,没有可选的默认参数,使用方法见下:
 \begin{minted}{latex}
 \begin{<proof like env>}
-    你 的 定 理 内 容 就 写 在 这 个 环 境 的 内 部 .
-    your proof writing here.
+    定理内容.
 \end{<proof like env>}
 \end{minted}
+\vspace*{-2em}
 
-\vspace*{4em}
 \begin{proof}
     \boomen \par 
     \boomcn
@@ -1114,8 +1252,8 @@ z\LaTeX{}对\cmd{book}文档类的无编号计数器进行了定制，有序列�
 
 \section{文献引用}
 \subsection{基本设置}
-本模板采用的文献引擎是\cmd{biber}, 这说明，你在编译你的文档时应该采用\cmd{biber}, 而非
-\cmd{bibtex}. 如果你想要把``参考文献''栏目加入目录，可以使用命令\cite{ahlfors1953complex}:
+这里说明部分关于文献引用的知识.如果你想要把``参考文献''栏目加入目录，可以使用
+命令\cite{ahlfors1953complex}:
 
 \begin{minted}{latex}
 \addcontentsline{toc}{chapter}{参考文献} % or

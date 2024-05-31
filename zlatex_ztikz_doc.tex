@@ -1,9 +1,8 @@
 \documentclass[
-    lang=cn, 
-    layout=oneside, 
-    margin=false, 
-    math-alias=true,
-    toc={rename, 2column}
+    lang=cn,
+    class=book,
+    mathSpec={envStyle=background, alias},
+    toc={redef, 2column}
 ]{zlatex}
 \newfontfamily{\russia}[Path=./Fonts/]{cmunrm.ttf}[
     BoldFont=cmunbx.ttf,
@@ -25,6 +24,7 @@
 \usepackage{booktabs}
 \usepackage{longtable}
 \usepackage{verbatim}
+\usepackage{pifont}
 \usepackage{multicol}
 \usepackage{framed}
 \usepackage[bottom]{footmisc}

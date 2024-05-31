@@ -41,7 +41,14 @@ Github提Issue或者是PR. 不要在Gitee或者是Gitlab上提问，本人只维
 那就不得而知了。你可以去使用更加精美的模板，比如 \href{https://github.com/ElegantLaTeX}{Elegant\LaTeX{}}, 
 \href{https://github.com/BeautyLaTeX/Beautybook}{Beauty\LaTeX{}} 等优秀的模板. 
 
-\section{模板设计}
+
+\subsection{使用教程}
+本文档中的\cref{模板设计}一般的使用者可以跳过，这一部分主要是我自己对本模板的设计思路和关于写\LaTeX{}的个人感受,
+对于使用模板和宏包而言，没有任何的帮助.如果要了解\cmd{zlatex.cls}文档类的使用,跳转到:z\LaTeX{}文档类教程(\cref{start-use-class}).
+如果要了解\cmd{ztikz.sty}宏包的使用，请跳转到:zTikZ宏包教程(\cref{start-use-package}).
+
+
+\section{模板设计}\label{模板设计}
 \subsection{设计历程}
 本模板的设计经历了相当长的一个周期，从最开始的初始\LaTeX{},我把自己常用的宏扔到了一个\cmd{.sty}文件中，以为这就是
 一个宏包了；之后了解到了\href{https://github.com/ElegantLaTeX}{Elegant\LaTeX{}}系列模板，也使用这个系列中的book文档类写了一点
@@ -66,8 +73,8 @@ Github提Issue或者是PR. 不要在Gitee或者是Gitlab上提问，本人只维
 \TeX-StackExchange上找到的,很多时候都是处于一种能跑就行的状态，并不知道其背后的原理. 
 
 后来自己便把zTiKZ从中z\LaTeX{}文档类中剥离出来，同时使用\LaTeX{}3对原始文档类和zTikZ进行重构.其中z\LaTeX{}文档类继承自\cmd{book}
-文档类，之后几乎所有命令几乎都自己书写，知道它们的具体作用，对其他的宏包的影响。于是z\LaTeX{}系列就诞生了，
-果然，在使用\LaTeX3对原始项目进行重构之后，整个项目的代码清爽了许多,比如下面的z\LaTeX{}文档类选项声明:
+文档类，之后几乎所有命令几乎都自己书写，知道它们的具体作用，对其他的宏包的影响。于是z\LaTeX{}系列就诞生了.果然,在使用\LaTeX3对原始项目
+进行重构之后，整个项目的代码清爽了许多,比如下面的z\LaTeX{}文档类选项声明:
 
 \begin{minted}{latex}
 \zlatex_define_option:n {
@@ -84,10 +91,35 @@ Github提Issue或者是PR. 不要在Gitee或者是Gitlab上提问，本人只维
 \ProcessKeysOptions {zlatex / option}
 \end{minted}
 
+但是后面发现这样还是不够的简洁与清晰，主要的问题就在于如果你需要加载的子文档类的选项比较多时，你需要声明许多这样的
+key-value,当整个文档类的key-value声明的过多时，模板便会变得难以维护。于是我引入了l3keys2e中的\textbf{元键}(\cmd{.meta:nn})
+用于将所有的key-value进行一个层级的划分,方便以后的模板维护. 目前的文档类键值对接口如下:
+
+\begin{minted}{latex}
+\zlatex_define_option:n {
+    % zlatex language
+    lang            .str_gset:N   =  \g__zlatex_lang_str,
+    lang            .initial:n    =  { en },
+    % class and options
+    class           .str_gset:N   = \g__zlatex_subclass_type_str,
+    class           .initial:n    = { book },
+    classOption     .clist_gset:N = \g__zlatex_subclass_option_clist,
+    classOption     .initial:n    = { oneside, 10pt },
+    % zlatex options meta key 
+    layout          .meta:nn      = {zlatex / layout}{#1},
+    mathSpec        .meta:nn      = {zlatex / mathSpec}{#1},
+    font            .meta:nn      = {zlatex / font}{#1},
+    bib             .meta:nn      = {zlatex / bib}{#1},
+    ...
+}
+\end{minted}
+
+同时声明的\texttt{<classOption>}可以轻松简单的处理子文档类的选项传递问题.
+
 \subsection{设计参考}
 这个模板自然不可能是我一个人独立开发，在开发过程中参考了诸多优秀文档类/模板，参考最多的{C\TeX{}art}文档类，几乎是
 本项目的大部分代码思路来源。此文档类完全采用\LaTeX3语法写成，本文档类中的\textbf{选项配置}模块主要参见\TeX-StackExchange上
-的讨论，采用了\LaTeX3的\cmd{key-value}模块；这样的好处有:选项配置简洁，符合人们习惯，模板维护方便.
+的讨论，采用了\LaTeX3的l3keys2e模块；这样的好处有:选项配置简洁，符合用户习惯，模板维护方便.
 
 
 \subsection{设计原则}
@@ -128,6 +160,20 @@ Github提Issue或者是PR. 不要在Gitee或者是Gitlab上提问，本人只维
 
 最后参考这这些标准，一步一步的调整，使得整体的页面布局稍微的合理些. 在设计这个模板时，还要考虑行距等各种元素。
 但是设计一个模板，你考虑的还不只这些，反正就是，如果你不会的话，那么就一切保持默认:\textcolor{red}{Be simple, Be fool}.
+
+\subsection{无题}
+时至今日，再次回头来看我的这个模板，我反而有了一些其他的感受. 一个模板到底需要给用户定制什么东西 ? 到底需要给用户
+多大的自由空间(配置选项)? 如果你的配置选项过多，像\href{https://www.ctan.org/pkg/koma-script}{koma-script}, 
+\href{https://ctan.org/pkg/memoir}{Memoir}那样处理很多的细节，提供种类繁多的接口. 还是像部分简单的模板仅提供几个
+必要的选项而已; 如果一个模板的说明文档都达到了上百页, 我作为一个用户为什么自己学习做模板，然后写一个有针对性的，适合自己的模板呢? 
+如果模板的配置选项过少，那么用户又会觉得这个模板不够灵活. 所以，到底什么样的一个模板设计才能够称得上是:\textcolor{red}{简单,灵活,易用}?
+这个问题就只能留给使用者回答了 ...
+
+z\LaTeX{} 系列写到今天，它已经不再是一个简单的文档类+绘图库了，所以这个系列可能并不适合新手. 同时我也意识到，很多时候其实我们并没有
+必要写一个模板出来，你需要什么样的功能，你就去找什么样的宏包，然后去调用它，根据它提供的命令实现自己的需求.这样会更加的方便，而且你也
+不用去考虑太多的细节问题,更没有必要去花费那个你在使用别人模板时阅读模板细节的时间. 似乎，有了基础文档类article, book+各种功能宏包之后
+的\LaTeX{}就已经的足够好了，并不需要我们这些闲来无事人写的模板 ? 所以我反而觉得，我们这些人更应该把多余的时间花在基础宏包的开发上，就像 
+l3draw宏包:我只提供基础的几组底层绘制命令，至于上层的封装，那就交给用户去实现吧. hahaa \texttt{>\_<}
 
 \section{兼容性}
 目前本系列已经实现Windows和Linux下的兼容; 但是MacOS下:目前仅支持z\LaTeX{}文档类.
