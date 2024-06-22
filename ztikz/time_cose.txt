@@ -1,0 +1,10 @@
+% 1. build from scratch
+Output written on ztikz_manual.pdf (122 pages).
+Transcript written on ztikz_manual.log.
+xelatex --shell-escape ztikz_manual.tex  320.16s user 32.06s system 71% cpu 8:13.07 total
+
+
+% 2. using cache module
+Output written on ztikz_manual.pdf (122 pages).
+Transcript written on ztikz_manual.log.
+xelatex --shell-escape ztikz_manual.tex  19.30s user 1.58s system 110% cpu 18.942 total

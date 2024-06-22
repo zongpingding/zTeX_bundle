@@ -47,6 +47,7 @@
 # latexrun
 latex.out/
 ztikz_output/
+debug.*
 
 ## Auxiliary and intermediate files from other packages:
 # algorithms
