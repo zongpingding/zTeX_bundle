@@ -135,9 +135,9 @@ closing quotation marks.另外，在排版要求中，当两层双引号嵌套�
 \Footnote{本内容摘自\href{https://wenda.latexstudio.net/article-5042.html}{latexstudio}}，比如要使用双引号文本，那么此时
 你就可以使用命令\cmd{\enquote{<your text>}}.
 
-\begin{leftbar}
+\begin{remark}
   但是你也可以直接在源文件中输入对应的unicode，如果你使用的是Xe\TeX{}或者是加载了inputenc的utf8选项.
-\end{leftbar}
+\end{remark}
 
 \subsection{数学字体类宏包}
 本模板会根据导言区选项加载不同的数学字体. 为方便新手较使用不同数学字体，本模板预设了几个简单的数学字体.
@@ -165,9 +165,9 @@ closing quotation marks.另外，在排版要求中，当两层双引号嵌套�
 
 其实还有一个包和 {esint} 类似，叫做 {pdfMsym}. 关于后者的使用请参见 pdfMsym 官方文档:\href{https://mirror-hk.koddos.net/CTAN/macros/generic/pdfmsym/pdfmsym-doc.pdf}{pdfMsym}.
 
-\begin{leftbar}
+\begin{remark}
 如果用户想自己设置文档的数学字体，那么请参见"字体配置\cref{font-config}"中的数学字体配置部分.
-\end{leftbar}
+\end{remark}
 
 \subsection{超链接宏包}
 z\LaTeX{}文档类现在不默认加载宏包 hyperref, 但是在加载文档类时指定\cmd{hyper=true}即可加载此宏包以及对应的配置.其实还是考虑
@@ -273,9 +273,9 @@ slide 中不同元素对应的颜色，那么只需重新定义如下三个颜�
   \label{fig:slide-example}
 \end{figure}
 
-\begin{leftbar}
+\begin{remark}
 目前 slide 模式还处于一个很不成熟的阶段，请谨慎使用. 在正式场合请使用默认的 beamer 文档类.
-\end{leftbar}
+\end{remark}
 
 \begin{remark}
 由于本模板可以切换单双面布局，所以为了保证 titlepage 中文字的正确居中，本文档类对原始命令:\cmd{\maketitle} 进行了重定义.
@@ -337,9 +337,9 @@ slide 中不同元素对应的颜色，那么只需重新定义如下三个颜�
 需要注意:本模板提供的部分数学字体并不一定符合每人审美，且由于本模板在 Linux 环境下开发，所以在平台迁移后部分字体可能会有细微的差别.
 其中的 {mtpro2} 字体并非免费字体, 请不要用于任何的商业用途. 若用户想自己配置数学字体，那么可以参见后文``Unicode-math:\cref{数学字体}''
 
-\begin{leftbar}
+\begin{remark}
 关于\cmd{envStyle}的详细信息请参见："常用数学环境\cref{常用数学环境}"
-\end{leftbar}
+\end{remark}
 
 \subsection{快捷命令}\label{快捷命令}
 在你决定加载选项\cmd{alias}\index{\cmd{alias}}前的进一步说明：默认自定义命令并不一定符合你的习惯,所以请一定谨慎加载此选项.
@@ -470,9 +470,9 @@ reason is a representation of, as far as I know, the things in themselves;
 使张规军证回，世市总李率英茄持伴.
 \end{refer}
 
-\begin{leftbar}
+\begin{remark}
   在上面的refer环境开始时插入一个\%可以用于消除多余空格
-\end{leftbar}
+\end{remark}
 
 \section{z\LaTeX{}接口}
 z\LaTeX{} 的接口正在不断的完善中，所以目前的接口可能并不是那么稳定(我已然尽力). 
@@ -506,10 +506,10 @@ z\LaTeX{} 的接口正在不断的完善中，所以目前的接口可能并不�
 这些宏包大部分还处于 experiment 阶段，自然 z\LaTeX{} 的这部分接口自然也可能会在不久的将来改变, 请见谅. 同样的,
 \cmd{l3draw} 其实还不能完全实现 PGF 的功能，如 shade 操作.
 
-\begin{leftbar}
+\begin{remark}
 本文档类配套的 {zTikZ} 模块(宏包)提供了丰富功能:如 TikZ绘图，数值计算，符号计算以及部分的图像处理功能. 具体使用请参见
 ztikz\_manual.pdf.
-\end{leftbar}
+\end{remark}
 
 \subsection{算法与数据结构}
 在 \LaTeX{}3 中其实已经提供了很多的常用数据结构:列表(token list, sequence, clsit), 字典(prop list), 整形数组(int array), 
@@ -524,16 +524,16 @@ ztikz\_manual.pdf.
 用 {amsthm}\index{\cmd{amsthm}} 宏包所定义的数学环境计数器,如 theorem, definition, corollary, example, axiom, remark 等. 
 用户在使用过程中可以按照自己的需要重定义这部分计数器.
 
-z\LaTeX{} 提供命令\cmd{\zlatexUpdateCounterAfter}\index{\cmd{\zlatexUpdateCounterAfter}} 用于设置
+z\LaTeX{} 提供命令\cmd{\zlatexCounterWith}\index{\cmd{\zlatexCounterWith}} 用于设置
 计数器的更新，使用格式为:
 \begin{minted}{latex}
-\zlatexUpdateCounterAfter{<child>}{<father>}
+\zlatexCounterWith{<child>}{<father>}
 \end{minted}
 
 也就是让上述的\zkey{child}计数器随着\zkey{father}父计数器的更新而更新,本命令原始声明:
 \begin{minted}{latex}
-\NewDocumentCommand{\zlatexUpdateCounterAfter}{mm}{
-    \@addtoreset{#1}{#2}
+\NewDocumentCommand{\zlatexCounterWith}{mm}{
+  \@addtoreset{#1}{#2}
 }
 \end{minted}
 
@@ -662,10 +662,10 @@ z\LaTeX{} 目前没有提供定制章节格式的接口. 使用者可以使用�
 \end{figure}
 
 
-\begin{leftbar}
+\begin{remark}
 本文档类默认不加载 {tikz, pgf} 宏包，想要使用这两个宏包定义更加复杂章节样式，请手动加载，并设置自己喜欢的章节格式. 
 也许后续我会在 z\LaTeX{} 的加载选项中添加一个 tikz 宏包选项，从而可以让用户自定义章节格式.
-\end{leftbar}
+\end{remark}
 
 \section{字体配置}\index{font-config}\label{font-config}
 \subsection{一些术语}
@@ -680,7 +680,7 @@ z\LaTeX{} 目前没有提供定制章节格式的接口. 使用者可以使用�
 \end{itemize} 
 
 \subsection{New Computer Modern}
-目前在 Xe\TeX{} 下已有一个比较完善的字体包 \cmd{newcomputermodern}\index{\cmd{newcomputermodern}}，这个包 
+目前在 \hologo{XeLaTeX} 下已有一个比较完善的字体包 \cmd{newcomputermodern}\index{\cmd{newcomputermodern}}，这个包 
 兼容原始的 CM 字体，并且对部分的细节进行了优化. 最重要的是，它支持多种语言:希腊语，俄语，中文，日文，韩文，西里尔语和梵文等.
 这个包的使用方法如下:
 
@@ -723,12 +723,12 @@ z\LaTeX{} 目前没有提供定制章节格式的接口. 使用者可以使用�
     \item \cmd{\setmonofont}: 设置正文的等宽字体(打字机字体), 对应命令\cmd{\texttt}
 \end{itemize}
 
-\begin{leftbar}
+\begin{remark}
 如果想要在pdf\TeX{}下使用别的字体(你自己下载的字体，系统中别的字体),那么最好的方法是使用别人写好的宏包.因为
 在pdf\TeX{}下使用别的字体，可能会需要一些\cmd{.tfm, .fd, .map, .sty}等文件，这个对于一般的\LaTeX{}使用者来说过于复杂了.
 可以参见网站：\href{https://tug.org/FontCatalogue/allfonts.html}{FontCatalogue}, 在这个网站上你可以看到很多的为pdf\TeX{}
 设计的字体宏包,然后你根据自己的喜好进行对应宏包的设置即可.
-\end{leftbar}
+\end{remark}
 
 \begin{figure}[!htb]
     \centering
@@ -738,10 +738,10 @@ z\LaTeX{} 目前没有提供定制章节格式的接口. 使用者可以使用�
 \end{figure}
 
 
-\begin{leftbar}
+\begin{remark}
 在设置全文的中(日韩)字体时也请使用命令\cmd{\setCJKmainfont}命令，格式和上述的命令一样. 也许在设置文档的中文字体时你还需要在导言区
 加载如下命令:
-\end{leftbar}
+\end{remark}
 \begin{minted}{latex}
 \renewcommand\CJKrmdefault{}
 \end{minted}
@@ -790,11 +790,11 @@ C:/texlive/2024/texmf-dist/fonts/opentype/public/drm/drmsym11.otf: drmsym11:styl
 \setmainfont{Times New Roman}
 \end{minted}
 
-\begin{leftbar}
+\begin{remark}
 如果你不想在你的本地安装过多的字体，我常常会建议使用``file name''的格式.只需要把对应的字体文件放到你的项目文件夹下就行了，
 免去了字体安装这一个步骤.这个时候你就需要在可选参数中指定键\zkey{Path}对应的路径值，对应的是项目下的字体路径. 这里给出一个示例:
 假如你把字体放到了项目根路径下的 {Fonts} 文件夹,那么声明格式为:
-\end{leftbar}
+\end{remark}
 \begin{minted}{latex}
 \setmainfont[Path = Fonts/]{<font name or file name>}
 \end{minted}
@@ -859,11 +859,11 @@ C:/WINDOWS/fonts/comicz.ttf: Comic Sans MS:style=Bold Italic
 \setmainfont{Comic Sans MS}
 \end{minted}
 
-\begin{leftbar}%
+\begin{remark}%
 就像上述备注的第二种``file name''方式的好处外,By ``font name'' 也有上述的优点. 尽管对于字体的加粗和斜体你可以偷懒，
 在字体族声明的可选参数中加入\cmd{AutoFakeBold, AutoFakeSlant}参数，它会自动同时实现中英文伪粗体和伪斜体，不用你自己单独去指定.
 但是我并不推荐. 还是给出一个示例:
-\end{leftbar}
+\end{remark}
 
 \begin{minted}{latex}
 \setCJKfamilyfont{AutoFakeBoldSlant}{<font-name>.ttf}[AutoFakeBold , AutoFakeSlant]
@@ -980,9 +980,9 @@ C:/texlive/2024/texmf-dist/fonts/opentype/public/tex-gyre-math/texgyretermes-mat
 在此命令之后的所有\cmd[F]{\mathscr, \mathbfscr}命令均会使用``TeX Gyre Termes Math''字体. 其他不变, 比如\cmd[F]{\mathrm, \mathbf}等.
 后续如果还想使用其他数学字体，只需要再次声明不同的\cmd[F]{\setmathfont}命令即可.
 
-\begin{leftbar}
+\begin{remark}
 值得注意的是：在加载宏包\cmd{unicode-math}后,数学字符的加粗请采用\cmd[F]{\boldsymbol}或\cmd[F]{\symbf, \symbfit, \symbfup}等命令.
-\end{leftbar}
+\end{remark}
 
 关于\cmd{unicode-math}宏包的更多功能，请参见对应的宏包手册. 
 
@@ -1153,9 +1153,10 @@ reason is a representation of, as far as I know, the things in themselves;
 使张规军证回，世市总李率英茄持伴.}
 
 \subsection{定理类环境样式}
-z\LaTeX{}中的预想定义有3中样式:\index{数学环境样式}\cmd{plain,leftbar,background,fancy}. 其中\cmd{plain}表示数学环境不加载任何的修饰;
-\cmd{leftbar} 本质上就是 {framed} 宏包提供的 \cmd{leftbar} 环境; \cmd{background}表示给对应的段落加上色彩背景; \cmd{fancy}表示
-数学环境加载\cmd{leftbar}的同时设置其背景颜色,为对应色彩的 10\%. 
+z\LaTeX{}中的预想定义有5中样式:\index{数学环境样式}\cmd{plain,leftbar,background,fancy,shadow}. 其中\cmd{plain}表示数学环境
+不加载任何的修饰;\cmd{leftbar} 本质上就是 {framed} 宏包提供的 \cmd{leftbar} 环境; \cmd{background}表示给对应的段落加上色彩背景; 
+\cmd{fancy}表示数学环境加载\cmd{leftbar}的同时设置其背景颜色,为对应色彩的 10\%. \cmd{shadow} 则是在 \cmd{fancy} 的基础上添加其对应的
+阴影.
 
 只需要用户在加载本文档类时指定\cmd{env-style}选项即可设置设定对应的定理类环境格式，比如本手册的数学环境主题
 为\cmd{leftbar}(默认样式为\cmd{plain}):
@@ -1166,13 +1167,33 @@ z\LaTeX{}中的预想定义有3中样式:\index{数学环境样式}\cmd{plain,le
 ]{zlatex}
 \end{minted}
 
-z\LaTeX{} 没有加载 tcolorbox 宏包用于这部分``盒子''的设计, 仅使用一个简单的 framed 宏包. 毕竟对于一篇普通的笔记或者书籍
-来说,你并不需要这些可能会分散你亦或者是这个材料潜在读者注意力的彩色高亮``盒子''.
+z\LaTeX{} 默认没有加载 tcolorbox 宏包用于这部分``盒子''的设计, 仅使用一个简单的 framed 宏包. 毕竟对于一篇普通的笔记或者书籍
+来说,你并不需要这些可能会分散你亦或者是这个材料潜在读者注意力的彩色高亮``盒子''. 
+
+\bigskip
+\noindent\textbf{update:\today}\par
+目前本文档类已经支持部分 tcolorbox 选项，可以在引入此宏包用于 \cmd{shadow} 样式的定理类环境. 挡在导言区
+加载\cmd{envStyle=shadow} 后，z\LaTeX{} 会自动引入 tcolorbox 宏包. 除此之外，本此更新还引入了 \cmd{\zlatexMathEnvStyle} 命令用于
+在文档中切换数学环境样式, 使用方法为:
+\begin{minted}{latex}
+% valid style: plain, leftbar, background, fancy, shadow
+\zlatexMathEnvStyle{<style>}
+\end{minted}
+
+\begin{remark}
+如果在导言区没有指定 \cmd{envStyle=shadow}, 并且在后文中仍想要切换到此样式，可以采用一下两种方法:
+\begin{itemize}
+  \item 导言区手动加载 tcolorbox 宏包
+  \item 在加载文档类时指定:\cmd{fancy=true} 或 \cmd{fancy}.
+\end{itemize} 
+
+\noindent\textbf{个人建议:} 一篇文章或者是笔记尽量采用统一的一个格式,切勿频繁切换样式.
+\end{remark}
+
+下面即为各种样式的数学环境的展示:
 
 \mstyle{plain样式}
-\ExplSyntaxOn
-\DeclareDocumentEnvironment{zlatexTheoremLikeFrame}{O{}}{\vspace*{5pt}}{\vspace*{5pt}}
-\ExplSyntaxOff
+\zlatexMathEnvStyle{plain}
 \begin{theorem}[prime theorem]\label{thm:test}
     \boomen \par 
     \boomcn
@@ -1184,12 +1205,7 @@ z\LaTeX{} 没有加载 tcolorbox 宏包用于这部分``盒子''的设计, 仅�
 \end{definition}
 
 \mstyle{leftbar样式}
-\ExplSyntaxOn
-\DeclareDocumentEnvironment{zlatexTheoremLikeFrame}{O{black}}{
-    \def\FrameCommand{{\color{#1}\vrule width 3pt}\hspace{5pt}}
-    \MakeFramed {\advance\hsize-\width \FrameRestore}
-}{\endMakeFramed}
-\ExplSyntaxOff
+\zlatexMathEnvStyle{leftbar}
 \begin{lemma}[prime lemma]
     \boomen \par 
     \boomcn
@@ -1202,12 +1218,7 @@ z\LaTeX{} 没有加载 tcolorbox 宏包用于这部分``盒子''的设计, 仅�
 
 
 \mstyle{background样式}
-\ExplSyntaxOn
-\DeclareDocumentEnvironment{zlatexTheoremLikeFrame}{O{black}}{
-    \def\FrameCommand{\colorbox{#1!10}}
-    \MakeFramed {\advance\hsize-\width \FrameRestore}
-}{\endMakeFramed}
-\ExplSyntaxOff
+\zlatexMathEnvStyle{background}
 \begin{lemma}[prime lemma]
     \boomen \par 
     \boomcn
@@ -1220,13 +1231,7 @@ z\LaTeX{} 没有加载 tcolorbox 宏包用于这部分``盒子''的设计, 仅�
 
 
 \mstyle{fancy样式}
-\ExplSyntaxOn
-\DeclareDocumentEnvironment{zlatexTheoremLikeFrame}{O{black}}{
-    \def\FrameCommand{{\color{#1}\vrule width 3pt}\colorbox{#1!10}}
-    \MakeFramed{\advance\hsize-\width \FrameRestore}
-}{\endMakeFramed}
-\ExplSyntaxOff
-
+\zlatexMathEnvStyle{fancy}
 \begin{axiom}[prime axiom]
     \boomen \par 
     \boomcn
@@ -1237,12 +1242,21 @@ z\LaTeX{} 没有加载 tcolorbox 宏包用于这部分``盒子''的设计, 仅�
     \boomcn
 \end{proposition}
 
-\ExplSyntaxOn
-\DeclareDocumentEnvironment{zlatexTheoremLikeFrame}{O{black}}{
-    \def\FrameCommand{{\color{#1}\vrule width 3pt}\hspace{5pt}}
-    \MakeFramed {\advance\hsize-\width \FrameRestore}
-}{\endMakeFramed}
-\ExplSyntaxOff
+\mstyle{shadow样式}
+\zlatexMathEnvStyle{shadow}
+\begin{theorem}[prime theorem]\label{thm:test}
+    \boomen \par 
+    \boomcn
+\end{theorem}
+
+\begin{definition}[prime definition]
+    \boomen \par 
+    \boomcn
+\end{definition}
+
+% reset to leftbar style
+\zlatexMathEnvStyle{leftbar}
+
 
 \subsection{证明类环境}
 证明类环境比较朴素, 没有可选的那部分默认参数, 使用方法见下:
@@ -1271,8 +1285,8 @@ z\LaTeX{} 没有加载 tcolorbox 宏包用于这部分``盒子''的设计, 仅�
 
 
 \subsection{注意事项}
-默认的数学类环境字体均采用正体\cmd{\upshape}，如果使用者不喜欢前者默认的``正体''字体样式，
-可以直接在数学类环境开始时使用字体命令\cmd{\itshape} 对原有字体 shape 进行覆盖，示例如下:
+默认的数学类环境字体均采用正体\cmd[F]{\upshape},如果使用者不喜欢前者默认的``正体''字体样式，
+可以直接在数学类环境开始时使用字体命令\cmd[F]{\itshape}对原有字体 shape 进行覆盖，示例如下:
 
 \begin{minted}{latex}
 \begin{theorem}[test theorem]\itshape
@@ -1439,7 +1453,7 @@ z\LaTeX{}文档类采用 {indextools} 宏包提供的命令进行索引的生成
 \end{minted}
 
 或者，你在文档导言区声明某种 {index} 的类型，比如 {person}, 随后在正文中即可使用命令
-\cmd{\index[person]{<the person>}} 进行索引. 索引的打印和索引格式的定制见下:
+\cmd[F]{\index[person]{<the-person>}} 进行索引. 索引的打印和索引格式的定制见下:
 
 \begin{minted}{latex}
 % 导言区索引格式定义
@@ -1450,7 +1464,7 @@ z\LaTeX{}文档类采用 {indextools} 宏包提供的命令进行索引的生成
 \end{minted}
 
 
-使用\cmd{\index{<index>}}命令时, 在此命令中 \cmd{<index>} 并不会显示在 PDF 文档中的，所以如果你要添加
+使用\cmd[F]{\index{<index>}}命令时, 在此命令中 \cmd{<index>} 并不会显示在 PDF 文档中的，所以如果你要添加
 一个``函数''的 index 项目时，在你的\LaTeX{}文档中应该这样写:
 
 \begin{minted}{latex}
@@ -1458,8 +1472,8 @@ z\LaTeX{}文档类采用 {indextools} 宏包提供的命令进行索引的生成
 \end{minted}
 
 若要定制\cmd[F]{\printindex}输出索引条目格式，可以在导言区进行一定的设置，{indextools}
-宏包提供了命令 \cmd{\indexsetup{}} 用于索引格式设定, 采用键值对的格式进行指定. 可用键:
-\zkey{level, toclevel, ...}，详情请参见对应文档. 默认 \cmd{level} 为 \cmd{\chapter*(\section* 在article中)}:
+宏包提供了命令 \cmd[F]{\indexsetup{}} 用于索引格式设定, 采用键值对的格式进行指定. 可用键:
+\zkey{level, toclevel, ...}，详情请参见对应文档. 默认 \cmd{level} 为 \cmd[F]{\chapter*(\section* 在article中)}:
 表示此章节为无编号章节. 但为了说明用法, 这里我们设置为有编号章节, level 为 chapter:
 \begin{minted}{latex}
 \indexsetup{level=\chapter}

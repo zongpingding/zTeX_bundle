@@ -44,6 +44,9 @@
 
 % setup options for class
 \zlatex_define_option:n {
+  % fancy to load 'tikz', 'tcolorbox' etc,.
+  fancy           .bool_gset:N  =  \g__zlatex_fancy_bool,
+  fancy           .initial:n    =  { false },
   % zlatex language
   lang            .str_gset:N   =  \g__zlatex_lang_str,
   lang            .initial:n    =  { en },
@@ -108,6 +111,11 @@
 
 % option setup
 \ProcessKeysOptions {zlatex / option}
+% handle fancy option
+\bool_if:NT \g__zlatex_fancy_bool {
+  \RequirePackage{tikz}
+  \RequirePackage[many]{tcolorbox}
+}
 \NewDocumentCommand{\zlatexSetup}{m}{
   \zlatex_set:nn {option}{#1}
 }
@@ -463,26 +471,59 @@
 
 % theorem-like env declaration
 \msg_new:nnn {zlatex}{mathenv-type}{Current~math~env~is~:~'\str_use:N \g__zlatex_math_env_style_tl'~,only~'plain',~'leftbar',~'background',~'fancy'~types~are-valid.}
-\DeclareDocumentEnvironment{zlatexTheoremLikeFrame}{O{black}}{
+\NewDocumentCommand{\zlatexMathEnvStyle}{m}{
+  \tl_gset:Nn \g__zlatex_math_env_style_tl {#1}
+}
+\str_if_eq:VnT \g__zlatex_math_env_style_tl{shadow}{
+  \@ifpackageloaded{tcolorbox}{\relax}{
+    \RequirePackage[many]{tcolorbox}
+  }
+}
+\DeclareDocumentEnvironment{zlatexTheoremLikeFrame}{O{axiom}}{
+  \def\TempColor{\tl_use:c {l__zlatex_#1_color_tl}}
+  \typeout{TempColor: \TempColor}
   \str_case:VnF \g__zlatex_math_env_style_tl {
     {plain}{  
       \def\FrameCommand{}
       \MakeFramed {\advance\hsize-\width \FrameRestore}
     }
     {leftbar}{
-      \def\FrameCommand{{\color{#1}\vrule width 3pt}\hspace{5pt}}
+      \def\FrameCommand{{\color{\TempColor}\vrule width 3pt}\hspace{5pt}}
       \MakeFramed {\advance\hsize-\width \FrameRestore}
     }
     {background}{
-      \def\FrameCommand{\colorbox{#1!10}}
+      \def\FrameCommand{\colorbox{\TempColor!10}}
       \MakeFramed {\advance\hsize-\width \FrameRestore}
     }
     {fancy}{
-      \def\FrameCommand{{\color{#1}\vrule width 3pt}\colorbox{#1!10}}
+      \def\FrameCommand{{\color{\TempColor}\vrule width 3pt}\colorbox{\TempColor!10}}
       \MakeFramed{\advance\hsize-\width \FrameRestore}
     }
+    {shadow}{
+      \begin{tcolorbox}[
+        top=1.5pt,
+        bottom=1.5pt,
+        left=3pt,
+        right=3pt,
+        boxrule=0pt,
+        sharp~ corners,
+        enhanced~ jigsaw,
+        drop~ fuzzy~ shadow,
+        breakable,
+        colback={\TempColor!10}, 
+        borderline~ west={3pt}{0pt}{\TempColor}
+      ]
+    }
   }{\msg_error:nn {zlatex}{mathenv-type}}
-}{\endMakeFramed}
+}{
+  \str_case:VnF \g__zlatex_math_env_style_tl {
+    {shadow}{\end{tcolorbox}}
+    {plain}{\endMakeFramed}
+    {leftbar}{\endMakeFramed}
+    {background}{\endMakeFramed}
+    {fancy}{\endMakeFramed}
+  }{\msg_error:nn {zlatex}{mathenv-type}}
+}
 
 % loop to create math env, setup \cref
 \clist_map_inline:Nn \g__zlatex_theoremlike_envs_clist {
@@ -491,7 +532,7 @@
 
   % env create (3 types: 'leftbar', 'none' and 'backgroud')
   \NewDocumentEnvironment{#1}{O{}}{
-    \begin{zlatexTheoremLikeFrame}[\tl_use:c {l__zlatex_#1_color_tl}]
+    \begin{zlatexTheoremLikeFrame}[#1]
     \begin{zlatex#1}[##1]
   }{\end{zlatex#1}\end{zlatexTheoremLikeFrame}}
 
@@ -667,7 +708,7 @@
 } 
 
 % reset counter command
-\NewDocumentCommand{\zlatexUpdateCounterAfter}{mm}{\@addtoreset{#1}{#2}}
+\NewDocumentCommand{\zlatexCounterWith}{mm}{\@addtoreset{#1}{#2}}
 
 
 

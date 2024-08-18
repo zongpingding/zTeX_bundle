@@ -391,26 +391,56 @@
 
 % theorem-like env declaration
 \msg_new:nnn {zlatex}{mathenv-type}{Current~math~env~is~:~'\str_use:N \g__zlatex_math_env_style_tl'~,only~'plain',~'leftbar',~'background',~'fancy'~types~are-valid.}
-\DeclareDocumentEnvironment{zlatexTheoremLikeFrame}{O{black}}{
+\NewDocumentCommand{\zlatexMathEnvStyle}{m}{
+  \tl_gset:Nn \g__zlatex_math_env_style_tl {#1}
+}
+\str_if_eq:VnT \g__zlatex_math_env_style_tl{shadow}{
+  \RequirePackage[many]{tcolorbox}
+  \tcbset{
+    top=1.5pt,
+    bottom=1.5pt,
+    left=3pt,
+    right=3pt,
+    boxrule=0pt,
+    sharp~ corners,
+    enhanced~ jigsaw,
+    drop~ fuzzy~ shadow,
+    breakable
+  }
+}
+\DeclareDocumentEnvironment{zlatexTheoremLikeFrame}{O{axiom}}{
+  \def\TempColor{\tl_use:c {l__zlatex_#1_color_tl}}
+  \typeout{TempColor: \TempColor}
   \str_case:VnF \g__zlatex_math_env_style_tl {
     {plain}{  
       \def\FrameCommand{}
       \MakeFramed {\advance\hsize-\width \FrameRestore}
     }
     {leftbar}{
-      \def\FrameCommand{{\color{#1}\vrule width 3pt}\hspace{5pt}}
+      \def\FrameCommand{{\color{\TempColor}\vrule width 3pt}\hspace{5pt}}
       \MakeFramed {\advance\hsize-\width \FrameRestore}
     }
     {background}{
-      \def\FrameCommand{\colorbox{#1!10}}
+      \def\FrameCommand{\colorbox{\TempColor!10}}
       \MakeFramed {\advance\hsize-\width \FrameRestore}
     }
     {fancy}{
-      \def\FrameCommand{{\color{#1}\vrule width 3pt}\colorbox{#1!10}}
+      \def\FrameCommand{{\color{\TempColor}\vrule width 3pt}\colorbox{\TempColor!10}}
       \MakeFramed{\advance\hsize-\width \FrameRestore}
     }
+    {shadow}{
+      \begin{tcolorbox}[colback={\TempColor!10}, borderline~ west={3pt}{0pt}{\TempColor}]
+    }
   }{\msg_error:nn {zlatex}{mathenv-type}}
-}{\endMakeFramed}
+}{
+  \str_case:VnF \g__zlatex_math_env_style_tl {
+    {shadow}{\end{tcolorbox}}
+    {plain}{\endMakeFramed}
+    {leftbar}{\endMakeFramed}
+    {background}{\endMakeFramed}
+    {fancy}{\endMakeFramed}
+  }{\msg_error:nn {zlatex}{mathenv-type}}
+}
 
 % loop to create math env, setup \cref
 \clist_map_inline:Nn \g__zlatex_theoremlike_envs_clist {
