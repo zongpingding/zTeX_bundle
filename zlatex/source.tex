@@ -78,12 +78,17 @@ z\LaTeX{}的最小工作示例如下\Footnote{导言区的配置可能需要根�
 \end{document}
 \end{minted}
 
+在使用 book 文档类时, 如果不加载 \cmd{\frontmatter} 和 \cmd{\mainmatter} 两命令，那么可能会导致整个文档的页眉，
+页脚格式不正确.
+
 \subsection{在线体验}
 为了让部分用户可以直接体验到 z\LaTeX{}，免去``繁杂''的环境配置.我已将本模板部署在 Overleaf 上，
 地址为:\href{https://www.overleaf.com/project/661fd2772cafbff9df5e6fb4}{Overleaf ZLaTeX Project}，
 直接打开此地址即可体验.Overleaf上的项目内容为本手册的源码，不含有 zTikZ 文档. 由于部分的技术原因，zTikZ 
 请在本地体验.
 
+
+\clearpage
 \section{宏包机制}
 z\LaTeX{}文档类会根据用户指定的选项自动处理和加载对应的宏包，所以z\LaTeX{}文档类在不同的导言区选项声明下
 加载的宏包和命令是不同的.本文档类内置导言区选项输出命令:\cmd{\zlatexOptions}\index{\cmd{\zlatexOptions}},
@@ -120,7 +125,7 @@ z\LaTeX{}文档类会根据用户指定的选项自动处理和加载对应的�
     \centering{
     \begin{tabular}{p{2cm}p{4cm}p{2cm}p{2cm}p{2cm}}
         \toprule
-        {\rmfamily lang=en} & inputenc(pdftex) & fontenc \\
+        {\rmfamily lang=en} & inputenc(pdftex) & fontenc & microtype\\
         {\rmfamily lang=cn} & fontspec & ctex \\
         \bottomrule
     \end{tabular}}
@@ -133,7 +138,7 @@ z\LaTeX{}文档类会根据用户指定的选项自动处理和加载对应的�
 closing quotation marks.另外，在排版要求中，当两层双引号嵌套使用时，其外层需要使用{\bf 双引号}，而内层则应该使用{\bf 单引号}，
 并且不同的语言中，用于表示引号的字符也不完全一致.为解决这些排版中的问题，可以使用 {csquotes} 宏包实现引号的灵活排版
 \Footnote{本内容摘自\href{https://wenda.latexstudio.net/article-5042.html}{latexstudio}}，比如要使用双引号文本，那么此时
-你就可以使用命令\cmd{\enquote{<your text>}}.
+你就可以使用命令\cmd[F]{\enquote{<your text>}}.
 
 \begin{remark}
   但是你也可以直接在源文件中输入对应的unicode，如果你使用的是Xe\TeX{}或者是加载了inputenc的utf8选项.
@@ -174,6 +179,7 @@ z\LaTeX{}文档类现在不默认加载宏包 hyperref, 但是在加载文档类
 到编译速度的问题，一般在初稿阶段:作者是不需要这部分超链接功能的,此宏包引入后需要的多次编译也十分不必要,所以我便把 hyperref
 从基本宏包中移除.
 
+\clearpage
 \section{文档类选项与命令}
 本模板具有丰富的配置选项\index{配置选项}, 采用键值对\cmd{[<key 1>=<value 1>, <key 2>=<value 2>]}的形式对各个选项就行指定, 和具体的指定顺序无关, 
 具体的可配置项和可用的配置值参见本节的后续内容以及\cref{fig:zlatex-options}. 现在先简要说明z\LaTeX{}文档类的主要配置内容:
@@ -198,8 +204,8 @@ z\LaTeX{}文档类现在不默认加载宏包 hyperref, 但是在加载文档类
 
 \begin{figure}[!htb]
     \centering
-    \includegraphics[width=.9\linewidth]{./pics/zlatex_options.pdf}
-    \caption{zlatex options map}
+    \includegraphics[width=1\linewidth]{./pics/zlatex_options.pdf}
+    \caption{zlatex options setup}
     \label{fig:zlatex-options}
 \end{figure}
 
@@ -211,6 +217,39 @@ z\LaTeX{}文档类现在不默认加载宏包 hyperref, 但是在加载文档类
 ={10pt, oneside, fleqn}}. 如果你在加载文档类时指定的\zkey{class}为 {ctexbook},那么此时你可以在\zkey{classOption}
 中填入如下像:\cmd{zihao=5, 12pt, heading=false, linespread=1.3} 等 {ctex} 手册中说明的合法选项. 若对于默认的 article,
 book 文档类不熟悉，可以参见:\href{https://texblog.org/2013/02/13/latex-documentclass-options-illustrated/}{latex-documentclass-options}.
+
+\mstyle{fancy}
+这一选项为 bool 值, 目前仅 \cmd[F]{\chapter} 命令和 \zkey{envStyle} 对此做了适配，后续可能会在此选项下开发更多的功能. 
+值得一提的是: 当你的文档从 fancy 模式切换为普通模式后，可能会在编译过程中报错，这是正常的，直接忽略即可. 每一个 chapter 对应的主题色
+由 \cmd{zchapColor} 控制, 所以用户可以重定义此命令来改变章节的颜色主题.
+
+fancy 章节中定义了一些列的元素, 它们均有一个默认的定义, 但是你可以引用下面的命令进行重定义:
+\begin{itemize}
+  \item \cmd[F]{\zsubtitle{<content>}}: 章节的副标题
+  \item \cmd[F]{\zchapterSaying[<author>]{<saying>}}: 定义格言以及作者
+  \item \cmd[F]{\zchapterLContent{<content>}}: 章节左侧的内容, 不允许含有\texttt{\textbackslash par}等命令
+  \item \cmd[F]{\zchapterRContent{<content>}}: 章节右侧的内容, 不允许含有\texttt{\textbackslash par}等命令
+\end{itemize}
+
+一个使用样例:
+\begin{minted}{latex}
+\zsubtitle{Basic introduction to Chinese Culture}
+\zchapterSaying[Xu Xiake]{The world is big, and I want to see it.}
+\zchapterLContent{Xu Xiake(1587-1641) is a famous Chinese geographer and traveler.}
+\zchapterRContent{He is known for his extensive travels throughout China.}
+\end{minted}
+
+下面再展示部分使用样例:
+\begin{figure}[!htb]
+  \centering
+  \includegraphics[width=.45\linewidth]{./pics/fancy_chapter_1.pdf}
+  \includegraphics[width=.45\linewidth]{./pics/fancy_chapter_2.pdf}
+  
+  \includegraphics[width=.45\linewidth]{./pics/fancy_chapter_3.pdf}
+  \includegraphics[width=.45\linewidth]{./pics/fancy_chapter_4.pdf}
+  \caption{fancy chapter Examples}
+  \label{fig:fancy-chapter-examples}
+\end{figure}
 
 \mstyle{lang}
 键\zkey{lang}的合法值为 {en, cn}; 第二个关于文档语言的指定是比较容易理解的,但是还是得说明对应的一些注意事项.\cmd{lang=cn}或者\cmd{class=ctexbook}时
@@ -428,12 +467,12 @@ z\LaTeX{}提供了命令\cmd{\zlatexColorSetup}\index{\cmd{\zlatexColorSetup}}�
 }
 \end{minted}
 
-本文档类的默认配色如下:
+本文档类的默认配色\Footnote{目前 zchapColor 还未整理,只能单独重定义}如下:
 \begin{table}[H]
     \centering
     \begin{tabular}{ccccccccc}
         \toprule
-        结构元素 & chapter & chapter-rule & link & url & cite \\
+        结构元素 & chapter & chapter-rule & link & url & cite  \\
         \midrule 
         颜色 & \block{RoyalRed} & \block{black} & \block{purple}& \block{RoyalRed} & \block{blue}\\
         \midrule
@@ -474,6 +513,7 @@ reason is a representation of, as far as I know, the things in themselves;
   在上面的refer环境开始时插入一个\%可以用于消除多余空格
 \end{remark}
 
+\clearpage
 \section{z\LaTeX{}接口}
 z\LaTeX{} 的接口正在不断的完善中，所以目前的接口可能并不是那么稳定(我已然尽力). 
 
@@ -667,6 +707,7 @@ z\LaTeX{} 目前没有提供定制章节格式的接口. 使用者可以使用�
 也许后续我会在 z\LaTeX{} 的加载选项中添加一个 tikz 宏包选项，从而可以让用户自定义章节格式.
 \end{remark}
 
+\clearpage
 \section{字体配置}\index{font-config}\label{font-config}
 \subsection{一些术语}
 在字体上，国内环境可以说是一团浆糊，再加之M\$ word对用户的不断误导与溺爱，导致无数的用户不知道字体，字体族，
