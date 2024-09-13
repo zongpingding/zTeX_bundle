@@ -4,15 +4,12 @@
   lang=cn,
   class=book,
   mathSpec={envStyle=shadow, alias},
-  toc={redef, 2column}
+  toc={redef, 2column},
+  font={config}
 ]{zlatex}
 \newfontfamily{\russia}[Path=./Fonts/]{cmunrm.ttf}[
   BoldFont=cmunbx.ttf,
   ItalicFont=cmunbi.ttf
-]
-\newfontfamily{\Cinzel}[Path=./Fonts/]{CinzelRegular.ttf}[
-  BoldFont=CinzelBold.ttf,
-  ItalicFont=SabonItalic.ttf
 ]
 \zlatexColorSetup{
   % link        = teal,
@@ -21,8 +18,11 @@
 \indexsetup{level=\chapter}
 \usepackage{zhnumber}
 
-% optional 
+% optional
+\usepackage{float} 
 \usepackage{booktabs}
+\usepackage{tabularray}
+\UseTblrLibrary{diagbox}
 \usepackage{verbatim}
 \usepackage{pifont}
 \usepackage{pdfpages}

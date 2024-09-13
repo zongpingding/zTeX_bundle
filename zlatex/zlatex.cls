@@ -12,7 +12,7 @@
 % zlatex class info
 \tl_const:Nn \c__zlatex_class_name_tl            {zlatex}
 \tl_const:Nn \c__zlatex_class_version_tl         {1.0.0}
-\tl_const:Nn \c__zlatex_class_date_tl            {2024/06/12}
+\tl_const:Nn \c__zlatex_class_date_tl            {2024/09/12}
 \tl_const:Nn \c__zlatex_class_description_tl     {A~pre-release~latex3~document~class}
 
 \ProvidesExplClass{\c__zlatex_class_name_tl}         % Class
@@ -39,39 +39,41 @@
   { \keys_define:nn { zlatex / #1} }
 \cs_new_protected:Npn \zlatex_set:nn #1
   { \keys_set:nn { zlatex / #1 } }
-\cs_new_protected:Npn \zlatex_load_after:n #1
-  { \AtBeginDocument {#1} }
+\cs_new_protected:Npn \zlatex_pkg_load_last:n #1
+  { \AddToHook{env/document/before}{#1} }
+\cs_new_protected:Npn \zlatex_opt_set_last:n #1
+  { \AddToHook{env/document/before}{#1} }
 
 % setup options for class
 \zlatex_define_option:n {
   % fancy to load 'tikz', 'tcolorbox' etc,.
-  fancy           .bool_gset:N  =  \g__zlatex_fancy_bool,
-  fancy           .initial:n    =  { false },
+  fancy           .bool_gset:N  = \g__zlatex_fancy_bool,
+  fancy           .initial:n    = { false },
   % zlatex language
-  lang            .str_gset:N   =  \g__zlatex_lang_str,
-  lang            .initial:n    =  { en },
-  hyper           .bool_gset:N  =  \g__zlatex_hyperref_bool,
-  hyper           .initial:n    =  { false },
+  lang            .str_gset:N   = \g__zlatex_lang_str,
+  lang            .initial:n    = { en },
+  hyper           .bool_gset:N  = \g__zlatex_hyperref_bool,
+  hyper           .initial:n    = { false },
   % class and options
   class           .str_gset:N   = \g__zlatex_subclass_type_str,
   class           .initial:n    = { article },
   classOption     .clist_gset:N = \g__zlatex_subclass_option_clist,
   classOption     .initial:n    = { oneside, 10pt },
   % zlatex options meta key 
-  layout          .meta:nn      = {zlatex / layout}{#1},
-  mathSpec        .meta:nn      = {zlatex / mathSpec}{#1},
-  font            .meta:nn      = {zlatex / font}{#1},
-  bib             .meta:nn      = {zlatex / bib}{#1},
+  layout          .meta:nn      = { zlatex / layout }{#1},
+  mathSpec        .meta:nn      = { zlatex / mathSpec }{#1},
+  font            .meta:nn      = { zlatex / font }{#1},
+  bib             .meta:nn      = { zlatex / bib }{#1},
   % toc setup
   toc             .multichoice:,
-  toc / 2column   .code:n       =  { \zlatex_load_after:n { \RequirePackage[toc]{multitoc} } },
+  toc / 2column   .code:n       =  { \zlatex_pkg_load_last:n {\RequirePackage[toc]{multitoc}} },
   toc / redef     .code:n       =  { 
     \str_case:VnF \g__zlatex_lang_str {
-      {en}{ \zlatex_load_after:n {\renewcommand{\contentsname}{\hfill\bfseries\huge Contents \hfill}} }
-      {cn}{ \zlatex_load_after:n {\renewcommand{\contentsname}{\hfill\bfseries\huge 目录     \hfill}} }
+      {en}{ \zlatex_opt_set_last:n {\renewcommand{\contentsname}{\hfill\bfseries\huge Contents \hfill}} }
+      {cn}{ \zlatex_opt_set_last:n {\renewcommand{\contentsname}{\hfill\bfseries\huge 目录     \hfill}} }
     }{\msg_error:nn {zlatex}{option-language}}
   },
-  toc / unknown.code:n          =  {
+  toc / unknown   .code:n       =  {
     \msg_new:nnn {zlatex}{option-toc}{Current~toc~option~is~:~'#1'~,default~toc~settings~substitute.}
     \msg_warning:nn {zlatex}{option-toc}
   },
@@ -92,21 +94,24 @@
   envStyle            .tl_gset:N    = \g__zlatex_math_env_style_tl,
   envStyle            .initial:n    = { plain },
   font                .choice:,
-  font / newtx        .code:n       = { \zlatex_load_after:n { \RequirePackage{newtxmath} } },
-  font / mtpro2       .code:n       = { \zlatex_load_after:n { \RequirePackage[lite, subscriptcorrection, slantedGreek, nofontinfo]{mtpro2} } },
-  font / euler        .code:n       = { \zlatex_load_after:n { \RequirePackage[OT1, euler-digits]{eulervm} } },
-  font / mathpazo     .code:n       = { \let\rmbefore\rmdefault\zlatex_load_after:n { \RequirePackage{mathpazo} } \let\rmdefault\rmbefore},
+  font / newtx        .code:n       = { \zlatex_pkg_load_last:n { \RequirePackage{newtxmath} } },
+  font / mtpro2       .code:n       = { \zlatex_pkg_load_last:n { \RequirePackage[lite, subscriptcorrection, slantedGreek, nofontinfo]{mtpro2} } },
+  font / euler        .code:n       = { \zlatex_pkg_load_last:n { \RequirePackage[OT1, euler-digits]{eulervm} } },
+  font / mathpazo     .code:n       = { \let\rmbefore\rmdefault\zlatex_pkg_load_last:n { \RequirePackage{mathpazo} } \let\rmdefault\rmbefore},
   font / unknown      .code:n       = {
     \msg_new:nnn {zlatex}{option-mathfont}{Current~math~font~option~is~:~'#1'~,default~math-font~substitute.}
     \msg_warning:nn {zlatex}{option-mathfont}
   },
 }
-\zlatex_define:nn {font}{ }
+\zlatex_define:nn {font}{
+  config              .bool_gset:N  = \g__zlatex_font_config_bool,
+  config              .initial:n    = { false }, 
+}
 \zlatex_define:nn {bib}{
-  source              .str_gset:N   =  \g__zlatex_bib_source_str,
-  source              .initial:n    =  { ref.bib },
-  backend             .str_gset:N   =  \g__zlatex_bib_backend_str,
-  backend             .initial:n    =  { biber },
+  source              .str_gset:N   = \g__zlatex_bib_source_str,
+  source              .initial:n    = { ref.bib },
+  backend             .str_gset:N   = \g__zlatex_bib_backend_str,
+  backend             .initial:n    = { biber },
 }
 
 % option setup
@@ -150,7 +155,7 @@
 \str_case:VnF \g__zlatex_lang_str {
   {en} { 
     \sys_if_engine_xetex:TF 
-      {\msg_warning:nn {zlatex}{compile-engine-pdftex}}
+      {\bool_if:NF \g__zlatex_font_config_bool {\msg_warning:nn {zlatex}{compile-engine-pdftex}}}
       {\RequirePackage[utf8]{inputenc}}
     \RequirePackage[T1]{fontenc}
     \RequirePackage[english]{babel}
@@ -178,7 +183,6 @@
 \RequirePackage{fancyhdr}
 \RequirePackage{framed}
 \RequirePackage{xcolor}
-% page layout 
 % document mode
 \if@twoside 
   \geometry{a4paper, left=3cm, right=5.5cm, bottom=3.5cm, footskip=1.5cm, marginparsep=1em}
@@ -198,51 +202,95 @@
     \renewcommand{\marginpar}[1]{\leftbar\noindent#1\endleftbar}
   }
 \fi
-% slide mode (only in 'oneside' mode)
+
+% slide mode
 \exp_args:NNnx \seq_set_split:Nnn \l_tmpa_seq {|}{\g__zlatex_aspectratio_tl}
 \bool_if:NTF \g__zlatex_slide_bool {
-  \RequirePackage{lastpage}
-  \definecolor{slideRed}{HTML}{a30000}
-  \definecolor{slideGray}{HTML}{e0e0e0}
-  \definecolor{slideWhite}{HTML}{f0f0f0}
-  % hook shipout
-  \RequirePackage{eso-pic}
-  \AddToShipoutPictureBG {
-    \AtPageUpperLeft {
-      \textcolor{slideRed}{\rule[-1.25em]{.5\paperwidth}{1.25em}}
-      \textcolor{slideGray}{\rule[-1.25em]{.5\paperwidth}{1.25em}}
-    }
-    \AtPageLowerLeft {
-      \textcolor{slideRed}{\rule{.35\paperwidth}{1.25em}}
-      \textcolor{slideWhite}{\rule{.3\paperwidth}{1.25em}}
-      \textcolor{slideGray}{\rule{.35\paperwidth}{1.25em}}
-    }
-  }
   % layout and mark
-  \RequirePackage{titling}
-  \IfClassLoadedTF{book}{
-    \renewcommand\chaptermark[1]{\markboth{#1}{}}
-  }{\relax}
-  \renewcommand\sectionmark[1]{\markboth{#1}{}}
+  \RequirePackage{titlesec}
   \geometry {
     papersize={\seq_item:Nn \l_tmpa_seq {1}cm, \seq_item:Nn \l_tmpa_seq {2}cm},
-    hmargin=1cm,
-    vmargin=.65cm,
-    head=0.52cm,
-    foot=12pt,
-    headsep=5pt,
-    footskip=15pt
+    hmargin=1cm, top=.4cm, headsep=0pt,
+    includefoot, bottom=5.5pt,
+    footskip=\dim_eval:n {1.25em + 5pt}
   }
-  % init slide mode
-  \zlatex_load_after:n {\pagestyle{fancy}}
-}{\relax}
+  \IfClassLoadedTF{book}{
+    \let\cleardoublepage\clearpage
+    \renewcommand\chaptermark[1]{\markboth{#1}{}}
+    \renewcommand\thesection{\arabic{section}}
+    \AddToHook{shipout/firstpage}{\setcounter{page}{0}}
+    \AddToHook{cmd/@schapter/after}{\thispagestyle{fancy}}
+    \AddToHook{cmd/@chapter/after}{\thispagestyle{fancy}}
+    \zlatex_opt_set_last:n {\renewcommand\mainmatter{}\renewcommand\frontmatter{}}
+    \renewcommand\tableofcontents {
+      \if@twocolumn\@restonecoltrue\onecolumn\else\@restonecolfalse\fi
+      \section*{\contentsname\@mkboth{\MakeUppercase\contentsname}{\MakeUppercase\contentsname}}
+      \@starttoc{toc}\if@restonecol\twocolumn\fi
+      \setcounter{page}{1}
+    }
+    \zlatex_opt_set_last:n {
+      \titleformat{\chapter}
+        {\null\vfill\Huge}{}{10pt}{}[\vspace{\stretch{2}}\null]
+      \titleformat{name=\chapter, numberless}
+        {\null\vfill\Huge}{}{10pt}{}[\vspace{\stretch{2}}\null]
+    }
+    \zlatex_opt_set_last:n {\titlespacing*{\chapter}{0pt}{30pt}{0pt}}
+  }{\relax}
+  \renewcommand\sectionmark[1]{\markboth{#1}{}}
+  \titleformat{\section}{\Large\color{zslideMain}}{}{0pt}{}[\bool_gset_true:N \g_new_sec_bool]
+  % status bar
+  \bool_new:N \g_new_sec_bool
+  \definecolor{zslideMain}{HTML}{a30000}
+  \definecolor{zslideII}{HTML}{e0e0e0}
+  \definecolor{zslideIII}{HTML}{f0f0f0}
+  \AddToHook{cmd/chapter/before}{\newpage}
+  \AddToHook{cmd/section/before}{\newpage}
+  \AddToHook{shipout/lastpage}{\label{zslide-last-page}}
+  \AddToHook{cmd/tableofcontents/before}{\renewcommand{\contentsname}{Outline}}
+  \AddToHook{shipout/after}{\bool_gset_false:N \g_new_sec_bool}
+  \AddToHook{shipout/background}{\ifnum\thepage=0\else
+    % header
+    \_zslide_status_bar:nnnn {(0, -1.25em)}{zslideMain}{.5}{1.25em}
+    \_zslide_status_bar:nnnn {(.5\paperwidth, -1.25em)}{zslideII}{.5}{1.25em}
+    \bool_if:NT \g_new_sec_bool {\_zslide_status_bar:nnnn {(0, -3.25em)}{zslideIII}{1}{2em}}
+    % foot
+    \_zslide_status_bar:nnnn {(0, -\paperheight)}{zslideMain}{.33}{1.25em}
+    \_zslide_status_bar:nnnn {(.33\paperwidth, -\paperheight)}{zslideIII}{.34}{1.25em}
+    \_zslide_status_bar:nnnn {(.67\paperwidth, -\paperheight)}{zslideII}{.33}{1.25em}
+  \fi}
+  % metadata setup
+  \AddToHook{cmd/maketitle/before}{
+    \let\zslideTitle\@title
+    \let\zslideAuthor\@author
+    \let\zslideDate\@date
+  }
+  \zlatex_define:nn {slide-metadata}{
+    UL    .tl_set:N  =  \l__zlatex_slide_UL_tl,
+    UL    .initial:n =  { \textcolor{zslideII}{Section\ \thesection} }, 
+    UR    .tl_set:N  =  \l__zlatex_slide_UR_tl,
+    UR    .initial:n =  { \textcolor{zslideMain}{Subsection\ \thesubsection} },
+    BL    .tl_set:N  =  \l__zlatex_slide_BL_tl,
+    BL    .initial:n =  { \textcolor{zslideII}{\zslideAuthor} },
+    BC    .tl_set:N  =  \l__zlatex_slide_BC_tl,
+    BC    .initial:n =  { \textcolor{zslideMain}{\zslideTitle} },
+    BR    .tl_set:N  =  \l__zlatex_slide_BR_tl,
+    BR    .initial:n =  { \textcolor{zslideMain}{\zslideDate\quad \thepage/\pageref{zslide-last-page}} }
+  }
+  \cs_new_protected:Npn \_slide_metadate:n #1 {
+    \tl_use:c {l__zlatex_slide_#1_tl}
+  }
+  \NewDocumentCommand{\zslideMetadataSetup}{m}{
+    \zlatex_set:nn {slide-metadata}{#1}
+  }
+  \cs_new_protected:Npn \_zslide_status_bar:nnnn #1#2#3#4 {
+    \put#1 {\textcolor{#2}{\rule{#3\paperwidth}{#4}}}
+  }
+  % init slide option
+  \zlatex_opt_set_last:n {\pagestyle{fancy}}
+  \renewcommand{\familydefault}{\sfdefault}
+}{\newcommand\zslideMetadataSetup[1]{}}
 
 % fancy page settings
-\cs_if_exist_use:NF \theauthor{
-  \newcommand{\theauthor}{}
-  \newcommand{\thetitle}{}
-  \newcommand{\thedate}{}
-}
 \fancypagestyle{fancy}{
   \fancyhf{}  
   \dim_gset:Nn \headheight{15pt}
@@ -250,27 +298,27 @@
   % slide mode
   \bool_if:NTF \g__zlatex_slide_bool {
     \def\headrule{}
-    \fancyhead[L]{\hbox to .42\paperwidth{\hss\sffamily\textcolor{white}{Section \ \thesection}\;}}
-    \fancyhead[R]{\hbox to .42\paperwidth{\;\sffamily\textcolor{slideRed}{\leftmark}\hss}}
-    \fancyfoot[L]{\sffamily\textcolor{white}{\theauthor}}
-    \fancyfoot[C]{\sffamily\textcolor{slideRed}{\thetitle}}
-    \fancyfoot[R]{\sffamily\textcolor{slideRed}{\hbox to .25\paperwidth{\hfill\thedate\kern2.5em\thepage/\pageref{LastPage}}}}
+    \fancyhead[L]{\hbox~ to~ .5\textwidth{\hfill\_slide_metadate:n {UL}\ }}
+    \fancyhead[R]{\hbox~ to~ .5\textwidth{\ \_slide_metadate:n {UR}\hfill}}
+    \fancyfoot[L]{\_slide_metadate:n {BL}}
+    \fancyfoot[C]{\_slide_metadate:n {BC}}
+    \fancyfoot[R]{\_slide_metadate:n {BR}}
   }{
   % doc mode
-    \if@twoside
-      \fancyhead[EL]{\leftmark}
-      \fancyhead[ER]{\thepage}
-      \fancyhead[OL]{\thepage}
-      \fancyhead[OR]{\rightmark}
-    \else
-      \IfClassLoadedTF{book}{
-        \fancyhead[L]{\thepage}
-        \fancyhead[R]{\rightmark}
-      }{
-        \fancyhead[L]{\thepage}
-        \fancyhead[R]{\leftmark}
-      }
-    \fi
+  \if@twoside
+    \fancyhead[EL]{\leftmark}
+    \fancyhead[ER]{\thepage}
+    \fancyhead[OL]{\thepage}
+    \fancyhead[OR]{\rightmark}
+  \else
+    \IfClassLoadedTF{book}{
+      \fancyhead[L]{\thepage}
+      \fancyhead[R]{\rightmark}
+    }{
+      \fancyhead[L]{\thepage}
+      \fancyhead[R]{\leftmark}
+    }
+  \fi
   }
 }
 \fancypagestyle{plain}{
@@ -280,7 +328,7 @@
   \fancyfoot[C]{\thepage}
 }
 
-% front and main matter cmds in book class
+% front/main matter
 \IfClassLoadedTF{book}{
   \renewcommand\frontmatter{
     \cleardoublepage
@@ -294,7 +342,7 @@
     \@mainmattertrue
     \pagenumbering{arabic}
   }
-}{\relax}
+}{\zlatex_opt_set_last:n {\pagestyle{fancy}}}
 
 
 
@@ -393,7 +441,7 @@
 \NewDocumentCommand{\zlatexColorSetup}{m}{
   \zlatex_set:nn {color}{#1}
   \bool_if:NTF \g__zlatex_hyperref_bool {
-    \hypersetup{
+    \hypersetup {
       colorlinks = true,
       urlcolor   = \tl_use:N \l__zlatex_url_color_tl,
       linkcolor  = \tl_use:N \l__zlatex_link_color_tl,
@@ -478,25 +526,34 @@
 \theoremstyle{zlatexMathEnv}
 
 % theorem-like env declaration
-\msg_new:nnn {zlatex}{mathenv-type}{Current~math~env~is~:~'\str_use:N \g__zlatex_math_env_style_tl'~,only~'plain',~'leftbar',~'background',~'fancy'~types~are-valid.}
+\msg_new:nnn {zlatex}{mathenv-type}{Current~math~env~is~:~'\str_use:N \g__zlatex_math_env_style_tl'~,only~'plain',~'leftbar',~'background',~'fancy',~'shadow',~'paris'~types~are-valid.}
 \NewDocumentCommand{\zlatexMathEnvStyle}{m}{
   \tl_gset:Nn \g__zlatex_math_env_style_tl {#1}
 }
-\str_if_eq:VnT \g__zlatex_math_env_style_tl{shadow}{
+\seq_new:N \l_tcb_flag_seq
+\seq_set_from_clist:Nn \l_tcb_flag_seq {shadow, paris}
+\seq_if_in:NVT \l_tcb_flag_seq \g__zlatex_math_env_style_tl {
   \@ifpackageloaded{tcolorbox}{\relax}{
     \RequirePackage[many]{tcolorbox}
   }
 }
+% Hook for Math Env Style
+\NewDocumentCommand{\zlatexMathEnvStyleNew}{mm}{
+  \AddToHook{zlatex/math/envstyle/begin}{#1}
+  \AddToHook{zlatex/math/envstyle/end}{#2}
+  \ActivateGenericHook{zlatex/math/envstyle/begin}
+  \ActivateGenericHook{zlatex/math/envstyle/end}
+  \tl_gset:Nn \g__zlatex_math_env_style_tl {HOOK}
+}
 \DeclareDocumentEnvironment{zlatexTheoremLikeFrame}{O{axiom}}{
   \def\TempColor{\tl_use:c {l__zlatex_#1_color_tl}}
-  \typeout{TempColor: \TempColor}
   \str_case:VnF \g__zlatex_math_env_style_tl {
     {plain}{  
       \def\FrameCommand{}
       \MakeFramed {\advance\hsize-\width \FrameRestore}
     }
     {leftbar}{
-      \def\FrameCommand{{\color{\TempColor}\vrule width 3pt}\hspace{5pt}}
+      \def\FrameCommand{{\color{\TempColor}\vrule~ width~ 3pt}\hspace{5pt}}
       \MakeFramed {\advance\hsize-\width \FrameRestore}
     }
     {background}{
@@ -504,27 +561,39 @@
       \MakeFramed {\advance\hsize-\width \FrameRestore}
     }
     {fancy}{
-      \def\FrameCommand{{\color{\TempColor}\vrule width 3pt}\colorbox{\TempColor!10}}
+      \def\FrameCommand{{\color{\TempColor}\vrule~ width~ 3pt}\colorbox{\TempColor!10}}
       \MakeFramed{\advance\hsize-\width \FrameRestore}
     }
     {shadow}{
       \begin{tcolorbox}[
-        top=1.5pt,
-        bottom=1.5pt,
-        left=3pt,
-        right=3pt,
-        boxrule=0pt,
-        sharp~ corners,
-        enhanced~ jigsaw,
+        enhanced~ jigsaw, breakable,
+        top=1.5pt,  bottom=1.5pt,
+        left=3pt,   right=3pt,
+        boxrule=0pt, sharp~ corners,
         drop~ fuzzy~ shadow,
-        breakable,
         colback={\TempColor!10}, 
         borderline~ west={3pt}{0pt}{\TempColor}
       ]
     }
+    {paris}{
+      \begin{tcolorbox}[
+        enhanced,   breakable,
+        top=1.5pt,  bottom=1.5pt,
+        left=3pt,   right=3pt,
+        boxrule=0pt,    sharp~ corners,
+        colback=gray!5, drop~ fuzzy~ shadow,
+        overlay={
+          \draw[\TempColor, line~ width=0.2pt] (frame.north~ west)--(frame.north~ east);
+          \draw[\TempColor, line~ width=3pt] ([yshift=1.5pt]frame.north~ west) -- +(2.5cm, 0);
+        }
+      ]  
+    }
+    {HOOK}{\UseHook{zlatex/math/envstyle/begin}}
   }{\msg_error:nn {zlatex}{mathenv-type}}
 }{
   \str_case:VnF \g__zlatex_math_env_style_tl {
+    {HOOK}{\UseHook{zlatex/math/envstyle/end}}
+    {paris}{\end{tcolorbox}}
     {shadow}{\end{tcolorbox}}
     {plain}{\endMakeFramed}
     {leftbar}{\endMakeFramed}
@@ -538,7 +607,7 @@
   % theorem create
   \newtheorem{zlatex#1}{\tl_use:c {zlatex#1Name}}[section]
 
-  % env create (3 types: 'leftbar', 'none' and 'backgroud')
+  % env create (use the above Styles)
   \NewDocumentEnvironment{#1}{O{}}{
     \begin{zlatexTheoremLikeFrame}[#1]
     \begin{zlatex#1}[##1]
@@ -564,19 +633,19 @@
   \MakeFramed {\advance\hsize-\width \FrameRestore}
 }{\endMakeFramed}
 \renewcommand{\qedsymbol}{\ensuremath{\blacksquare}}
-\clist_map_inline:Nn \g__zlatex_prooflike_envs_clist{
+\clist_map_inline:Nn \g__zlatex_prooflike_envs_clist {
   \DeclareDocumentEnvironment{#1}{O{}}{
     \begin{zlatexProofLikeFrame}[]
     {\noindent{\bfseries\tl_use:c {zlatex#1Name}:}}
     \tl_set:Nn \l__arg_one_tl {#1}
-  }{\str_if_eq:VnTF \l__arg_one_tl{proof}{\hfill\qedsymbol\par}{\par}\end{zlatexProofLikeFrame}}
+  }{\str_if_eq:VnTF \l__arg_one_tl {proof}{\hfill\qedsymbol\par}{\par}\end{zlatexProofLikeFrame}}
 }
 
 % equation number style
 \counterwithin{equation}{section}
 
 % math related cmds alias
-\bool_if:NTF \g__zlatex_math_alias_bool{
+\bool_if:NT \g__zlatex_math_alias_bool {
   \RequirePackage{amssymb, mathtools}
   \RequirePackage{bm}          
   % Math Font 
@@ -606,7 +675,7 @@
   \newcommand{\grad}{\ensuremath{\mathrm{grad}\;}}
   \newcommand{\trace}{\ensuremath{\mathrm{trace}\;}}
   \renewcommand{\div}{\ensuremath{\mathrm{div}\;}}
-}{}
+}
 
 
 
@@ -616,7 +685,6 @@
 %                          Graphics and Item  
 % ----------------------------------------------------------------------
 \RequirePackage{graphicx}
-\RequirePackage{float}
 \RequirePackage{sidenotes}
 \graphicspath{
   {./figure/}{./figures/}{./image/}{./images/}
@@ -665,8 +733,15 @@
 }
 
 % chapter head style
+\newif\ifFancyChapter
+\bool_if:NTF \g__zlatex_font_config_bool {
+  \RequirePackage{fontspec}
+  \newfontfamily{\Cinzel}{CinzelRegular.ttf}[
+    BoldFont=CinzelBold.ttf,
+    ItalicFont=SabonItalic.ttf
+  ]
+}{\def\Cinzel{\relax}}
 \IfClassLoadedTF{book}{
-  \newif\ifFancyChapter
   \bool_if:NTF \g__zlatex_fancy_bool {
     \RequirePackage[explicit]{titlesec}
     \FancyChaptertrue
@@ -686,7 +761,7 @@
       \draw[draw=zchapColor] (stripES)++(.25em, 0em)   -- ++(.75\paperwidth-3.25em, 0pt);
       % chapter title and index
       \node[anchor=south, color=white] at ($(stripES)+(-1.5em, 0em)$)
-        {\normalfont\normalsize\scalebox{4}{\thechapter}\Suffixnum{\thechapter}};
+        {\normalfont\normalsize\scalebox{4}{\thechapter}\numSuffix{\thechapter}};
       \node[anchor=south~ west, inner~ sep=0pt, 
             yshift=4.25em, xshift=.25em, 
             font=\Large\bfseries, color=zchapColor
@@ -741,18 +816,17 @@
 }{\relax}
 
 % find number suffix: 1 -> st, 2 -> nd, ...
-\tl_const:Nn \c_numSufix_i {st}
-\tl_const:Nn \c_numSufix_ii {nd}
-\tl_const:Nn \c_numSufix_iii {rd}
-\tl_const:Nn \c_numSufix_ {th}
-\clist_const:Nn \c_numSpecialSufix_clist {11, 12, 13}
-\NewDocumentCommand\Suffixnum{m}{
-  \clist_if_in:NnTF \c_numSpecialSufix_clist {#1}
-  {th}{
-    \int_compare:nNnTF {\int_mod:nn {#1}{10}}{>}{3}
-    {th}
-    {\tl_use:c {c_numSufix_\int_to_roman:n {\int_mod:nn {#1}{10}}}}
-  }
+\prop_new:N \g_arabix_suffix_prop
+\prop_set_from_keyval:Nn \g_arabix_suffix_prop {
+  1=st, 2=nd, 3=rd, 11=th, 12=th, 13=th, 0=th, _=th
+} 
+\NewDocumentCommand\numSuffix{m}{
+  \int_compare:nTF {11 <= #1 <= 13}
+    {\prop_item:Ne \g_arabix_suffix_prop {#1}}
+    {\int_compare:nTF {\int_mod:nn {#1}{10} > 3}
+      {\prop_item:Ne \g_arabix_suffix_prop {_}}
+      {\prop_item:Ne \g_arabix_suffix_prop {\int_mod:nn {#1}{10}}}
+    }
 }
 
 % fancy chapter default material
@@ -760,40 +834,16 @@
 \makeatletter
 \ifFancyChapter
   % default settings
-  \newcommand{\z@subtitle}{An Introduction to Mathematical Logic}
-  \newcommand{\z@saying}{Mathematical logic has always been closely connected with the philosophy of mathematics.}
-  \newcommand{\z@sayauthor}{-- Joseph R. Shoenfield}
-  \newcommand{\z@leftContent}{
-    \includegraphics[width=1\linewidth]{example-image-duck}\\[.5em]
-    We add two words of caution. First, if two different syntactical variables
-    occur in the same context, they do not necessarily represent different expressions.
-  }
-  \newcommand{\z@rightContent}{
-    Logic is the study of reasoning; and mathematical logic is the study of the 
-    type of reasoning done by mathematicians. To discover the proper approach to 
-    mathematical logic, we must therefore examine the methods of the mathematician.\\
-    The conspicuous feature of mathematics, as opposed to other sciences, is
-    the use of proofs instead of observations. A physicist may prove physical laws
-    from other physical laws; but he usually regards agreement with observation as
-    the ultimate test of a physical law. A mathematician may, on occasions, use
-    observation; for example, he may measure the angles of many triangles and
-    conclude that the sum of the angles is always 180$^\circ$. However, he will 
-    accept this as a law of mathematics only when it has been proved.
-  }
+  \newcommand{\z@subtitle}{Subtitle}
+  \newcommand{\z@saying}{SAYING}
+  \newcommand{\z@sayauthor}{-- Author}
+  \newcommand{\z@rightContent}{Right Content}
+  \newcommand{\z@leftContent}{\includegraphics[width=1\linewidth]{example-image-duck}\\[.5em]Figure Description}
   % users' interface
-  \NewDocumentCommand{\zsubtitle}{m}{
-    \renewcommand\z@subtitle{#1}
-  }
-  \NewDocumentCommand{\zchapterSaying}{O{}m}{
-    \renewcommand\z@saying{#2}
-    \renewcommand\z@sayauthor{#1}
-  }
-  \NewDocumentCommand{\zchapterLContent}{m}{
-    \renewcommand\z@leftContent{#1}
-  }
-  \NewDocumentCommand{\zchapterRContent}{m}{
-    \renewcommand\z@rightContent{#1}
-  }
+  \NewDocumentCommand{\zsubtitle}{m}{\renewcommand\z@subtitle{#1}}
+  \NewDocumentCommand{\zchapterSaying}{O{}m}{\renewcommand\z@saying{#2}\renewcommand\z@sayauthor{#1}}
+  \NewDocumentCommand{\zchapterLContent}{m}{\renewcommand\z@leftContent{#1}}
+  \NewDocumentCommand{\zchapterRContent}{m}{\renewcommand\z@rightContent{#1}}
 \else 
   \NewDocumentCommand{\zsubtitle}{m}{\relax}
   \NewDocumentCommand{\zchapterSaying}{O{}m}{\relax}
@@ -812,29 +862,26 @@
 }
 \makeatletter
 \bool_if:NTF \g__zlatex_slide_bool {
-  \let\orithepage\thepage
   \renewcommand\maketitle{
-    \Maketitle
-    \def\thepage{}
-    \setcounter{page}{0}
+    \null\vfill\begin{center}
+      \begin{tabular}{c}{\huge\zslideTitle}\\[2em]
+      \zslideAuthor\\[2em]\zslideDate\end{tabular}
+      \vspace{\stretch{2}}\end{center}
+    \thispagestyle{empty}\setcounter{page}{0}
     \newpage
-    \let\thepage\orithepage
   }
 }{
   \renewcommand{\maketitle}{
-    \bool_if:NTF \g__zlatex_hyperref_bool {\hypersetup{pageanchor=false}}{\relax}
-    \newgeometry{margin=1in}
-    \begin{titlepage}
-      \vfill\vspace*{40pt}
-      \noindent\hspace*{134pt}\rule[-75pt]{6pt}{95pt}
-      {\hspace*{10pt}\leavevmode\parbox[t]{25em}{\fontsize{25}{25}\selectfont\bfseries\@title}}\par
-      \vspace*{-15pt}
-      \noindent\hspace*{150pt}{\leavevmode\parbox[t]{30em}{\Large\bfseries\@author}}\par
-      \vfill
-      \noindent\hspace*{150pt}{\Large\textcolor{gray}{\@date}}
-    \end{titlepage}
+    \bool_if:NT \g__zlatex_hyperref_bool {\hypersetup{pageanchor=false}}
+    \newgeometry{margin=1.5in}
+      \thispagestyle{empty}
+      \begin{center}\vfill\vspace*{40pt}
+      \rule{6pt}{80pt}
+      \begin{tabular}[b]{l}{\huge\bfseries\@title}\\[5em]{\Large\bfseries\@author}\end{tabular}
+      \par\vfill{\Large\textcolor{gray}{\@date}}
+      \end{center}
     \restoregeometry
-    \bool_if:NTF \g__zlatex_hyperref_bool {\hypersetup{pageanchor=true}}{\relax}
+    \bool_if:NT \g__zlatex_hyperref_bool {\hypersetup{pageanchor=true}}
   }
 }
 \makeatother
