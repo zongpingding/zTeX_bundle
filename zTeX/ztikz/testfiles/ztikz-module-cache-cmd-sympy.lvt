@@ -1,0 +1,12 @@
+\input{regression-test.tex}
+\documentclass{article}
+\usepackage{ztikz}
+\ztikzLoadModule{cache, python}
+
+\begin{document}
+\START
+\TEST{ztikz-module-cache-cmd-sympy}{
+  \sympy{1+1}
+}
+\END
+\end{document}

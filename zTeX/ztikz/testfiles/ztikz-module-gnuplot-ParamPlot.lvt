@@ -1,0 +1,15 @@
+\input{regression-test.tex}
+\documentclass{article}
+\usepackage{ztikz}
+\ztikzLoadModule{gnuplot}
+
+
+\begin{document}
+\START
+\BEGINTEST{ztikz-module-gnuplot-ParamPlot}
+\begin{tikzpicture}
+  \ParamPlot[0:2*pi][red]{7*sin(t), 4*cos(t)}
+\end{tikzpicture}
+\ENDTEST
+\END
+\end{document}

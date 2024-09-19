@@ -1,0 +1,16 @@
+\input{regression-test.tex}
+\documentclass{article}
+\usepackage{ztikz}
+\ztikzLoadModule{cache}
+% \usepackage{tikz}
+% \usetikzlibrary{external}
+
+\begin{document}
+\START
+\BEGINTEST{ztikz-module-cache-env-tikz}
+\begin{tikzpicture}
+  \draw (0, 0) -- (1, 1);
+\end{tikzpicture}
+\ENDTEST
+\END
+\end{document}

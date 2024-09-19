@@ -1,0 +1,12 @@
+\input{regression-test.tex}
+\documentclass{article}
+\usepackage{ztikz}
+\ztikzLoadModule{cache, wolfram}
+
+\begin{document}
+\START
+\TEST{ztikz-module-cache-cmd-wolframDSolve}{
+  \wolframDSolve{{y'[x] + y[x] == a*Sin[x], y[0] == 0}}[y[x]][x]
+}
+\END
+\end{document}

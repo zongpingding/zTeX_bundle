@@ -1,0 +1,11 @@
+\input{regression-test.tex}
+\documentclass{article}
+\usepackage{ztool}
+
+\begin{document}
+\START
+\TEST{ztikz-module-zdraw-zrule}{
+  \ztool{Hello ztool}
+}
+\END
+\end{document}

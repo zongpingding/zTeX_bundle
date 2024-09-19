@@ -1,0 +1,16 @@
+\input{regression-test.tex}
+\documentclass{article}
+\usepackage{ztikz}
+\ztikzLoadModule{python}
+
+
+\begin{document}
+\START
+\BEGINTEST{ztikz-module-python-pycode}
+\begin{pycode}{TEST.py}
+with open ('./ztikz_output/python_data/TEST.py.out', 'w') as file:
+    file.write('l3buil-TEST')
+\end{pycode}
+\ENDTEST
+\END
+\end{document}

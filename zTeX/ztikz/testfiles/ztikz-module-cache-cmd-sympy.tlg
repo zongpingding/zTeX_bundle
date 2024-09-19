@@ -1,0 +1,10 @@
+This is a generated file for the l3build validation system.
+Don't change this file in any respect.
+============================================================
+TEST 1: ztikz-module-cache-cmd-sympy
+============================================================
+runsystem(sed -i "8s|F_res = .*|F_res = 1+1|" ztikz_output/scripts/sympy_script.py)...executed.
+current hash is 7B96635607C6902FD62BCE8F70A1D06C
+(ztikz_output/python_data/sympy_1.out)
+skip recompile, using the cache sympy result 1
+============================================================
