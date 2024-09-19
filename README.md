@@ -51,21 +51,19 @@ then create a new folder named `zTeX` in the above `USER-DIR` and copy the files
 USER-DIR
 └── zTeX
     ├── doc
-    │   ├── series_intro.pdf
     │   ├── zlatex_manual.pdf
-    │   ├── zslide_manual.pdf
     │   ├── ztex_intro.pdf
-    │   └── ztikz_manual.pdf
+    │   ├── ztikz_manual.pdf
+    │   └── ztool_manual.pdf
     ├── modules
     │   ├── ztikzmodule.cache.tex
     │   ├── ztikzmodule.gnuplot.tex
     │   ├── ztikzmodule.python.tex
     │   ├── ztikzmodule.wolfram.tex
     │   └── ztikzmodule.zdraw.tex
-    ├── README.md
     ├── zlatex.cls
-    ├── zslide.sty
-    └── ztikz.sty
+    ├── ztikz.sty
+    └── ztool.sty
 ```
 
 If possible, run `texhash` to update the database.
@@ -259,7 +257,7 @@ Only `wolframscript`, `gnuplot` and `python` need additional settings. I'll simp
     * If you already have wolframscript setup in your windows, then you can create a soft link in [WSL](https://learn.microsoft.com/zh-cn/windows/wsl/install) to make it works in your WSL:
         ```shell 
         ln -sf "/mnt/c/Program Files/Wolfram Research/WolframScript/wolframscript.exe" /usr/bin/wolframscript
-        ``` 
+        ```
         > pay attention to the wolframscript folder.
     * If wolframscript setup successfully, then everything is done. 
     * compile your document turning `shell escape` on.
