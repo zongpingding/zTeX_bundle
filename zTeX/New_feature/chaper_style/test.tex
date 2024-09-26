@@ -1,0 +1,89 @@
+\documentclass[12pt]{article}
+\PassOptionsToPackage{quiet}{fontspec}
+\usepackage{ctex}
+\usepackage{geometry}
+\geometry{paperheight=12.02in, paperwidth=8.5in,}
+\usepackage{xcolor}
+\usepackage{tikz}
+\usetikzlibrary{calc}
+\usepackage{fontspec}
+\newfontfamily{\Cinzel}[Path=../Fonts/]{CinzelRegular.ttf}[
+    BoldFont=CinzelBold.ttf,
+    ItalicFont=SabonItalic.ttf
+]
+\usepackage{graphicx}
+
+
+
+\definecolor{chpcolor}{HTML}{7f8184}
+\definecolor{chpLogoTextColor}{HTML}{4c4c4e}
+\definecolor{chpTextColor}{HTML}{231f20}
+
+\newlength{\chaplinexshift}
+\newlength{\chaplineyextend}
+\setlength{\chaplinexshift}{.5em}
+\setlength{\chaplineyextend}{\dimexpr(.75\paperwidth-5em-1\chaplinexshift)}
+
+
+\begin{document}
+\thispagestyle{empty}
+\begin{tikzpicture}[overlay, remember picture]
+    % 1.mark nodes(need 'calu')
+    \coordinate (A) at ($(current page.north west)+(.125\paperwidth, 0pt)$);
+    \coordinate (B) at ($(A)+(5em, -15em)$);
+    \coordinate (C) at ($(current page.south west)+(0em, 22em)$);
+    % show the ref nodes 
+    \node[red] at (A) {A};
+    \node[red] at (B) {B};
+    \node[red] at (C) {C};
+    % 2.draw basic 'rectangle' and 'lines'
+    \draw[fill=chpcolor, draw=none] (A) rectangle (B); 
+    \draw[draw=chpcolor] (B)++(1\chaplinexshift, 6em) -- ++(1\chaplineyextend, 0pt);
+    \draw[draw=chpcolor] (B)++(1\chaplinexshift, 0em) -- ++(1\chaplineyextend, 0pt);
+    \draw[draw=chpcolor] (B)++(1\chaplinexshift, 1.5pt) -- ++(1\chaplineyextend, 0pt);
+    % \shade[top color=yellow,bottom color=black] (0,0) rectangle +(2,1);
+    \shade[top color=white, bottom color=chpcolor!25] (C) rectangle ++(1\paperwidth, 5pt);
+    \shade[top color=chpcolor!25, bottom color=white] ($(C)+(0em, -12em)$) rectangle ++(1\paperwidth, -5pt);
+    % 3. annotate text
+    \node[anchor=south,color=white] at ($(B)+(-2.5em, 0em)$) {\scalebox{4}{I}st};
+    \node[anchor=south west, inner sep=0pt, 
+        yshift=6.5em, xshift=1\chaplinexshift, 
+        font=\Large\bfseries, color=chpcolor] at (B) {An Introduction to Mathematical Logic};
+    \node[anchor=south west, inner sep=0pt,
+        yshift=2em, xshift=1\chaplinexshift,
+        font=\Cinzel\Huge\bfseries, color=chpcolor] at (B) {MATHEMATICAL LOGIC};
+    % 4. parbox insert
+    \node[anchor=north west, inner sep=0pt, 
+        color=chpTextColor] at ($(B)+(-5em, -1.7em)$) {%
+        % left parbox insert
+        \parbox[t][][r]{.25\paperwidth}{\begingroup\Cinzel\itshape%
+            \includegraphics[width=.25\paperwidth]{../Pics/087.png}\par\vspace*{2em}
+            We add two words of caution. First, if two different syntactical variables
+            occur in the same context, they do not necessarily 
+            represent different expressions ...
+        \endgroup}
+        % mid blank parbox
+        \parbox[t][][r]{1em}{\hspace*{1em}}
+        % right parbox insert
+        \parbox[t][][r]{\dimexpr(.5\paperwidth-1.5em)}{%
+        Logic is the study of reasoning; and mathematical logic is the study of the type of
+        reasoning done by mathematicians. To discover the proper approach to mathe*
+        matical logic, we must therefore examine the methods of the mathematician.
+        
+        The conspicuous feature of mathematics, as opposed to other sciences, is
+        the use of proofs instead of observations. A physicist may prove physical laws
+        from other physical laws; but he usually regards agreement with observation as
+        the ultimate test of a physical law. A mathematician may, on occasions, use
+        observation; for example, he may measure the angles of many triangles and
+        conclude that the sum of the angles is always 180°. However, he will accept this
+        as a law of mathematics only when it has been proved.}
+    };
+    \node[inner sep=0pt, font=\Large\Cinzel] at ($(C)+(.5\paperwidth, -6em)$){%
+        \parbox[t][][r]{.75\paperwidth}{
+            Mathematical logic has always been closely connected 
+            with the philosophy of mathematics\par
+            \leavevmode\hfill --- {\itshape\normalsize Joseph R . Shoenfield}
+        }
+    };
+\end{tikzpicture}
+\end{document}

@@ -1,0 +1,10 @@
+This is a generated file for the l3build validation system.
+Don't change this file in any respect.
+============================================================
+TEST 1: unknown-mathSpec-key-handle
+============================================================
+Class zlatex Warning: You use an invalid key "log-declarations" or key assign for it in the meta key "mathSpec", Valid options are:alias(<bool>:false),envStyle,font(<choice>:newtx,mtpro2,euler,mathpazo); Assignment Ignored and zLaTeX default mathSpec settings substitute.
+============================================================
+=======================================
+CLASS-mathSpec-OPTIONS-PASSING-CORRECTLY
+=======================================

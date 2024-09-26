@@ -1,0 +1,14 @@
+This is a generated file for the l3build validation system.
+Don't change this file in any respect.
+============================================================
+TEST 1: ztikz-module-wolfram-wolframGraphics
+============================================================
+\l__xsim_file_contents_iow=\write...
+runsystem(wolframscript -script ztikz_output/mma_data/MMATEST.wls)...executed.
+<ztikz_output/mma_data/MMATEST.wls.pdf, id=28, 260.975pt x 159.59625pt>
+File: ztikz_output/mma_data/MMATEST.wls.pdf Graphic file (type pdf)
+<use ztikz_output/mma_data/MMATEST.wls.pdf>
+Package pdftex.def Info: ztikz_output/mma_data/MMATEST.wls.pdf  used on input line ....
+(pdftex.def)             Requested size: 137.9979pt x 84.39078pt.
+Writing 'mmafig' environment source to ztikz_output/mma_data/MMATEST.wls
+============================================================

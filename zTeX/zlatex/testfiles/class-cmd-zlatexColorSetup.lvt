@@ -1,0 +1,36 @@
+\input{regression-test.tex}
+\documentclass{zlatex}
+
+
+\begin{document}
+\ExplSyntaxOn
+\START
+\TEST{zlatexColorSetup-key-set}{
+  \zlatexColorSetup{
+    link         = red,               
+    cite         = red,           
+    url          = red,        
+    chapter      = red,
+    chapter-rule = red,
+    axiom        = red,
+    definition   = red,
+    theorem      = red,
+    lemma        = red,
+    corollary    = red,
+    proposition  = red,
+    remark       = red
+  }
+}
+
+\TEST{unknown-zlatexColorSetup-key-handle}{
+  \zlatex_metakey_msg_warning:nn {color}
+    {link, cite, url, chapter, chapter-rule, axiom, 
+    definition, theorem, lemma, corollary, proposition, remark} 
+}
+
+\NEWLINE
+\TYPE{=======================================}
+\TYPE{zlatexColorSetup-working-CORRECTLY}
+\TYPE{=======================================}
+\END
+\end{document}

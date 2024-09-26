@@ -49,6 +49,13 @@ latex.out/
 ztikz_output/
 debug.*
 
+## l3build
+build/
+<<<<<<< HEAD
+debug/
+=======
+>>>>>>> 251a5459e0a18f78b841e2efc0fe574a26966d68
+
 ## Auxiliary and intermediate files from other packages:
 # algorithms
 *.alg

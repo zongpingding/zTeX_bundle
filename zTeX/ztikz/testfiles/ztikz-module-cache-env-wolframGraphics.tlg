@@ -1,0 +1,14 @@
+This is a generated file for the l3build validation system.
+Don't change this file in any respect.
+============================================================
+TEST 1: ztikz-module-cache-env-wolframGraphics
+============================================================
+\l__xsim_file_contents_iow=\write...
+current hash is 84271E10C77D669C7824C1F909127E16
+<ztikz_output/mma_data/MMATEST.wls.pdf, id=28, 260.975pt x 159.59625pt>
+File: ztikz_output/mma_data/MMATEST.wls.pdf Graphic file (type pdf)
+<use ztikz_output/mma_data/MMATEST.wls.pdf>
+Package pdftex.def Info: ztikz_output/mma_data/MMATEST.wls.pdf  used on input line ....
+(pdftex.def)             Requested size: 137.9979pt x 84.39078pt.
+skip recompile by wolframscript, using the cache picture 1
+============================================================

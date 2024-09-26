@@ -1,0 +1,16 @@
+\input{regression-test.tex}
+\documentclass{article}
+\usepackage{ztikz}
+\ztikzLoadModule{gnuplot}
+
+
+\begin{document}
+\START
+\BEGINTEST{ztikz-module-gnuplot-PlotPrecise}
+\begin{tikzpicture}
+  \PlotPrecise{plot}{22}
+  \Plot[-1.5*pi:2*pi]{sin(x)}
+\end{tikzpicture}
+\ENDTEST
+\END
+\end{document}
