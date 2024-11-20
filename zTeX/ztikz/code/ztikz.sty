@@ -2,6 +2,9 @@
 \ProvidesExplPackage{ztikz}{2024/06/12}{1.0.0}{A~pre-release~diagram~plot~package}
 
 
+
+
+
 % ----------------------------------------------------------------------
 %                        Init ztikz's Environment
 % ----------------------------------------------------------------------
@@ -9,6 +12,9 @@
 \NewDocumentCommand\ztikzMkdir{m}{ \sys_shell_mkdir:n {#1} }
 \ztikzMkdir{ztikz_output/}
 \tl_const:Nn \g__ztikz_scripts_path_tl  {ztikz_output/scripts}
+
+
+
 
 
 % ----------------------------------------------------------------------
@@ -33,20 +39,26 @@
 \usetikzlibrary{fadings}
 
 
+
+
+
 % ----------------------------------------------------------------------
 %                        load module interface
 % ----------------------------------------------------------------------
-\cs_new_nopar:Npn \g__ztikz_load_module:n #1 {
+\cs_new_nopar:Npn \__ztikz_load_library:n #1 {
   \clist_map_inline:nn {#1} {
-    \file_if_exist_input:nF {modules/ztikzmodule.##1.tex} {
-      \msg_new:nnn {ztikz} {module-not-found} {Module~`##1'~not~found.}
-      \msg_error:nnn {ztikz} {module-not-found} {##1}
+    \file_if_exist_input:nF {library/ztikz.library.##1.tex} {
+      \msg_new:nnn {ztikz} {library-not-found} {library~`##1'~not~found.}
+      \msg_error:nnn {ztikz} {library-not-found} {##1}
     }
   }
 }
-\NewDocumentCommand\ztikzLoadModule{m}{
-  \g__ztikz_load_module:n {#1}\ExplSyntaxOff
+\NewDocumentCommand\ztikzloadlibrary{m}{
+  \__ztikz_load_library:n {#1}\ExplSyntaxOff
 }
+
+
+
 
 
 % ----------------------------------------------------------------------
@@ -56,6 +68,9 @@
   \bool_gset_true:N \g__hash_change_bool
 }
 \cs_generate_variant:Nn \ztikz_hash_if_change_cs:n { x }
+
+
+
 
 
 % ----------------------------------------------------------------------
@@ -241,6 +256,9 @@
     \ShowPoint[#1]{(intersection-##1)}
   }
 }
+
+
+
 
 
 % ----------------------------------------------------------------------

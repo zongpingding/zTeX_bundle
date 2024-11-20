@@ -1,0 +1,86 @@
+\ProvidesExplFile{zlatex.library.mathalias.tex}{2024/10/24}{1.0.0}{mathalias~library~for~zlatex}
+
+
+%%%%%     mathalias for zlatex     %%%%%
+% alias command
+\cs_new_protected:Npn \zlatex_math_alias:nn #1#2 {
+  \cs_new:cpn {#1} {#2}
+}
+
+% alias setup
+\zlatex_hook_preamble_last:n {
+  \RequirePackage{amssymb, mathrsfs}
+  \RequirePackage{mathtools}
+  \let\oldS\S
+  \let\S\undefined       
+  \let\olddiv\div
+  \let\oldhom\hom
+
+
+  % ==> Math Font 
+  \newcommand{\F}[1]{\ensuremath{\boldsymbol{#1}}}
+  \newcommand{\R}[1]{\ensuremath{\mathrm{#1}}}
+  \newcommand{\K}[1]{\ensuremath{\mathfrak{#1}}}
+  \newcommand{\C}[1]{\ensuremath{\mathcal{#1}}}
+  \newcommand{\B}[1]{\ensuremath{\mathbb{#1}}}
+  \newcommand{\S}[1]{\ensuremath{\mathscr{#1}}}
+  \@ifpackageloaded{ascii}
+    {\let\asciiFF\FF\renewcommand{\FF}[1]{\ensuremath{\mathbf{#1}}}}
+    {\newcommand{\FF}[1]{\ensuremath{\mathbf{#1}}}}
+  
+
+  % ==> Math Arrow 
+  \newcommand{\ma}{\ensuremath{\longmapsto}}
+  \newcommand{\la}{\ensuremath{\leftarrow}}
+  \newcommand{\lla}{\ensuremath{\longleftarrow}}
+  \newcommand{\ra}{\ensuremath{\rightarrow}}
+  \newcommand{\rra}{\ensuremath{\longrightarrow}}
+  \newcommand{\da}{\ensuremath{\longleftrightarrow}}
+  \newcommand{\dda}{\ensuremath{\Longleftrightarrow}}
+  \NewDocumentCommand{\xl}{O{}D(){}}{\ensuremath{\xlongleftarrow[#2]{#1}}}
+  \NewDocumentCommand{\xxl}{O{}D(){}}{\ensuremath{\xLongleftarrow[#2]{#1}}}
+  \NewDocumentCommand{\xr}{O{}D(){}}{\ensuremath{\xlongrightarrow[#2]{#1}}}
+  \NewDocumentCommand{\xxr}{O{}D(){}}{\ensuremath{\xLongrightarrow[#2]{#1}}}
+  
+
+  % ==> Math Operator and symbols
+  % REF: 1. https://en.wikipedia.org/wiki/List_of_mathematical_abbreviations
+  %      2. https://tex.stackexchange.com/a/289946/294585
+  \newcommand{\A}{\ensuremath{\forall}}
+  \newcommand{\E}{\ensuremath{\exists}}
+  \newcommand{\ns}{\ensuremath{\varnothing}}
+  \newcommand{\se}{\ensuremath{\backsimeq}}
+  \newcommand{\sse}{\ensuremath{\cong}}
+  \newcommand{\CC}{\ensuremath{\mathrm{C}}}
+  \newcommand{\RR}{\ensuremath{\mathbb{R}}}
+  \newcommand{\dd}{\ensuremath{\mathchoice{\:}{\mspace{1.5mu}}{}{}\mathrm{d}}}
+  % math operator alias setup
+  \cs_set_protected:Npn \zlatex_op_name_set:nn #1#2 
+    { \exp_args:Nee \DeclareMathOperator{\use:c {z#1}}{#2} }
+  \keyval_parse:NNn \use_none:n \zlatex_op_name_set:nn {
+    alt = alt,
+    rot = rot,
+    div = div,
+    curl = curl,
+    grad = grad,
+    id = Id,
+    im = Im,
+    ker = Ker,
+    cok = Cok,
+    hom = Hom,
+    sign = sign,
+    trace = trace,
+  }
+  \tl_const:Nn \c_zlatex_math_ops_tl { \cdot \wedge \times \oplus \otimes }
+  \clist_map_inline:nn 
+    { trace, alt, rot, div, curl, grad, id, im, ker, cok, hom, sign }
+    {\cs_set_protected_nopar:cpn {#1}{\use:c {z#1} \peek_after:Nw \zlatex_op_check:}}
+  \cs_new_protected:Nn \zlatex_op_check: { 
+    \tl_map_inline:Nn \c_zlatex_math_ops_tl {
+      \token_if_eq_meaning:NNT \l_peek_token ##1 {\tl_map_break:n {{\!}}}
+    }
+  }
+
+
+  % ==> pyhsics package commands (\qty, ...) implementation ???
+}

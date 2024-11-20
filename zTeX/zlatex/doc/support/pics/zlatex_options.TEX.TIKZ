@@ -36,6 +36,7 @@
       [[[[.\node[metaKey] {layout}; 
         [.\node[boolKey]   {margin}; ]
         [.\node[boolKey]   {slide};  ]
+        [.\node[boolKey]   {theme};  ]
         [.\node[normalKey] {aspect}; ]
       ]]]]
       [[[.\node[metaKey] {section};]] ]

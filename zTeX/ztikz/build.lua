@@ -22,11 +22,11 @@ typesetsuppfiles = {
   "/doc/support/pics/*", 
   "/doc/support/data/*",
   "/doc/support/gallery/*",
-  "/code/modules/ztikzmodule.cache.tex",
-  "/code/modules/ztikzmodule.gnuplot.tex",
-  "/code/modules/ztikzmodule.python.tex",
-  "/code/modules/ztikzmodule.wolfram.tex",
-  "/code/modules/ztikzmodule.zdraw.tex"
+  "/code/modules/ztikz-library.cache.tex",
+  "/code/modules/ztikz-library.gnuplot.tex",
+  "/code/modules/ztikz-library.python.tex",
+  "/code/modules/ztikz-library.wolfram.tex",
+  "/code/modules/ztikz-library.zdraw.tex"
 }
 typesetruns = 3
 typesetexe  = "xelatex"
@@ -35,6 +35,7 @@ typesetopts = "-interaction=nonstopmode --shell-escape"
 
 -- test
 checkruns    = 2
+-- includetests = {"ztikz-cmd-ShowAxis"}
 testsuppdir  = projectdir.."/code"
 checkopts    = "-interaction=nonstopmode --shell-escape"
 checkengines = {"pdftex"}

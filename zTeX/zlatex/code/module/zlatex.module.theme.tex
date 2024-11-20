@@ -1,0 +1,125 @@
+\ProvidesExplFile{zlatex.module.theme.tex}{2024/10/24}{1.0.0}{theme~module~for~zlatex}
+
+
+%%%%%     color module for zlatex thm and structure    %%%%%
+% ==> color setup
+% dynamic color setup
+\regex_new:N \l__zlatex_color_mode_regex
+\regex_set:Nn \l__zlatex_color_mode_regex {(\cB..{1,}\cE.){2}}
+\cs_new:Npn \__zlatex_color_set:n #1 {
+  \regex_match:NnTF \l__zlatex_color_mode_regex {#1}{
+    \definecolor{zlatex@color@\l_keys_key_str}#1
+  }{
+    \colorlet{zlatex@color@\l_keys_key_str}{#1}
+  }
+  \tl_set:ce 
+    {l__zlatex_\l_keys_key_str _color_tl}
+    {zlatex@color@\l_keys_key_str}
+}
+
+% all colors
+% How to use the clist in "thm" module ???
+\definecolor{zlatex@color@royalred}{RGB}{157, 16, 45}
+\definecolor{zlatex@color@axiom}{HTML}{000000}
+\definecolor{zlatex@color@definition}{HTML}{bdc3c7}
+\definecolor{zlatex@color@theorem}{HTML}{27ae60}
+\definecolor{zlatex@color@lemma}{HTML}{2980b9}
+\definecolor{zlatex@color@corollary}{HTML}{8e44ad}
+\definecolor{zlatex@color@proposition}{HTML}{f39c12}
+\definecolor{zlatex@color@remark}{HTML}{c92a2a}
+
+
+% ==> structure theme
+\zlatex_keys_define:nn {color}{
+  chapter         .tl_set:N     =  \l__zlatex_chapter_color_tl,
+  chapter         .initial:n    =  { zlatex@color@royalred },  
+  chapter         .code:n       =  { \__zlatex_color_set:n {#1} },
+  chapter-rule    .tl_set:N     =  \l__zlatex_chapter_rule_color_tl,
+  chapter-rule    .initial:n    =  { black },
+  chapter-rule    .code:n       =  { \__zlatex_color_set:n {#1} },
+}
+
+
+% ==> index and ref theme
+\zlatex_keys_define:nn {color}{
+  link            .tl_set:N     =  \l__zlatex_link_color_tl,
+  link            .initial:n    =  { purple },
+  link            .code:n       =  { \__zlatex_color_set:n {#1} },
+  cite            .tl_set:N     =  \l__zlatex_cite_color_tl,
+  cite            .initial:n    =  { blue },
+  cite            .code:n       =  { \__zlatex_color_set:n {#1} },
+  url             .tl_set:N     =  \l__zlatex_url_color_tl,
+  url             .initial:n    =  { zlatex@color@royalred },
+  url             .code:n       =  { \__zlatex_color_set:n {#1} },
+}
+
+
+% ==> thm env themecolor
+\zlatex_keys_define:nn {color}{
+  % theorem-like envs (numbered)
+  axiom           .tl_set:N     =  \l__zlatex_axiom_color_tl,
+  axiom           .initial:n    =  { zlatex@color@axiom },
+  axiom           .code:n       =  { \__zlatex_color_set:n {#1} },
+  definition      .tl_set:N     =  \l__zlatex_definition_color_tl,
+  definition      .initial:n    =  { zlatex@color@definition },
+  definition      .code:n       =  { \__zlatex_color_set:n {#1} },
+  theorem         .tl_set:N     =  \l__zlatex_theorem_color_tl,
+  theorem         .initial:n    =  { zlatex@color@theorem },
+  theorem         .code:n       =  { \__zlatex_color_set:n {#1} },
+  lemma           .tl_set:N     =  \l__zlatex_lemma_color_tl,
+  lemma           .initial:n    =  { zlatex@color@lemma },
+  lemma           .code:n       =  { \__zlatex_color_set:n {#1} },
+  corollary       .tl_set:N     =  \l__zlatex_corollary_color_tl,
+  corollary       .initial:n    =  { zlatex@color@corollary },
+  corollary       .code:n       =  { \__zlatex_color_set:n {#1} },
+  proposition     .tl_set:N     =  \l__zlatex_proposition_color_tl,
+  proposition     .initial:n    =  { zlatex@color@proposition },
+  proposition     .code:n       =  { \__zlatex_color_set:n {#1} },
+  remark          .tl_set:N     =  \l__zlatex_remark_color_tl,
+  remark          .initial:n    =  { zlatex@color@remark },
+  remark          .code:n       =  { \__zlatex_color_set:n {#1} },
+  % proof-like envs (unnumbered)
+  proof           .tl_set:N     =  \l__zlatex_proof_color_tl,
+  proof           .initial:n    =  { black },
+  proof           .code:n       =  { \__zlatex_color_set:n {#1} },
+  exercise        .tl_set:N     =  \l__zlatex_exercise_color_tl,
+  exercise        .initial:n    =  { black },
+  exercise        .code:n       =  { \__zlatex_color_set:n {#1} },
+  example         .tl_set:N     =  \l__zlatex_example_color_tl,
+  example         .initial:n    =  { black },
+  example         .code:n       =  { \__zlatex_color_set:n {#1} },
+  solution        .tl_set:N     =  \l__zlatex_solution_color_tl,
+  solution        .initial:n    =  { black },
+  solution        .code:n       =  { \__zlatex_color_set:n {#1} },
+}
+
+
+% ==> unknown color key
+\zlatex_keys_define:nn {color}{
+  unknown         .code:n       =  { 
+    \zlatex_metakey_msg_warning:nn {color}
+      {link, cite, url, chapter, chapter-rule, axiom, definition, 
+      theorem, lemma, corollary, proposition, remark} 
+    }
+}
+
+
+% ==> init color theme
+\DeclareHookRule{env/document/before}
+  {zlatex-themecolor-setup-user}{>}{zlatex-thmptheorem-setup-inner}
+\DeclareHookRule{env/document/before}
+  {zlatex-themecolor-setup-user}{>}{zlatex-thmpproof-setup-inner}
+\NewDocumentCommand{\zlatexColorSetup}{m}{
+  \zlatex_label_hook_preamble_last:nn {zlatex-themecolor-setup-user}
+    {\zlatex_keys_set:nn {color}{#1}}
+  \bool_if:NT \g__zlatex_hyperref_bool {
+    \hypersetup {
+      colorlinks = true,
+      urlcolor   = \tl_use:N \l__zlatex_url_color_tl,
+      linkcolor  = \tl_use:N \l__zlatex_link_color_tl,
+      citecolor  = \tl_use:N \l__zlatex_cite_color_tl,
+    }
+  }
+}
+\@onlypreamble\zlatexColorSetup
+\zlatexColorSetup{link=purple, cite=blue, url=zlatex@color@royalred}

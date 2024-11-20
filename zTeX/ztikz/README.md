@@ -65,3 +65,7 @@ At first run (`checkruns  = 2`) Test 34 `ztikz-module-wolfram-wolframResult` wil
 % 3. using cache module the third time
 142 page: about 20s
 ```
+
+
+## project re-orignization
+Rename `modules` directory to `library`, related control sequences are renamed as well

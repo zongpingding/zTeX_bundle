@@ -1,0 +1,18 @@
+\ProvidesExplFile{zlatex.module.fontcfg.tex}{2024/10/24}{1.0.0}{fontcfg~module~for~zlatex}
+
+
+%%%%%     font config module for zlatex     %%%%%
+% ==> cinel font
+\zlatex_hook_preamble_last:n {
+  \bool_if:NTF \g__zlatex_font_config_bool {
+    \RequirePackage{fontspec}
+    \newfontfamily{\Cinzel}{CinzelRegular.ttf}[
+      BoldFont=CinzelBold.ttf,
+      ItalicFont=SabonItalic.ttf
+    ]
+  }{\def\Cinzel{\relax}}
+}
+
+
+% ==> chinese font: 
+% 1. Source Han Serif SC

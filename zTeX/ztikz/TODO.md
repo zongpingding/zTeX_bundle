@@ -1,8 +1,14 @@
 # TODO LIST
 
+- [ ] Bug: during test, when set `prefix` for `external` library, the `.lvt` extension test file will fail when compiling.
+- [ ] test files: 
+    - [x] update the test files to the current version
+    - [ ] run the test.
+- [ ] Implement `Plot`, `ParamPlot`, `PolarPlot` etc, by l3-keys
+- [ ] remove dependency: tool `sed` and package `l3sys-shell`
 - [x] support `\py` in \newcommand
 - [x] add `pycode` environment for writing tabel and other loop-like things
-- [x] `\ior_str_get:NN` and `\ior_get:NN` for reading contents from externel file
+- [x] `\ior_str_get:NN` and `\ior_get:NN` for reading contents from external file
 - [ ] fixed the bug of hash-recover
 - [ ] access varible decleared in Python before
 - [ ] can't use `''` in sed command under windows, but works fine on Linux

@@ -1,0 +1,101 @@
+\documentclass[oneside]{book}
+\usepackage{multicol,lipsum,etoolbox}
+
+\ExplSyntaxOn\makeatletter
+% ==> table of contents definition
+\renewcommand\tableofcontents {
+\if@twocolumn\@restonecoltrue\onecolumn\else\@restonecolfalse\fi
+\section*{\contentsname\@mkboth{\MakeUppercase\contentsname}{\MakeUppercase\contentsname}}
+\begin{multicols}{2}
+  \@starttoc{toc}
+\end{multicols}
+\if@restonecol\twocolumn\fi
+}
+
+
+% ==> escape multicols
+\newcount\saved@colnumber
+\newenvironment{escapemulticol}{}
+  {\aftergroup\restore@multicols}
+\BeforeBeginEnvironment{escapemulticol}{%
+  \global\saved@colnumber=\col@number
+  \end{multicols}%
+}
+\def\restore@multicols{\begin{multicols}{\saved@colnumber}}
+
+
+% ==> redefine \@chapter
+\def\addcontentsline#1#2#3{%
+  \str_set:Ne \l_tmpa_str {\str_if_eq:nnTF {#2}{chapter}{}{\thepage}}
+  \edef\tempPageNum{\str_use:N \l_tmpa_str}
+  \addtocontents{#1}{\protect\contentsline{#2}{\hfill #3\hfill}{\tempPageNum}{}%
+  \protected@file@percent}%
+}
+\def\@chapter[#1]#2{%
+  \ifnum\c@secnumdepth>\m@ne
+    \if@mainmatter\refstepcounter{chapter}%
+      \typeout {\@chapapp\space\thechapter.}%
+      \addcontentsline{toc}{chapter}{\protect\numberline{\thechapter}#1}%
+    \else
+      \addcontentsline{toc}{chapter}{#1}%
+    \fi 
+  \else 
+    \addcontentsline{toc}{chapter}{#1}%
+  \fi 
+  \chaptermark{#1}%
+  \addtocontents{lof}{\protect\addvspace{10\p@}}%
+  \addtocontents{lot}{\protect\addvspace{10\p@}}%
+  \if@twocolumn
+    \@topnewpage[\@makechapterhead{#2}]
+  \else 
+    \@makechapterhead{#2}\@afterheading 
+  \fi
+}
+
+
+% ==> write to toc
+\def\TocEscapeTwocol{\write\@auxout{\protect\@writefile{toc}{\protect\begin{escapemulticol}}}}
+\def\TocResetTwocol{\write\@auxout{\protect\@writefile{toc}{\protect\end{escapemulticol}}}}
+\pretocmd{\@chapter}{\TocEscapeTwocol}{}{}
+\apptocmd{\@chapter}{\TocResetTwocol}{}{}
+\makeatother\ExplSyntaxOff
+
+
+
+
+\begin{document}
+\thispagestyle{empty}
+\tableofcontents
+
+\chapter{FIRST CHAPTER}
+\section{Context escape}
+\subsection{sss 1-i}
+\begin{multicols}{2}
+\lipsum[1]
+
+\begin{escapemulticol}
+\lipsum[1]
+\end{escapemulticol}
+
+\lipsum[1]
+\end{multicols}
+\subsection{sss 1-ii}
+\section{Context escape}
+\subsection{sss 1-i}
+\subsection{sss 1-i}
+
+
+\chapter{SECOND CHAPTER}
+\section{toc escape}
+\subsection{sss 2-i}
+\subsection{sss 2-ii}
+
+\section{Context escape}
+\subsection{sss 1-i}
+\subsection{sss 1-i}
+
+
+\chapter{THIRD CHAPTER}
+\section{toc escape}
+\subsection{sss 3-i}
+\end{document}

@@ -1,0 +1,206 @@
+\ProvidesExplFile{zlatex.module.secformat.tex}{2024/10/24}{1.0.0}{secformat~module~for~zlatex}
+
+
+%%%%%     sec format module for zlatex     %%%%%
+\RequirePackage{titlesec}
+\RequirePackage{xtemplate}
+\cs_new:Nn \__zlatex_titlesec_copy:nnnnnnn 
+  {
+    \titleformat{#1}[#2]{#3}{#4}{#5}{#6}[#7]
+  }
+\cs_generate_variant:Nn \__zlatex_titlesec_copy:nnnnnnn { ooffofo }
+
+
+% ==> title class interface
+% ⟨begin-shape⟩ 
+%     ⟨format⟩⟨label⟩
+%     ⟨sep⟩     % \vskip or \hskip
+%     ⟨before-code⟩
+%     ⟨text⟩
+%     ⟨after-code⟩
+% ⟨end-shape⟩
+\DeclareObjectType{title}{1}
+\DeclareTemplateInterface{title}{default}{1}
+  {
+    shape:tokenlist       = hang,
+    titlecmd:function 1   = \textbf{#1},
+    format:tokenlist      = ,
+    titleformat:tokenlist = ,
+    label:tokenlist       = ,
+    labelformat:tokenlist = ,
+    sep:length            = 0pt,
+    before:tokenlist      = ,
+    after:tokenlist       = ,
+    align:choice{center, left, right} = left,
+  }
+\DeclareTemplateCode{title}{default}{1}
+  {
+    shape       = \l_shape_tl,
+    titlecmd    = \title_cmd:n,
+    format      = \l_format_tl,
+    titleformat = \l_titleformat_tl,
+    label       = \l_label_tl,
+    labelformat = \l_labelformat_tl,
+    sep         = \l_sep_dim,
+    before      = \l_before_tl,
+    after       = \l_after_tl,
+    align       = {
+      left   = \raggedright,
+      center = \centering,
+      right  = \raggedleft,
+    },
+  }{
+    \__zlatex_titlesec_copy:ooffofo
+      {\cs:w #1\cs_end:}
+      { \l_shape_tl }
+      {
+        % \KeyValue{align} % --> How to get the value of align key?
+        \raggedleft
+        \l_format_tl
+      }
+      { \group_begin: 
+        \l_labelformat_tl 
+        \l_label_tl 
+        \group_end:
+      }
+      { \l_sep_dim }
+      { 
+        \l_before_tl 
+        \l_titleformat_tl
+        \title_cmd:n {#1} % this argument is redundant ???
+      }
+      { \l_after_tl }
+  }
+
+\def\testcmd#1{\textbf{(#1]}}
+\DeclareInstance{title}{chapter}{default}
+  {
+    shape       = display,
+    format      = \bfseries,
+    % align     = left,
+    titlecmd    = \testcmd,
+    sep         = 10pt,
+    label       = \MakeUppercase{\chaptertitlename}\hspace{1ex}\scalebox{2.5}{\thechapter},
+    labelformat = \Large\color{\tl_use:N \l__zlatex_chapter_color_tl},
+    titleformat = \raggedright\bfseries\huge\color{black},
+    before      = \color{\tl_use:N \l__zlatex_chapter_rule_color_tl}\titlerule\vspace{15pt},
+    after       = \vspace{15pt}
+  }
+
+\DeclareInstance{title}{section}{default}
+  {
+    shape       = hang,
+    % titlecmd  = \testcmd, % --> BUG
+  }
+
+\UseInstance{title}{section}{section}
+\UseInstance{title}{chapter}{chapter}
+
+
+
+% custom title format 
+% TODO: add label-align, title-align keys 
+\zlatex_keys_define:nn { title/style }
+  {
+    shape           .tl_set:N  = \l__zlatex_title_shape_tl,
+    shape           .initial:n = {hang},
+    align           .tl_set:N  = \l__zlatex_title_align_tl,
+    align           .choice:,
+    align / center  .code:n    = { \tl_set:Nn \l__zlatex_title_align_tl {\centering} },
+    align / left    .code:n    = { \tl_set:Nn \l__zlatex_title_align_tl {\raggedright} },
+    align / right   .code:n    = { \tl_set:Nn \l__zlatex_title_align_tl {\raggedleft} },
+    align           .initial:n = {left},
+    titlecmd        .tl_set:N  = \l__zlatex_title_titlecmd_tl,
+    titlecmd        .initial:n = {},
+    format          .tl_set:N  = \l__zlatex_title_format_tl,
+    format          .initial:n = {},
+    titleformat     .tl_set:N  = \l__zlatex_title_titleformat_tl,
+    titleformat     .initial:n = {},
+    label           .tl_set:N  = \l__zlatex_title_label_tl,
+    label           .initial:n = {},
+    labelformat     .tl_set:N  = \l__zlatex_title_labelformat_tl,
+    labelformat     .initial:n = {},
+    sep             .dim_set:N = \l__zlatex_title_sep_dim,
+    sep             .initial:n = {0pt},
+    before          .tl_set:N  = \l__zlatex_title_before_tl,
+    before          .initial:n = {},
+    after           .tl_set:N  = \l__zlatex_title_after_tl,
+    after           .initial:n = {},
+  }
+
+\cs_generate_variant:Nn \__zlatex_titlesec_copy:nnnnnnn { ooffofo }
+\cs_new:Npn \zlatex_title_format:nn #1#2 
+  {
+    \zlatex_keys_set:nn { title/style } {#2}
+    \__zlatex_titlesec_copy:ooffofo
+      {\cs:w #1\cs_end:}
+      { \l__zlatex_title_shape_tl }
+      {
+        \l__zlatex_title_align_tl
+        \l__zlatex_title_format_tl
+      }
+      { \group_begin: 
+        \l__zlatex_title_labelformat_tl 
+        \l__zlatex_title_label_tl 
+        \group_end:
+      }
+      { \l__zlatex_title_sep_dim }
+      { 
+        \l__zlatex_title_before_tl 
+        \l__zlatex_title_titleformat_tl
+        \l__zlatex_title_titlecmd_tl
+      }
+      { \l__zlatex_title_after_tl }
+  }
+\NewDocumentCommand{\zlatexTitleStyle}{mm}
+  {
+    \zlatex_title_format:nn {#1}{#2} 
+  }
+\@onlypreamble\zlatexTitleStyle
+
+% create new title
+\cs_new:Npn \zlatex_title_new:nnn #1#2#3 
+  { % #1: class; #2: name; #3: format
+    \exp_args:Noo \titleclass{\cs:w #2\cs_end:}{#1}
+    \zlatex_title_format:nn {#2}{#3}
+  }
+\NewDocumentCommand{\zlatexTitleNew}{omm}
+  {% #1: format; #2: class; #3: name
+    \IfValueTF {#1}
+      {\zlatex_title_new:nnn {#2}{#3}{#1}}
+      {\zlatex_title_new:nnn {#2}{#3}{}}
+  }
+
+
+% ==> predefined title format
+% numbered chapter format
+% \zlatex_title_format:nn {chapter}
+%   {
+%     shape = display,
+%     align = right,
+%     sep = 10pt,
+%     label = {
+%       \MakeUppercase{\chaptertitlename}
+%       \hspace{1ex}\scalebox{2.5}{\thechapter}
+%     },
+%     format = {\bfseries},
+%     labelformat = {
+%       \Large
+%       \color{\tl_use:N \l__zlatex_chapter_color_tl}
+%     },
+%     titleformat = {
+%       \raggedright\bfseries\huge\color{black}
+%     },
+%     before = {
+%       \color{\tl_use:N \l__zlatex_chapter_rule_color_tl}
+%       \titlerule\vspace{15pt}
+%     }
+%   }
+
+% unnumbered chapter format
+\titleformat{name=\chapter, numberless}
+  {\bfseries\Huge}
+  {}{0pt}{}
+
+% chapter space
+\titlespacing{\chapter}{0pt}{-30pt}{40pt}

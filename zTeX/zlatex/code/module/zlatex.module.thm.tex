@@ -1,0 +1,437 @@
+\ProvidesExplFile{zlatex.module.thm.tex}{2024/10/24}{1.0.0}{thm~module~for~zlatex}
+
+
+%%%%%     Math-envs for zlatex     %%%%%
+% ==> module init
+\clist_gclear:N \g__zlatex_thm_theorem_clist
+\clist_gclear:N \g__zlatex_thm_proof_clist
+\cs_new_protected:Npn \zlatex_thm_create:nn #1#2 {
+  \clist_gput_right:cn {g__zlatex_thm_#1_clist}{#2}
+}
+\cs_generate_variant:Nn \zlatex_thm_create:nn {ne}
+\zlatex_thm_create:nn {theorem}{ 
+  axiom, definition, theorem, lemma, corollary, proposition, remark,
+}
+\zlatex_thm_create:nn {proof}{ 
+  proof, exercise, example, solution, problem,  
+}
+\zlatex_msg_set:nn {thm-name}
+  {An~unexpected~math~env~name~in~multichoice~key:'\l_keys_key_tl',~there~is~no~internal~config~for~it.}
+
+% thm title definition
+\cs_new_protected:Npn \zlatex_thm_name_set:nn #1#2 {
+  \prop_set_from_keyval:cn {g__zlatex_thm_name_#1_prop} {#2}
+}
+\zlatex_thm_name_set:nn {en}{
+  axiom       = Axiom, 
+  definition  = Definition, 
+  theorem     = Theorem, 
+  lemma       = Lemma, 
+  corollary   = Corollary, 
+  proposition = Proposition, 
+  remark      = Remark, 
+  proof       = Proof, 
+  exercise    = Exercise, 
+  example     = Example, 
+  solution    = Solution, 
+  problem     = Problem,
+}
+\zlatex_thm_name_set:nn {cn}{
+  axiom       = 公理, 
+  definition  = 定义, 
+  theorem     = 定理, 
+  lemma       = 引理, 
+  corollary   = 推论, 
+  proposition = 命题, 
+  remark      = 注记, 
+  proof       = 证明, 
+  exercise    = 练习, 
+  example     = 示例, 
+  solution    = 解, 
+  problem     = 问题,
+}
+\zlatex_thm_name_set:nn {fr}{
+  axiom       = Axiome, 
+  definition  = Définition, 
+  theorem     = Théorème, 
+  lemma       = Lemme, 
+  corollary   = Corollaire, 
+  proposition = Proposition, 
+  remark      = Remarque, 
+  proof       = Preuve, 
+  exercise    = Exercice, 
+  example     = Exemple, 
+  solution    = Solution, 
+  problem     = Problème,
+}
+\tl_if_exist:NF \g__zlatex_lang_math_tl {
+  \tl_set_eq:cc {g__zlatex_lang_math_tl}{g__zlatex_lang_str}
+}
+
+
+% ==> thm module tools
+\NewDocumentCommand{\zlatexThmLang}{m}{
+  \tl_gset:Nn \g__zlatex_lang_math_tl {#1}
+}
+\prop_new:c {g__zlatex_thm_name_prop}
+\prop_gclear:c {g__zlatex_thm_name_prop}
+\zlatex_hook_preamble_last:n {
+  \prop_set_eq:cc {g__zlatex_thm_name_prop}
+                  {g__zlatex_thm_name_\g__zlatex_lang_math_tl _prop}
+}
+\tl_new:N \g__zlatex_thm_title_tl
+\NewDocumentCommand{\zlatexThmTitle}{}{
+  \tl_use:N \g__zlatex_thm_title_tl
+}
+\bool_new:N \g__zlatex_thm_title_inline_bool
+\NewDocumentCommand{\zlatexThmTitleSwitch}{}{
+  \bool_gset_inverse:N \g__zlatex_thm_title_inline_bool
+}
+\NewDocumentCommand{\zlatexThmColorSetup}{m}{
+  \zlatex_keys_set:nn {color}{#1}
+}
+% create new thm env
+\cs_new:Npn \__zlatex_mid_first:w #1|#2\q_stop {#1}
+\cs_new:Npn \__zlatex_thm_color_set:w #1\q_stop #2|#3\q_stop 
+  { \zlatex_keys_set:nn {color}{#1=#3} }
+\cs_new:Npn \__zlatex_color_keyval_add:n #1 {
+  \zlatex_keys_define:nn {color}{
+    #1 .tl_set:c  = { l__zlatex_#1_color_tl },
+    #1 .initial:n = { black },
+    #1 .code:n    = { \__zlatex_color_set:n {##1} },
+  }
+}
+\cs_new:Npn \__zlatex_thm_create__:nn #1#2 {
+  \zlatex_thm_create:nn {#1}{#2}
+  \__zlatex_color_keyval_add:n {#2}
+  \prop_gput_from_keyval:cn {g__zlatex_thm_name_prop}{#2=#2}
+}
+\cs_new:Npn \__zlatex_thm_create__:nnn #1#2#3 { 
+  \zlatex_thm_create:ne {#1}{\use_i:nn {#2}{#3}}
+  \__zlatex_color_keyval_add:n {#2}
+  \exp_last_unbraced:Ne \__zlatex_thm_color_set:w #2\q_stop #3\q_stop
+  \prop_gput:cee {g__zlatex_thm_name_prop}
+    {#2}{\exp_last_unbraced:Ne \__zlatex_mid_first:w #3\q_stop}
+}
+\NewDocumentCommand{\zlatexThmCreate}{mm}{
+  \zlatex_label_hook_preamble_last:nn {zlatex-thmall-setup-user}{
+  \keyval_parse:nnn
+    { \__zlatex_thm_create__:nn {#1} }
+    { \__zlatex_thm_create__:nnn {#1} }
+    { #2 }
+  }
+}
+\@onlypreamble\zlatexThmCreate
+
+
+% ==> new thm style interface
+\NewDocumentCommand{\zlatexThmStyleNew}{+m}{
+  \keyval_parse:nnn
+    {\use_none:n}
+    {\__zlatex_thm_new_style:nn} 
+    {#1}
+}
+\cs_new_protected:Npn \__zlatex_thm_new_style:nn #1#2 {
+  \zlatex_keys_define:nn { thm/style } {
+    #1            .meta:nn   = { zlatex/thm/style/#1 }{##1},
+    #1 / begin    .tl_gset:c = { g__zlatex_thm_style_#1_begin_tl },
+    #1 / end      .tl_gset:c = { g__zlatex_thm_style_#1_end_tl },
+    #1 / option   .tl_gset:c = { g__zlatex_thm_style_#1_option_tl }, 
+  }
+  \zlatex_keys_set:nn { thm/style }{ #1={#2} }
+}
+\NewDocumentCommand{\zlatexThmStyle}{m}{
+  \tl_gset:Nn \g__zlatex_thm_style_tl {#1}
+}
+% title switch and tcb warning, create thm styles
+\cs_new:Npn \__zlatex_thm_title_inline:n #1 {
+  \tl_if_eq:nnTF {#1}{T}
+    {\bool_gset_true:N \g__zlatex_thm_title_inline_bool}
+    {\bool_gset_false:N \g__zlatex_thm_title_inline_bool}
+}
+\zlatex_msg_set:nn {mathEnv-dependency}{
+  MathEnv~style:'\g__zlatex_thm_style_tl'~requires~package~'tcolorbox'~and~'tikz',~and~
+  either~of~which~hasn't~been~loaded~in~your~preamble.~Reset~to~default~'plain'~style~now.
+}
+\cs_new:Nn \__zlatex_thm_tcolorbox_warning: {
+  \@ifpackageloaded{tcolorbox}{\relax}{
+    \zlatex_msg_warn:n {mathEnv-dependency}
+    \tl_gset:Nn \g__zlatex_thm_style_tl {plain}
+  }
+}
+\zlatexThmStyleNew {
+  plain = {
+    begin  =, 
+    end    =, 
+    option = \__zlatex_thm_title_inline:n {T}
+  },
+  leftbar = {
+    begin = {
+      \def\FrameCommand{{\color{\thm@temp@color}\vrule~ width~ 3pt}
+      \hspace{5pt}}\MakeFramed{\advance\hsize-\width \FrameRestore}
+    },
+    end = {\endMakeFramed},
+    option = { \__zlatex_thm_title_inline:n {T} }
+  },
+  background = {
+    begin = {
+      \def\FrameCommand{\colorbox{\thm@temp@color!10}}
+      \MakeFramed{\advance\hsize-\width \FrameRestore}
+    },
+    end = {\endMakeFramed},
+    option = { \__zlatex_thm_title_inline:n {T} }
+  },
+  fancy = {
+    begin = {
+      \def\FrameCommand{{\color{\thm@temp@color}\vrule~ width~ 3pt}\colorbox{\thm@temp@color!10}}
+      \MakeFramed{\advance\hsize-\width \FrameRestore}
+    },
+    end = {\endMakeFramed},
+    option = { \__zlatex_thm_title_inline:n {T} }
+  },
+  shadow = {
+    begin = {
+      \begin{tcolorbox}[
+        enhanced~ jigsaw, breakable,
+        top=1.5pt,  bottom=1.5pt,
+        left=3pt,   right=3pt,
+        boxrule=0pt, sharp~corners,
+        drop~fuzzy~shadow,
+        colback={\thm@temp@color!10}, 
+        borderline~west={3pt}{0pt}{\thm@temp@color}
+      ]
+    },
+    end = {\end{tcolorbox}},
+    option = {
+      \__zlatex_thm_title_inline:n {T}
+      \__zlatex_thm_tcolorbox_warning:
+    }
+  },
+  paris = {
+    begin = {
+      \begin{tcolorbox}[
+        enhanced,   breakable,
+        top=1.5pt,  bottom=1.5pt,
+        left=3pt,   right=3pt,
+        boxrule=0pt,    sharp~corners,
+        colback=gray!5, drop~fuzzy~shadow,
+        overlay={
+          \draw[\thm@temp@color, line~width=0.2pt] (frame.north~west)--(frame.north~east);
+          \draw[\thm@temp@color, line~width=3pt] ([yshift=1.5pt]frame.north~west) -- +(2.5cm, 0);
+        }
+      ]  
+    },
+    end = {\end{tcolorbox}},
+    option = {
+      \__zlatex_thm_title_inline:n {T}
+      \__zlatex_thm_tcolorbox_warning:
+    }
+  },
+  elegant = {
+    begin = {
+      \begin{tcolorbox}[
+        enhanced,   breakable,
+        top=8pt,    bottom=1.5pt,
+        left=3pt,   right=3pt,
+        arc=3pt,    boxrule=0.5pt,
+        before~upper*={\setlength{\parindent}{1em}},
+        fontupper=\rmfamily,   fonttitle=\bfseries,
+        lower~separated=false, separator~sign={.},
+        attach~boxed~title~to~top~left={yshift=-0.11in, xshift=0.15in},
+        boxed~title~style={boxrule=0pt, colframe=white, arc=0pt, outer~arc=0pt},
+        title=\zlatexThmTitle,
+        coltitle = white,           colbacktitle = \thm@temp@color,
+        colframe = \thm@temp@color, colback  = \thm@temp@color!5,
+      ]
+    },
+    end = {\end{tcolorbox}},
+    option = {
+      \__zlatex_thm_title_inline:n {F}
+      \__zlatex_thm_tcolorbox_warning:
+      \zlatex_keys_set:nn {color}{
+        axiom       = {HTML}{2c3e50},
+        definition  = {RGB}{0, 166, 82},
+        theorem     = {RGB}{255, 134, 23},
+        lemma       = {RGB}{255, 134, 23},
+        corollary   = {RGB}{255, 134, 23},
+        proposition = {RGB}{0, 173, 247},
+      }
+    }
+  },
+}
+
+
+% ==> thm format and style setup
+\zlatex_msg_set:nn {mathEnv-style}{
+  You~use~an~incorrect~MathEnv~style:~'\g__zlatex_thm_style_tl',~All~valid~
+  MathEnv~are:'plain',~'leftbar',~'background',~'fancy',~'shadow',~'paris'.
+}
+% thm counter
+\bool_new:N \g__zlatex_thm_cntshare_bool
+\zlatex_keys_define:nn {thm/cnt} {
+  share     .bool_gset:N = \g__zlatex_thm_cntshare_bool,
+  share     .default:n   = true,
+  parent    .tl_gset:N   = \g__zlatex_thm_cntparent_tl,
+  parent    .initial:n   = section,
+}
+\NewDocumentCommand{\zlatexThmCnt}{m}{
+  \group_begin:
+    \zlatex_keys_set:nn {thm/cnt}{#1}
+  \group_end:
+}
+\@onlypreamble\zlatexThmCnt
+% thm env warper
+\cs_new:Npn \__zlatex_thm_warp_start:nnnn #1#2#3#4 {
+  \def\thm@temp@color{\tl_use:c {l__zlatex_#1_color_tl}}
+  \__zlatex_thm_title_item:nnnn {#1}{#2}{#3}{#4}
+  \tl_use:c {g__zlatex_thm_style_\g__zlatex_thm_style_tl _option_tl}
+  \tl_if_exist:cTF {g__zlatex_thm_style_\g__zlatex_thm_style_tl _begin_tl}
+    {\tl_use:c {g__zlatex_thm_style_\g__zlatex_thm_style_tl _begin_tl}}
+    {\zlatex_msg_error:n {mathEnv-style}}
+}
+\cs_new:Npn \__zlatex_thm_warp_end:n #1 {
+  \tl_use:c {g__zlatex_thm_style_\g__zlatex_thm_style_tl _end_tl}
+  \__zlatex_thm_toc_add:eeee 
+    {\g__zlatex_thm_table_level}{\zlatexThmName\ (\zlatexThmNote)}
+    {\thepage}{#1.\zlatexThmNumber}
+}
+% thm title interface
+\NewHook{zlatex/thm/titleformat}
+\cs_new:Npn \__zlatex_thm_title_item:nnnn #1#2#3#4 {
+  \cs_set:Npn \zlatexThmName  {\prop_item:cn {g__zlatex_thm_name_prop}{#1}}
+  \cs_set:Npn \zlatexThmNote  {#2}
+  \bool_if:NTF \g__zlatex_thm_cntshare_bool
+    {\cs_set:Npn \zlatexThmNumber {
+      \cs:w the\g__zlatex_thm_cntparent_tl\cs_end:
+        .\cs:w thezlatex@thm@sharecnt\cs_end:}
+      \stepcounter{zlatex@thm@sharecnt}
+    }{\cs_set:Npn \zlatexThmNumber {
+      \cs:w the\g__zlatex_thm_cntparent_tl\cs_end:
+        .\cs:w the#1\cs_end:}
+      \stepcounter{#1}
+    }
+  \tl_gset:Nn \g__zlatex_thm_title_tl {
+    #3\zlatexThmName#4\zlatexThmNumber#4(\zlatexThmNote)
+  }
+  \UseHook{zlatex/thm/titleformat}
+}
+\cs_new:Npn \__zlatex_thm_title: {
+  \bool_if:NT \g__zlatex_thm_title_inline_bool
+    {\group_begin:\noindent\tl_use:N \g__zlatex_thm_title_tl\group_end:}
+}
+% users' interface of thm title format
+\NewDocumentCommand{\zlatexThmTitleFormat}{sm}{
+  \IfBooleanTF{#1}{
+    \AddToHook{zlatex/thm/titleformat}
+      {\tl_gset:Nn \g__zlatex_thm_title_tl {#2}}
+  }{
+    \AddToHookNext{zlatex/thm/titleformat}
+      {\tl_gset:Nn \g__zlatex_thm_title_tl {#2}}
+  }
+}
+% list of thm: ".thlist" as file extension
+% REF: https://github.com/mbertucci47/keytheorems
+\bool_new:N \g__zlatex_thm_toc_bool
+\hook_gput_code:nnn { enddocument } { thm-toc }
+  {
+    \bool_if:NT \g__zlatex_thm_toc_bool {
+      \iow_new:N \tf@thlist
+      \iow_open:Nn \tf@thlist { \c_sys_jobname_str.thlist }
+    }
+  }
+\cs_new:Npn \__zlatex_thm_toc_add:nnnn #1#2#3#4 
+  {
+    \iow_now:Ne \@auxout 
+      {
+        \token_to_str:N \@writefile{thlist}
+          {\token_to_str:N \contentsline{#1}{#2}{#3}{#4}
+          \token_to_str:N \protected@file@percent}
+      }
+  }
+\cs_generate_variant:Nn \__zlatex_thm_toc_add:nnnn { eeee }
+\tl_new:N \g__zlatex_thm_table_level
+\tl_set:Nn \g__zlatex_thm_table_level {subsection}
+\NewDocumentCommand{\zlatexThmTocLevel}{m}
+  {
+    \tl_gset:Nn \g__zlatex_thm_table_level {#1}
+  }
+\@onlypreamble\zlatexThmTocLevel
+\zlatex_keys_define:nn {thm/toc}
+  {
+    title  .tl_gset:N  = \g__zlatex_thm_toc_title_tl,
+    title  .initial:n  = List\ of\ Theorems,
+    vspace .dim_gset:N = \g__zlatex_thm_toc_vspace_dim,
+    vspace .initial:n  = 10pt,
+  }
+\NewDocumentCommand{\zlatexThmToc}{o}
+  {
+    \bool_gset_true:N \g__zlatex_thm_toc_bool
+    \group_begin:
+    \IfValueT {#1}{\zlatex_keys_set:nn {thm/toc}{#1}}
+    \legacy_if_set_false:n { @filesw }  
+    {\Large\bfseries\noindent\tl_use:c {g__zlatex_thm_toc_title_tl}}
+    \par\addvspace{\g__zlatex_thm_toc_vspace_dim}\@starttoc{ thlist }
+    \group_end:
+  }
+
+
+% ==> thm env definition
+\NewHook{zlatex/thmstyle/before}
+\NewHook{zlatex/thmstyle/begin}
+\NewReversedHook{zlatex/thmstyle/end}
+\NewReversedHook{zlatex/thmstyle/after}
+\zlatex_label_hook_preamble_last:nn {zlatex-thmptheorem-setup-inner}{
+  \newcounter{zlatex@thm@sharecnt}[\g__zlatex_thm_cntparent_tl]
+  \clist_map_inline:Nn \g__zlatex_thm_theorem_clist {
+    \newcounter{#1}[\g__zlatex_thm_cntparent_tl]
+    \__zlatex_cref_math_env:n {#1}
+    \DeclareDocumentEnvironment{#1}{O{}}{
+      \UseHook{zlatex/thmstyle/before}
+      \__zlatex_thm_warp_start:nnnn {#1}{##1}{\bfseries}{\ }
+      \MakeLinkTarget*{#1.\zlatexThmNumber}\__zlatex_thm_title:                                  
+      \UseHook{zlatex/thmstyle/begin}
+    }{
+      \UseHook{zlatex/thmstyle/end}
+      \__zlatex_thm_warp_end:n {#1}
+      \UseHook{zlatex/thmstyle/after}
+    }
+  }
+}
+\newcommand{\qedsymbol}{\ensuremath{\square}}
+\zlatex_label_hook_preamble_last:nn {zlatex-thmprooof-setup-inner}{
+  \clist_map_inline:Nn \g__zlatex_thm_proof_clist {
+    \DeclareDocumentEnvironment{#1}{O{}}{
+      \noindent{\color{\tl_use:c {l__zlatex_#1_color_tl}}
+      \bfseries\prop_item:cn {g__zlatex_thm_name_prop}{#1}:}
+      \tl_set:Nn \l__arg_one_tl {#1}
+    }{\str_if_eq:VnTF \l__arg_one_tl {proof}{\hfill\qedsymbol\par}{\par}}
+  }
+}
+% zlatex thm hook
+\int_new:N \g__zlatex_thm_hook_index_int
+\int_gzero:N \g__zlatex_thm_hook_index_int
+\cs_generate_variant:Nn \hook_gput_code:nnn {ne}
+\NewDocumentCommand{\zlatexThmHook}{sm}{
+  \IfBooleanTF{#1}
+    {
+      \cs_set:Npn \__zlatex_hook_add:nn ##1##2
+        {
+          \int_gincr:N \g__zlatex_thm_hook_index_int
+          \hook_gput_code:nen {zlatex/thmstyle/##1}
+            {thm-hook.\int_use:N \g__zlatex_thm_hook_index_int}{##2}
+        }
+    }{
+      \cs_set:Npn \__zlatex_hook_add:nn ##1##2
+        {
+          \int_gincr:N \g__zlatex_thm_hook_index_int
+          \hook_gput_next_code:nn {zlatex/thmstyle/##1}{##2} 
+        }
+    }
+  \keyval_parse:NNn 
+    \use_none:n
+    \__zlatex_hook_add:nn {#2}
+}
+\DeclareHookRule{env/document/before}
+  {zlatex-thmall-setup-user}{<}{zlatex-thmptheorem-setup-inner}
+\DeclareHookRule{env/document/before}
+  {zlatex-thmall-setup-user}{<}{zlatex-thmprooof-setup-inner}

@@ -3,13 +3,13 @@
 \usepackage{ztikz}
 \ztikzloadlibrary{gnuplot}
 
+
 \begin{document}
 \START
-\BEGINTEST{ztikz-cmd-ShowIntersection}
+\BEGINTEST{ztikz-module-gnuplot-ListPlot}
 \begin{tikzpicture}
-  \Plot[1:3][name path=line1]{2*x-3}
-  \Plot[0:3][name path=line2]{-x+3}
-  \ShowIntersection[color=red]{line1; line2}{1}
+  \PlotPrecise{polar}{15}
+  \PolarPlot[0:2*pi][opacity=0, orange][type=square, color=orange]{1-sin(t)}
 \end{tikzpicture}
 \ENDTEST
 \END

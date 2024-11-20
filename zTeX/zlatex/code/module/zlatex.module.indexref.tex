@@ -1,0 +1,64 @@
+\ProvidesExplFile{zlatex.module.indexref.tex}{2024/10/24}{1.0.0}{indexref~module~for~zlatex}
+
+
+%%%%%     index/ref for zlatex     %%%%%
+% ==> package loading
+\bool_if:NT \g__zlatex_bib_index_load_bool {            
+  \RequirePackage{indextools}
+  \str_case:Vn \g__zlatex_bib_backend_str {
+    {bibtex}{\RequirePackage[backend=bibtex]{biblatex}}
+    {biber}{\RequirePackage[backend=biber]{biblatex}}
+  }
+  \exp_args:Nx \addbibresource{\str_use:N \g__zlatex_bib_source_str}
+}
+\bool_if:NT \g__zlatex_hyperref_bool {
+  \RequirePackage{hyperref}
+  \SetLinkTargetFilter{zlatex-\jobname-#1}
+}
+\RequirePackage[nameinlink]{cleveref}
+
+
+% ==> provide command
+\ProvideDocumentCommand\hyper@anchor{m}{}
+\ProvideDocumentCommand\hyper@link{mmm}{}
+\ProvideDocumentCommand\MakeLinkTarget{sO{}m}{}
+\ProvideDocumentCommand\LinkTargetOn{}{}
+\ProvideDocumentCommand\LinkTargetOff{}{}
+\ProvideDocumentCommand\NextLinkTarget{m}{}
+
+
+% ==> figure and table prefix for \cref 
+\str_case:VnF \g__zlatex_lang_str {
+  {en}{
+    \IfClassLoadedTF{book}{
+      \crefname{part}{part}{parts}
+      \crefname{chapter}{chapter}{chapters}
+    }{\relax}
+    \crefname{section}{section}{sections}
+    \crefname{subsection}{subsection}{subsections}
+    \crefname{figure}{figure}{figures}
+    \crefname{table}{table}{tables}
+    \crefname{equation}{equation}{equations}
+  }
+  {cn}{
+    \IfClassLoadedTF{book}{
+      \crefname{part}{部分}{部分}
+      \crefname{chapter}{章}{章}
+    }{\relax}
+    \crefname{section}{节}{节}
+    \crefname{subsection}{小节}{小节}
+    \crefname{figure}{图}{图}
+    \crefname{table}{表}{表}
+    \crefname{equation}{方程}{方程}
+  }
+}{\zlatex_msg_error:n {option-language}}
+
+
+% ==> \cref format for thm
+\cs_generate_variant:Nn \__zlatex_cref_math_env:nnn {eee}
+\cs_new:Npn \__zlatex_cref_math_env:n #1 {
+  \exp_args:Nnff \crefname{#1}
+    {\prop_item:cn {g__zlatex_thm_name_prop}{#1}}
+    {\prop_item:cn {g__zlatex_thm_name_prop}{#1}s}
+  \creflabelformat{#1}{##2(##1)##3}
+}

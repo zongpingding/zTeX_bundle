@@ -1,0 +1,41 @@
+\ProvidesExplFile{zlatex.module.toc.tex}{2024/10/24}{1.0.0}{toc~module~for~zlatex}
+
+
+%%%%%     toc setup module for zlatex     %%%%%
+% ==> main ToC interface
+\AddToHook{cmd/@starttoc/before}{\vspace*{\dim_use:N \g__zlatex_toc_title_vspace_dim}}
+\zlatex_hook_preamble_last:n {
+\int_compare:nNnT {\g__zlatex_toc_column_int} > {1} {
+  \RequirePackage{multicol}
+  \AddToHook{cmd/@starttoc/before}{\begin{multicols}
+    {\int_use:N \g__zlatex_toc_column_int}}
+  \AddToHook{cmd/@starttoc/after}{\end{multicols}}
+}}
+
+
+% ==> partial ToC
+\RequirePackage{titletoc}
+\NewDocumentCommand\stopPartToc{mm}{
+  \int_compare:nNnTF {#2}<{1}
+    {\relax}{\stopcontents[#1]}
+}
+\NewDocumentCommand{\partialToc}{O{2}}{
+  % toc depth
+  \setcounter{tocdepth}{#1} 
+  \titlecontents{psection}[2em]
+    {} {\contentslabel{2em}} {} {\titlerule*[1pc]{.}\contentspage}
+  \titlecontents{psubsection}[4.5em]
+    {} {\contentslabel{2.5em}} {} {\titlerule*[1pc]{.}\contentspage}
+  \titlecontents{psubsubsection}[5.5em]
+    {} {\contentslabel{0em}} {} {\titlerule*[1pc]{.}\contentspage}
+  % print partial Toc
+  \IfClassLoadedTF{book}{ 
+    \startcontents[chapters]
+    \printcontents[chapters]{p}{1}{}
+    \AddToHook{cmd/chapter/before}{\stopPartToc{chapters}{\thechapter}}
+  }{
+    \startcontents[sections]
+    \printcontents[sections]{p}{1}{}
+    \AddToHook{cmd/section/before}{\stopPartToc{section}{\thesection}}
+  }
+}

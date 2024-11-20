@@ -4,6 +4,7 @@
   lang=cn,
   class=book,
   bib_index={load},
+  % layout={slide, aspect=16|9},
   mathSpec={envStyle=shadow, alias},
   toc={column=2, title=目录},
   font={config}
@@ -53,6 +54,9 @@
 \definecolor{slideGray}{HTML}{e0e0e0}
 \definecolor{slideWhite}{HTML}{f0f0f0}
 \definecolor{bg}{rgb}{0.95,0.95,0.95}
+\makeatletter
+\colorlet{RoyalRed}{zlatex@color@royalred}
+\makeatother
 \setminted{
   fontsize=\small,
   bgcolor=bg,
@@ -442,8 +446,9 @@ z\LaTeX{} 默认页面布局如:\cref{fig:zlatex-default-layout}
 
 
 \mstyle{slide theme}
-slide 模式下，用户可以自由切换主题颜色. zlatex 内置了四套主题色彩，内置主题命令方式为: <beamer-theme-name>-<beamer-themecolor-name>.
-目前 zlatex 只复刻了 beamer 下的 {AnnArbor} 主题，但是内置了4中色彩主题:
+slide 模式下，用户可以自由切换主题颜色. 出于加载速度考虑，主题的指定应在导言区声明, 即指定 \zkey{layout/theme}. 
+zlatex 内置了四套主题色彩，内置主题命令方式为: <beamer-theme-name>-<beamer-themecolor-name>. 目前 zlatex 只复刻了 
+beamer 下的 {AnnArbor} 主题，但是内置了4中色彩主题:
 \begin{itemize}
   \item AnnArborDefault
   \item AnnArborBeaver
@@ -451,12 +456,7 @@ slide 模式下，用户可以自由切换主题颜色. zlatex 内置了四套�
   \item AnnArborSeahorse
 \end{itemize}
 
-用户可以使用如下命令进行主题切换: 
-\begin{minted}{latex}
-\zslideThemeUse{<theme-name>}
-\end{minted}
-
-如果用户希望在加载某一个主题的时同时覆盖一部分主题的原定义，可以使用命令:
+在导言区指定对应的主题后，如果用户希望在加载某一个主题的时同时覆盖一部分主题的原定义，可以使用命令:
 \begin{minted}{latex}
 \zslideThemeUse[UL={text=UL-TEXT}]{<theme-name>}
 \end{minted}
@@ -464,7 +464,6 @@ slide 模式下，用户可以自由切换主题颜色. zlatex 内置了四套�
 \mstyle{自定义主题}
 目前 slide 模式下还不支持自定义主题，因为这部分涉及到的内容比价繁杂，还没有考虑好如果实现. 但是用户可以通过重定义对应的颜色来实现自定义主题,
 请参见后文的示例.
-
 
 \mstyle{自定义主题}
 slide 模式下的主题颜色\index{slide theme}目前基本均由三名称控制，用户如果想要修改 slide 的主题色，请重定义它们。以下展示默认主题色对应的

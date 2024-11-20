@@ -33,6 +33,24 @@ Running checks on
   All checks passed
 ```
 
+A new debug folder added to this project, a useful file `zlatex-cfg.tex`:
+```latex 
+\makeatletter
+\def\input@path{{../code/}{../code/module/}{../code/library/}}
+\makeatother
+```
+
+when running frequent debug.
+
+
+## split zlatex class to modules and libraries
+Class `zlatex` has been split into 3 parts:
+* `zlatex.cls`: the main class file
+* `module`: the neccessary files(functions) for zlatex 
+* `library`: the optional files(functions) for zlatex
+
+> Additional `\makeatlette` and `\makeatother` has been removed from these modules and libraries by adding `\makeatlette` in front of the inputing command `\file_input:n {#1/zlatex.#1.##1.tex}`
+
 
 ## package dependency
 add package 
@@ -90,6 +108,73 @@ This command act as an argument in another command, like:
 \foo{\zlatexVerb{<ARGUMENT>}}
 ```
 
+## hyperref 
+### example
+Some commands maybe useful for hyperref setup:
+```latex
+\@currentHref .hint
+
+\hyper@link { link }
+
+\Hy@raisedlink { \hyper@anchor {#1} }
+```
+
+use example of these commands:
+```latex
+\cs_new_protected:Npn \@@_problem_label_aux:n #1
+  {
+    \refstepcounter { problem }
+    \set@display@protect
+    \tl_gset:Nx \g_@@_curr_item_tl
+      { \c_backslash_str item [ {#1} { \@currentHref } ] }
+    \set@typeset@protect
+    \exp_args:No \@@_hyper_link:nn
+      { \@currentHref .hint }
+      { \@@_label_format:n {#1} }
+  }
+\cs_new_protected:Npn \@@_hint_label:n #1
+  { \@@_label:nnnn { .hint } { .solution } #1 }
+\cs_new_protected:Npn \@@_solution_label:n #1
+  { \@@_label:nnnn { .solution } { } #1 }
+\cs_new_protected:Npn \@@_label:nnnn #1#2#3#4
+  {
+    \cs_set_eq:NN \prefix \@@_label_prefix:nn
+    \@@_hyper_anchor:n { #4#1 }
+    \@@_hyper_link:nn
+      { #4#2 }
+      { \@@_label_format:n {#3} }
+  }
+\tl_new:N \g_@@_curr_item_tl
+\cs_new_protected:Npn \@@_label_format:n #1
+  { \normalfont \bfseries #1 }
+\cs_new_protected_nopar:Npn \@@_hyper_link:nn
+  { \hyper@link { link } }
+\cs_new_protected_nopar:Npn \@@_hyper_anchor:n #1
+  { \Hy@raisedlink { \hyper@anchor {#1} } }
+```
+
+### cref
+Bug of `cleveref`? see mwe below:
+```latex 
+\documentclass{article}
+\usepackage[nameinlink]{cleveref}
+
+
+\newcounter{THM}[section]
+\crefname{THM}{aaa}{bbb} % aaa --> aa, works right
+\NewDocumentEnvironment{THM}{o}{
+  \refstepcounter{THM}
+}{}
+\begin{document}
+\begin{THM}[TEST]\label{thm:1}
+  Hello world: $a^2+b^2=c^2$.
+\end{THM}
+
+BBB: \cref{thm:1}
+\end{document}
+```
+
+
 ## hook interface
 ### introduction
 zLaTeX now provides these hooks for users to use:
@@ -105,6 +190,78 @@ zLaTeX now provides these hooks for users to use:
 
 > These functions now belongs to the group `Class Tools`.
 
+
+### thm title hook (TODO)
+There are 2 ways to set the title format of theorem-like envs:
+* hook with args:
+```latex
+\documentclass{article}
+\usepackage{amsmath, amsthm}
+% preamble
+\NewHookWithArguments{zlatex/thm/titleformat}{3}
+\newtheoremstyle{zlatexMathEnv}
+  {2pt}{2pt}{}
+  {0pt}{\bfseries}{}
+  {.25em}
+  {
+    \UseHookWithArguments{zlatex/thm/titleformat}{3}{#1}{#2}{#3}
+  }
+\theoremstyle{zlatexMathEnv}
+
+\newcommand{\zlatexThmTitleFormat}[1]{
+  \IfHookEmptyTF{zlatex/thm/titleformat}{}
+    {\RemoveFromHook{zlatex/thm/titleformat}[once]}
+  \AddToHookWithArguments{zlatex/thm/titleformat}[once]{#1}
+}
+
+% main document
+\begin{document}
+\newtheorem{aaa}{AAA}
+\zlatexThmTitleFormat{\thmname{#1}. \thmnumber{#2} \thmnote{(#3]}}
+\begin{aaa}[SECOND]
+  ENV-CONTENT-SECOND
+\end{aaa}
+\end{document}
+```
+
+* hook without args:
+```latex
+\documentclass{article}
+\usepackage{amsmath, amsthm}
+
+
+% preamble
+\ExplSyntaxOn
+\NewHook{zlatex/thm/titleformat}
+\newtheoremstyle{zlatexMathEnv}
+  {2pt}{2pt}{}
+  {0pt}{\bfseries}{}
+  {.25em}
+  {
+    \cs_set:Npn \ThmName { \thmname{#1} }
+    \cs_set:Npn \ThmNumber { \thmnumber{#2} }
+    \cs_set:Npn \ThmNote { \thmnote{#3} }
+    \UseHook{zlatex/thm/titleformat}
+  }
+\theoremstyle{zlatexMathEnv}
+
+\newcommand{\zlatexThmTitleFormat}[1]{
+  \IfHookEmptyTF{zlatex/thm/titleformat}{}
+    {\RemoveFromHook{zlatex/thm/titleformat}[once]}
+  \AddToHook{zlatex/thm/titleformat}[once]{#1}
+}
+\ExplSyntaxOff
+
+
+% main document
+\begin{document}
+\newtheorem{aaa}{AAA}
+\zlatexThmTitleFormat{\ThmName. \ThmNumber [\ThmNote)}
+\begin{aaa}[SECOND]
+  ENV-CONTENT-SECOND
+\end{aaa}
+\end{document}
+```
 
 ## key-value interface
 ### setup functions
@@ -133,8 +290,190 @@ Consider move `color` k-v interface to `zlatex / color`.
 
 
 ### package Option 
-The `packageOption` interface is available now in zLaTeX.
+The `packageOption` interface is available now in zLaTeX. Implement the `package-option` interface by `l3keys`; Now this interface has been implemented, a example usage:
+```latex
+\documentclass[
+    lang=cn,
+    packageOption={
+        fontspec=quiet, 
+        ctex={scheme=plain, punct=quanjiao}
+    },
+]{zlatex}
+```
 
+### color setup
+#### feature 
+now you can use the following syntax to setup your color:
+```latex
+\zlatexThmCreate{theorem}{Ztheorem=THM|{HTML}{8e44ad}, Zproposition} 
+
+\zlatexColorSetup{
+  definition=blue,
+  theorem={HTML}{007175},
+  Ztheorem={RGB}{219,48,122}
+}
+```
+
+You do NOT need to use `\definecolor` command to setup your color, just use the `zlatexColorSetup` command to setup your color. 
+
+> All color mode that xcolor support is valid in `zlatex`, eg, `RGB`, `cmyk`, ...
+
+#### bug
+Current you can only use a specific color that pre-defined before in `.initial:n`. Can NOT create these colors dynamiclly. 
+
+There is a simple mwe provides different ways to dynamiclly setup colors:
+
+```latex
+\documentclass{article}
+\usepackage{xcolor}
+
+
+\begin{document}
+\ExplSyntaxOn\makeatletter
+\regex_new:N \l__color_mode_regex
+\regex_set:Nn \l__color_mode_regex {(\cB..{1,}\cE.){2}}
+\cs_new:Npn \test__color_set:n #1 {
+  \regex_match:NnTF \l__color_mode_regex {#1}{
+    \typeout{---->~ \use_ii:nn #1}
+    \typeout{---->~ def}
+    \definecolor{Test@\l_keys_key_str}#1
+    \tl_set:ce {l_test_\l_keys_key_str _tl}{Test@\l_keys_key_str}
+  }{
+    \@ifundefined{\string\color@#1}{
+      \msg_new:nnn {color} {undefined} {--->~Color~`#1'~undefined}
+      \msg_error:nn {color} {undefined}
+    }{
+      \tl_set:ce {l_test_\l_keys_key_str _tl}{#1}
+    }
+  }
+}
+\keys_define:nn {test}{
+  keyA  .tl_set:N  = \l_test_keyA_tl,
+  keyA  .initial:n = {green},
+  keyA  .code:n    = {\test__color_set:n {#1}},
+  keyB  .tl_set:N  = \l_test_keyB_tl,
+  keyB  .initial:n = {black},
+  keyB  .code:n    = {\test__color_set:n {#1}},
+}
+
+% EXAMPLES
+\textcolor{\l_test_keyA_tl}{TEXT-keyA}\par
+\textcolor{\l_test_keyB_tl}{TEXT-keyB}\par
+
+\keys_set:nn {test}{keyA={HTML}{0f45f3}}
+\textcolor{\l_test_keyA_tl}{TEXT-keyA}\par
+
+\keys_set:nn {test}{keyA={HTML}{8975f3}}
+\textcolor{\l_test_keyA_tl}{TEXT-keyA}\par
+
+\keys_set:nn {test}{keyB=orange}
+\textcolor{\l_test_keyB_tl}{TEXT-keyB}\par
+
+% \keys_set:nn {test}{keyB=orangee}
+% \textcolor{\l_test_keyB_tl}{TEXT-keyA}\par
+\makeatother\ExplSyntaxOff
+\end{document}
+```
+
+But currently, there are some problem in `.initial:n`, the following initial color will NOT work.
+
+```latex   
+\cs_new:Npn \__test_color_cmd:n #1 {
+  \regex_match:nnTF {#1}{ab}{green}{red}
+}
+
+\cs_new:Npn \test__color_set:nn #1#2 {
+  % \typeout{#2} % #2 = {HTML}{0f45f3}
+  \regex_match:NnTF \l__color_mode_regex {#1}{
+    \typeout{---->~ \use_ii:nn #1}
+    \typeout{---->~ def}
+    \definecolor{Test@\l_keys_key_str}#1
+    \tl_set:ce {l_test_\l_keys_key_str _tl}{Test@\l_keys_key_str}
+    % \tl_if_empty:nTF {#2}
+    %   {\tl_set:cn {l_test_\l_keys_key_str _tl}{Test@\l_keys_key_str}}
+    %   {Test@\l_keys_key_str}
+  }{
+    \typeout{---->~ #1}
+    \typeout{---->~ use}
+    \@ifundefined{\string\color@#1}{
+      \msg_new:nnn {color} {undefined} {--->~Color~`#1'~undefined}
+      \msg_error:nn {color} {undefined}
+    }{
+      \tl_set:ce {l_test_\l_keys_key_str _tl}{#1}
+      % \tl_if_empty:nTF {#2}
+      %   {\tl_set:cn {l_test_\l_keys_key_str _tl}{#1}}
+      %   {#1}
+    }
+  }
+  \tl_if_empty:nF {#2}
+    {\use:c {l_test_\l_keys_key_str _tl}}
+}
+
+\keys_define:nn {test}{
+    ...
+    keyB  .initial:n = {\__test_color_cmd:n {ab}},
+    keyB  .initial:n = {\test__color_set:nn {orange}{init}},
+    keyB  .initial:e = {\test__color_set:nn {{HTML}{0f45f3}}{init}},
+    ...
+}
+```
+
+Some code for debugging:
+```latex 
+\documentclass{article}
+\usepackage[T1]{fontenc}
+\usepackage{xcolor}
+
+
+\begin{document}
+\ExplSyntaxOn\makeatletter
+\cs_new:Npn \__other_color_cmd:nn #1#2 {
+  % \tl_if_empty:NF {#2}{
+  %   \definecolor{Test@\l_keys_key_str}{#1}{#2}
+  % }
+  \tl_if_empty:NTF {#2}{#1}{
+    Test@\l_keys_key_str
+  }
+}
+\cs_new:Npn \__test_color_cmd:n #1 {
+  \regex_match:nnTF {ab}{#1}{green}{red}
+  % \tl_if_in:nnTF {abc}{#1}{green}{red}
+  % \typeout{#1}
+  % \tl_if_empty:nTF {#1}{EMPTY}{FILLED}
+}
+\keys_define:nn {test}{
+  keyA  .tl_set:N  = \l_test_keyA_tl,
+  keyB  .tl_set:N  = \l_test_keyB_tl,
+  % keyB  .initial:e = {\__test_color_cmd:n {ab}},
+  % keyB  .initial:e = {\__other_color_cmd:nn {HTML}{0f45f3}},
+  keyB  .initial:e = {\__other_color_cmd:nn {red}{}},
+}
+% \keys_precompile:nnN {test}{keyB=\__test_color_cmd:n {ab}}\l_tmpa_tl
+% \tl_use:N \l_tmpa_tl
+% \__test_color_cmd:n {c}\par % success
+% \__test_color_cmd:n {abc}\par % success
+
+
+% \vskip4em
+\keys_set:nn {test}{keyA=AAA}
+\cs_meaning:N \l_test_keyB_tl\par
+% \tl_use:N \l_test_keyB_tl\par
+% \exp_args:Nee \textcolor{\l_test_keyB_tl}{TEXT-BBB}
+\makeatother\ExplSyntaxOff
+\end{document}
+
+
+% ===> DEBUG SECTION <=== %
+\test__color_set:nn {red}{init}\par
+\test__color_set:nn {{HTML}{0f45f3}}{init}
+\tl_use:N \l_test_keyB_tl\par
+\tl_show:N \l_test_keyB_tl % > \l_test_keyB_tl=\test__color_set:nn {orange}{init}.
+\textcolor{\l_test_keyA_tl}{TEXT-keyA}\par
+% ===> DEBUG SECTION <=== %
+```
+Remark:
+* The main reason is that some functions can NOT be fully exapnded in `e`-type, eg. `\regex_match:NnTF`.
+* A weird synomyms of `\textcolor{\l_test_keyA_tl}{TEXT-keyA}`: only when there is a `\tl_use:N \l_test_keyB_tl` before it, the color will be set correctly.
 
 ## message system
 ### group name 
@@ -224,7 +563,7 @@ Class zlatex Warning: MathEnv style:'paris' requires package 'tcolorbox' and
 ```
 
 
-### test source
+### Test source I
 Here is the source for message system debug:
 ```latex
 \documentclass[
@@ -245,6 +584,68 @@ Here is the source for message system debug:
   % lang=cn,
   hello=world,
 ]{zlatex}
+```
+
+### Test source II
+```latex 
+\documentclass{article}
+
+\begin{document}
+\ExplSyntaxOn
+\keys_define:nn {test}{
+key-a  .code:n = {key-a:~#1},
+key-b  .code:n = {key-b:~#1},
+m-key / mkey-a  .code:n = {mkey-a:~#1},
+m-key / mkey-b  .code:n = {mkey-b:~#1},
+m-key / unknown .code:n = {
+    \msg_new:nnn {text/m-key}{unknown-mkey}{Unknown~key:\l_keys_path_str}
+    \msg_warning:nn {text/m-key}{unknown-mkey}
+},
+unknown .code:n = {
+    \msg_new:nnn {text}{unknown-key}{Unknown~key:\l_keys_path_str}
+    \msg_warning:nn {text}{unknown-key}
+}
+}
+
+\keys_set:nn {test}{
+key-a = 1,
+key-c = 3,
+m-key/mkey-a = 4,
+m-key/mkey-c = 6,
+}
+\ExplSyntaxOff
+
+% WRONG WARNINGs
+% Package slide/sec Warning: KEY:zlatex/slide/hello
+% Package slide Warning: KEY:zlatex/slide/hello
+
+% EXPECTED WARNINGs
+% Package text Warning: Unknown key:test/key-c
+% Package text/m-key Warning: Unknown key:test/m-key/mkey-c
+\end{document}
+```
+
+Now the message looks like:
+```shell
+Class zlatex Warning: You use an invalid key "zlatex/slide/world" or key
+(zlatex)              assign for it in the meta key "slide", Valid options
+(zlatex)              are:sec(<key-value>:prefix,suffix,bg,fg),
+(zlatex)              UL(<key-value>:text,bg,fg),UR(<key-value>:text,bg,fg),
+(zlatex)              BL(<key-value>:text,bg,fg),BC(<key-value>:text,bg,fg),
+(zlatex)              BR(<key-value>:text,bg,fg); Assignment Ignored and
+(zlatex)              zLaTeX default "slide" settings of this key substitute.
+
+
+Class zlatex Warning: You use an invalid key "zlatex/slide/toc/hello" or key
+(zlatex)              assign for it in the meta key "slide/toc", Valid options
+(zlatex)              are:leftmargin(<key-value>:chapter[<dim>:2em],section[<di
+m>:4em],subsection[<dim>:6em]),
+(zlatex)              label(<key-value>:chapter[<tl>:thechapter;hbox:1em],secti
+on[<tl>:thesection;hbox:1em],subsection[<tl>:thesubsection;hbox:2em]),
+(zlatex)              after(<key-value>:chapter[tl:<empty>],section[tl:<empty>]
+,subsection[tl:<empty>]);
+(zlatex)              Assignment Ignored and zLaTeX default "slide-toc"
+(zlatex)              settings of this key substitute.
 ```
 
 ## class option interface
@@ -347,6 +748,68 @@ zLaTeX now provides command `\zslideSetup` for slide mode setup, command args sp
 \zslideSetup[<sub-key>]{<key-value list>}
 ```
 
+### Update 2024-10-24
+Command `\FF` conflicting with `\FF` command in `ascii` package:
+```latex 
+% ascii package
+\def\FF{{\asciifamily\char"0C}\xspace}
+% zlatex class
+\newcommand{\FF}[1]{\ensuremath{\mathbf{#1}}}
+```
+
+Just let a alias `\let\asciiFF\FF` when loading `ascii` package, see below:
+```latex
+\@ifpackageloaded{ascii}
+    {\let\asciiFF\FF\renewcommand{\FF}[1]{\ensuremath{\mathbf{#1}}}}
+    {\newcommand{\FF}[1]{\ensuremath{\mathbf{#1}}}}
+```
+
+### auto scale graphics
+A simple solution may be:
+```latex
+\makeatletter
+\def\rubberPicHeight{%
+  \ifdim\Gin@nat@height>\paperheight
+    .5\paperheight
+  \else\Gin@nat@height\fi
+}
+\let\oldincludegraphics\includegraphics
+\setkeys{Gin}{height=\rubberPicHeight}
+\renewcommand\includegraphics[2][]{%
+  \oldincludegraphics{#2}%
+}
+\makeatother
+
+
+\includegraphics{Epmmy.jpg}
+```
+
+But this method is NOT too reflexiable. The better method may be use package `adjustbox` as:
+```latex
+\includegraphics[max width=\linewidth]{<image file name>}
+```
+
+Then i WON'T Implement this feature. For more detail, see: [Scale (resize) large images (graphics) that exceed page margins](https://tex.stackexchange.com/q/6073/294585)
+
+### hyperref support
+Hyperref is support now, such anchors are available:
+* `page.<page num>`: link to abusolute page index `<page num>`
+* `zslide@\FirstMark{zslide-left}.<frame index>`: link to frame indexd at `<frame index>` in section `\FirstMark{zslide-left}` (roughly equals to current section).
+
+A users' interface `\zslide@navigate:nnnn` have been created, syntax as follows:
+```latex
+\zslide@navigate:nnnn 
+    {<total frame num>}
+    {<current frame index>}
+    {<current frame symbol>}
+    {<other frame symbols>}
+```
+
+You can access the total frame num by macro: `\zslideFrame{<Roman number>}`, `I`, `II`, `\Roman{section}` and so forth, which will return the total frames the current section has. Current frame number can be retrived by command `\zslideFrameIndex`.
+
+> In the future, command `\zslideFrame` maybe extends to `chapter` or `subsection`, not just counting `section`'s frame total number.
+
+
 #### basic settings
 For common item setup, like `slide theme`, `slide metadata`, an simple example:
 ```latex
@@ -404,4 +867,437 @@ Add `title`, `column` and `title-vspace` options to toc setting interface. The o
   \if@restonecol\twocolumn\fi
   \setcounter{page}{1}
 }
+```
+
+
+## thm module
+### intro 
+Now this thm module can do these things, especially that: `thm` module now provides a user-friendly interface to create new theorem/proof-like envs, the commands are:
+* manually create new theorem/proof-like envs
+* set the title format of theorem-like envs
+* change the style of theorem-like envs: colors, titlebar
+* custom the warper of each theorem-like envs
+* thm envs names setup interface of different languages, i implemented the `fr` and `cn` languages, you can add more languages by yourself.
+
+
+### main commands
+The main commands of this module are:
+```latex
+% 1. create new theorem/proof-like envs
+\zlatexThmCreate{theorem}{Zaxiom, Ztheorem=Thm|green, Zproposition=Prop|orange}
+\zlatexThmCreate{proof}{Zproof, Zexample=Example|red, Zsolution=Solution|}
+
+
+% 2. set the title format of theorem-like envs
+% NOTE: This command will overwrite the existing environments
+\zlatexThmTitle % thm title content
+\zlatexThmTitleSwitch % thm title inline or not
+\zlatexThmTitleFormat{<format>, <content, such as:\zlatexThmNumber, \zlatexThmName, \zlatexThmNote>}
+\zlatexThmTitleFormat*{<format>, <content, such as:\zlatexThmNumber, \zlatexThmName, \zlatexThmNote>}
+\zlatexThmCnt{share, parent=<counter name:section, subsection, ...>}
+
+
+% 3. change the style of theorem-like envs
+\zlatexThmStyle{elegant}
+\zlatexThmColorSetup{<theorem/proof-like envs' name>=<color>}
+
+
+% 4. custom the warper of each theorem-like envs
+\zlatexThmStyleNew{<style>={begin=<.>, end=<.>, option=<.>}}
+
+
+% 5. thm envs names setup interface of different languages
+\zlatexThmLang{fr}
+\zlatex_math_env_name_set:nn {fr}{
+  axiom       = Axiome, 
+  definition  = Définition, 
+  theorem     = Théorème, 
+  lemma       = Lemme, 
+  corollary   = Corollaire, 
+  proposition = Proposition, 
+  remark      = Remarque, 
+  proof       = Preuve, 
+  exercise    = Exercice, 
+  example     = Exemple, 
+  solution    = Solution, 
+  problem     = Problème,
+}
+
+
+% 6. thm hooks
+\zlatexThmHook{<next hook>}
+\zlatexThmHook*{<next all hook>}
+
+
+% 7. list of theorems
+\zlatexThmToc[vspace=15pt, title=THM LIST]
+```
+
+### Set color spec 
+color spec is very simple now, see below:
+```latex 
+% way 1
+\zlatexThmCreate{theorem}{Ztheorem=THM|{HTML}{8e44ad}, Zproposition} 
+
+% way 2
+\zlatexColorSetup{
+  definition=blue,
+  theorem={HTML}{007175},
+  Ztheorem={RGB}{219,48,122}
+}
+```
+
+Command `\zlatexColorSetup` is only available in preamble. Though, I do NOT recommend using too much color in your script, you can change color temporarily using command such as the following:
+```latex 
+% users' interface
+\zlatexThmColorSetup{
+  definition={HTML}{22b8cf},
+}
+
+% the implementation of the above command
+\ExplSyntaxOn
+\zlatex_keys_set:nn {color}{
+  definition  = {RGB}{219,48,122},
+}
+\ExplSyntaxOff
+```
+
+### thm hooks 
+Now the `thm` module provides 4 hooks for users to custom the theorem-like envs. The places of these hooks are:
+```latex
+(zlatex/thmstyle/before) --> (warper begin) 
+--> (thm-title) --> (zlatex/thmstyle/begin) --> (thm-content) --> (zlatex/thmstyle/end) --> 
+(warper end) --> (zlatex/thmstyle/after)
+```
+
+The implementation as below:
+```latex
+\NewDocumentEnvironment{#1}{O{}}{
+  \refstepcounter{#1}
+  \UseHook{zlatex/thmstyle/before}
+  \__zlatex_thm_warp_start:nnnn {#1}{##1}{\bfseries}{\ }
+  \__zlatex_thm_title:                                  
+  \UseHook{zlatex/thmstyle/begin}
+}{
+  \UseHook{zlatex/thmstyle/end}
+  \__zlatex_thm_warp_end:
+  \UseHook{zlatex/thmstyle/after}
+}
+```
+
+Command `\zlatexThmHook` is used to add your own code chunks to these places, syntax:
+```latex 
+% only add to the next one
+\zlatexThmHook{
+    before=<BEFORE code>, 
+    begin=<BEGIN code>, 
+    end=<END code>, 
+    after=<AFTER code>
+}
+
+% add to all thm ebv below
+\zlatexThmHook*{
+    before=<BEFORE code>, 
+    begin=<BEGIN code>, 
+    end=<END code>, 
+    after=<AFTER code>
+}
+```
+
+Remark:
+* the function `\zlatexThmStyleNew`(this function can be only used in preamble) are based on these hooks.
+* the macro `\zlatexThmTitle` and `\zlatexThmTitleSwitch` may be useful for you to custom the title format of theorem-like envs.
+* The hooks `zlatex/thmstyle/end` and `zlatex/thmstyle/after` are reversed.
+
+For that the original `HOOK` thm style is removed, thus the original definition of `\zlatexThmStyleNew`:
+```latex 
+% dependency of this command:
+\DeclareDocumentEnvironment{zlatexTheoremWarper}{O{axiom}}{{
+    ...
+    {HOOK}{\UseHook{zlatex/math/envstyle/begin}}
+    ...
+    }{
+    ...
+    {HOOK}{\UseHook{zlatex/math/envstyle/end}}
+    ... 
+    }
+}
+
+% definition
+\NewDocumentCommand{\zlatexThmStyleNew}{mm}{
+  \AddToHook{zlatex/thmstyle/begin}{#1}
+  \AddToHook{zlatex/thmstyle/end}{#2}
+  \ActivateGenericHook{zlatex/thmstyle/begin}
+  \ActivateGenericHook{zlatex/thmstyle/end}
+  \tl_gset:Nn \g__zlatex_thm_style_tl {HOOK}
+}
+\@onlypreamble\zlatexThmStyleNew
+```
+
+Now the implementation is:
+```latex 
+\NewDocumentCommand{\zlatexThmStyleNew}{smm}{
+  \IfBooleanTF{#1}
+    {\zlatexThmHook*{#2}{#3}}
+    {\zlatexThmHook{#2}{#3}}
+}
+```
+
+> In the future, this function maybe be changed, i will use this function to add more `thm` style like the `\_zslide_theme_create:nn` function in `slide` library plays on.
+> please use this command with `*` in the preamble, or some unexpected error may occur.
+
+Update: 2024-11-13
+Now the command `\zlatexThmStyleNew` is implemented by `l3keys`, then you could add your own thm style freely. The Syntax of this function as follows:
+```latex 
+\zlatexThmStyleNew {
+  <thm style name> = {
+    begin  = <env begin code>, 
+    end    = <env end code>, 
+    option = <env begin option>
+  },
+}
+```
+
+What you need pay attention to is `<env begin option>`, in this part, you can specify whether to display `thm title` inline or hang on the top like in tcolorbox. Use function:
+```latex
+\__zlatex_thm_title_inline:n {T}
+% T: inline 
+% F: on the top
+```
+
+Or you can set the thm envs colors, see the `elegant` thm-style for reference:
+```latex
+\zlatexThmStyleNew {
+  elegant = {
+    begin = {
+      \begin{tcolorbox}[
+        enhanced,   breakable,
+        top=8pt,    bottom=1.5pt,
+        left=3pt,   right=3pt,
+        arc=3pt,    boxrule=0.5pt,
+        before~upper*={\setlength{\parindent}{1em}},
+        fontupper=\rmfamily,   fonttitle=\bfseries,
+        lower~separated=false, separator~sign={.},
+        attach~ boxed~ title~ to~ top~ left={yshift=-0.11in, xshift=0.15in},
+        boxed~ title~ style={boxrule=0pt, colframe=white, arc=0pt, outer~arc=0pt},
+        title=\zlatexThmTitle,
+        colback  = \thm@temp@color!5, colframe = \thm@temp@color,
+        coltitle = white,        colbacktitle = \thm@temp@color,
+      ]
+    },
+    end = {\end{tcolorbox}},
+    option = {
+      \__zlatex_thm_title_inline:n {F}
+      \__zlatex_thm_tcolorbox_warning:
+      \zlatex_keys_set:nn {color}{
+        axiom       = {HTML}{2c3e50},
+        definition  = {RGB}{0, 166, 82},
+        theorem     = {RGB}{255, 134, 23},
+        lemma       = {RGB}{255, 134, 23},
+        corollary   = {RGB}{255, 134, 23},
+        proposition = {RGB}{0, 173, 247},
+      }
+    }
+  },
+}
+```
+
+###  mechanism
+A simple analysis of the mechanism of this module:
+```latex
+% For command:
+\zlatexThmCreate{theorem}{Ztheorem=THM|orange}
+
+% ANALYSIS
+\__zlatex_math_env_create__:nnn {theorem}{Ztheorem}{THM|orange}
+	\zlatex_math_env_create:ne {theorem}{Ztheorem} 
+		% the theorem-like clist add a new item "Ztheorem"
+	\__zlatex_color_keyval_add:n {Ztheorem}    
+		% created a key named "Ztheorem"
+	\__zlatex_math_env_color_set:w {Ztheorem}\q_stop THM|orange\q_stop
+		% create a new tl "\l__zlatex_Ztheorem_color_tl" and set it to "orange"
+    \prop_gput:cee {g__zlatex_math_env_name_prop}
+       {#2}{\exp_last_unbraced:Ne \__zlatex_mid_first:w #3\q_stop}
+        % add a new key-value pair to the prop for thm title, in this case it is "Ztheorem=THM"
+```
+
+The key command is `\__zlatex_color_set:n`, see below:
+```latex 
+% ==> color setup
+\regex_new:N \l__zlatex_color_mode_regex
+\regex_set:Nn \l__zlatex_color_mode_regex {(\cB..{1,}\cE.){2}}
+\cs_new:Npn \__zlatex_color_set:n #1 {
+  \regex_match:NnTF \l__zlatex_color_mode_regex {#1}{
+    \definecolor{zlatex@color@\l_keys_key_str}#1
+    \tl_set:ce {l__zlatex_\l_keys_key_str _color_tl}{zlatex@color@\l_keys_key_str}
+  }{
+    \@ifundefined{\string\color@#1}{
+      \msg_new:nnn {color} {undefined} {--->~Color~`#1'~undefined}
+      \msg_error:nn {color} {undefined}
+    }{
+      \tl_set:cn {l__zlatex_\l_keys_key_str _color_tl}{#1}
+    }
+  }
+}
+```
+
+This function will check your color spec is valid or not, if not, it will throw an error message. If so, it will create a color and set the color tl to the color name dynamiclly. 
+
+### remark
+**Remark**: In `fancy` math EnvStyle, you can use command:
+```latex 
+\setlength{\fboxsep}{0pt}
+```
+to cancle the color box padding. 
+
+`elegant` thm style page break issue in slide mode, warning message:
+```shell
+Package tcolorbox Warning: Using nobreak failed. Try to enlarge `lines before break' or set page breaks manually on input line 216.
+```
+
+### list of theorem 
+Now you can use command `\zlatexThmToc` to create a table of the previous theorem-like env. You can use it for proof-like environments. Once this command is invoke in your source, there will be a file named `\jobname.thlist` occurs in your working dir. This command takes 1 option argument, in form of key-value, syntax as follows:
+
+```latex 
+\zlatexThmToc[vspace=<dim>, title=<title>]
+```
+
+Additionally, you can use command `\zlatexThmTocLevel` to change the default thm entry level, a simple example:
+
+```latex 
+\zlatexThmTocLevel{section}
+```
+
+This table of theorems shares the same format as the main table of contents.
+
+### source file backup
+The test files is as below:
+```latex
+\InputIfFileExists{zlatex-cfg.tex}{}{}
+\documentclass[
+  fancy,
+  % hyper,
+  % lang=cn,
+  % class=book,
+  % font={config},
+  % layout={margin},
+  % layout={slide, theme=AnnArborSeahorse, aspect=16|9},
+  % classOption={12pt}
+]{../code/zlatex}
+\zlatexThmLang{fr}
+\zlatexloadlibrary{mathalias}
+\zlatexSetup{mathSpec={envStyle=fancy}}
+% \zlatexColorSetup{theorem=orange}
+\zlatexThmCreate{theorem}{Zaxiom, Ztheorem=Thm|green, Zproposition=Prop|orange}
+\zlatexThmCreate{proof}{Zproof, Zexample=Example|red, Zsolution=Solution|}
+
+
+\def\boomen{As any dedicated reader can clearly see, the Ideal of practical
+reason is a representation of, as far as I know, the things in themselves; 
+\begin{align}
+\underset{}{\mathbf{v} \bigotimes \mathbf{w}} 
+  & = \underset{}{\mathbf{v} \otimes \mathbf{w}}
+      = \sum_{i=1}^3\sum_{j=1}^3a_{ij}u^iv^j \\[-.75em]
+  & = \sum_{i=1}^3\left(a_{i1}u^iv^1+a_{i2}u^iv^2+a_{i3}u^iv^3\right) 
+  \end{align}  
+}
+
+% \setlength{\fboxsep}{0pt}
+\title{z\LaTeX{} Benchmark Test}
+\author{Eureka}
+\date{\today}
+\begin{document}
+\maketitle
+% \chapter{Hello}
+% \section{Py Fijw}
+\section{FIRST}
+Hello world; \meaning\FF
+
+
+\begin{theorem}[Pythagorean theorem]\label{Pythagorean theorem}
+This is a theorem:
+  \begin{align}
+    \R{d}^2x + \R{d}^2y = \R{d}^2z\\
+    dx = 2
+  \end{align}  
+\end{theorem}
+
+
+\section{Internal Math Env}
+\begin{zlatexZtheorem}[internal Env]
+  Hello Internal Ztheorem
+\end{zlatexZtheorem}
+
+
+\section{New Math Env}
+\begin{Zaxiom}
+Hello Zaxiom
+\end{Zaxiom}
+
+\begin{Ztheorem}[New Thm Users' ENV] % ---> inside thm source
+\boomen
+\end{Ztheorem}
+
+\zlatexThmStyle{elegant}
+\begin{Zproposition}[New Prop Users' ENV]\label{zprop-1}
+\boomen
+
+\boomen
+\end{Zproposition}
+
+
+
+\newpage
+\section{Elegant Style Math Env}
+\begin{axiom}[prime number]
+  \boomen
+\end{axiom}
+
+\begin{definition}[prime number]
+  \boomen
+\end{definition}
+
+\begin{theorem}[prime number]
+  \boomen
+\end{theorem}
+
+\zlatexThmTitleFormat{\thmname{#1}:\thmnote{[#3]-}\thmnumber{#2}}
+\begin{lemma}[prime number]
+  \boomen
+\end{lemma}
+
+\zlatexThmStyle{plain}
+\begin{corollary}[prime number]
+  \boomen
+\end{corollary}
+
+\begin{proposition}
+  \boomen
+\end{proposition}
+
+
+\section{New Proof Env}
+\begin{Zproof}
+Hello Zproof
+\end{Zproof}
+
+\begin{Zexample}
+Hello Zexample
+\end{Zexample}
+
+\begin{Zsolution}\label{zsolu-1}
+Hello Zsolution
+\end{Zsolution}
+
+% \href{http://www.google.com}{Google}
+
+\newpage
+Hello world:
+
+\begin{itemize}
+  \item \cref{Pythagorean theorem}
+  \item \cref{zprop-1}
+  \item \cref{zsolu-1}
+\end{itemize}
+\end{document}
 ```

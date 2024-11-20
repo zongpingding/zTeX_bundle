@@ -3,13 +3,12 @@
 \usepackage{ztikz}
 \ztikzloadlibrary{gnuplot}
 
+
 \begin{document}
 \START
-\BEGINTEST{ztikz-cmd-ShowIntersection}
+\BEGINTEST{ztikz-module-gnuplot-PolarPlot}
 \begin{tikzpicture}
-  \Plot[1:3][name path=line1]{2*x-3}
-  \Plot[0:3][name path=line2]{-x+3}
-  \ShowIntersection[color=red]{line1; line2}{1}
+  \PolarPlot[0:10*pi][orange]{0.1*t}
 \end{tikzpicture}
 \ENDTEST
 \END

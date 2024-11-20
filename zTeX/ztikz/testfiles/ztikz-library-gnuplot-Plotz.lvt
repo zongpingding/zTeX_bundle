@@ -1,0 +1,17 @@
+\input{regression-test.tex}
+\documentclass{article}
+\usepackage{ztikz}
+\ztikzloadlibrary{gnuplot}
+
+
+\begin{document}
+\START
+\BEGINTEST{ztikz-module-gnuplot-Plotz}
+\Plotz[
+  width=1\linewidth,
+  domain={-3:3; -3:3},
+  palette={cubehelix start 0 cycles -1. saturation 1}
+]{x**2-y**2-2 with pm3d}
+\ENDTEST
+\END
+\end{document}
