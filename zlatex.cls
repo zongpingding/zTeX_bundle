@@ -11,13 +11,47 @@
 \ExplSyntaxOn
 \tl_const:Nn \c__zlatex_class_name_tl            {zlatex}
 \tl_const:Nn \c__zlatex_class_version_tl         {1.1.0}
-\tl_const:Nn \c__zlatex_class_date_tl            {2024/09/25}
+\tl_const:Nn \c__zlatex_class_date_tl            {2024/09/15}
 \tl_const:Nn \c__zlatex_class_description_tl     {A~pre-release~latex3~document~class~for~article,~book,~or~slides.}
 
 \ProvidesExplClass{\c__zlatex_class_name_tl}         % Class name
                   {\c__zlatex_class_date_tl}         % Class Date updated
                   {\c__zlatex_class_version_tl}      % Class Version latest
                   {\c__zlatex_class_description_tl}  % Class Description
+
+
+
+
+
+% ----------------------------------------------------------------------
+%                   zlatex Message system
+% ----------------------------------------------------------------------                 
+\prop_gput:Nnn \g_msg_module_type_prop { zlatex } { Class }
+\cs_new_protected:Npn \zlatex_msg_set:nn #1#2 { 
+  \msg_if_exist:nnTF { zlatex }{#1} 
+    { \msg_set:nnn { zlatex }{#1}{#2} }
+    { \msg_new:nnn { zlatex }{#1}{#2} }
+}
+\cs_new_protected:Npn \zlatex_msg_warn:n #1 { 
+  \msg_warning:nn { zlatex }{#1} 
+}
+\cs_new_protected:Npn \zlatex_msg_error:n #1 { 
+  \msg_error:nn { zlatex }{#1} 
+}
+% class common options
+\zlatex_msg_set:nn {option-unknown}{
+  You~use~an~unknown~class~option~key:'\l_keys_key_str'.~Valid~options~are:lang,~
+  hyper,~fancy,~class,~classOption(<clist>),~toc(<key-value>),~font(<key-value>),~
+  layout(<key-value>),~section(<key-value>),~mathSpec(<key-value>),~bib_index(<key-value>).~
+  Assignment~Ignored~and~LaTeX~default~settings~substitute.
+}
+% meta key warning message
+\cs_new_protected:Npn \zlatex_metakey_msg_warning:nn #1#2 {
+  \zlatex_msg_set:nn {option-meta-key}
+    {You~use~an~invalid~key~"\l_keys_key_str"~or~key~assign~for~it~in~the~meta~key~"#1",~
+    Valid~options~are:#2;~Assignment~Ignored~and~zLaTeX~default~#1~settings~substitute.}
+  \zlatex_msg_warn:n {option-meta-key}
+}
 
 
 
@@ -58,51 +92,6 @@
 
 
 % ----------------------------------------------------------------------
-%                   zlatex Message system
-% ----------------------------------------------------------------------                 
-\prop_gput:Nnn \g_msg_module_type_prop { zlatex } { Class }
-\cs_new_protected:Npn \zlatex_msg_set:nn #1#2 { 
-  \msg_if_exist:nnTF { zlatex }{#1} 
-    { \msg_set:nnn { zlatex }{#1}{#2} }
-    { \msg_new:nnn { zlatex }{#1}{#2} }
-}
-\cs_new_protected:Npn \zlatex_msg_warn:n #1 { 
-  \msg_warning:nn { zlatex }{#1} 
-}
-\cs_new_protected:Npn \zlatex_msg_error:n #1 { 
-  \msg_error:nn { zlatex }{#1} 
-}
-% meta key warning message
-\cs_new_protected:Npn \zlatex_metakey_msg_warning:nn #1#2 {
-  \zlatex_msg_set:nn {#1}
-    {You~use~an~invalid~key~"\l_keys_path_str"~or~key~assign~for~it~in~the~meta~
-    key~"#1",~Valid~options~are:#2;~Assignment~Ignored~and~zLaTeX~default~"#1"~
-    settings~of~this~key~substitute.}
-  \zlatex_msg_warn:n {#1}
-}
-% zlatex class options message
-\zlatex_msg_set:nn {option-unknown}{
-  You~use~an~unknown~class~option~key:'\l_keys_path_str'.~Valid~options~are:lang,~
-  hyper,~fancy,~class,~classOption(<clist>),~toc(<key-value>),~font(<key-value>),~
-  layout(<key-value>),~section(<key-value>),~mathSpec(<key-value>),~bib_index(<key-value>).~
-  Assignment~Ignored~and~LaTeX~default~settings~substitute.
-}
-% package options passing
-\cs_new:Npn \zlatex_package_options_pass:nn #1#2 {
-  \PassOptionsToPackage{#2}{#1}
-}
-\cs_new:Npn \zlatex_package_options_pass_deprecate:n #1 {
-  \zlatex_msg_set:nn {package-option}{
-    No~options~were~passed~to~package:#1,~Deprecated~this~option(s)~for~package~#1.
-  }
-  \zlatex_msg_warn:n {package-option}
-}
-
-
-
-
-
-% ----------------------------------------------------------------------
 %                              Class Option 
 % ----------------------------------------------------------------------
 \RequirePackage {l3keys2e}
@@ -120,7 +109,7 @@
   class           .initial:n    = { article },
   classOption     .clist_gset:N = \g__zlatex_subclass_option_clist,
   classOption     .initial:n    = { oneside, 10pt },
-  packageOption   .code:n       = { \keyval_parse:NNn \zlatex_package_options_pass_deprecate:n \zlatex_package_options_pass:nn {#1} },
+  packageOption   .clist_gset:N = \g__zlatex_package_option_clist,
   % zlatex options meta key 
   toc             .meta:nn      = { zlatex / option / toc }{#1},
   font            .meta:nn      = { zlatex / option / font }{#1},
@@ -145,7 +134,7 @@
   title-vspace    .dim_gset:N   = \g__zlatex_toc_title_vspace_dim,
   title-vspace    .initial:n    = { -2em },
   unknown         .code:n       = { 
-    \zlatex_metakey_msg_warning:nn {option-toc}
+    \zlatex_metakey_msg_warning:nn {toc}
       {column(<int>:1), title(<tl>:contentname), title-vspace(<dim>:-2em)} 
   }
 }
@@ -153,7 +142,7 @@
   config          .bool_gset:N  = \g__zlatex_font_config_bool,
   config          .initial:n    = { false }, 
   unknown         .code:n       = { 
-    \zlatex_metakey_msg_warning:nn {option-font}
+    \zlatex_metakey_msg_warning:nn {font}
       {config(<bool>:false)} 
   }
 }
@@ -164,10 +153,8 @@
   slide           .initial:n    = { false },
   aspect          .tl_gset:N    = \g__zlatex_aspectratio_tl,
   aspect          .initial:n    = { 12|9 },
-  theme           .str_gset:N   = \g__zlatex_slide_theme_str,
-  theme           .initial:n    = { AnnArborDefault },
   unknown         .code:n       = { 
-    \zlatex_metakey_msg_warning:nn {option-layout}
+    \zlatex_metakey_msg_warning:nn {layout}
       {margin(<bool>:false), slide, aspect} 
   }
 }
@@ -181,9 +168,9 @@
   font / mtpro2   .code:n       = { \zlatex_hook_preamble_last:n { \RequirePackage[lite, subscriptcorrection, slantedGreek, nofontinfo]{mtpro2} } },
   font / euler    .code:n       = { \zlatex_hook_preamble_last:n { \RequirePackage[OT1, euler-digits]{eulervm} } },
   font / mathpazo .code:n       = { \let\rmbefore\rmdefault\zlatex_hook_preamble_last:n { \RequirePackage{mathpazo} } \let\rmdefault\rmbefore},
-  font / unknown  .code:n       = { \zlatex_metakey_msg_warning:nn {option-mathSpec-font}{newtx, mtpro2, euler, mathpazo} },
+  font / unknown  .code:n       = { \zlatex_metakey_msg_warning:nn {mathSpec}{newtx, mtpro2, euler, mathpazo} },
   unknown         .code:n       = { 
-    \zlatex_metakey_msg_warning:nn {option-mathSpec}
+    \zlatex_metakey_msg_warning:nn {mathSpec}
       {alias(<bool>:false), envStyle, font(<choice>:newtx,mtpro2,euler,mathpazo)} 
   }
 }
@@ -194,7 +181,7 @@
   backend             .str_gset:N   = \g__zlatex_bib_backend_str,
   backend             .initial:n    = { biber },
   unknown             .code:n       = { 
-    \zlatex_metakey_msg_warning:nn {option-bib_index}
+    \zlatex_metakey_msg_warning:nn {bib_index}
       {load(<bool>:false), source, backend} 
   } 
 }
@@ -354,11 +341,6 @@
   \AddToHook{shipout/after}{\bool_gset_false:N \g_new_sec_bool}
   \AddToHook{cmd/tableofcontents/before}{\renewcommand{\contentsname}{Outline}}
   \AddToHook{shipout/background}{
-    \put(0, -\paperheight){\textcolor
-        {\tl_use:N \l__zlatex_slide_doc_bgcolor_tl}
-        {\rule{1\paperwidth}{1\paperheight}}}
-  }
-  \AddToHook{shipout/background}{
     \_zslide_status_bar:nnnn {(0, -.9em)}{UL}{.5}{1.25em}
     \_zslide_status_bar:nnnn {(.5\paperwidth, -.9em)}{UR}{.5}{1.25em}
     \_zslide_status_bar:nnnn {(0, -\paperheight)}{BL}{.33}{.9em}
@@ -386,78 +368,61 @@
   }
 
   % zslide metadata setup
-  \zlatex_hook_preamble_last:n {
+  \AddToHook{cmd/maketitle/before}{
     \let\zslideTitle\@title
     \let\zslideAuthor\@author
     \let\zslideDate\@date
   }
   \zlatex_keys_define:nn { slide }{
-    % theme related keys
-    doc              .meta:nn   = { zlatex / slide / doc }{#1},
-    doc / bg-color   .tl_set:N  = \l__zlatex_slide_doc_bgcolor_tl,
-    doc / text-color .tl_set:N  = \l__zlatex_slide_doc_textcolor_tl,
-    doc / text-style .tl_set:N  = \l__zlatex_slide_doc_textstyle_tl,
-    sec              .meta:nn   = { zlatex / slide / sec }{#1},
-    sec / prefix     .tl_set:N  = \l__zlatex_slide_sec_prefix_tl,
-    sec / suffix     .tl_set:N  = \l__zlatex_slide_sec_suffix_tl,
-    sec / bg         .tl_set:N  = \l__zlatex_slide_sec_bg_tl,
-    sec / fg         .tl_set:N  = \l__zlatex_slide_sec_fg_tl,
-    UL               .meta:nn   = { zlatex / slide / UL }{#1},
-    UL / text        .tl_set:N  = \l__zlatex_slide_UL_text_tl,
-    UL / bg          .tl_set:N  = \l__zlatex_slide_UL_bg_tl,
-    UL / fg          .tl_set:N  = \l__zlatex_slide_UL_fg_tl,
-    UR               .meta:nn   = { zlatex / slide / UR }{#1},
-    UR / text        .tl_set:N  = \l__zlatex_slide_UR_text_tl,
-    UR / bg          .tl_set:N  = \l__zlatex_slide_UR_bg_tl,
-    UR / fg          .tl_set:N  = \l__zlatex_slide_UR_fg_tl,
-    BL               .meta:nn   = { zlatex / slide / BL }{#1},
-    BL / text        .tl_set:N  = \l__zlatex_slide_BL_text_tl,
-    BL / bg          .tl_set:N  = \l__zlatex_slide_BL_bg_tl,
-    BL / fg          .tl_set:N  = \l__zlatex_slide_BL_fg_tl,
-    BC               .meta:nn   = { zlatex / slide / BC }{#1},
-    BC / text        .tl_set:N  = \l__zlatex_slide_BC_text_tl,
-    BC / bg          .tl_set:N  = \l__zlatex_slide_BC_bg_tl,
-    BC / fg          .tl_set:N  = \l__zlatex_slide_BC_fg_tl,
-    BR               .meta:nn   = { zlatex / slide / BR }{#1},
-    BR / text        .tl_set:N  = \l__zlatex_slide_BR_text_tl,
-    BR / bg          .tl_set:N  = \l__zlatex_slide_BR_bg_tl,
-    BR / fg          .tl_set:N  = \l__zlatex_slide_BR_fg_tl,
-    % toc related keys
-    toc                           .meta:nn   = { zlatex / slide / toc }{#1},
-    toc / leftmargin              .meta:nn   = { zlatex / slide / toc / leftmargin }{#1},
-    toc / leftmargin / chapter    .dim_set:N = \l__zlatex_slide_toc_leftmargin_chapter_dim,
-    toc / leftmargin / chapter    .initial:n = { 2em },
-    toc / leftmargin / section    .dim_set:N = \l__zlatex_slide_toc_leftmargin_section_dim,
-    toc / leftmargin / section    .initial:n = { 4em },
-    toc / leftmargin / subsection .dim_set:N = \l__zlatex_slide_toc_leftmargin_subsection_dim,
-    toc / leftmargin / subsection .initial:n = { 6em },
-    toc / label                   .meta:nn   = { zlatex / slide / toc / label }{#1},
-    toc / label / chapter         .tl_set:N  = \l__zlatex_slide_toc_label_chapter_tl,
-    toc / label / chapter         .initial:n = { \zslideToclabelSet[.25em]{\thecontentslabel.} },
-    toc / label / section         .tl_set:N  = \l__zlatex_slide_toc_label_section_tl,
-    toc / label / section         .initial:n = { \zslideToclabelSet{\DLE} },
-    toc / label / subsection      .tl_set:N  = \l__zlatex_slide_toc_label_subsection_tl,
-    toc / label / subsection      .initial:n = { \zslideToclabelSet[.5em]{\zslidesubsecIcon} },
-    toc / suffix                  .meta:nn   = { zlatex / slide / toc / suffix }{#1},
-    toc / suffix / chapter        .tl_set:N  = \l__zlatex_slide_toc_suffix_chapter_tl,
-    toc / suffix / chapter        .initial:n = {  },
-    toc / suffix / section        .tl_set:N  = \l__zlatex_slide_toc_suffix_section_tl,
-    toc / suffix / section        .initial:n = {  },
-    toc / suffix / subsection     .tl_set:N  = \l__zlatex_slide_toc_suffix_subsection_tl,
-    toc / suffix / subsection     .initial:n = {  },
-    toc / unknown                 .code:n    = { 
-      \zlatex_metakey_msg_warning:nn {slide-toc}{
-        leftmargin(<key-value>:chapter[<dim>:2em], section[<dim>:4em], subsection[<dim>:6em]), ~
-        label(<key-value>:chapter[<tl>:thechapter;hbox:1em], section[<tl>:thesection;hbox:1em],
-          subsection[<tl>:thesubsection;hbox:2em]),~
-        after(<key-value>:chapter[tl:<empty>], section[tl:<empty>], subsection[tl:<empty>])
-      } 
-    },
-    unknown                       .code:n    = { 
+    sec            .meta:nn   = { zlatex / slide / sec }{#1},
+    sec / prefix   .tl_set:N  = \l__zlatex_slide_sec_prefix_tl,
+    sec / prefix   .initial:n = {},
+    sec / suffix   .tl_set:N  = \l__zlatex_slide_sec_suffix_tl,
+    sec / suffix   .initial:n = {},
+    sec / bg       .tl_set:N  = \l__zlatex_slide_sec_bg_tl,
+    sec / bg       .initial:n = { zslideIII },
+    sec / fg       .tl_set:N  = \l__zlatex_slide_sec_fg_tl,
+    sec / fg       .initial:n = { zslideMain },
+    UL             .meta:nn   = { zlatex / slide / UL }{#1},
+    UL / text      .tl_set:N  = \l__zlatex_slide_UL_text_tl,
+    UL / text      .initial:n = { Section\ \thesection },
+    UL / bg        .tl_set:N  = \l__zlatex_slide_UL_bg_tl,
+    UL / bg        .initial:n = { zslideMain },
+    UL / fg        .tl_set:N  = \l__zlatex_slide_UL_fg_tl,
+    UL / fg        .initial:n = { zslideII },
+    UR             .meta:nn   = { zlatex / slide / UR }{#1},
+    UR / text      .tl_set:N  = \l__zlatex_slide_UR_text_tl,
+    UR / text      .initial:n = { {\ifnum\arabic{subsection}=0\else Subsection\ \thesubsection\fi} },
+    UR / bg        .tl_set:N  = \l__zlatex_slide_UR_bg_tl,
+    UR / bg        .initial:n = { zslideII },
+    UR / fg        .tl_set:N  = \l__zlatex_slide_UR_fg_tl,
+    UR / fg        .initial:n = { zslideMain },
+    BL             .meta:nn   = { zlatex / slide / BL }{#1},
+    BL / text      .tl_set:N  = \l__zlatex_slide_BL_text_tl,
+    BL / text      .initial:n = { \zslideAuthor },
+    BL / bg        .tl_set:N  = \l__zlatex_slide_BL_bg_tl,
+    BL / bg        .initial:n = { zslideMain },
+    BL / fg        .tl_set:N  = \l__zlatex_slide_BL_fg_tl,
+    BL / fg        .initial:n = { zslideII },
+    BC             .meta:nn   = { zlatex / slide / BC }{#1},
+    BC / text      .tl_set:N  = \l__zlatex_slide_BC_text_tl,
+    BC / text      .initial:n = { \zslideTitle },
+    BC / bg        .tl_set:N  = \l__zlatex_slide_BC_bg_tl,
+    BC / bg        .initial:n = { zslideIII },
+    BC / fg        .tl_set:N  = \l__zlatex_slide_BC_fg_tl,
+    BC / fg        .initial:n = { zslideMain },
+    BR             .meta:nn   = { zlatex / slide / BR }{#1},
+    BR / text      .tl_set:N  = \l__zlatex_slide_BR_text_tl,
+    BR / text      .initial:n = { \zslideDate\quad \thepage/\pageref{zslide-last-page} },
+    BR / bg        .tl_set:N  = \l__zlatex_slide_BR_bg_tl,
+    BR / bg        .initial:n = { zslideII },
+    BR / fg        .tl_set:N  = \l__zlatex_slide_BR_fg_tl,
+    BR / fg        .initial:n = { zslideMain },
+    unknown        .code:n    = { 
       \zlatex_metakey_msg_warning:nn {slide}{
-        sec(<key-value>:prefix, suffix, bg, fg),~
-        UL(<key-value>:text, bg, fg), UR(<key-value>:text, bg, fg),~
-        BL(<key-value>:text, bg, fg), BC(<key-value>:text, bg, fg),~
+        sec(<key-value>:prefix, suffix, bg, fg)
+        UL(<key-value>:text, bg, fg), UR(<key-value>:text, bg, fg),
+        BL(<key-value>:text, bg, fg), BC(<key-value>:text, bg, fg),
         BR(<key-value>:text, bg, fg)
       }
     }
@@ -476,6 +441,37 @@
       {\dim_set:Nn \l_tmpb_dim {\l_tmpa_dim + #1}}
     \contentslabel[#2]{\dim_use:N \l_tmpb_dim}
   }
+  \zlatex_keys_define:nn { slide / toc }{
+    leftmargin              .meta:nn   = { zlatex / slide / toc / leftmargin }{#1},
+    leftmargin / chapter    .dim_set:N = \l__zlatex_slide_toc_leftmargin_chapter_dim,
+    leftmargin / chapter    .initial:n = { 2em },
+    leftmargin / section    .dim_set:N = \l__zlatex_slide_toc_leftmargin_section_dim,
+    leftmargin / section    .initial:n = { 4em },
+    leftmargin / subsection .dim_set:N = \l__zlatex_slide_toc_leftmargin_subsection_dim,
+    leftmargin / subsection .initial:n = { 6em },
+    label                   .meta:nn   = { zlatex / slide / toc / label }{#1},
+    label / chapter         .tl_set:N  = \l__zlatex_slide_toc_label_chapter_tl,
+    label / chapter         .initial:n = { \zslideToclabelSet[.25em]{\thecontentslabel.} },
+    label / section         .tl_set:N  = \l__zlatex_slide_toc_label_section_tl,
+    label / section         .initial:n = { \zslideToclabelSet{\DLE} },
+    label / subsection      .tl_set:N  = \l__zlatex_slide_toc_label_subsection_tl,
+    label / subsection      .initial:n = { \zslideToclabelSet[.5em]{\zslidesubsecIcon} },
+    suffix                  .meta:nn   = { zlatex / slide / toc / suffix }{#1},
+    suffix / chapter        .tl_set:N  = \l__zlatex_slide_toc_suffix_chapter_tl,
+    suffix / chapter        .initial:n = {  },
+    suffix / section        .tl_set:N  = \l__zlatex_slide_toc_suffix_section_tl,
+    suffix / section        .initial:n = {  },
+    suffix / subsection     .tl_set:N  = \l__zlatex_slide_toc_suffix_subsection_tl,
+    suffix / subsection     .initial:n = {  },
+    unknown                 .code:n    = { 
+      \zlatex_metakey_msg_warning:nn {slide}{
+        {leftmargin(<key-value>:chapter[<dim>:2em], section[<dim>:4em], subsection[<dim>:6em]), 
+        label(<key-value>:chapter[<tl>:thechapter;hbox:1em], section[<tl>:thesection;hbox:1em], 
+          subsection[<tl>:thesubsection;hbox:2em]),
+        after(<key-value>:chapter[tl:<empty>], section[tl:<empty>], subsection[tl:<empty>])}
+      } 
+    }
+  }
   \clist_map_inline:nn {chapter, section, subsection}{
     \titlecontents{#1}
       [\dim_use:c {l__zlatex_slide_toc_leftmargin_#1_dim}]
@@ -487,6 +483,7 @@
   \def\zslidesubsecIcon{\rule[1.5pt]{3pt}{3pt}}
   \AddToHook{cmd/@starttoc/before}{\vspace*{\fill}}
   \AddToHook{cmd/@starttoc/after}{\vspace*{\stretch{3}}}
+
   % slide mode setup interface
   \NewDocumentCommand{\zslideSetup}{om}{
     \IfNoValueTF {#1}{
@@ -496,231 +493,9 @@
     }
   }
 
-  % slide theme create interface
-  \clist_new:N \g__zslide_all_themes_clist
-  \clist_gclear:N \g__zslide_all_themes_clist
-  \cs_new_protected:Npn \_zslide_theme_create:nn #1#2 {
-    \tl_new:c {g__zslide_theme_#1_tl}
-    \clist_gput_right:Nn \g__zslide_all_themes_clist {g__zslide_theme_#1_tl}
-    \keys_precompile:nnN { zlatex/slide }{#2}\l_tmpa_tl
-    \tl_set_eq:cc {g__zslide_theme_#1_tl} {l_tmpa_tl} 
-  }
-  \str_new:N \g__zslide_theme_current_str
-  \cs_new_protected:Npn \_zslide_theme_use:nn #1#2 {
-    \tl_use:c {g__zslide_theme_#1_tl}
-    \IfNoValueF{#2}{
-      \zlatex_keys_set:nn { slide }{#2}
-    }
-  }
-  \cs_new_protected:Npn \zslide_set_doc_text_color:n #1 {
-    \color{#1}\global\let\default@color\current@color
-  }
-  \NewDocumentCommand{\zslideThemeCreate}{mm}{
-    \_zslide_theme_create:nn {#1}{#2}
-  }
-  \NewDocumentCommand{\zslideThemeUse}{om}{
-    \_zslide_theme_use:nn {#2}{#1}
-  }
-  \NewDocumentCommand\zslideDocTextColor{m}{
-    \zslide_set_doc_text_color:n {#1}
-  }
-  % pre-defined slide theme: 'theme'-'color'
-  % slide theme: AnnArbor-default
-  \definecolor{Ann-default-I}{HTML}{0000a3} % blue
-  \definecolor{Ann-default-II}{HTML}{ffc20c} % light yellow
-  \definecolor{Ann-default-III}{HTML}{ffcb03}
-  \_zslide_theme_create:nn {AnnArborDefault}{
-    doc = {
-      bg-color = white,
-      text-color = black,
-      text-style = \sfdefault
-    },
-    UL = {
-      bg   = Ann-default-I,
-      fg   = Ann-default-II,
-      text = {\ifnum\arabic{section}=0\else Section\ \thesection\fi}
-    },
-    UR = {
-      bg   = Ann-default-II,
-      fg   = Ann-default-I,
-      text = {\ifnum\arabic{subsection}=0\else Subsection\ \thesubsection\fi}
-    },
-    BL = {
-      bg   = Ann-default-I,
-      fg   = Ann-default-III,
-      text = \zslideAuthor
-    },
-    BC = {
-      bg   = Ann-default-III,
-      fg   = Ann-default-I,
-      text = \zslideTitle
-    },
-    BR = {
-      bg   = Ann-default-II,
-      fg   = Ann-default-I,
-      text = \zslideDate\quad \thepage/\pageref{zslide-last-page}
-    },
-    sec = {
-      fg   = Ann-default-I,
-      bg   = Ann-default-III,
-      prefix = {},
-      suffix = {}
-    }
-  }
-  % other slide themes
-  \str_case:NnF \g__zlatex_slide_theme_str {
-    {AnnArborBeaver}{
-      % ==> slide theme: AnnArbor-beaver
-      \definecolor{Ann-bea-I}{HTML}{a30000}
-      \definecolor{Ann-bea-II}{HTML}{e0e0e0}
-      \definecolor{Ann-bea-III}{HTML}{f0f0f0}
-      \_zslide_theme_create:nn {AnnArborBeaver}{ 
-        doc = {
-          bg-color = white,
-          text-color = black,
-          text-style = \sfdefault
-        },
-        UL = {
-          bg   = Ann-bea-I,
-          fg   = Ann-bea-II, 
-          text = {\ifnum\arabic{section}=0\else Section\ \thesection\fi} 
-        },
-        UR = {
-          bg   = Ann-bea-II,
-          fg   = Ann-bea-I,
-          text = {\ifnum\arabic{subsection}=0\else Subsection\ \thesubsection\fi}
-        },
-        BL = {
-          bg   = Ann-bea-I,
-          fg   = Ann-bea-II,
-          text = \zslideAuthor
-        },
-        BC = {
-          bg   = Ann-bea-III,
-          fg   = Ann-bea-I,
-          text = \zslideTitle
-        },
-        BR = {
-          bg   = Ann-bea-II,
-          fg   = Ann-bea-I,
-          text = \zslideDate\quad \thepage/\pageref{zslide-last-page} 
-        },
-        sec = {
-          fg   = Ann-bea-I,
-          bg   = Ann-bea-III,
-          prefix = {},
-          suffix = {}
-        }
-      }
-    }
-
-    {AnnArborAlbatross}{
-      % slide theme: AnnArbor-Albatross
-      \definecolor{Ann-alb-I}{HTML}{000039} % UL bg
-      \definecolor{Ann-alb-II}{HTML}{bfbfff}% UL fg 
-      \definecolor{Ann-alb-III}{HTML}{00005f}% UR bg
-      \definecolor{Ann-alb-IV}{HTML}{00004c}% BC bg
-      \definecolor{Ann-alb-V}{HTML}{00007f} % doc bg
-      \definecolor{Ann-alb-VI}{HTML}{ffe700}% doc text color
-      \_zslide_theme_create:nn {AnnArborAlbatross}{
-        doc = {
-          bg-color = Ann-alb-V,
-          text-color = Ann-alb-VI,
-          text-style = \sfdefault
-        },
-        UL = {
-          bg   = Ann-alb-I,
-          fg   = Ann-alb-II, 
-          text = {\ifnum\arabic{section}=0\else Section\ \thesection\fi} 
-        },
-        UR = {
-          bg   = Ann-alb-III,
-          fg   = Ann-alb-II,
-          text = {\ifnum\arabic{subsection}=0\else Subsection\ \thesubsection\fi}
-        },
-        BL = {
-          bg   = Ann-alb-I,
-          fg   = Ann-alb-II,
-          text = \zslideAuthor
-        },
-        BC = {
-          bg   = Ann-alb-IV,
-          fg   = Ann-alb-II,
-          text = \zslideTitle
-        },
-        BR = {
-          bg   = Ann-alb-III,
-          fg   = Ann-alb-II,
-          text = \zslideDate\quad \thepage/\pageref{zslide-last-page} 
-        },
-        sec = {
-          bg   = Ann-alb-IV,
-          fg   = Ann-alb-II,
-          prefix = {},
-          suffix = {}
-        }
-      }
-    }
-
-    {AnnArborSeahorse}{
-      % slide theme: AnnArbor-seahorse
-      \definecolor{Ann-sea-I}{HTML}{c2c2e8} % UL bg
-      \definecolor{Ann-sea-II}{HTML}{d7d7f0}% UR bg
-      \definecolor{Ann-sea-III}{HTML}{ccccec}% BC bg
-      \_zslide_theme_create:nn {AnnArborSeahorse}{
-        doc = {
-          bg-color = white,
-          text-color = black,
-          text-style = \sfdefault
-        },
-        UL = {
-          bg   = Ann-sea-I,
-          fg   = black,
-          text = {\ifnum\arabic{section}=0\else Section\ \thesection\fi}
-        },
-        UR = {
-          bg   = Ann-sea-II,
-          fg   = black,
-          text = {\ifnum\arabic{subsection}=0\else Subsection\ \thesubsection\fi}
-        },
-        BL = {
-          bg   = Ann-sea-I,
-          fg   = black,
-          text = \zslideAuthor
-        },
-        BC = {
-          bg   = Ann-sea-III,
-          fg   = black,
-          text = \zslideTitle
-        },
-        BR = {
-          bg   = Ann-sea-II,
-          fg   = black,
-          text = \zslideDate\quad \thepage/\pageref{zslide-last-page}
-        },
-        sec = {
-          fg   = black,
-          bg   = Ann-sea-III,
-          prefix = {},
-          suffix = {}
-        }
-      }
-    }
-  }{
-    \zlatex_metakey_msg_warning:nn {slide-theme}{
-      AnnArborDefault(default), AnnArborBeaver, 
-      AnnArborAlbatross, AnnArborSeahorse
-    }
-    \str_set:Nn \g__zlatex_slide_theme_str {AnnArborDefault}
-  }
-
   % slide mode init options
   \zlatex_hook_preamble_last:n {\pagestyle{empty}}
-  \_zslide_theme_use:nn {\str_use:N \g__zlatex_slide_theme_str}{}
-  \zslide_set_doc_text_color:n {\tl_use:N \l__zlatex_slide_doc_textcolor_tl}
-  \renewcommand{\familydefault}{
-    \tl_use:N \l__zlatex_slide_doc_textstyle_tl
-  }
+  \renewcommand{\familydefault}{\sfdefault}
   \definecolor{zslideMain}{HTML}{a30000}
   \definecolor{zslideII}{HTML}{e0e0e0}
   \definecolor{zslideIII}{HTML}{f0f0f0}
@@ -785,14 +560,14 @@
 \RequirePackage{amsfonts, amsmath}          
 \RequirePackage{amsthm}
 \RequirePackage{esint} 
+\zlatex_hook_preamble_last:n {
 \bool_if:NT \g__zlatex_bib_index_load_bool {            
-  \RequirePackage{indextools}
   \str_case:Vn \g__zlatex_bib_backend_str {
     {bibtex}{\RequirePackage[backend=bibtex]{biblatex}}
     {biber}{\RequirePackage[backend=biber]{biblatex}}
   }
   \exp_args:Nx \addbibresource{\str_use:N \g__zlatex_bib_source_str}
-}
+}}
 \bool_if:NT \g__zlatex_hyperref_bool {
   \RequirePackage{hyperref}
 }
@@ -1360,5 +1135,11 @@
   \clist_use:Nn \g__zlatex_subclass_option_clist{~-~}
   \par
 }
-% verbatim command like '\verb'
-\NewDocumentCommand\zlatexVerb{O{\texttt}v}{#1{#2}}
+% verbatim cs ('F' to remove space)
+\NewDocumentCommand{\zlatexVerb}{O{T}m}{
+  \str_set:Nn \l_tmpa_str { #2 } 
+  \tl_if_eq:nnT {#1}{F}{
+    \str_replace_all:Nnn \l_tmpa_str {~}{} 
+  }
+  \texttt{\l_tmpa_str}
+}
