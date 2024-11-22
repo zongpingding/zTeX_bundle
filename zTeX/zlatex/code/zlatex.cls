@@ -1,12 +1,8 @@
-\NeedsTeXFormat{LaTeX2e}
-\RequirePackage{expl3}
-
-
-
 % ----------------------------------------------------------------------
 %                        zlatex class metadata
 % ----------------------------------------------------------------------
 \ExplSyntaxOn
+\NeedsTeXFormat{LaTeX2e}
 \clist_const:Nn \c__zlatex_lang_support_clist    {en, cn}
 \tl_const:Nn \c__zlatex_class_name_tl            {zlatex}
 \tl_const:Nn \c__zlatex_class_version_tl         {1.1.0}

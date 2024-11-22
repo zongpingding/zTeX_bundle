@@ -1,0 +1,112 @@
+\InputIfFileExists{ztikz-cfg.tex}{}{}
+\documentclass{article}
+\usepackage{ztikz}
+\ztikzloadlibrary{cache, wolfram, gnuplot, python, zdraw}
+\usepackage{amsmath}
+
+
+
+\begin{document}
+Hello world
+
+\section{Wolfram}
+\begin{center}
+\begin{wolframGraphics}[width=.4\linewidth]{mma_1.wls}
+  plotFunction[fun_, xlimits_, ylimits_] := ContourPlot[fun,
+  xlimits, ylimits,
+  ContourStyle->{
+  RGBColor["#f8790c"],
+  Thickness[0.004]
+  },
+  AspectRatio->((xlimits[[2]]//Abs) + (xlimits[[3]]//Abs))/((ylimits[[2]]//Abs) +
+  (ylimits[[3]]//Abs)),
+  AxesOrigin->{0,0},
+  Axes->True,
+  Frame->False,
+  AxesStyle->Arrowheads[{0, 0.03}],
+  AxesLabel->{"x", "y"},
+  PlotRange -> Full
+]
+xlimits = {x, -3, 6};
+ylimits = {y, -4, 5};
+fp1 = plotFunction[y==Sin[x], xlimits, ylimits];
+fp2 = plotFunction[x^2/4 + y^2/3 == 5, {x, -5, 5}, {y, -5, 5}];
+figure = Show[fp2, fp1];
+(* 1. 保存的图片格式为:*.wls.pdf; 2. 保存路径在:./ztikz_output/mma_data *)
+Export["./ztikz_output/mma_data/mma_1.wls.pdf", figure];
+\end{wolframGraphics}
+\end{center}
+
+\wolfram{LaplaceTransform[t^4 Sin[t],t,s]}
+\[
+  \wolframResult
+\]
+
+\wolfram{Series[Exp[x], {x, 0, 5}]}
+\[\wolframResult\]
+
+\wolframSolve{x^4 - x^2 - 5 == 0}[x]
+\begin{align}
+  \left\{\begin{aligned}
+    & \wolframResult[raw][\\ &]
+  \end{aligned}\right.
+\end{align}
+
+\section{gnuPlot}
+\PlotPrecise{plot}{5}
+\begin{center}
+\begin{tikzpicture}
+  \Plot[
+    domain=0:2*pi, 
+    style={color=teal, thick}, 
+    marker={type=square*, color=red, rotate=45}
+  ]{2*sin(x)}
+\end{tikzpicture}
+\end{center}
+
+\begin{center}
+\begin{tikzpicture}
+  % \Plot[-1.5*pi:2*pi]{2*cos(2*x)*sin(x)}
+  \ContourPlot[
+    domain={-3:pi;-3:exp(1)},
+    style=orange,
+  ]{x**2/16 + y**2/10 - 1}
+  % \ParamPlot{}
+  \ParamPlot[
+    domain=0:2*pi, 
+    style={red, name path=ellipse},
+  ]{7*sin(t), 4*cos(t)}
+  \PolarPlot[domain=0:10*pi, style={orange, thick}]{0.1*t}
+\end{tikzpicture}
+\end{center}
+
+\begin{center}
+\Plotz[
+  width=.75\linewidth,
+  domain={-3:3; -3:3}
+]{x**2+y**2-2 with pm3d, -x**2-y**2+8 with lines}
+\end{center}
+
+\section{python}
+\[
+  \sympy{integrate(sin(x)/x, (x, -oo, oo))}
+\]
+
+\py{102\%8}
+
+\section{l3draw}
+\ExplSyntaxOn
+\begin{center}
+\zplot[
+  domain={0, 0.02*\c_pi_fp, 2*\c_pi_fp}, 
+  action=shade, 
+  startColor=blue,
+  endColor=green, 
+  axis=y
+]{sin(x)}
+\end{center}
+\ExplSyntaxOff
+
+\ztikzHashCurrent[,\par]
+\ztikzHashClean
+\end{document}
