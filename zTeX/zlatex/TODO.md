@@ -27,6 +27,7 @@
 - [ ] limit the scope of keys by `.usage:n`
 - [ ] replace the traditional mark system by New Mark mechanism introduced In June 2022.
 - [ ] add a entry `.color_set:n` in l3keys.
+- [ ] add `+=` keys assignment method.
 
 ## `indexref` module 
 - [x] Set default `hyperref` and `biblatex` a group, Don't loading them by default
@@ -68,6 +69,10 @@
 - [x] Bug: wrong `\cref` name and linked target for proof-like envs in `thm` module. (Proof like env is not a theorem-like env, so it should not be numbered or linked ?) (fixed, this is not a bug, for that there is not `\refstepcounter` command in proof-like env declaration)
 - [x] re-write the pre-defined thm style, eg. `plain`, `fancy`, `paris`, ... by the newly added hooks. Is that right ??? (implemented by l3keys)
 - [x] Color set unsuccessfully for syntax: `\zlatexThmColorSetup{theorem=purple!50}`.
+- [x] fixed THM note expansion bug;
+- [x] toc thm toc line stretch
+- [x] add thm toc symbol and prefix interface.
+
 
 ## `slide` library
 - [ ] implement the `slide` mode part as a package ?
@@ -87,6 +92,9 @@
     - [x] Auto scale graphics that too large for current paper size. (**deprecated**)
 - [x] add navigat bar: like balls, or other symbols.
 - [x] add hyperref support.
+- [x] fixed bug: annotations added by `\zlatexPageMask` are invisible.
+- [x] Unified color scheme for `UR` and `BR` text.
+- [x] provide an `\zslidelogo` command for slide mode.
 
 
 ## `toc` module

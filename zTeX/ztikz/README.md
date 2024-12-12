@@ -232,3 +232,29 @@ add functions:
 
 ## project re-orignization
 Rename `modules` directory to `library`, related control sequences are renamed as well
+
+
+## ztikz example
+All commands in `gnuplot` module have been implemented by key-value, a simple example as below:
+```latex
+% \usepackage{ztikz}
+% \ztikzloadlibrary{cache, gnuplot}
+
+\ShowGrid{(-5, -5);(5, 5)}
+\Plot[
+  domain=0:2*pi, 
+  style={color=teal}, 
+  marker={type=square*, color=red, rotate=45}
+]{2*sin(x)}
+
+\ContourPlot[
+  domain={-1.5:1.5;}, 
+  style={color=red}, 
+]{x**2/4+y**2-1}
+\PlotPrecise{param}{6}
+\ParamPlot[domain=-pi:pi, style={teal, very thick}]{4*sin(t), 2*cos(t)}
+\PolarPlot{2*(1-sin(t))}
+\end{tikzpicture}
+
+\Plotz[palette={cubehelix start 0 cycles -1. saturation 1}]{x**2-sin(y)}
+```

@@ -5,12 +5,23 @@
 % ==> main ToC interface
 \AddToHook{cmd/@starttoc/before}{\vspace*{\dim_use:N \g__zlatex_toc_title_vspace_dim}}
 \zlatex_hook_preamble_last:n {
-\int_compare:nNnT {\g__zlatex_toc_column_int} > {1} {
-  \RequirePackage{multicol}
-  \AddToHook{cmd/@starttoc/before}{\begin{multicols}
-    {\int_use:N \g__zlatex_toc_column_int}}
-  \AddToHook{cmd/@starttoc/after}{\end{multicols}}
-}}
+  % multi-column toc
+  \int_compare:nNnT {\g__zlatex_toc_column_int} > {1} 
+    {
+      \RequirePackage{multicol}
+      \AddToHook{cmd/@starttoc/before}{
+        \begin{multicols}{\int_use:N \g__zlatex_toc_column_int}  
+      }
+      \AddToHook{cmd/@starttoc/after}{\end{multicols}}
+    }
+  % toc strech
+  \AddToHookNext{cmd/@starttoc/before}{
+    \renewcommand{\baselinestretch}{\fp_use:N \g__zlatex_toc_stretch_fp}\normalsize 
+  }
+  \AddToHookNext{cmd/@starttoc/after}{
+    \renewcommand{\baselinestretch}{1.0}\normalsize 
+  }
+}
 
 
 % ==> partial ToC

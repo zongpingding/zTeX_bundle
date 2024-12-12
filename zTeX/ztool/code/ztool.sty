@@ -28,8 +28,7 @@
   {
     \exp_after:wN \ztool_sys_path_to_win:w \tl_to_str:n {#1} ~ \q_stop
   }
-
-% respective command 
+% respective commands
 \cs_new_protected:Npn \ztool_shell_escape:n #1
   {
     \sys_if_shell_unrestricted:T
@@ -135,20 +134,143 @@
       \exp_not:N \l__ztool_shell_tmp_tl
     \seq_pop_right:NN #2 \exp_not:N \l__sys_tmp_tl
   }
-
-% generate shell command variants 
 \cs_generate_variant:Nn \ztool_shell_mkdir:n {e}
-\cs_generate_variant:Nn \ztool_shell_cp:nn {ee}
-\cs_generate_variant:Nn \ztool_shell_cp:nn {ne}
-\cs_generate_variant:Nn \ztool_shell_cp:nn {en}
-\cs_generate_variant:Nn \ztool_shell_mv:nn {ee}
-\cs_generate_variant:Nn \ztool_shell_mv:nn {ne}
-\cs_generate_variant:Nn \ztool_shell_mv:nn {en}
-\cs_generate_variant:Nn \ztool_shell_rm:n {e}
-\cs_generate_variant:Nn \ztool_shell_rm:n {f}
-\cs_generate_variant:Nn \ztool_shell_rm:n {o}
-\cs_generate_variant:Nn \ztool_shell_rmdir:n {e}
-\cs_generate_variant:Nn \ztool_shell_rmdir:n {f}
-\cs_generate_variant:Nn \ztool_shell_rmdir:n {o}
+\cs_generate_variant:Nn \ztool_shell_cp:nn { ee, ne, en }
+\cs_generate_variant:Nn \ztool_shell_mv:nn { ee, ne, en }
+\cs_generate_variant:Nn \ztool_shell_rm:nn { e, f, o }
+\cs_generate_variant:Nn \ztool_shell_rmdir:nn { e, f, o }
 \cs_generate_variant:Nn \ztool_get_shell_pwd:N {c}
 \cs_generate_variant:Nn \ztool_shell_split_ls:nN {nc}
+
+
+% ==> IO operations
+\ior_new:N \g_ztool_file_read_ior
+\ior_new:N \g_ztool_file_append_ior
+\iow_new:N \g_ztool_file_append_iow
+\tl_new:N \l_ztool_current_line
+\str_clear:N \l_ztikz_file_ori_content_str
+\seq_new:N \l_ztool_file_seq
+\cs_new_protected:Npn \ztool_read_file_as_seq:nnN #1#2#3 
+  {% #1: bool(True to keep spaces, False to trim); #2: file name; #3: seq
+    \seq_clear:N #3
+    \ior_open:Nn \g_ztool_file_read_ior {#2}
+    \ior_map_inline:Nn \g_ztool_file_read_ior
+      {
+        \bool_if:nTF {#1}
+          { \seq_put_right:Nn #3 {##1} }
+          { \seq_put_right:Nn #3 {\tl_trim_spaces:n {##1}} }
+      }
+    \ior_close:N \g_ztool_file_read_ior
+  }
+\cs_new_protected:Npn \ztool_gread_file_as_seq:nnN #1#2#3 
+  {% #1: bool(True to keep spaces, False to trim); #2: file name; #3: seq
+    \ior_open:Nn \g_ztool_file_read_ior {#2}
+    \seq_gclear:N \g__ztikz_file_hash_seq
+    \ior_map_inline:Nn \g_ztool_file_read_ior
+      {
+        \bool_if:nTF {#1}
+          { \seq_gput_right:Nn #3 {##1} }
+          { \seq_gput_right:Ne #3 {\tl_trim_spaces:n {##1}} }
+      }
+    \ior_close:N \g_ztool_file_read_ior
+  }
+\cs_generate_variant:Nn \ztool_read_file_as_seq:nnN { ne, nnc, nec }
+\cs_generate_variant:Nn \ztool_gread_file_as_seq:nnN { ne, nnc, nec }
+\cs_new_protected:Npn \ztool_append_to_file:nn #1#2 
+  {% #1: file name; #2: content
+    \seq_clear:N \l_ztool_file_seq
+    \ior_open:Nn \g_ztool_file_append_ior {#1}
+    \ior_str_map_inline:Nn \g_ztool_file_append_ior 
+      {
+        \seq_put_right:Nn \l_ztool_file_seq 
+          { ##1 }
+      }
+    \iow_open:Nn \g_ztool_file_append_iow {#1}  
+    \iow_now:Ne \g_ztool_file_append_iow 
+      { \seq_use:Nn \l_ztool_file_seq {^^J} }
+    \iow_now:Ne \g_ztool_file_append_iow {#2}
+    \iow_close:N \g_ztool_file_append_iow
+  }
+\cs_generate_variant:Nn \ztool_append_to_file:nn { no, nf, ne, ee }
+\cs_new_protected:Npn \ztool_replace_file_line:nnn #1#2#3 
+  {% #1:file name; #2:line index; #3:replacement
+    \seq_clear:N \l_ztool_file_seq
+    \ior_open:Nn \g_ztool_file_read_ior {#1}
+    \ior_str_map_inline:Nn \g_ztool_file_read_ior 
+      {
+        \seq_put_right:Nn \l_ztool_file_seq {##1}
+      }
+    \ior_close:N \g_ztool_file_read_ior
+    \seq_set_item:Nnn \l_ztool_file_seq {#2} 
+      { #3 }
+    \iow_open:Nn \g_ztool_file_append_iow {#1}
+    \iow_now:Ne \g_ztool_file_append_iow 
+      { \seq_use:Nn \l_ztool_file_seq {^^J} }
+    \iow_close:N \g_ztool_file_append_iow
+  }
+\cs_generate_variant:Nn \seq_set_item:Nnn { Nne }
+\cs_generate_variant:Nn \ztool_replace_file_line:nnn { e, ene, eee }
+\cs_new_protected:Npn \ztool_insert_to_file:nnn #1#2#3
+  {% #1:file name; #2:line index; #3:content
+    \seq_clear:N \l_ztool_file_seq
+    \ior_open:Nn \g_ztool_file_read_ior {#1}
+    \ior_str_map_inline:Nn \g_ztool_file_read_ior 
+      {
+        \seq_put_right:Nn \l_ztool_file_seq {##1}
+      }
+    \ior_close:N \g_ztool_file_read_ior
+    \tl_set:No \l_ztool_current_line 
+      { \seq_item:Nn \l_ztool_file_seq {#2} }
+    \seq_set_item:Nne \l_ztool_file_seq {#2} 
+      { #3^^J\l_ztool_current_line }
+    \iow_open:Nn \g_ztool_file_append_iow {#1}
+    \iow_now:Ne \g_ztool_file_append_iow 
+      { \seq_use:Nn \l_ztool_file_seq {^^J} }
+    \iow_close:N \g_ztool_file_append_iow
+  }
+\cs_generate_variant:Nn \ztool_insert_to_file:nn { ne, nf, ee }
+
+% ==> box manipulation tool
+% catch box dimension
+\box_new:N \l_ztool_measure_box
+\cs_new:Npn \ztool_box_set_to:NNn #1#2#3 {
+  \hbox_set:Nn \l_ztool_measure_box {#3}
+  \dim_set:Nn #2 {#1 \l_ztool_measure_box}
+  \box_set_eq:NN \l_ztool_measure_box \c_empty_box
+}
+\cs_new:Npn \ztool_box_gset_to:NNn #1#2#3 {
+  \hbox_set:Nn \l_ztool_measure_box {#3}
+  \dim_gset:Nn #2 {#1 \l_ztool_measure_box}
+  \box_set_eq:NN \l_ztool_measure_box \c_empty_box
+}
+\cs_new:Npn \ztool_set_to_ht:Nn 
+  { \ztool_box_set_to:NNn \box_ht:N }
+\cs_new:Npn \ztool_set_to_wd:Nn  
+  { \ztool_box_set_to:NNn \box_wd:N }
+\cs_new:Npn \ztool_set_to_dp:Nn  
+  { \ztool_box_set_to:NNn \box_dp:N }
+\cs_new:Npn \ztool_gset_to_ht:Nn 
+  { \ztool_box_gset_to:NNn \box_ht:N }
+\cs_new:Npn \ztool_gset_to_wd:Nn  
+  { \ztool_box_gset_to:NNn \box_wd:N }
+\cs_new:Npn \ztool_gset_to_dp:Nn  
+  { \ztool_box_gset_to:NNn \box_dp:N }
+\cs_generate_variant:Nn \ztool_set_to_ht:Nn { Ne, ce }
+\cs_generate_variant:Nn \ztool_set_to_wd:Nn  { Ne, ce }
+\cs_generate_variant:Nn \ztool_gset_to_ht:Nn { Ne, ce }
+\cs_generate_variant:Nn \ztool_gset_to_wd:Nn  { Ne, ce }
+% resize box content
+\cs_new_protected:Npn \ztool_resize_to_wd:nn #1#2
+  {% #1: object; #2: width
+    \hbox_set:Nn \l_tmpa_box {#2}
+    \box_resize_to_wd:Nn \l_tmpa_box {#1}
+    \box_use:N \l_tmpa_box
+  }
+\cs_new_protected:Npn \ztool_resize_to_ht:nn #1#2
+  {% #1: object; #2: width
+    \hbox_set:Nn \l_tmpa_box {#2}
+    \box_resize_to_ht:Nn \l_tmpa_box {#1}
+    \box_use:N \l_tmpa_box
+  }
+\cs_generate_variant:Nn \ztool_resize_to_wd:nn { e, ne, ee }
+\cs_generate_variant:Nn \ztool_resize_to_ht:nn { e, ne, ee }

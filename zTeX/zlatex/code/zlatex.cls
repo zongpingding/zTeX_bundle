@@ -50,19 +50,7 @@
 % ----------------------------------------------------------------------
 %                             class tools
 % ----------------------------------------------------------------------
-% zlatex dim set interface
-\box_new:N \l_zlatex_measure_box
-\cs_new_protected:Npn \zlatex_box_set_to:NNn #1#2#3 {
-  \hbox_set:Nn \l_zlatex_measure_box {#3}
-  \dim_set:Nn #2 {#1 \l_zlatex_measure_box}
-  \box_set_eq:NN \l_zlatex_measure_box \c_empty_box
-}
-\cs_new_protected:Npn \zlatex_set_to_height:Nn { \zlatex_box_set_to:NNn \box_ht:N }
-\cs_new_protected:Npn \zlatex_set_to_width:Nn  { \zlatex_box_set_to:NNn \box_wd:N }
-\cs_new_protected:Npn \zlatex_set_to_depth:Nn  { \zlatex_box_set_to:NNn \box_dp:N }
-\cs_generate_variant:Nn \zlatex_set_to_height:Nn { Ne }
-\cs_generate_variant:Nn \zlatex_set_to_width:Nn  { Ne }
-
+\RequirePackage{ztool}
 % zlatex hook interface
 \cs_new_protected:Npn \zlatex_hook_preamble_last:n #1
   { \AddToHook{env/document/before}{#1} }
@@ -150,7 +138,7 @@
   class           .str_gset:N   = \g__zlatex_subclass_type_str,
   class           .initial:n    = { article },
   classOption     .clist_gset:N = \g__zlatex_subclass_option_clist,
-  classOption     .initial:n    = { oneside, 10pt },
+  classOption     .initial:n    = { oneside, 12pt },
   packageOption   .code:n       = { 
     \keyval_parse:NNn 
       \zlatex_package_options_pass_deprecate:n 
@@ -183,6 +171,8 @@
   },
   title-vspace    .dim_gset:N   = \g__zlatex_toc_title_vspace_dim,
   title-vspace    .initial:n    = { -2em },
+  stretch         .fp_gset:N    = \g__zlatex_toc_stretch_fp,
+  stretch         .initial:n    = { 1 },
   unknown         .code:n       = { 
     \zlatex_metakey_msg_warning:nn {option-toc}
       {column(<int>:1), title(<tl>:contentname), title-vspace(<dim>:-2em)} 
@@ -348,18 +338,18 @@
 
 
 % ----------------------------------------------------------------------
-%                              page info
-% ----------------------------------------------------------------------
-\__zlatex_load_module_library:nn {module}{pageinfo}
-
-
-
-% ----------------------------------------------------------------------
 %                               slide mode
 % ----------------------------------------------------------------------
 \bool_if:NTF \g__zlatex_slide_bool {
   \__zlatex_load_module_library:nn {library}{slide}
 }{\newcommand\zslideSetup[1]{}}
+
+
+
+% ----------------------------------------------------------------------
+%                              page info
+% ----------------------------------------------------------------------
+\__zlatex_load_module_library:nn {module}{pageinfo}
 
 
 

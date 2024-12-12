@@ -2,7 +2,20 @@
 
 
 %%%%%     font config module for zlatex     %%%%%
-% ==> cinel font
+% ==> math font
+\DeclareMathSymbol{\blacktriangleright}{\mathrel}{AMSa}{"49}
+
+
+% ==> text font
+\cs_new:Nn \__zlatex_text_symbol_patch: 
+  {
+    \let\oldtextbullet\textbullet
+    \DeclareTextFontCommand{\zslideCmsyOms}
+      {\fontfamily{cmsy}\fontencoding{OMS}\selectfont}
+    \DeclareRobustCommand{\textbullet}
+      {\zslideCmsyOms\oldtextbullet}
+  }
+% cinel font
 \zlatex_hook_preamble_last:n {
   \bool_if:NTF \g__zlatex_font_config_bool {
     \RequirePackage{fontspec}
@@ -12,7 +25,4 @@
     ]
   }{\def\Cinzel{\relax}}
 }
-
-
-% ==> chinese font: 
-% 1. Source Han Serif SC
+% Source Han Serif SC ???

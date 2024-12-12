@@ -37,35 +37,29 @@
 \NewDocumentEnvironment{pyfig}{ O{width=.75\linewidth}m }
   {
     \newcommand{\py@file}{#2}
-    \xsim_file_write_start:ne {\c_true_bool}{\g__ztikz_python_path_tl/#2}
+    \xsim_file_write_start:ne {\c_true_bool}{\g__ztikz_python_path_tl/\py@file}
   }{ 
     \xsim_file_write_stop:   
-    \ztikz_hash_if_change_cs:e {\g__ztikz_python_path_tl/\py@file}   
-    \bool_if:NTF \g__hash_change_bool {
-      \sys_if_platform_windows:TF {
-        \ztool_shell_escape:e {
-          echo~ plt.savefig('\g__ztikz_python_path_tl/\py@file.pdf')~ >>~ \g__ztikz_python_path_tl/\py@file
-        }
+    \ztikz_hash_if_change:neTF {\c_true_bool}{\g__ztikz_python_path_tl/\py@file}   
+      {
+        \ztool_append_to_file:nn {\g__ztikz_python_path_tl/\py@file} 
+          {
+            plt.savefig('\g__ztikz_python_path_tl/\py@file.pdf')
+          }
+        \ztool_shell_escape:e {python~ \g__ztikz_python_path_tl/\py@file} 
+        \includegraphics[#1]{\g__ztikz_python_path_tl/\py@file.pdf}
+        \ztikz_term_info:e {Writing~ 'pyfig'~environment~source~to~\g__ztikz_python_path_tl/\py@file}
       }{
-        \ztool_shell_escape:e {
-          echo~ "plt.savefig('\g__ztikz_python_path_tl/\py@file.pdf')"~ >>~ \g__ztikz_python_path_tl/\py@file
-        }
+        \includegraphics[#1]{\g__ztikz_python_path_tl/\py@file.pdf}
+        \ztikz_term_info:e {skip~recompile~by~python,~using~the~cache~picture~\int_use:N \g__python_picture_index_int}
       }
-      \ztool_shell_escape:e {python~ \g__ztikz_python_path_tl/\py@file} 
-      \includegraphics[#1]{\g__ztikz_python_path_tl/\py@file.pdf}
-      \typeout{Writing~ 'pyfig'~environment~source~to~\tl_use:N \g__ztikz_python_path_tl/\py@file}
-    }{
-      \includegraphics[#1]{\g__ztikz_python_path_tl/\py@file.pdf}
-      \typeout{skip~recompile~by~python,~using~the~cache~picture~\int_use:N \g__python_picture_index_int}
-    }
-    % step picture index
     \int_gadd:Nn \g__python_picture_index_int {1}
   }
 % inline python command
 \NewDocumentCommand\py{O{raw}m}
   {
-    \ztool_shell_escape:e {sed~ -i~ "6s|Float_res~ =~ .*|Float_res~ =~ \tl_to_str:n {#2}|"~ \g__ztikz_scripts_path_tl/python_script.py}
-    \typeout{using~python~float~module~calculating...}
+    \__ztikz_sed_script:nne {python_script.py}{6}{Float_res~=~\tl_to_str:n {#2}}
+    \ztikz_term_info:e {using~python~float~module~calculating...}
     \ztool_shell_escape:e {python~ \g__ztikz_scripts_path_tl/python_script.py}
     \zlatex_Readlines_cs:ee {#1}{\g__ztikz_python_path_tl/PyFloat.out}
     % ---> cause bug that can't write ToC to file
@@ -76,19 +70,19 @@
   {
     \int_gadd:Nn \g__sympy_index_int {1}  
     \tl_set:Ne \l__current_sympy_index_tl {\int_use:N \g__sympy_index_int}
-    \ztool_shell_escape:e {sed~ -i~ "8s|F_res~ =~ .*|F_res~ =~  #1|"~ \g__ztikz_scripts_path_tl/sympy_script.py}
-    \ztikz_hash_if_change_cs:e {\g__ztikz_scripts_path_tl/sympy_script.py}
-    \bool_if:NTF \g__hash_change_bool {
-      \ztool_shell_escape:e {python~ \g__ztikz_scripts_path_tl/sympy_script.py}
-      \ztool_shell_mv:ee
-        {\g__ztikz_python_path_tl/sympy.out}
-        {\g__ztikz_python_path_tl/sympy_\int_use:N \g__sympy_index_int .out}
-      \typeout{using~python~sympy~calculating~question~\l__current_sympy_index_tl ...}
-      \exp_args:Ne \input{\g__ztikz_python_path_tl/sympy_\l__current_sympy_index_tl.out}
-    }{
-      \exp_args:Ne \input{\g__ztikz_python_path_tl/sympy_\l__current_sympy_index_tl.out}
-      \typeout{skip~recompile,~using~the~cache~sympy~result~\l__current_sympy_index_tl}
-    }
+    \__ztikz_sed_script:nne {sympy_script.py}{8}{F_res~=~\tl_to_str:n {#1}}
+    \ztikz_hash_if_change:neTF {\c_true_bool}{\g__ztikz_scripts_path_tl/sympy_script.py}
+      {
+        \ztool_shell_escape:e {python~ \g__ztikz_scripts_path_tl/sympy_script.py}
+        \ztool_shell_mv:ee
+          {\g__ztikz_python_path_tl/sympy.out}
+          {\g__ztikz_python_path_tl/sympy_\int_use:N \g__sympy_index_int .out}
+        \ztikz_term_info:e {using~python~sympy~calculating~question~\l__current_sympy_index_tl ...}
+        \exp_args:Ne \input{\g__ztikz_python_path_tl/sympy_\l__current_sympy_index_tl.out}
+      }{
+        \exp_args:Ne \input{\g__ztikz_python_path_tl/sympy_\l__current_sympy_index_tl.out}
+        \ztikz_term_info:e {skip~recompile,~using~the~cache~sympy~result~\l__current_sympy_index_tl}
+      }
   }
 % python-code-env
 \NewDocumentEnvironment{pycode}{ m }
@@ -97,14 +91,14 @@
     \xsim_file_write_start:ne {\c_true_bool}{\g__ztikz_python_path_tl/#1}
   }{ 
     \xsim_file_write_stop: 
-    \ztikz_hash_if_change_cs:e {\g__ztikz_python_path_tl/\py@file}   
-    \bool_if:NTF \g__hash_change_bool {
-      \ztool_shell_escape:e {python~ \g__ztikz_python_path_tl/\py@file} 
-      \input{\g__ztikz_python_path_tl/\py@file.out}
-      \typeout{Writing~ 'pycode'~environment~source~to~\tl_use:N \g__ztikz_python_path_tl/\py@file}
-    }{
-      \input{\g__ztikz_python_path_tl/\py@file.out}
-      \typeout{skip~recompile~by~python,~using~the~cache~pycode~result~\int_use:N \g__python_picture_index_int}
-    }
+    \ztikz_hash_if_change:neTF {\c_true_bool}{\g__ztikz_python_path_tl/\py@file}   
+      {
+        \ztool_shell_escape:e {python~ \g__ztikz_python_path_tl/\py@file} 
+        \input{\g__ztikz_python_path_tl/\py@file.out}
+        \ztikz_term_info:e {Writing~ 'pycode'~environment~source~to~\g__ztikz_python_path_tl/\py@file}
+      }{
+        \input{\g__ztikz_python_path_tl/\py@file.out}
+        \ztikz_term_info:e {skip~recompile~by~python,~using~the~cache~pycode~result~\int_use:N \g__python_picture_index_int}
+      }
     \int_gadd:Nn \g__python_picture_index_int {1}  
   }

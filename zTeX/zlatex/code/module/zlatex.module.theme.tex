@@ -109,17 +109,19 @@
   {zlatex-themecolor-setup-user}{>}{zlatex-thmptheorem-setup-inner}
 \DeclareHookRule{env/document/before}
   {zlatex-themecolor-setup-user}{>}{zlatex-thmpproof-setup-inner}
-\NewDocumentCommand{\zlatexColorSetup}{m}{
-  \zlatex_label_hook_preamble_last:nn {zlatex-themecolor-setup-user}
-    {\zlatex_keys_set:nn {color}{#1}}
-  \bool_if:NT \g__zlatex_hyperref_bool {
-    \hypersetup {
-      colorlinks = true,
-      urlcolor   = \tl_use:N \l__zlatex_url_color_tl,
-      linkcolor  = \tl_use:N \l__zlatex_link_color_tl,
-      citecolor  = \tl_use:N \l__zlatex_cite_color_tl,
+\NewDocumentCommand{\zlatexColorSetup}{m}
+  {\zlatex_label_hook_preamble_last:nn {zlatex-themecolor-setup-user}
+    {
+      \zlatex_keys_set:nn {color}{#1}
+      \bool_if:NT \g__zlatex_hyperref_bool {
+        \hypersetup {
+          colorlinks = true,
+          urlcolor   = \tl_use:N \l__zlatex_url_color_tl,
+          linkcolor  = \tl_use:N \l__zlatex_link_color_tl,
+          citecolor  = \tl_use:N \l__zlatex_cite_color_tl,
+        }
+      }
     }
   }
-}
 \@onlypreamble\zlatexColorSetup
 \zlatexColorSetup{link=purple, cite=blue, url=zlatex@color@royalred}

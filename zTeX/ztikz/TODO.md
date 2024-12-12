@@ -4,14 +4,14 @@
 - [ ] test files: 
     - [x] update the test files to the current version
     - [ ] run the test.
-- [ ] Implement `Plot`, `ParamPlot`, `PolarPlot` etc, by l3-keys
-- [ ] remove dependency: tool `sed` and package `l3sys-shell`
+- [x] Implement `Plot`, `ParamPlot`, `PolarPlot` etc, by l3-keys
+- [x] remove dependency: tool `sed` and package `l3sys-shell`
 - [x] support `\py` in \newcommand
 - [x] add `pycode` environment for writing tabel and other loop-like things
 - [x] `\ior_str_get:NN` and `\ior_get:NN` for reading contents from external file
 - [ ] fixed the bug of hash-recover
 - [ ] access varible decleared in Python before
-- [ ] can't use `''` in sed command under windows, but works fine on Linux
+- [x] can't use `''` in sed command under windows, but works fine on Linux (remove `sed`)
 - [ ] line cache for `\pyfp{}` command
 - [x] split `cache/wolfram/python/matlab/gnuplot/zdraw` into modules, load them by command like `\ztikzload{matlab}`. Set a uniformal interface to handle these `--shell-escape` activities
 - [x] add `l3draw` module to `ztikz`
@@ -19,3 +19,5 @@
 - [x] add `\plotz` to plot function $z=f(x,y)$ using gnuplot 
 - [x] fixed typo in document
 - [ ] Implement `3d-part` using `l3draw` ? using `pgf` ?
+- [ ] Remove dependency `external` library.
+- [ ] Implement an expandable replace command.

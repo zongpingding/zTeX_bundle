@@ -65,6 +65,7 @@ remove
 
 
 ## Class Tools 
+### overview
 Create a new group name `Class Tools`, Now, this group consist of the following series of functions:
 ```latex 
 % ----------------------------------------------------------------------
@@ -107,6 +108,15 @@ This command act as an argument in another command, like:
 ```latex
 \foo{\zlatexVerb{<ARGUMENT>}}
 ```
+
+### ztool package
+Update: 2024-11-27
+These box related functions has moved to module `ztool`. Besides these box-related function, these functions have been implemented:
+* shell escape replated, copy from the original `l3sys-shell` package plus some modification.
+* IO: add a function `\ztool_append_to_file:nn {file}{content}` to append content to a exsiting file.
+* box-related: get box content dimension, resize box content to a pre-defined dimension.
+
+> The way(`\RequirePackage{../../ztool/code/ztool}`) i call this package in `zlatex.cls` does not seems to be appropriate.
 
 ## hyperref 
 ### example
@@ -475,6 +485,16 @@ Remark:
 * The main reason is that some functions can NOT be fully exapnded in `e`-type, eg. `\regex_match:NnTF`.
 * A weird synomyms of `\textcolor{\l_test_keyA_tl}{TEXT-keyA}`: only when there is a `\tl_use:N \l_test_keyB_tl` before it, the color will be set correctly.
 
+### `+=` keys assign
+A new feature like this need to be added, similar to what `ctex` do:
+```latex 
+\ctexset{
+  chapter/format     = \sffamily\raggedright,
+  section/format    += \sffamily,
+  subsection/format += \fbox,
+}
+```
+
 ## message system
 ### group name 
 The message system related tools are moved to a new group `message system`.
@@ -699,6 +719,38 @@ Some tips: Some options can only be declared in preamble, like: `fancy`, `class`
 
 > See below `\zslideSetup` for more info.
 
+## font module 
+Now, only some simple configurations have been added to this module, total content till now is:
+```latex
+\ProvidesExplFile{zlatex.module.fontcfg.tex}{2024/10/24}{1.0.0}{fontcfg~module~for~zlatex}
+
+
+%%%%%     font config module for zlatex     %%%%%
+% ==> math font
+\DeclareMathSymbol{\blacktriangleright}{\mathrel}{AMSa}{"49}
+
+
+% ==> text font
+\cs_new:Nn \__zlatex_text_symbol_patch: 
+  {
+    \let\oldtextbullet\textbullet
+    \DeclareTextFontCommand{\zslideCmsyOms}
+      {\fontfamily{cmsy}\fontencoding{OMS}\selectfont}
+    \DeclareRobustCommand{\textbullet}
+      {\zslideCmsyOms\oldtextbullet}
+  }
+% cinel font
+\zlatex_hook_preamble_last:n {
+  \bool_if:NTF \g__zlatex_font_config_bool {
+    \RequirePackage{fontspec}
+    \newfontfamily{\Cinzel}{CinzelRegular.ttf}[
+      BoldFont=CinzelBold.ttf,
+      ItalicFont=SabonItalic.ttf
+    ]
+  }{\def\Cinzel{\relax}}
+}
+% Source Han Serif SC ???
+```
 
 ## slide mode
 ### Update: 2024-09-20
@@ -809,6 +861,10 @@ You can access the total frame num by macro: `\zslideFrame{<Roman number>}`, `I`
 
 > In the future, command `\zslideFrame` maybe extends to `chapter` or `subsection`, not just counting `section`'s frame total number.
 
+Add one function `\zslideIfPageTF{}{}{}` to check page number, syntax as follows:
+```latex
+\zslideIfPageTF{<operators><num>}{<True Branch>}{<False Branch>}
+```
 
 #### basic settings
 For common item setup, like `slide theme`, `slide metadata`, an simple example:
@@ -829,7 +885,23 @@ Update to default `UR` content according to the beamer theme  `AnnArbor`:
 UR / text      .initial:n = { {\ifnum\arabic{subsection}=0\else Subsection\ \thesubsection\fi} },
 ```
 
-#### ToC settings
+#### Navigate symbols 
+Update the Navigate ball color to the `UR Foreground` color, 
+i.e., `\l__zlatex_slide_UR_fg_tl`. See current definition below:
+
+```latex
+\NewDocumentCommand{\zslideNavigateBall}{O{\(\bullet\)}O{\(\circ\)}}{
+  \cs_if_exist:cTF {zsec@\Roman{section}@cnt}
+    {\zslide@navigate:nnnn 
+      {\zslideFrame{\Roman{section}}}
+      {\zslideFrameIndex}
+      {\textcolor{\l__zlatex_slide_UR_fg_tl}{#1}}
+      {\textcolor{\l__zlatex_slide_UR_fg_tl}{#2}}
+    }{??}
+}
+```
+
+### ToC settings
 For toc setup, a example like:
 ```latex
 \setcounter{tocdepth}{3}
@@ -847,6 +919,61 @@ For toc setup, a example like:
     subsection=\zslideToclabelSet{\thecontentslabel}
   },
 }
+```
+
+Remove dependency: `ascii` package, use the existing `AMSb` symbols font to declare such `\DLE` macro, original definition:
+
+```latex 
+% in 'fontcfg' module
+\DeclareMathSymbol{\blacktriangleright}{\mathrel}{AMSa}{"49}
+
+
+% in 'slide' library 
+\gdef\zslidesecIcon
+  {\box_move_up:nn {2pt}
+    {\hbox:n {\ztool_resize_to_wd:nn 
+      {6pt}{\(\blacktriangleright\)}}
+    }
+  }
+\gdef\zslidesubsecIcon{\rule[1.5pt]{3pt}{3pt}}
+```
+
+### font family patch 
+When switch to text family `\sfdefault`, the `\textbullet` will become a square. I have do a patch to revert it to original shape:
+```latex 
+% in 'fontcfg' module
+\cs_new:Nn \__zlatex_text_symbol_patch: 
+  {
+    \let\oldtextbullet\textbullet
+    \DeclareTextFontCommand{\zslideCmsyOms}
+      {\fontfamily{cmsy}\fontencoding{OMS}\selectfont}
+    \DeclareRobustCommand{\textbullet}
+      {\zslideCmsyOms\oldtextbullet}
+  }
+
+% in 'slide' library 
+\zlatex_hook_preamble_last:n 
+  { 
+    \pagestyle{empty} 
+    \__zlatex_text_symbol_patch:
+  }
+```
+
+### themes 
+Add a new theme: `AnnArborSpruce`,which is based on `green`. For more color themes, you can refer to [A New Beamer Theme Matrix](https://mpetroff.net/files/beamer-theme-matrix/).
+
+- [x] fixed bug: annotations added by `\zlatexPageMask` are invisible.
+- [x] Unified color scheme for `UR` and `BR` text.
+- [x] Provide an `\zslidelogo` command for slide mode.
+- [x] fixed warning: dupicate hyper target when use `\tableofcontents`.
+
+Syntax of command: `\zslidelogo` (only accessiable in preamble):
+```latex 
+\zslidelogo[
+  width=3em, 
+  exclude={0, 1},
+  position={(20pt, 30pt)}
+]{Epmmy.jpg}
 ```
 
 
@@ -869,6 +996,17 @@ Add `title`, `column` and `title-vspace` options to toc setting interface. The o
 }
 ```
 
+Now the toc interface syntax is:
+```latex
+\zlatexSetup{
+  toc={
+    column=<int>,
+    title=<title>,
+    title-vspace=<dim>,
+    stretch=<float>
+  }
+}
+```
 
 ## thm module
 ### intro 
@@ -930,8 +1068,42 @@ The main commands of this module are:
 
 
 % 7. list of theorems
-\zlatexThmToc[vspace=15pt, title=THM LIST]
+\zlatexThmToc[
+  title-vspace=<dim>, 
+  title=<title>,
+  after-vspace=<dim>,
+  stretch=<float>
+]
+\zlatexThmTocPrefix{<prefix>}
+\zlatexThmTocSymbol{
+  lemma=<lemma symbol>,
+  definition=<definition symbol>,
+  ....
+}
+% clear all predefined thm toc symbol
+\zlatexThmTocSymbolClear 
+\zlatexThmSecAdd[name=<toc name>]{<toc level:chapter, section, etc.>}
 ```
+
+### bug fixed 
+Fixed bug: optional braces, brackets around `\zlatexThmNote` when it is empty. Now the syntax is:
+```latex 
+\zlatexThmNote{<before>}{<end>}
+% --> output:
+% <before><Thm-Note><end>
+```
+
+To define a complex Thm title format, users may use command `\zlatexThmNoteEmptyTF`, which is provided by `thm` module in zlatex, to check whether it's empty or not, definition of this command as below:
+```latex 
+\NewDocumentCommand{\zlatexThmNoteEmptyTF}{mm}
+  {
+    \tl_if_empty:eTF {\zlatexThmNote{}{}}
+      {#1}
+      {#2}
+  }
+```
+
+The corresponding format in List of Theorem command `\zlatexThmToc` fixed as well.
 
 ### Set color spec 
 color spec is very simple now, see below:
@@ -1169,6 +1341,16 @@ Additionally, you can use command `\zlatexThmTocLevel` to change the default thm
 ```
 
 This table of theorems shares the same format as the main table of contents.
+
+Now the syntax is as follows, a simple example:
+```latex 
+\zlatexThmToc[
+  title={\textsc{List of Theorems}},
+  stretch=1.5, 
+  title-vspace=-10pt, 
+  after-vspace=20pt
+]
+```
 
 ### source file backup
 The test files is as below:

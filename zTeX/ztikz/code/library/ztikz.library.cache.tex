@@ -3,8 +3,7 @@
 
 
 % ==> init cache
-\bool_new:N \g__hash_change_bool
-\bool_gset_true:N \g__hash_change_bool
+% TODO: HASH form: 'HASH-<index>'
 \ztool_shell_mkdir:n {ztikz_output/tikz_data/}
 \usetikzlibrary{external}
 \tikzexternalize[prefix=ztikz_output/tikz_data/]
@@ -13,36 +12,37 @@
 
 % ==> cache function                
 \ior_new:N \g__ztikz_file_ior
+\tl_new:N \l__ztikz_current_hash_tl
+\tl_new:N \g__ztikz_current_hash_tl
 \seq_new:N \g__ztikz_file_hash_seq
-\cs_new_protected:Nn \ztikz_file_read_lines_cs:n 
-  {
-    \ior_open:Nn \g__ztikz_file_ior {#1}
-    \seq_gclear:N \g__ztikz_file_hash_seq
-    \ior_str_map_inline:Nn \g__ztikz_file_ior
-      {
-        \seq_gput_right:Ne \g__ztikz_file_hash_seq
-          { \tl_trim_spaces:n {##1} }
-      }
-    \ior_close:N \g__ztikz_file_ior
-  }
-\cs_generate_variant:Nn \ztikz_file_read_lines_cs:n { e }
-% check code hash value
-\seq_new:N \l__ztikz_hash_seq
-\cs_set_protected:Npn \ztikz_hash_if_change_cs:n #1 
-  {
-    \ztikz_file_read_lines_cs:e { ./ztikz_output/ztikz.hash }
+\cs_generate_variant:Nn \ztikz_file_read_lines:n { e }
+\prg_set_conditional:Npnn \ztikz_hash_if_change:nn #1#2 { p, T, F, TF }
+  {% #1: true/false; #2: True for file, False for hash str
+    \bool_if:nTF {#1}
+      { \file_get_mdfive_hash:nN {#2} \l__ztikz_current_hash_tl }
+      { \tl_set:Nn \l__ztikz_current_hash_tl {#2} }
+    \tl_set_rescan:Nne \l__ztikz_current_hash_tl
+      { \cctab_select:N \c_initex_cctab } 
+      { \l__ztikz_current_hash_tl }
+    \tl_gset_eq:NN \g__ztikz_current_hash_tl \l__ztikz_current_hash_tl
+    \ztool_gread_file_as_seq:nnc {\c_false_bool}
+      { ztikz_output/ztikz.hash } 
+      { g__ztikz_file_hash_seq }
     \seq_gremove_duplicates:N \g__ztikz_file_hash_seq
-    \file_get_mdfive_hash:nN {#1} \l__ztikz_hash_seq
-    \typeout{current~hash~is~\l__ztikz_hash_seq}
-    \seq_if_in:NVTF \g__ztikz_file_hash_seq \l__ztikz_hash_seq {
-      \bool_gset_false:N \g__hash_change_bool
+    \ztikz_term_info:e {
+      \iow_newline: CURRENT~FILE:'#2.wls'
+      \iow_newline: HASH:\l__ztikz_current_hash_tl
+    }
+    \seq_if_in:NVTF \g__ztikz_file_hash_seq \l__ztikz_current_hash_tl {
+      \ztikz_term_info:n {CURRENT~HASH~ALREADY~EXISTS}
+      \prg_return_false:
     }{
-      \bool_gset_true:N \g__hash_change_bool
-      \typeout{current~hash~is~unique~-->~recorded}
-      \ztool_shell_escape:e { echo~ \l__ztikz_hash_seq >> ./ztikz_output/ztikz.hash}
+      \ztikz_term_info:n {CURRENT~HASH~IS~UNIQUE:RECORDING...}
+      \ztool_append_to_file:nn {ztikz_output/ztikz.hash}{\l__ztikz_current_hash_tl}
+      \prg_return_true:
     }
   }
-\cs_generate_variant:Nn \ztikz_hash_if_change_cs:n { e }
+\prg_generate_conditional_variant:Nnn \ztikz_hash_if_change:nn { ne } { p, T, F, TF }
 
 
 % ==> clear cache hash
@@ -53,7 +53,7 @@
   }
 \NewDocumentCommand{\ztikzHashClean}{}{
   \ztikz_clear_hash:
-  \typeout{clear~ztikz~hash~successfully~...}
+  \ztikz_term_info:n {CLEAN~ALL~ztikz~HASH~SUCCESSFULLY...}
 }
 \NewDocumentCommand{\ztikzHashCurrent}{+O{,}}{
   \seq_use:Nn \g__ztikz_file_hash_seq {#1}

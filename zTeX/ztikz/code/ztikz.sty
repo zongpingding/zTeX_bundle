@@ -48,6 +48,15 @@
 \tl_const:Nn \g__ztikz_scripts_path_tl  {ztikz_output/scripts}
 \NewDocumentCommand\ztikzMkdir{m}{ \ztool_shell_mkdir:n {#1} }
 \__ztikz_load_module_library:nn {library}{basic}
+\cs_new_protected:Npn \ztikz_term_info:n #1 
+  {
+    \iow_now:Nn \c_term_iow {#1}
+  }
+\cs_new_protected:Npn \ztikz_term_info:e #1 
+  {
+    \iow_now:Ne \c_term_iow {#1}
+  }
+% \cs_generate_variant:Nn \ztikz_term_info:n { e }
 
 
 
@@ -76,9 +85,11 @@
 % ----------------------------------------------------------------------
 %                          ztikz's cache mechanism 
 % ----------------------------------------------------------------------
+\cs_generate_variant:Nn \ior_open:Nn { Ne }
 \cs_generate_variant:Nn \iow_open:Nn { Ne }
-\cs_generate_variant:Nn \ztikz_hash_if_change_cs:n { e }
-\cs_set_protected:Npn \ztikz_hash_if_change_cs:n #1 
+\prg_new_conditional:Npnn \ztikz_hash_if_change:nn #1 {p, T, F, TF}
   {
     \bool_gset_true:N \g__hash_change_bool
   }
+\prg_generate_conditional_variant:Nnn 
+  \ztikz_hash_if_change:nn { ne } { p, T, F, TF }

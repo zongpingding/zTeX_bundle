@@ -2,21 +2,20 @@
 
 
 %%%%%     mathalias for zlatex     %%%%%
-% alias command
-\cs_new_protected:Npn \zlatex_math_alias:nn #1#2 {
-  \cs_new:cpn {#1} {#2}
-}
+\RequirePackage{amssymb, mathrsfs}
+\RequirePackage{mathtools}
+\let\oldS\S
+\let\S\undefined       
+\let\olddiv\div
+\let\oldhom\hom
+
 
 % alias setup
+\cs_new_protected:Npn \zlatex_math_alias:nn #1#2 
+  {
+    \cs_new:cpn {#1}{#2}
+  }
 \zlatex_hook_preamble_last:n {
-  \RequirePackage{amssymb, mathrsfs}
-  \RequirePackage{mathtools}
-  \let\oldS\S
-  \let\S\undefined       
-  \let\olddiv\div
-  \let\oldhom\hom
-
-
   % ==> Math Font 
   \newcommand{\F}[1]{\ensuremath{\boldsymbol{#1}}}
   \newcommand{\R}[1]{\ensuremath{\mathrm{#1}}}
@@ -30,17 +29,57 @@
   
 
   % ==> Math Arrow 
-  \newcommand{\ma}{\ensuremath{\longmapsto}}
-  \newcommand{\la}{\ensuremath{\leftarrow}}
-  \newcommand{\lla}{\ensuremath{\longleftarrow}}
-  \newcommand{\ra}{\ensuremath{\rightarrow}}
-  \newcommand{\rra}{\ensuremath{\longrightarrow}}
-  \newcommand{\da}{\ensuremath{\longleftrightarrow}}
-  \newcommand{\dda}{\ensuremath{\Longleftrightarrow}}
-  \NewDocumentCommand{\xl}{O{}D(){}}{\ensuremath{\xlongleftarrow[#2]{#1}}}
-  \NewDocumentCommand{\xxl}{O{}D(){}}{\ensuremath{\xLongleftarrow[#2]{#1}}}
-  \NewDocumentCommand{\xr}{O{}D(){}}{\ensuremath{\xlongrightarrow[#2]{#1}}}
-  \NewDocumentCommand{\xxr}{O{}D(){}}{\ensuremath{\xLongrightarrow[#2]{#1}}}
+  % simple arrow
+  \prop_new:N \g_zlatex_math_simple_arrow_prop
+  \prop_set_from_keyval:Nn \g_zlatex_math_simple_arrow_prop 
+    {% 1.double:long;  2.capital:double line; 
+     % 3.neg:negation; 4.No '\nlongleftarrow', '\nLongleftarrow' etc.
+      ma   = \mapsto,
+      mma  = \longmapsto,
+      % left arrow
+      la   = \leftarrow,
+      La   = \Leftarrow,
+      nla  = \nleftarrow,
+      Nla  = \nLeftarrow,
+      lla  = \longleftarrow,
+      Lla  = \Longleftarrow,
+      % right arrow
+      ra   = \rightarrow,
+      Ra   = \Rightarrow,
+      nra  = \nrightarrow,
+      Nra  = \nRightarrow,
+      rra  = \longrightarrow,
+      Rra  = \Longrightarrow,
+      % bidirectional arrow
+      da   = \leftrightarrow,
+      Da   = \Leftrightarrow,
+      nda  = \nleftrightarrow,
+      Nda  = \nLeftrightarrow,
+      dda  = \longleftrightarrow,
+      Dda  = \Longleftrightarrow,
+    }
+  \prop_map_inline:Nn \g_zlatex_math_simple_arrow_prop 
+    {
+      \zlatex_math_alias:nn {#1}{#2}
+    }
+  % extend text arrow
+  \cs_new:Npn \ext_arrow_set:nn #1#2 
+    { \exp_args:Nee \NewDocumentCommand{\use:c {#1}}{sO{}D(){}}
+        {
+          \IfBooleanTF{##1}
+            {#2[\text{##3}]{\text{##2}}}
+            {#2[##3]{##2}}
+        }
+    }
+  \keyval_parse:NNn \use_none:n \ext_arrow_set:nn 
+    {
+      xla  = \xLeftarrow,
+      xxla = \xLongleftarrow,
+      xra  = \xRightarrow,
+      xxra = \xLongrightarrow,
+      hla  = \xhookleftarrow,
+      hra  = \xhookrightarrow,
+    }
   
 
   % ==> Math Operator and symbols
@@ -51,26 +90,29 @@
   \newcommand{\ns}{\ensuremath{\varnothing}}
   \newcommand{\se}{\ensuremath{\backsimeq}}
   \newcommand{\sse}{\ensuremath{\cong}}
-  \newcommand{\CC}{\ensuremath{\mathrm{C}}}
+  \newcommand{\CC}{\ensuremath{\mathbb{C}}}
   \newcommand{\RR}{\ensuremath{\mathbb{R}}}
+  \newcommand{\ZZ}{\ensuremath{\mathbb{Z}}}
+  \newcommand{\NN}{\ensuremath{\mathbb{N}}}
   \newcommand{\dd}{\ensuremath{\mathchoice{\:}{\mspace{1.5mu}}{}{}\mathrm{d}}}
   % math operator alias setup
   \cs_set_protected:Npn \zlatex_op_name_set:nn #1#2 
     { \exp_args:Nee \DeclareMathOperator{\use:c {z#1}}{#2} }
-  \keyval_parse:NNn \use_none:n \zlatex_op_name_set:nn {
-    alt = alt,
-    rot = rot,
-    div = div,
-    curl = curl,
-    grad = grad,
-    id = Id,
-    im = Im,
-    ker = Ker,
-    cok = Cok,
-    hom = Hom,
-    sign = sign,
-    trace = trace,
-  }
+  \keyval_parse:NNn \use_none:n \zlatex_op_name_set:nn 
+    {
+      alt   = alt,
+      rot   = rot,
+      div   = div,
+      curl  = curl,
+      grad  = grad,
+      id    = Id,
+      im    = Im,
+      ker   = Ker,
+      cok   = Cok,
+      hom   = Hom,
+      sign  = sign,
+      trace = trace,
+    }
   \tl_const:Nn \c_zlatex_math_ops_tl { \cdot \wedge \times \oplus \otimes }
   \clist_map_inline:nn 
     { trace, alt, rot, div, curl, grad, id, im, ker, cok, hom, sign }
@@ -83,4 +125,11 @@
 
 
   % ==> pyhsics package commands (\qty, ...) implementation ???
+  % \qty(#1) --> \left(#1\right)
+  \NewDocumentCommand{\zab}{d()d[]d\{\}}
+    { 
+      \IfValueT{#1}{ \left(#1\right) }
+      \IfValueT{#2}{ \left[#2\right] }
+      \IfValueT{#3}{ \left\{#3\right\} }
+    }
 }

@@ -2,8 +2,10 @@
 
 
 %%%%%     slide/presentation library for zlatex     %%%%%
+% ==> slide initialization
+\dim_new:N \c_zlatex_quad_dim 
+\ztool_gset_to_wd:Nn \c_zlatex_quad_dim {\quad}
 \exp_args:NNnx \seq_set_split:Nnn \l_tmpa_seq {|}{\g__zlatex_aspectratio_tl}
-% layout and mark
 \RequirePackage[explicit]{titlesec}
 \RequirePackage{titletoc}
 \geometry {
@@ -12,7 +14,8 @@
   footskip=\dim_eval:n {1.25em + 5pt}
 }
 
-% marker class
+
+% ==> marker and commands patches
 \mark_new_class:n {zslide-left}
 \mark_new_class:n {zslide-right}
 \IfClassLoadedTF{book}{
@@ -67,11 +70,18 @@
           \tl_use:N \l__zlatex_slide_sec_suffix_tl
       }}
     }
+  }[
+    \bool_gset_true:N \g_new_sec_bool
+    \int_gset:Nn \g__zlatex_slide_framecnt_int {1}
+  ]
+\hook_gput_code:nnn {cmd/tableofcontents/before}
+  {zslide-toc-leftmark} 
+  {
+    \mark_insert:nn {zslide-left}{contents}
   }
-  [\bool_gset_true:N \g_new_sec_bool
-  \int_gset:Nn \g__zlatex_slide_framecnt_int {1}]
 
-% status bar and metadata-item
+
+% ==> status rule bar and metadata-item
 \bool_new:N \g_new_sec_bool
 \int_new:N \g__zlatex_slide_framecnt_int
 \int_gset:Nn \g__zlatex_slide_framecnt_int {1}
@@ -98,6 +108,7 @@
 }
 \AddToHook{shipout/lastpage}{
   \label{zslide-last-page}
+  \hyper@anchor{zslide@lastpage}
   \zslideFrameCntAux:ee 
     {\Roman{section}}
     {\int_use:N \g__zlatex_slide_framecnt_int}
@@ -106,11 +117,12 @@
   \bool_gset_false:N \g_new_sec_bool
   \int_gincr:N \g__zlatex_slide_framecnt_int
 }
-\AddToHook{shipout/background}{
-  \put(0, -\paperheight){\textcolor
-    {\tl_use:N \l__zlatex_slide_doc_bgcolor_tl}
-    {\rule{1\paperwidth}{1\paperheight}}}
-}
+\hook_gput_code:nnn {shipout/background}{zslide-background}
+  {
+    \put(0, -\paperheight){\textcolor
+      {\tl_use:N \l__zlatex_slide_doc_bgcolor_tl}
+      {\rule{1\paperwidth}{1\paperheight}}}
+  }
 \AddToHook{shipout/background}{
   \_zslide_status_bar:nnnn {(0, -.9em)}{UL}{.5}{1.25em}
   \_zslide_status_bar:nnnn {(.5\paperwidth, -.9em)}{UR}{.5}{1.25em}
@@ -151,23 +163,7 @@
       }
   }
 }
-\NewDocumentCommand{\zslideFrame}{m}{%
-  \cs_if_exist:cTF {zsec@#1@cnt}
-    {\cs:w zsec@#1@cnt\cs_end:}
-    {??}
-}
-\NewDocumentCommand{\zslideFrameIndex}{}{
-  \int_use:N \g__zlatex_slide_framecnt_int
-}
-\NewDocumentCommand{\zslideNavigateBall}{O{\textbullet}O{\(\circ\)}}{
-  \cs_if_exist:cTF {zsec@\Roman{section}@cnt}
-    {\zslide@navigate:nnnn 
-      {\zslideFrame{\Roman{section}}}
-      {\zslideFrameIndex}{#1}{#2}
-    }{??}
-}
-
-% zslide metadata setup
+% zslide metadata key-value
 \zlatex_hook_preamble_last:n {
   \let\zslideTitle\@title
   \let\zslideAuthor\@author
@@ -217,7 +213,7 @@
   toc / label / chapter         .tl_set:N  = \l__zlatex_slide_toc_label_chapter_tl,
   toc / label / chapter         .initial:n = { \zslideToclabelSet[.25em]{\thecontentslabel.} },
   toc / label / section         .tl_set:N  = \l__zlatex_slide_toc_label_section_tl,
-  toc / label / section         .initial:n = { \zslideToclabelSet{\DLE} },
+  toc / label / section         .initial:n = { \zslideToclabelSet[.25em]{\zslidesecIcon} },
   toc / label / subsection      .tl_set:N  = \l__zlatex_slide_toc_label_subsection_tl,
   toc / label / subsection      .initial:n = { \zslideToclabelSet[.5em]{\zslidesubsecIcon} },
   toc / suffix                  .meta:nn   = { zlatex / slide / toc / suffix }{#1},
@@ -249,11 +245,55 @@
     {\tl_use:c {l__zlatex_slide_#1_text_tl}}}
 }
 
-% slide toc interface
+
+% ==> zslide custom interface
+% zslide users' tools
+\NewDocumentCommand{\zslideFrame}{m}{%
+  \cs_if_exist:cTF {zsec@#1@cnt}
+    {\cs:w zsec@#1@cnt\cs_end:}
+    {??}
+}
+\NewDocumentCommand{\zslideFrameIndex}{}{
+  \int_use:N \g__zlatex_slide_framecnt_int
+}
+\NewDocumentCommand{\zslideNavigateBall}{O{\(\bullet\)}O{\(\circ\)}}
+  {
+    \cs_if_exist:cTF {zsec@\Roman{section}@cnt}
+      {\zslide@navigate:nnnn 
+        {\zslideFrame{\Roman{section}}}
+        {\zslideFrameIndex}
+        {\textcolor{\l__zlatex_slide_UR_fg_tl}{#1}}
+        {\textcolor{\l__zlatex_slide_UR_fg_tl}{#2}}
+      }{??}
+  }
+\zlatex_keys_define:nn { slide / logo }
+  {
+    position  .tl_gset:N     = \g__zlatex_slide_logo_position_tl,
+    % position  .initial:n  = { (\textwidth/2+\paperwidth/2, 1.5em) }, % deprecated
+    position  .initial:n    = { (\paperwidth-\c_zlatex_quad_dim, 1.5em) },
+    width     .dim_gset:N    = \g__zlatex_slide_logo_width_dim,
+    width     .initial:n    = { 2.5em },
+    exclude   .clist_gset:N = \g__zlatex_slide_logo_exclude_clist,
+    exclude   .initial:n    = { 0 },
+  }
+\NewDocumentCommand{\zslidelogo}{om}
+  {
+    \IfValueT{#1}{\zlatex_keys_set:nn { slide / logo }{#1}}
+    \__zlatex_page_annotate:eeenn 
+      {background}
+      {\exp_after:wN \__page_mask@pos_parse:w \g__zlatex_slide_logo_position_tl}
+      {rb}{
+        \edef\current@page{\thepage}
+        \clist_if_in:NVF \g__zlatex_slide_logo_exclude_clist\current@page
+          {\includegraphics[width=\g__zlatex_slide_logo_width_dim]{#2}}
+      }{}
+  }
+\@onlypreamble\zslidelogo
+% slide toc customization
 \let\zslideTocPage\contentspage
-% bug: cat let an alias fot '\thecontentslabel'
+% bug: can NOT alias for command:'\thecontentslabel'
 \NewDocumentCommand{\zslideToclabelSet}{om}{
-  \zlatex_set_to_width:Nn \l_tmpa_dim {#2}
+  \ztool_set_to_wd:Nn \l_tmpa_dim {#2}
   \IfNoValueTF {#1}{\dim_set:Nn \l_tmpb_dim {\l_tmpa_dim}}
     {\dim_set:Nn \l_tmpb_dim {\l_tmpa_dim + #1}}
   \contentslabel[#2]{\dim_use:N \l_tmpb_dim}
@@ -264,11 +304,16 @@
     {\vspace*{\fill}}{\tl_use:c {l__zlatex_slide_toc_label_#1_tl}}
     {}{\tl_use:c {l__zlatex_slide_toc_suffix_#1_tl}}
 }
-\RequirePackage{ascii}
 \setcounter{tocdepth}{2}
-\def\zslidesubsecIcon{\rule[1.5pt]{3pt}{3pt}}
-\AddToHook{cmd/@starttoc/before}{\vspace*{\fill}}
-\AddToHook{cmd/@starttoc/after}{\vspace*{\stretch{3}}}
+\gdef\zslidesecIcon
+  {\box_move_up:nn {2pt}
+    {\hbox:n {\ztool_resize_to_wd:nn 
+      {6pt}{\(\blacktriangleright\)}}
+    }
+  }
+\gdef\zslidesubsecIcon{\rule[1.5pt]{3pt}{3pt}}
+% \AddToHook{cmd/@starttoc/before}{\vspace*{\fill}}
+% \AddToHook{cmd/@starttoc/after}{\vspace*{\stretch{3}}}
 % slide mode setup interface
 \NewDocumentCommand{\zslideSetup}{om}{
   \IfNoValueTF {#1}{
@@ -278,7 +323,8 @@
   }
 }
 
-% slide theme create interface
+
+% ==> slide theme create interface
 \clist_new:N \g__zslide_all_themes_clist
 \clist_gclear:N \g__zslide_all_themes_clist
 \cs_new_protected:Npn \_zslide_theme_create:nn #1#2 {
@@ -306,13 +352,38 @@
 \NewDocumentCommand\zslideDocTextColor{m}{
   \zslide_set_doc_text_color:n {#1}
 }
-\NewDocumentCommand{\zslideDefaultUR}{}{
-  \mark_if_eq:nnnnTF {page}{zslide-right}{first}{last}
-    {\ifnum\arabic{subsection}=0\else\FirstMark{zslide-right}\fi}
-    {\ifnum\arabic{subsection}=0\else\FirstMark{zslide-right}\,--\,\LastMark{zslide-right}\fi}
-}
+% page check interface
+\prg_new_conditional:Npnn \zslide_if_page:n #1 {p, T, F, TF}
+  {
+    \int_compare:nTF {\thepage#1}
+      { \prg_return_true: }
+      { \prg_return_false: }
+  }
+\prg_generate_conditional_variant:Nnn \zslide_if_page:n {e} { T, F, TF }
+\NewDocumentCommand{\zslideIfPageTF}{mmm}
+  {
+    \zslide_if_page:nTF {#1}
+      {#2}{#3}
+  }
+% BUG: if no subsection, mark-'zslide-right' added manually will be lost
+\NewDocumentCommand{\zslideDefaultUR}{}
+  {
+    \mark_if_eq:nnnnTF {page}{zslide-right}{first}{last}
+      {\ifnum\arabic{subsection}=0\else\FirstMark{zslide-right}\fi}
+      {\ifnum\arabic{subsection}=0\else\FirstMark{zslide-right}\,--\,\LastMark{zslide-right}\fi}
+  }
+\NewDocumentCommand{\zslideDefaultBR}{}
+  {
+    \zslideDate\quad 
+    \thepage/\hyper@link{link}{zslide@lastpage}
+      {
+        \textcolor{\l__zlatex_slide_BR_fg_tl}
+          {\pageref*{zslide-last-page}}
+      }
+  }
 
-% pre-defined slide theme: 'theme'-'color'
+
+% ==> pre-defined slide theme: 'theme'-'color'
 \str_case:NnF \g__zlatex_slide_theme_str {
   % slide theme: AnnArbor-default
   {AnnArborDefault}{
@@ -348,7 +419,7 @@
       BR = {
         bg   = Ann-default-II,
         fg   = Ann-default-I,
-        text = \zslideDate\quad \thepage/\pageref{zslide-last-page}
+        text = \zslideDefaultBR
       },
       sec = {
         fg   = Ann-default-I,
@@ -393,7 +464,7 @@
       BR = {
         bg   = Ann-bea-II,
         fg   = Ann-bea-I,
-        text = \zslideDate\quad \thepage/\pageref{zslide-last-page} 
+        text = \zslideDefaultBR 
       },
       sec = {
         fg   = Ann-bea-I,
@@ -441,7 +512,7 @@
       BR = {
         bg   = Ann-alb-III,
         fg   = Ann-alb-II,
-        text = \zslideDate\quad \thepage/\pageref{zslide-last-page} 
+        text = \zslideDefaultBR 
       },
       sec = {
         bg   = Ann-alb-IV,
@@ -486,11 +557,58 @@
       BR = {
         bg   = Ann-sea-II,
         fg   = black,
-        text = \zslideDate\quad \thepage/\pageref{zslide-last-page}
+        text = \zslideDefaultBR
       },
       sec = {
         fg   = black,
         bg   = Ann-sea-III,
+        prefix = {},
+        suffix = {}
+      }
+    }
+  }
+
+  % slide theme: AnnArbor-Spruce
+  {AnnArborSpruce}{
+    \definecolor{Ann-spr-I}{HTML}{005128} % UL bg
+    \definecolor{Ann-spr-II}{HTML}{d8e8e0}% UR bg
+    \definecolor{Ann-spr-III}{HTML}{99c1ad}% BC bg
+    \definecolor{Ann-spr-IV}{HTML}{7fb298}% UL/BL fg
+    \definecolor{Ann-spr-V}{HTML}{e5efea}% sec bg
+    \_zslide_theme_create:nn {AnnArborSpruce}{
+      doc = {
+        bg-color = white,
+        text-color = black,
+        text-style = \sfdefault
+      },
+      UL = {
+        bg   = Ann-spr-I,
+        fg   = Ann-spr-IV,
+        text = {\ifnum\arabic{section}=0\else Section\ \thesection\fi}
+      },
+      UR = {
+        bg   = Ann-spr-II,
+        fg   = Ann-spr-I,
+        text = {\zslideDefaultUR}
+      },
+      BL = {
+        bg   = Ann-spr-I,
+        fg   = Ann-spr-IV,
+        text = \zslideAuthor
+      },
+      BC = {
+        bg   = Ann-spr-III,
+        fg   = Ann-spr-I,
+        text = \zslideTitle
+      },
+      BR = {
+        bg   = Ann-spr-II,
+        fg   = Ann-spr-I,
+        text = \zslideDefaultBR
+      },
+      sec = {
+        fg   = Ann-spr-I,
+        bg   = Ann-spr-V,
         prefix = {},
         suffix = {}
       }
@@ -504,8 +622,13 @@
   \str_set:Nn \g__zlatex_slide_theme_str {AnnArborDefault}
 }
 
-% slide mode init options
-\zlatex_hook_preamble_last:n { \pagestyle{empty} }
+
+% ==> slide mode init options
 \_zslide_theme_use:nn { \str_use:N \g__zlatex_slide_theme_str }{}
 \zslide_set_doc_text_color:n { \tl_use:N \l__zlatex_slide_doc_textcolor_tl }
 \renewcommand{\familydefault}{ \tl_use:N \l__zlatex_slide_doc_textstyle_tl }
+\zlatex_hook_preamble_last:n 
+  { 
+    \pagestyle{empty} 
+    \__zlatex_text_symbol_patch:
+  }

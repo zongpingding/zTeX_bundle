@@ -1,3 +1,290 @@
+% ==> mathalias library test
+\InputIfFileExists{zlatex-cfg.tex}{}{}
+\documentclass[lang=cn]{../code/zlatex}
+\zlatexloadlibrary{mathalias}
+\zlatexSetup{
+  mathSpec={envStyle=fancy}
+}
+\usepackage{lipsum}
+\usepackage{zhlipsum}
+
+\begin{document}
+\section{Symbols}
+\subsection{simple}
+\zhlipsum[1]
+\begin{align}
+  & \la \\
+  & \rra \\
+  & \Nra \\
+  & \dda \\
+  & \xra*[Up](down)\\
+  & \xla(\beta) \\
+  & \xxla[2](1)
+\end{align}
+
+\subsection{Complex}
+Some Examples: $H^1(\Omega)\hra L^p(\Omega)$, And further more: 
+\begin{align}
+  H^1(\Omega)\hra[E:t-1 = \gamma] L^p(\Omega)
+\end{align}
+
+Some symbols: \CC, \RR, \ZZ, \NN
+
+\begin{align}
+  & \zab \alpha + \beta \text{ V.S. } \alpha + \beta \\
+  & \zab(\frac12) \text{ V.S. } (\frac12) \\
+  & \zab[\frac12] \text{ V.S. } [\frac12] \\
+  & \zab\{\frac12\} \text{ V.S. } \{\frac12\}
+\end{align}
+
+\section{Text}
+\lipsum[1]
+
+\begin{definition}[Test THM]
+  A smooth vector field \(\mathbf{v}\) is defined in a domain \(M\) if to each point \(x\) there is 
+  assigned a vector \(\mathbf{v}\left( x\right)  \in  {T}_{x}M\) attached at that point and depending 
+  smoothly on the point \(x\) (if a system of \(m\) coordinates is chosen, the field is defined by 
+  its \(m\) components, which are smooth functions of \(m\) variables). The vector \(\mathbf{v}\left( x\right)\) 
+  is called the value of the field \(\mathbf{v}\) at the point \(x\) .
+\end{definition}
+
+\zhlipsum[1]
+
+\begin{definition}[映射连续性]
+  如果对于某一给定的点 $x_0\in X$, 映射 $T$满足下面的条件:
+  对于任意给定的 $\varepsilon > 0$, 存在 $\delta > 0$, 使得当 $\rho(x, x_0) < \delta$时, 有 
+  $\rho_1(Tx, Tx_0) < \varepsilon$,则称 $T$在点 $x_0$处连续. 如果 $T$在 $X$上的每一点都连续,
+  则称 $T$在 $X$上连续, 且称 $T$为连续映射.
+\end{definition}
+
+\lipsum[3]
+
+\begin{lemma}[Test THM]
+  A smooth vector field \(\mathbf{v}\) is defined in a domain \(M\) if to each point \(x\) there is 
+  assigned a vector \(\mathbf{v}\left( x\right)  \in  {T}_{x}M\) attached at that point and depending 
+  smoothly on the point \(x\) (if a system of \(m\) coordinates is chosen, the field is defined by 
+  its \(m\) components, which are smooth functions of \(m\) variables). The vector \(\mathbf{v}\left( x\right)\) 
+  is called the value of the field \(\mathbf{v}\) at the point \(x\) .
+\end{lemma}
+
+\lipsum[4]
+\end{document}
+
+
+
+
+% ==> Fixed Bugs: 
+% 1. THM note expansion bug; 
+% 2. hyper init faild; 
+% 3. toc line stretch
+\InputIfFileExists{zlatex-cfg.tex}{}{}
+\documentclass[hyper]{../code/zlatex}
+\zlatexColorSetup{link=teal}
+\zlatexSetup{
+  toc={
+    stretch=1.25, 
+    title-vspace=-1em, 
+    title=\centerline{\bfseries\Large \textsc{Contents}}
+  }
+}
+\usepackage{lipsum}
+\zlatexThmTocPrefix{\P\;}
+% \zlatexThmTocSymbolClear
+\zlatexThmTocSymbol{
+  lemma=$\star$\;,
+  definition=$\diamond$\;,
+}
+\ExplSyntaxOn
+\newcommand{\addthmsec}[4]{
+  \__zlatex_thm_toc_add:nnnn {#1}{#2}{#3}{#4}
+}
+\ExplSyntaxOff
+\AddToHook{zlatex/thmstyle/before}{\par}
+
+\begin{document}
+\tableofcontents
+\vskip5em
+
+
+\newpage
+\zlatexThmToc[
+  title={\textsc{List of Theorems}},
+  stretch=1.5, 
+  title-vspace=-10pt, 
+  after-vspace=20pt
+]
+
+\lipsum[2]
+
+\section{Accent}
+\addthmsec{section}{BLANK}{\thepage}{section.1}
+AAA
+\begin{lemma}[N\"ormal Text]
+  This is a simple lemma.
+  \begin{align}
+    a^2 + b^2 = c^2
+  \end{align}
+\end{lemma}
+
+BBB
+\begin{proposition}[Normal Text]
+  This is a simple lemma.
+  \begin{align}
+    a^2 + b^2 = c^2
+  \end{align}
+\end{proposition}
+
+
+\section{Macros/Equation}
+\zlatexThmSecAdd[name=NEW-SEC]{section}
+\begin{theorem}[$\mathbb{Z}[\sqrt{2}]$]%
+  This is a simple theorem.
+  \begin{align}
+    a^2 + b^2 = c^2
+  \end{align}
+\end{theorem}
+
+
+\begin{definition}
+  This is a simple definition.
+  \begin{align}
+    a^2 + b^2 = c^2
+  \end{align}
+\end{definition}
+
+\ExplSyntaxOn
+% \cs_show:N \sqrt
+
+\cs_set:Npn \__test_sqrt:n #1 
+  { #1--$Z[\sqrt {2}]$ }
+
+\__test_sqrt:n {AA}
+
+\the\baselineskip
+\ExplSyntaxOff
+
+
+\section{AAA}
+\subsection{AAA-1}
+\subsection{AAA-2}
+\subsection{AAA-3}
+
+\section{BBB}
+\subsection{BBB-1}
+\subsection{BBB-2}
+\subsection{BBB-3}
+\end{document}
+
+
+% ==> thmnote update
+\InputIfFileExists{zlatex-cfg.tex}{}{}
+\documentclass{../code/zlatex}
+
+
+\begin{document}
+\section{First}
+This is a simple definition style in z\LaTeX{}:
+
+\begin{definition}
+  This is a simple definition. 
+  \begin{align}
+    a^2 + b^2 = c^2
+  \end{align}
+\end{definition}
+
+A simple theorem environment follows the above definition as below:
+\begin{theorem}[THM-NOTE]
+  This is a simple theorem.
+  \begin{align}
+    a^2 + b^2 = c^2
+  \end{align}
+\end{theorem}
+
+
+\section{SET to HEIGHT}
+\ExplSyntaxOn
+\ztool_resize_to_ht:nn {2.5pt}{XXX}
+\ExplSyntaxOff
+
+
+\section{THM LIST}
+Test List of Theorems:
+
+\zlatexThmToc
+\end{document}
+
+
+
+
+
+% ==> slide mode test
+\InputIfFileExists{zlatex-cfg.tex}{}{}
+\documentclass[
+  hyper,
+  % class=book,
+  % lang=cn,
+  layout={slide, aspect=16|9, theme=AnnArborSpruce},
+]{../code/zlatex}
+\zslideThemeUse[
+  UR={text=\zslideIfPageTF{=1}{}{\zslideDefaultUR:\ \zslideNavigateBall}},
+]{AnnArborSpruce}
+\makeatletter
+\def\seeTargets{%
+  \par\noindent\dotfill\\
+  \string\@currentHref\ = \meaning\@currentHref\par
+  \string\@currentHpage\ = \meaning\@currentHpage\par
+  \string\Hy@currentbookmarklevel\ = \meaning\Hy@currentbookmarklevel\par\vskip3em
+}
+\makeatother
+\zlatexPageMask*[layer=foreground]{AAA}
+\zlatexPageMask[layer=foreground]{BBB}
+% \zslidelogo[position={(40pt, 10pt)}, exclude={0, 2}]{Epmmy.jpg}
+\zslidelogo[width=3em, exclude={0, 1}]{Epmmy.jpg}
+
+
+\title{Debug}
+\author{Eureka}
+\date{\today}
+\begin{document}
+\maketitle
+\tableofcontents
+
+\section{First Section}
+\subsection{Test}
+BULLET TEST: \textbullet
+
+\ExplSyntaxOn
+m\ztool_resize_to_wd:nn {1em}{mmmm}\par 
+
+\rule{1em}{3pt}
+\ExplSyntaxOff
+
+\zslideIfPageTF{<2}{PAGE-II}{NOT PAGE-II}
+
+\newpage
+\subsection[Short First Subsection Name]{First Subsection Name}
+  \begin{itemize}
+    \item
+    An item
+    \item
+    Another item
+    \begin{itemize}
+      \item Something
+      \begin{itemize}
+        \item Something else
+      \end{itemize}
+    \end{itemize}
+    \begin{enumerate}
+      \item Thing A
+      \item Thing B
+      \item Thing C
+    \end{enumerate}
+  \end{itemize}
+\end{document}
+
+
+
+
 % ===> Re-write titlesec package
 \InputIfFileExists{zlatex-cfg.tex}{}{}
 \documentclass[

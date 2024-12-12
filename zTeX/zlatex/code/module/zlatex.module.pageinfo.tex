@@ -80,8 +80,8 @@
   \renewcommand{\maketitle}{
     \thispagestyle{empty}
     % calc max width, add '1pt' for right padding in case of wrong line break
-    \zlatex_set_to_width:Nn \l_tmpa_dim {\hbox:n {\huge\bfseries\@title}}
-    \zlatex_set_to_width:Nn \l_tmpb_dim {\hbox:n {\Large\bfseries\@author}}
+    \ztool_set_to_wd:Nn \l_tmpa_dim {\hbox:n {\huge\bfseries\@title}}
+    \ztool_set_to_wd:Nn \l_tmpb_dim {\hbox:n {\Large\bfseries\@author}}
     \dim_set:Nn \l_tmpa_dim {\dim_max:nn {\l_tmpa_dim}{\l_tmpb_dim} + 1pt}
     % typeset info
     \begin{center}\vfill\vspace*{40pt}

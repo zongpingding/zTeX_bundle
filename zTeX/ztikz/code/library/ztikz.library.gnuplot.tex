@@ -22,10 +22,15 @@
     ori   .tl_set:N  = \l__ztikz_sed_script_ori_tl,
     new   .tl_set:N  = \l__ztikz_sed_script_new_tl,
   }
-\cs_new:Npn \__ztikz_sed_script:nnnn #1#2#3#4
-  {% #1: file; #2: line; #3: ori; #4: new 
-    \ztool_shell_escape:e {sed~ -i~ "#2s|#3|#4|"~ \g__ztikz_scripts_path_tl/#1}
+\cs_new:Npn \__ztikz_sed_script:nnn #1#2#3 
+  {% #1: file; #2: line; #3:new
+    \ztool_replace_file_line:nnn 
+      {\g__ztikz_scripts_path_tl/#1}
+      {#2}{#3}
   }
+\cs_generate_variant:Nn \__ztikz_sed_script:nnn {eee}
+\cs_generate_variant:Nn \__ztikz_sed_script:nnn {nne}
+
 % plot args
 \tl_new:N \l__pairs_x_domain_tl
 \tl_new:N \l__pairs_y_domain_tl
@@ -41,6 +46,8 @@
     domain      .initial:n  = {-5:5; -5:5},
     palette     .tl_set:N   = \l__ztikz_plotz_palette_tl,
     palette     .initial:n  = {rgbformulae~ 22,13,-31},
+    pm3d        .bool_set:N = \l__ztikz_plotz_pm_bool,
+    pm3d        .initial:n  = {true},
     width       .dim_set:N  = \l__ztikz_plotz_width_dim,
     width       .initial:n  = {0.75\linewidth},
   }
@@ -51,8 +58,6 @@
       { \tl_set:Nn \l__pairs_y_domain_tl {*:*} }
       { \tl_set:Nn \l__pairs_y_domain_tl {#2} }
   }
-\cs_generate_variant:Nn \__ztikz_sed_script:nnnn {eeee}
-\cs_generate_variant:Nn \__ztikz_sed_script:nnnn {nnne}
 
 
 % ==> plot precise
@@ -70,15 +75,16 @@
       }
     \IfBooleanF{#1}{ \bool_gset_true:c {g__#2_precise_restore_bool} }
     \tl_if_eq:nnTF {contour}{#2}{
-      \__ztikz_sed_script:nnnn {contour_plot.gp}{2}{set~samples~.*}{set~samples~#3}
-      \__ztikz_sed_script:nnnn {contour_plot.gp}{3}{set~isosamples~.*}{set~isosamples~#3,#3}
+      \__ztikz_sed_script:nnn {contour_plot.gp}{2}{set~samples~#3}
+      \__ztikz_sed_script:nnn {contour_plot.gp}{3}{set~isosamples~#3,#3}
     }{
-      \__ztikz_sed_script:nnnn {#2_plot.gp}{3}{set~samples~.*}{set~samples~#3}
+      \__ztikz_sed_script:nnn {#2_plot.gp}{3}{set~samples~#3}
     }
   }
 % data plot, precise, style
 \cs_new_protected:Npn \__ztikz_gnu_data_plot:nnn #1#2#3 
   {
+    \ztool_shell_escape:e {gnuplot~ \g__ztikz_scripts_path_tl/#1_plot.gp}
     \int_gadd:Nn \g__gnu_data_index_int {1}
     \tl_set:Ne \l__gnu_data_new_name_tl 
       {
@@ -119,21 +125,19 @@
   {
     \group_begin:
     \ztikz_keys_set:nn { 2dplot } { #1 }
-    \__ztikz_sed_script:nnne {plot_plot.gp}{8}{set~xr~.*}{set~xr~[\l__ztikz_plot_domain_tl]}
-    \__ztikz_sed_script:nnnn {plot_plot.gp}{7}{f(x)~=~.*}{f(x)~=~#2}
-    \ztool_shell_escape:e {gnuplot~ \g__ztikz_scripts_path_tl/plot_plot.gp}
+    \__ztikz_sed_script:nne {plot_plot.gp}{8}{set~xr~[\l__ztikz_plot_domain_tl]}
+    \__ztikz_sed_script:nnn {plot_plot.gp}{7}{f(x)~=~#2}
     \__ztikz_gnu_data_plot:nee {plot}{\l__ztikz_plot_style_tl}{\l__ztikz_plot_marker_tl}
     \group_end:
   }
-\NewDocumentCommand\ContourPlot{ O{domain=-5:5, style={color=black}, marker=}m }
+\NewDocumentCommand\ContourPlot{ O{domain={-5:5;}, style={color=black}, marker=}m }
   {
     \group_begin:
     \ztikz_keys_set:nn { 2dplot } { #1 }
     \exp_last_unbraced:Nf \__ztikz_pairs_domain_parse:w \l__ztikz_plot_domain_tl\q_stop
-    \__ztikz_sed_script:nnne {contour_plot.gp}{11}{set~xr~.*}{set~xr~[\l__pairs_x_domain_tl]}
-    \__ztikz_sed_script:nnne {contour_plot.gp}{12}{set~yr~.*}{set~yr~[\l__pairs_y_domain_tl]}
-    \__ztikz_sed_script:nnne {contour_plot.gp}{14}{f(x,~y)~=~.*}{f(x,~y)~=~#2}
-    \ztool_shell_escape:e {gnuplot~ \g__ztikz_scripts_path_tl/contour_plot.gp}
+    \__ztikz_sed_script:nne {contour_plot.gp}{11}{set~xr~[\l__pairs_x_domain_tl]}
+    \__ztikz_sed_script:nne {contour_plot.gp}{12}{set~yr~[\l__pairs_y_domain_tl]}
+    \__ztikz_sed_script:nne {contour_plot.gp}{14}{f(x,~y)~=~#2}
     \__ztikz_gnu_data_plot:nee {contour}{\l__ztikz_plot_style_tl}{\l__ztikz_plot_marker_tl}
     \group_end:
   }
@@ -141,9 +145,8 @@
   {
     \group_begin:
     \ztikz_keys_set:nn { 2dplot } { #1 }
-    \__ztikz_sed_script:nnne {param_plot.gp}{8}{set~trange~.*}{set~trange~[\l__ztikz_plot_domain_tl]}
-    \__ztikz_sed_script:nnnn {param_plot.gp}{9}{plot~.*}{plot~#2}
-    \ztool_shell_escape:e {gnuplot~ \g__ztikz_scripts_path_tl/param_plot.gp}
+    \__ztikz_sed_script:nne {param_plot.gp}{8}{set~trange~[\l__ztikz_plot_domain_tl]}
+    \__ztikz_sed_script:nnn {param_plot.gp}{9}{plot~#2}
     \__ztikz_gnu_data_plot:nee {param}{\l__ztikz_plot_style_tl}{\l__ztikz_plot_marker_tl}
     \group_end:
   }
@@ -151,9 +154,8 @@
   {
     \group_begin:
     \ztikz_keys_set:nn { 2dplot } { #1 }
-    \__ztikz_sed_script:nnne {polar_plot.gp}{8}{set~trange~.*}{set~trange~[\l__ztikz_plot_domain_tl]}
-    \__ztikz_sed_script:nnnn {polar_plot.gp}{9}{plot~.*}{plot~#2}
-    \ztool_shell_escape:e {gnuplot~ \g__ztikz_scripts_path_tl/polar_plot.gp}
+    \__ztikz_sed_script:nne {polar_plot.gp}{8}{set~trange~[\l__ztikz_plot_domain_tl]}
+    \__ztikz_sed_script:nnn {polar_plot.gp}{9}{plot~#2}
     \__ztikz_gnu_data_plot:nee {polar}{\l__ztikz_plot_style_tl}{\l__ztikz_plot_marker_tl}
     \group_end:
   }
@@ -161,11 +163,12 @@
   {
     \group_begin:
     \ztikz_keys_set:nn { 3dplot } { #1 }
+    \bool_if:NTF \l__ztikz_plotz_pm_bool {\def\plotz@pm{with~pm3d}}{\def\plotz@pm{}}
     \exp_last_unbraced:Nf \__ztikz_pairs_domain_parse:w \l__ztikz_plotz_domain_tl\q_stop
-    \__ztikz_sed_script:nnne {3d_plot.gp}{18}{set~palette~.*}{set~palette~\l__ztikz_plotz_palette_tl}
-    \__ztikz_sed_script:nnne {3d_plot.gp}{23}{set~xr~.*}{set~xr~[\l__pairs_x_domain_tl]}
-    \__ztikz_sed_script:nnne {3d_plot.gp}{24}{set~yr~.*}{set~yr~[\l__pairs_y_domain_tl]}
-    \__ztikz_sed_script:nnne {3d_plot.gp}{25}{splot~.*}{splot~#2}
+    \__ztikz_sed_script:nne {3d_plot.gp}{18}{set~palette~\l__ztikz_plotz_palette_tl}
+    \__ztikz_sed_script:nne {3d_plot.gp}{23}{set~xr~[\l__pairs_x_domain_tl]}
+    \__ztikz_sed_script:nne {3d_plot.gp}{24}{set~yr~[\l__pairs_y_domain_tl]}
+    \__ztikz_sed_script:nne {3d_plot.gp}{25}{splot~#2~\plotz@pm}
     \ztool_shell_escape:e {gnuplot~ ./ztikz_output/scripts/3d_plot.gp}
     \tl_set:Ne \l_tmpa_tl {./ztikz_output/gnuplot_data/plot_3d_\int_use:N \g__gnu_plotz_index_int.pdf}
     \ztool_shell_mv:ne {./ztikz_output/gnuplot_data/plot_3d.pdf}{\l_tmpa_tl}

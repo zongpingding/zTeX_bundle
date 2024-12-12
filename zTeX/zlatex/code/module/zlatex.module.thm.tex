@@ -175,7 +175,7 @@
   },
   background = {
     begin = {
-      \def\FrameCommand{\colorbox{\thm@temp@color!10}}
+      \def\FrameCommand{\colorbox{\thm@temp@color}}
       \MakeFramed{\advance\hsize-\width \FrameRestore}
     },
     end = {\endMakeFramed},
@@ -289,17 +289,35 @@
     {\tl_use:c {g__zlatex_thm_style_\g__zlatex_thm_style_tl _begin_tl}}
     {\zlatex_msg_error:n {mathEnv-style}}
 }
-\cs_new:Npn \__zlatex_thm_warp_end:n #1 {
-  \tl_use:c {g__zlatex_thm_style_\g__zlatex_thm_style_tl _end_tl}
-  \__zlatex_thm_toc_add:eeee 
-    {\g__zlatex_thm_table_level}{\zlatexThmName\ (\zlatexThmNote)}
-    {\thepage}{#1.\zlatexThmNumber}
+\tl_new:N \__zlatex_thm_toc_prefix_tl
+\newcommand\zlatexThmTocPrefix[1]{
+  \tl_set:Nn \__zlatex_thm_toc_prefix_tl {\exp_not:n {#1}}
 }
+\@onlypreamble\zlatexThmTocPrefix
+\cs_new:Npn \__zlatex_thm_warp_end:n #1 
+  {
+    \tl_use:c {g__zlatex_thm_style_\g__zlatex_thm_style_tl _end_tl}
+    \__zlatex_thm_toc_add:eeee 
+      {\g__zlatex_thm_table_level}
+      { 
+        \exp_not:N \__zlatex_thm_toc_prefix_tl
+        \exp_not:n {\prop_item:Nn \g_zlatex_thm_toc_symbols_prop {#1}}
+        \zlatexThmName\ \zlatexThmNumber
+        \tl_if_empty:eF {\zlatexThmNote{}{}}{\ }
+        \zlatexThmNote{(}{)}
+      }
+      {\thepage}{#1.\zlatexThmNumber}
+  }
 % thm title interface
 \NewHook{zlatex/thm/titleformat}
 \cs_new:Npn \__zlatex_thm_title_item:nnnn #1#2#3#4 {
-  \cs_set:Npn \zlatexThmName  {\prop_item:cn {g__zlatex_thm_name_prop}{#1}}
-  \cs_set:Npn \zlatexThmNote  {#2}
+  \tl_set:Nn \l_tmpa_tl {\exp_not:n {#2}}
+  \cs_set:Npn \zlatexThmName {\prop_item:cn {g__zlatex_thm_name_prop}{#1}}
+  \cs_set:Npn \zlatexThmNote ##1##2
+    {
+      \tl_if_empty:nF {#2}
+        {##1\exp_not:n {\l_tmpa_tl}##2}
+    }
   \bool_if:NTF \g__zlatex_thm_cntshare_bool
     {\cs_set:Npn \zlatexThmNumber {
       \cs:w the\g__zlatex_thm_cntparent_tl\cs_end:
@@ -311,7 +329,9 @@
       \stepcounter{#1}
     }
   \tl_gset:Nn \g__zlatex_thm_title_tl {
-    #3\zlatexThmName#4\zlatexThmNumber#4(\zlatexThmNote)
+    #3\zlatexThmName #4 \zlatexThmNumber
+    \tl_if_empty:eF {\zlatexThmNote{}{}}{#4}
+    \zlatexThmNote{(}{)} #4
   }
   \UseHook{zlatex/thm/titleformat}
 }
@@ -329,6 +349,15 @@
       {\tl_gset:Nn \g__zlatex_thm_title_tl {#2}}
   }
 }
+\NewDocumentCommand{\zlatexThmNoteEmptyTF}{mm}
+  {
+    \tl_if_empty:eTF {\zlatexThmNote{}{}}
+      {#1}
+      {#2}
+  }
+
+
+% ==> Thm Toc interface
 % list of thm: ".thlist" as file extension
 % REF: https://github.com/mbertucci47/keytheorems
 \bool_new:N \g__zlatex_thm_toc_bool
@@ -348,7 +377,22 @@
           \token_to_str:N \protected@file@percent}
       }
   }
-\cs_generate_variant:Nn \__zlatex_thm_toc_add:nnnn { eeee }
+\cs_generate_variant:Nn \__zlatex_thm_toc_add:nnnn { eeee, nnee }
+\zlatex_keys_define:nn { thm/add }
+  {
+    % level   .tl_set:N  = \l__zlatex_add_thm_toc_level_tl,
+    % level   .initial:n = { section },
+    name      .tl_set:N  = \l__zlatex_add_thm_toc_name_tl,
+    name      .initial:n = { ?? },
+  }
+\NewDocumentCommand{\zlatexThmSecAdd}{om}{
+  \group_begin:
+  \zlatex_keys_set:nn {thm/add}{#1}
+  \__zlatex_thm_toc_add:nnee {#2}
+    {\l__zlatex_add_thm_toc_name_tl}
+    {\thepage}{#2.\cs:w the#2\cs_end:}
+  \group_end:
+}
 \tl_new:N \g__zlatex_thm_table_level
 \tl_set:Nn \g__zlatex_thm_table_level {subsection}
 \NewDocumentCommand{\zlatexThmTocLevel}{m}
@@ -358,10 +402,14 @@
 \@onlypreamble\zlatexThmTocLevel
 \zlatex_keys_define:nn {thm/toc}
   {
-    title  .tl_gset:N  = \g__zlatex_thm_toc_title_tl,
-    title  .initial:n  = List\ of\ Theorems,
-    vspace .dim_gset:N = \g__zlatex_thm_toc_vspace_dim,
-    vspace .initial:n  = 10pt,
+    title         .tl_gset:N  = \g__zlatex_thm_toc_title_tl,
+    title         .initial:n  = { \Large\bfseries List\ of\ Theorems },
+    title-vspace  .dim_gset:N = \g__zlatex_thm_toc_title_vspace_dim,
+    title-vspace  .initial:n  = { 0pt },
+    after-vspace  .dim_gset:N = \g__zlatex_thm_toc_after_vspace_dim,
+    after-vspace  .initial:n  = { 0pt },
+    stretch       .fp_gset:N  = \g__zlatex_thm_toc_stretch_fp,
+    stretch       .initial:n  = { 1 },
   }
 \NewDocumentCommand{\zlatexThmToc}{o}
   {
@@ -369,10 +417,32 @@
     \group_begin:
     \IfValueT {#1}{\zlatex_keys_set:nn {thm/toc}{#1}}
     \legacy_if_set_false:n { @filesw }  
-    {\Large\bfseries\noindent\tl_use:c {g__zlatex_thm_toc_title_tl}}
-    \par\addvspace{\g__zlatex_thm_toc_vspace_dim}\@starttoc{ thlist }
+    {\noindent\tl_use:c {g__zlatex_thm_toc_title_tl}}
+    \addvspace{\fp_to_dim:n {\g__zlatex_thm_toc_stretch_fp*\baselineskip}}
+    \addvspace{\g__zlatex_thm_toc_title_vspace_dim}
+    \renewcommand{\baselinestretch}{\fp_use:N \g__zlatex_thm_toc_stretch_fp}\normalsize 
+    \@starttoc{ thlist }
+    \addvspace{\g__zlatex_thm_toc_after_vspace_dim}
     \group_end:
   }
+% thm toc symbols
+\prop_new:N \g_zlatex_thm_toc_symbols_prop 
+\prop_set_from_keyval:Nn \g_zlatex_thm_toc_symbols_prop
+  {
+    axiom       = { \textbf{A}\; },
+    definition  = { \textbf{D}\; },
+    theorem     = { \textbf{T}\; },
+    lemma       = { \textbf{L}\; },
+    corollary   = { \textbf{C}\; },
+    proposition = { \textbf{P}\; },
+    remark      = { \textbf{R}\; },
+  }
+\NewDocumentCommand{\zlatexThmTocSymbol}{m}
+  {
+    \prop_set_from_keyval:Nn \g_zlatex_thm_toc_symbols_prop {#1}
+  }
+\NewDocumentCommand{\zlatexThmTocSymbolClear}{}
+  { \prop_gclear:N \g_zlatex_thm_toc_symbols_prop }
 
 
 % ==> thm env definition
@@ -388,8 +458,9 @@
     \DeclareDocumentEnvironment{#1}{O{}}{
       \UseHook{zlatex/thmstyle/before}
       \__zlatex_thm_warp_start:nnnn {#1}{##1}{\bfseries}{\ }
-      \MakeLinkTarget*{#1.\zlatexThmNumber}\__zlatex_thm_title:                                  
+      \MakeLinkTarget*{#1.\zlatexThmNumber}\__zlatex_thm_title:   
       \UseHook{zlatex/thmstyle/begin}
+      \peek_remove_spaces:n             
     }{
       \UseHook{zlatex/thmstyle/end}
       \__zlatex_thm_warp_end:n {#1}

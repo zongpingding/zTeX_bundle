@@ -1,0 +1,10 @@
+\gdef \filename {XXX.tex}\__hook_next env/tikzpicture/before \@ifundefined {tikzpicture}{\def \reserved@a {\@latex@error {Environment tikzpicture undefined}\@eha }}{\def \reserved@a {\def \@currenvir {tikzpicture}\edef \@currenvline {\on@line }\@execute@begin@hook {tikzpicture}\csname tikzpicture\endcsname }}\@ignorefalse \begingroup \@endpefalse \reserved@a 
+  \Plot[
+    domain=0:2*pi,
+    style={color=teal},
+    % marker={type=square*, color=red, rotate=45}
+  ]{2*sin(x)}
+  \StemPlot[x][red][type=*, color=orange]{\gnudata{1}}
+  \node at (0, 0) {\AAA};
+\end{tikzpicture}
+% comment 
