@@ -610,26 +610,28 @@ slide 模式下的主题颜色\index{slide theme}目前基本均由三名称控�
       {\rule{1\paperwidth}{1\paperheight}}}
 }
 \AddToHook{shipout/background}{
-  \_zslide_status_bar:nnnn {(0, -.9em)}{UL}{.5}{1.25em}
-  \_zslide_status_bar:nnnn {(.5\paperwidth, -.9em)}{UR}{.5}{1.25em}
-  \_zslide_status_bar:nnnn {(0, -\paperheight)}{BL}{.33}{.9em}
-  \_zslide_status_bar:nnnn {(.33\paperwidth, -\paperheight)}{BC}{.34}{.9em}
-  \_zslide_status_bar:nnnn {(.67\paperwidth, -\paperheight)}{BR}{.33}{.9em}
-  \bool_if:NT \g_new_sec_bool {\_zslide_status_bar:nnnn {(0, -2.7em)}{sec}{1}{1.8em}}
+  \_zslide_status_bar:nnnn {UL}{(0,              -.9em)}{.5}{1.25em}
+  \_zslide_status_bar:nnnn {UR}{(.5\paperwidth,  -.9em)}{.5}{1.25em}
+  \_zslide_status_bar:nnnn {BL}{(0,              -\paperheight)}{.33}{.9em}
+  \_zslide_status_bar:nnnn {BC}{(.33\paperwidth, -\paperheight)}{.34}{.9em}
+  \_zslide_status_bar:nnnn {BR}{(.67\paperwidth, -\paperheight)}{.33}{.9em}
+  \bool_if:NT \g_new_sec_bool {
+  \_zslide_status_bar:nnnn {sec}{(0, -2.7em)}{1}{1.8em}}
 }
 \AddToHook{shipout/foreground}{
-  \_slide_status_metadate:nnn {head}{0}  {.5}{ \hfill\_slide_metadate:n {UL}\  }
-  \_slide_status_metadate:nnn {head}{.5} {.5}{ \ \_slide_metadate:n {UR}\hfill }
-  \_slide_status_metadate:nnn {foot}{0}  {.33}{ \hfill\_slide_metadate:n {BL}\hfill }
-  \_slide_status_metadate:nnn {foot}{.33}{.34}{ \hfill\_slide_metadate:n {BC}\hfill }
-  \_slide_status_metadate:nnn {foot}{.67}{.33}{ \hfill\_slide_metadate:n {BR}\quad  }
+  \_zslide_status_info:nnnn {head}{ 0 }{.5 }{ \hfill\_slide_metadate:n {UL}\  }
+  \_zslide_status_info:nnnn {head}{.5 }{.5 }{ \ \_slide_metadate:n {UR}\hfill }
+  \_zslide_status_info:nnnn {foot}{ 0 }{.33}{ \hfill\_slide_metadate:n {BL}\hfill }
+  \_zslide_status_info:nnnn {foot}{.33}{.34}{ \hfill\_slide_metadate:n {BC}\hfill }
+  \_zslide_status_info:nnnn {foot}{.67}{.33}{ \hfill\_slide_metadate:n {BR}\quad  }
+  \exp_args:Ne \hyper@anchor{zslide@\FirstMark{zslide-left}.\int_use:N \g__zlatex_slide_framecnt_int}
 }
 \cs_new_protected:Npn \_zslide_status_bar:nnnn #1#2#3#4 {
   \ifnum\thepage=0\else
-    \put#1 {\textcolor{\tl_use:c {l__zlatex_slide_#2_bg_tl}}{\rule{#3\paperwidth}{#4}}}
+    \put#2 {\textcolor{\tl_use:c {l__zlatex_slide_#1_bg_tl}}{\rule{#3\paperwidth}{#4}}}
   \fi
 }
-\cs_new_protected:Npn \_slide_status_metadate:nnn #1#2#3#4 {
+\cs_new_protected:Npn \_zslide_status_info:nnnn #1#2#3#4 {
   \ifnum\thepage=0\else\str_case:nn {#1}{ 
     {head} {\put(#2\paperwidth, -.9em+2.5pt) {\hbox~ to~ #3\paperwidth {#4}}}
     {foot} {\put(#2\paperwidth, -\paperheight+2.5pt) {\hbox~ to~ #3\paperwidth {#4}}}
@@ -991,13 +993,13 @@ z\LaTeX{} 提供命令\cmd{\zlatexCounterWith}\index{\cmd{\zlatexCounterWith}} �
 
 \subsection{子目录}
 在z\LaTeX{},用户可以在 chapter/section 后插入本章/节下的所有子目录. 此功能基于\cmd{titletoc}宏包，本文档类中将其封装为 
-命令 \cmd{\partialToc[<depth>]}, 其中\cmd{<depth>}表示目录的深度，默认为2. 一个使用示例如下:
+命令 \cmd{\zlatexPartialToc[<depth>]}, 其中\cmd{<depth>}表示目录的深度，默认为2. 一个使用示例如下:
 \begin{minted}{latex}
 \chapter{Test}
-\partialToc
+\zlatexPartialToc
 \end{minted}
 
-当然你也可以把子目录放入边注中，类似于 Memoir 文档类中提供的效果：只需把 \cmd{\partialToc} 命令放入 \cmd{\marginpar} 环境即可.
+当然你也可以把子目录放入边注中，类似于 Memoir 文档类中提供的效果：只需把 \cmd{\zlatexPartialToc} 命令放入 \cmd{\marginpar} 环境即可.
 
 \begin{remark}
 如果要在边注中放入子目录，那么可以考虑加载 \cmd{margin} 选项，否则 margin 过窄会导致子目录显示不协调，甚至是显示不全.

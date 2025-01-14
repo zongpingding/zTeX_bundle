@@ -18,7 +18,7 @@
   - [x] How to choose appropriate command names for these alias? (package `bm` has been removed from zlatex)
   - [x] fixed wrong space after these new math operator and before a binary symbol, such as `\grad`
 - [ ] consider to remove `indextools` or add a hook for `\indexsetup{}` ? Or add a hook `\zlatex_hook_preamble_first:n` to load `indextools`?
-- [ ] replace `\str_...` functions with `\tl_...` for catcode reasons.
+- [x] replace `\str_...` functions with `\tl_...` for catcode reasons.
 - [ ] support language: france
 - [ ] Hook Managment:
     - [x] find out if `\zlatex_hook_preamble_last` is a reverse hook ? (It is NOT a reverse hook)
@@ -27,7 +27,7 @@
 - [ ] limit the scope of keys by `.usage:n`
 - [ ] replace the traditional mark system by New Mark mechanism introduced In June 2022.
 - [ ] add a entry `.color_set:n` in l3keys.
-- [ ] add `+=` keys assignment method.
+- [x] add `+=` keys assignment method.
 
 ## `indexref` module 
 - [x] Set default `hyperref` and `biblatex` a group, Don't loading them by default
@@ -104,13 +104,14 @@
 - [ ] make `\part`, `\chapter` etc. a single line(cross columns) in multi-columns toc. See `toc_interface` folder in `New_feature` dir.
 - [x] weired vspace in  `\partialToC`. Consider add a `\stopcontents` before the next chapter automatically (or set up this function for `section` counter). Add this function to doc. 
 - [ ] use the internal macro `\@writefile{toc}{< token list >}` to write to toc file or use `l3-file-system` related functions ?
-
+- [ ] wrong baselinestretch when use command `\renewcommand{\baselinestretch}{1.3}\normalsize` after `\@starttoc`, maybe use another method to archieve this feature. REF: [baselinestretch vs. setspace](https://tex.stackexchange.com/a/79155/294585).
 
 
 ## `pageinfo` module
 - [x] make layout spec more flexible, pre-defined some layouts in class ?
 - [x] when to use `\pagestyle{}` in `book/article` class
 - [ ] Remove `fancyhdr` package, make a more flexible(which means add page info any where) `page-info` interface. Probably by LaTeX hooks ?
+- [x] add `\zlatexPageMask` command to add watermark.
 
 
 ## `font` module 

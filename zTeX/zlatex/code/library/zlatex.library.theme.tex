@@ -1,4 +1,192 @@
-\ProvidesExplFile{zlatex.library.theme.tex}{2024/10/24}{1.0.0}{theme~library~for~zlatex}
+\ProvidesExplFile{zlatex.library.theme.tex}{2024/12/17}{1.0.0}{theme~library~for~zlatex}
 
 
 %%%%%     theme library for zlatex thm and structure    %%%%%
+%% ==> new thm theme
+% preamble
+\RequirePackage[many]{tcolorbox}
+\RequirePackage{adjustbox}
+\RequirePackage{tikz}
+\RequirePackage{etoolbox}
+\patchcmd{\pgfutil@InputIfFileExists}{\input #1}{
+  \@pushfilename
+  \xdef\@currname{#1}
+  \input #1
+  \@popfilename
+}{}{}
+\usetikzlibrary{fadings, calc}
+\RequirePackage{pifont}
+
+% thm icon interface
+\prop_new:N \g__zlatex_thm_icon_prop
+\prop_gclear:N \g__zlatex_thm_icon_prop
+\prop_gput_from_keyval:cn {g__zlatex_thm_icon_prop}
+  {
+    axiom       = \ding{111},
+    definition  = \ding{118}, 
+    theorem     = \ding{169}, 
+    lemma       = \ding{170},
+    corollary   = \ding{168}, 
+    proposition = \ding{125}, 
+    remark      = \ding{46},
+    proof       = , 
+    exercise    = \ding{45},
+    example     = ,
+    solution    = \ding{45}, 
+    problem     = ,
+  }
+
+% thm additional theme
+\zlatexThmStyleNew{
+  % theme shadow: copy from an old book
+  shadow = {
+    begin = {
+      \begin{tcolorbox}[
+        enhanced~ jigsaw, breakable,
+        top=1.5pt,  bottom=1.5pt,
+        left=3pt,   right=3pt,
+        boxrule=0pt, sharp~corners,
+        drop~fuzzy~shadow,
+        colback={\thm@temp@color!10}, 
+        borderline~west={3pt}{0pt}{\thm@temp@color}
+      ]
+    },
+    end = {\end{tcolorbox}},
+    option = {
+      \__zlatex_thm_title_inline:n {T}
+      \__zlatex_thm_tcolorbox_warning:
+    }
+  },
+  % theme paris from: An internet sketch book
+  paris = {
+    begin = {
+      \begin{tcolorbox}[
+        enhanced,   breakable,
+        top=1.5pt,  bottom=1.5pt,
+        left=3pt,   right=3pt,
+        boxrule=0pt,    sharp~corners,
+        colback=gray!5, drop~fuzzy~shadow,
+        overlay={
+          \draw[\thm@temp@color, line~width=0.2pt] (frame.north~west)--(frame.north~east);
+          \draw[\thm@temp@color, line~width=3pt] ([yshift=1.5pt]frame.north~west) -- +(2.5cm, 0);
+        }
+      ]  
+    },
+    end = {\end{tcolorbox}},
+    option = {
+      \__zlatex_thm_title_inline:n {T}
+      \__zlatex_thm_tcolorbox_warning:
+    }
+  },
+  % elegant theme from: ElegantLaTeX Project
+  elegant = {
+    begin = {
+      \begin{tcolorbox}[
+        enhanced,   breakable,
+        top=8pt,    bottom=1.5pt,
+        left=3pt,   right=3pt,
+        arc=3pt,    boxrule=0.5pt,
+        before~upper*={\setlength{\parindent}{1em}},
+        fontupper=\rmfamily,   fonttitle=\bfseries,
+        lower~separated=false, separator~sign={.},
+        attach~boxed~title~to~top~left={yshift=-0.11in, xshift=0.15in},
+        boxed~title~style={boxrule=0pt, colframe=white, arc=0pt, outer~arc=0pt},
+        title=\zlatexThmTitle,
+        coltitle = white,           colbacktitle = \thm@temp@color,
+        colframe = \thm@temp@color, colback  = \thm@temp@color!5,
+      ]
+    },
+    end = {\end{tcolorbox}},
+    option = {
+      \__zlatex_thm_title_inline:n {F}
+      \__zlatex_thm_tcolorbox_warning:
+      \zlatex_keys_set:nn {color}{
+        axiom       = {HTML}{2c3e50},
+        definition  = {RGB}{0, 166, 82},
+        theorem     = {RGB}{255, 134, 23},
+        lemma       = {RGB}{255, 134, 23},
+        corollary   = {RGB}{255, 134, 23},
+        proposition = {RGB}{0, 173, 247},
+      }
+    }
+  },
+  % obsidian theme from: obsidian plug 'Callouts'
+  obsidian = {
+    begin = {
+      \begin{tcolorbox}[
+        enhanced,   breakable,
+        top=5pt,    bottom=8pt,
+        left=10pt,  right=10pt,
+        arc=3pt,    frame~hidden, 
+        colback = \thm@temp@color!20,
+      ] { \zlatexThmTitle }\par
+    },
+    end = {\end{tcolorbox}},
+    preamble = {
+      \zlatexThmTitleFormat*{
+        \def\temp@icon{\prop_item:ce {g__zlatex_thm_icon_prop}{\thm@temp@name}}
+        \noindent\sffamily\bfseries\textcolor{\thm@temp@color}{
+          \temp@icon\ \zlatexThmName :\zlatexThmNumber
+          \zlatexThmNoteEmptyTF{}{\ }
+          \zlatexThmNote{}{}\ \raise7pt\hbox{\rotatebox{-90}{\(\triangleright\)}}
+        }
+      }
+    },
+    option = {
+      \__zlatex_thm_title_inline:n {F}
+      \__zlatex_thm_tcolorbox_warning:
+    }
+  },
+  % lapsis theme from: book 'Foundation Mathematics for the Physical Sciences'
+  % NOTE: 'overlay' --> 'frame~code~app' ???
+  lapsis = {
+    begin = {
+      \begin{tcolorbox}[
+        enhanced,  breakable,
+        top=1.5pt, bottom=1.5pt,
+        left=2pt,  leftlower=-3pt,
+        right=3pt, arc=0pt, frame~hidden,
+        bicolor,   colback=\thm@temp@color!60,
+        opacitybacklower=0,
+        overlay~first = {
+          \fill[color=\thm@temp@color!50, path~fading=east] 
+            (frame.north~west)++(-5cm, -1pt) rectangle ($(frame.south~east)+(5cm, 0pt)$);
+          \draw[color=\thm@temp@color, thick] 
+            (frame.north~west)++(-5cm, -1pt)--($(frame.north~east)+(5cm, 0pt)$);
+        },
+        overlay~last={
+          \draw[color=\thm@temp@color, thick] 
+            (frame.south~west)++(-5cm, -1pt)--($(frame.south~east)+(5cm, 0pt)$);
+          \fill[color=\thm@temp@color!50, path~fading=east] 
+            (frame.north~west)++(-5cm, -1pt) rectangle ($(frame.south~east)+(5cm, 0pt)$);
+        },
+        overlay~unbroken={
+          \fill[color=\thm@temp@color!50, path~fading=east] 
+            (frame.north~west)++(-5cm, -1pt) rectangle ($(frame.south~east)+(5cm, 0pt)$);
+          \draw[color=\thm@temp@color, thick] 
+            (frame.north~west)++(-5cm, -1pt)--($(frame.north~east)+(5cm, 0pt)$);
+          \draw[color=\thm@temp@color, thick] 
+            (frame.south~west)++(-5cm, -1pt)--($(frame.south~east)+(5cm, 0pt)$);
+        },
+      ]\zlatex@llapnote{\zlatexThmTitle}
+    },
+    end = {\hfill$\mathcolor{\thm@temp@color}{\blacktriangleleft}$\end{tcolorbox}},
+    option = {
+      \__zlatex_thm_title_inline:n {F}
+      \__zlatex_thm_tcolorbox_warning:
+    },
+    preamble = {
+      \DeclareMathSymbol{\blacktriangleleft}{\mathrel}{AMSa}{"4A}
+      \zlatexThmTitleFormat*{\bfseries
+        \zlatexThmName\ \zlatexThmNumber
+        \zlatexThmNoteEmptyTF{}{\\}
+        \zlatexThmNote{}{}
+      }
+      \newcommand{\zlatex@llapnote}[1]{
+        \mbox{}\llap{
+        \adjustbox{set~height=0pt, set~depth=0pt}{
+          \parbox[t]{2.85cm}{\raggedleft #1}}\hspace*{.75em}}
+      }
+    }
+  },
+}

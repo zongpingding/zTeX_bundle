@@ -29,6 +29,7 @@
       [[.\node[normalKey] {class}; 
         [.\node[normalKey, fill=Blue] (articleL) {article};  ]
         [.\node[normalKey] {book};     ]
+        [.\node[normalKey] {l3doc};     ]
         [.\node[normalKey] (ctexbookR) {ctexbook}; ]
       ]]
       [.\node[normalKey] (classOptionC) {classOption};]
@@ -36,13 +37,14 @@
       [[[[.\node[metaKey] {layout}; 
         [.\node[boolKey]   {margin}; ]
         [.\node[boolKey]   {slide};  ]
-        [.\node[boolKey]   {theme};  ]
+        [.\node[normalKey] {theme};  ]
         [.\node[normalKey] {aspect}; ]
       ]]]]
       [[[.\node[metaKey] {section};]] ]
       [.\node[metaKey] {toc};
         [.\node[normalKey] {column}; ]
         [.\node[normalKey] {title}; ]
+        [.\node[normalKey] {stretch}; ]
         [.\node[normalKey] {title-vspace}; ]
       ]
       [.\node[metaKey] {mathSpec};
@@ -53,6 +55,9 @@
             [.\node[normalKey] {fancy};      ]
             [.\node[normalKey] {shadow};     ]
             [.\node[normalKey] {paris};      ]
+            [.\node[normalKey] {elegant};    ]
+            [.\node[normalKey] {lapsis};     ]
+            [.\node[normalKey] {obsdian};    ]
         ]
         [[.\node[normalKey] {font}; 
           [.\node[normalKey] {newtx}; ]
@@ -74,8 +79,8 @@
     ]
   % lines
   \draw (articleL.south) |- ++(0, -1.5em) -| (ctexbookR.south);
-  \draw ($(articleL.south)+(3em, -2.5em)$)node[draw, rectangle, below] {Valid Options} -- ++(0, 1em);
-  \draw[->, dashed] ($(articleL.south)+(6.4em, -3.3em)$) -| (classOptionC);
+  \draw ($(articleL.south)+(5em, -2.5em)$)node[draw, rectangle, below] {Valid Options} -- ++(0, 1em);
+  \draw[->, dashed] ($(articleL.south)+(8.4em, -3.3em)$) -| (classOptionC);
   % annotatations
   \node[text=Blue, rectangle, draw] at ($(annotateC)+(0, -8em)$)  {\texttt{default Value}};
   \node[boolKey] at ($(annotateC)+(0, -10em)$)  {Bool Value};

@@ -1,4 +1,4 @@
-\ProvidesExplFile{zlatex.module.indexref.tex}{2024/10/24}{1.0.0}{indexref~module~for~zlatex}
+\ProvidesExplFile{zlatex.module.indexref.tex}{2024/12/17}{1.0.0}{indexref~module~for~zlatex}
 
 
 %%%%%     index/ref for zlatex     %%%%%
@@ -21,10 +21,13 @@
 % ==> provide command
 \ProvideDocumentCommand\hyper@anchor{m}{}
 \ProvideDocumentCommand\hyper@link{mmm}{}
+\ProvideDocumentCommand{\hyper@linkstart}{mmm}{}
+\ProvideDocumentCommand{\hyper@linkend}{}{}
 \ProvideDocumentCommand\MakeLinkTarget{sO{}m}{}
 \ProvideDocumentCommand\LinkTargetOn{}{}
 \ProvideDocumentCommand\LinkTargetOff{}{}
 \ProvideDocumentCommand\NextLinkTarget{m}{}
+\ProvideDocumentCommand\SetLinkTargetFilter{m}{}
 
 
 % ==> figure and table prefix for \cref 

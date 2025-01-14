@@ -1,4 +1,4 @@
-\ProvidesExplFile{zlatex.module.thm.tex}{2024/10/24}{1.0.0}{thm~module~for~zlatex}
+\ProvidesExplFile{zlatex.module.thm.tex}{2024/12/17}{1.0.0}{thm~module~for~zlatex}
 
 
 %%%%%     Math-envs for zlatex     %%%%%
@@ -72,6 +72,9 @@
 % ==> thm module tools
 \NewDocumentCommand{\zlatexThmLang}{m}{
   \tl_gset:Nn \g__zlatex_lang_math_tl {#1}
+  \prop_set_eq:cc 
+    {g__zlatex_thm_name_prop}
+    {g__zlatex_thm_name_\g__zlatex_lang_math_tl _prop}
 }
 \prop_new:c {g__zlatex_thm_name_prop}
 \prop_gclear:c {g__zlatex_thm_name_prop}
@@ -93,7 +96,11 @@
 % create new thm env
 \cs_new:Npn \__zlatex_mid_first:w #1|#2\q_stop {#1}
 \cs_new:Npn \__zlatex_thm_color_set:w #1\q_stop #2|#3\q_stop 
-  { \zlatex_keys_set:nn {color}{#1=#3} }
+  { 
+    \tl_if_empty:eTF {#3}
+      {\zlatex_keys_set:nn {color}{#1=black}} 
+      {\zlatex_keys_set:nn {color}{#1=#3}} 
+  }
 \cs_new:Npn \__zlatex_color_keyval_add:n #1 {
   \zlatex_keys_define:nn {color}{
     #1 .tl_set:c  = { l__zlatex_#1_color_tl },
@@ -121,7 +128,7 @@
     { #2 }
   }
 }
-\@onlypreamble\zlatexThmCreate
+% \@onlypreamble\zlatexThmCreate
 
 
 % ==> new thm style interface
@@ -137,6 +144,17 @@
     #1 / begin    .tl_gset:c = { g__zlatex_thm_style_#1_begin_tl },
     #1 / end      .tl_gset:c = { g__zlatex_thm_style_#1_end_tl },
     #1 / option   .tl_gset:c = { g__zlatex_thm_style_#1_option_tl }, 
+    #1 / preamble .code:n    = { 
+      % NOTE:
+      % 1. thm preamble can be only set by one style
+      % 2. '\g__zlatex_thm_style_tl' need to be set 
+      %       before '\zlatexloadlibrary{theme}'
+      \tl_if_eq:cnT {g__zlatex_thm_style_tl}{#1}{
+        % \hook_gremove_code:nn {env/document/before}{zlatex-thm-preamble}
+        \zlatex_label_hook_preamble_last:nn 
+          {zlatex-thm-preamble}{##1} 
+      }
+    },
   }
   \zlatex_keys_set:nn { thm/style }{ #1={#2} }
 }
@@ -149,6 +167,8 @@
     {\bool_gset_true:N \g__zlatex_thm_title_inline_bool}
     {\bool_gset_false:N \g__zlatex_thm_title_inline_bool}
 }
+% tcolorbox and tikz warning if missing 
+%             when create new thm style
 \zlatex_msg_set:nn {mathEnv-dependency}{
   MathEnv~style:'\g__zlatex_thm_style_tl'~requires~package~'tcolorbox'~and~'tikz',~and~
   either~of~which~hasn't~been~loaded~in~your~preamble.~Reset~to~default~'plain'~style~now.
@@ -189,82 +209,13 @@
     end = {\endMakeFramed},
     option = { \__zlatex_thm_title_inline:n {T} }
   },
-  shadow = {
-    begin = {
-      \begin{tcolorbox}[
-        enhanced~ jigsaw, breakable,
-        top=1.5pt,  bottom=1.5pt,
-        left=3pt,   right=3pt,
-        boxrule=0pt, sharp~corners,
-        drop~fuzzy~shadow,
-        colback={\thm@temp@color!10}, 
-        borderline~west={3pt}{0pt}{\thm@temp@color}
-      ]
-    },
-    end = {\end{tcolorbox}},
-    option = {
-      \__zlatex_thm_title_inline:n {T}
-      \__zlatex_thm_tcolorbox_warning:
-    }
-  },
-  paris = {
-    begin = {
-      \begin{tcolorbox}[
-        enhanced,   breakable,
-        top=1.5pt,  bottom=1.5pt,
-        left=3pt,   right=3pt,
-        boxrule=0pt,    sharp~corners,
-        colback=gray!5, drop~fuzzy~shadow,
-        overlay={
-          \draw[\thm@temp@color, line~width=0.2pt] (frame.north~west)--(frame.north~east);
-          \draw[\thm@temp@color, line~width=3pt] ([yshift=1.5pt]frame.north~west) -- +(2.5cm, 0);
-        }
-      ]  
-    },
-    end = {\end{tcolorbox}},
-    option = {
-      \__zlatex_thm_title_inline:n {T}
-      \__zlatex_thm_tcolorbox_warning:
-    }
-  },
-  elegant = {
-    begin = {
-      \begin{tcolorbox}[
-        enhanced,   breakable,
-        top=8pt,    bottom=1.5pt,
-        left=3pt,   right=3pt,
-        arc=3pt,    boxrule=0.5pt,
-        before~upper*={\setlength{\parindent}{1em}},
-        fontupper=\rmfamily,   fonttitle=\bfseries,
-        lower~separated=false, separator~sign={.},
-        attach~boxed~title~to~top~left={yshift=-0.11in, xshift=0.15in},
-        boxed~title~style={boxrule=0pt, colframe=white, arc=0pt, outer~arc=0pt},
-        title=\zlatexThmTitle,
-        coltitle = white,           colbacktitle = \thm@temp@color,
-        colframe = \thm@temp@color, colback  = \thm@temp@color!5,
-      ]
-    },
-    end = {\end{tcolorbox}},
-    option = {
-      \__zlatex_thm_title_inline:n {F}
-      \__zlatex_thm_tcolorbox_warning:
-      \zlatex_keys_set:nn {color}{
-        axiom       = {HTML}{2c3e50},
-        definition  = {RGB}{0, 166, 82},
-        theorem     = {RGB}{255, 134, 23},
-        lemma       = {RGB}{255, 134, 23},
-        corollary   = {RGB}{255, 134, 23},
-        proposition = {RGB}{0, 173, 247},
-      }
-    }
-  },
 }
 
 
 % ==> thm format and style setup
 \zlatex_msg_set:nn {mathEnv-style}{
   You~use~an~incorrect~MathEnv~style:~'\g__zlatex_thm_style_tl',~All~valid~
-  MathEnv~are:'plain',~'leftbar',~'background',~'fancy',~'shadow',~'paris'.
+  MathEnv~are:'plain',~'leftbar',~'ba\zlatexThmNameckground',~'fancy',~'shadow',~'paris'.
 }
 % thm counter
 \bool_new:N \g__zlatex_thm_cntshare_bool
@@ -283,6 +234,7 @@
 % thm env warper
 \cs_new:Npn \__zlatex_thm_warp_start:nnnn #1#2#3#4 {
   \def\thm@temp@color{\tl_use:c {l__zlatex_#1_color_tl}}
+  \def\thm@temp@name{#1}
   \__zlatex_thm_title_item:nnnn {#1}{#2}{#3}{#4}
   \tl_use:c {g__zlatex_thm_style_\g__zlatex_thm_style_tl _option_tl}
   \tl_if_exist:cTF {g__zlatex_thm_style_\g__zlatex_thm_style_tl _begin_tl}
@@ -312,7 +264,10 @@
 \NewHook{zlatex/thm/titleformat}
 \cs_new:Npn \__zlatex_thm_title_item:nnnn #1#2#3#4 {
   \tl_set:Nn \l_tmpa_tl {\exp_not:n {#2}}
-  \cs_set:Npn \zlatexThmName {\prop_item:cn {g__zlatex_thm_name_prop}{#1}}
+  \cs_set:Npn \zlatexThmName {
+    % \textcolor{\tl_use:c {l__zlatex_#1_color_tl}}
+      {\prop_item:cn {g__zlatex_thm_name_prop}{#1}}
+    }
   \cs_set:Npn \zlatexThmNote ##1##2
     {
       \tl_if_empty:nF {#2}
@@ -385,7 +340,7 @@
     name      .tl_set:N  = \l__zlatex_add_thm_toc_name_tl,
     name      .initial:n = { ?? },
   }
-\NewDocumentCommand{\zlatexThmSecAdd}{om}{
+\NewDocumentCommand{\zlatexThmTocAdd}{om}{
   \group_begin:
   \zlatex_keys_set:nn {thm/add}{#1}
   \__zlatex_thm_toc_add:nnee {#2}
@@ -400,29 +355,13 @@
     \tl_gset:Nn \g__zlatex_thm_table_level {#1}
   }
 \@onlypreamble\zlatexThmTocLevel
-\zlatex_keys_define:nn {thm/toc}
-  {
-    title         .tl_gset:N  = \g__zlatex_thm_toc_title_tl,
-    title         .initial:n  = { \Large\bfseries List\ of\ Theorems },
-    title-vspace  .dim_gset:N = \g__zlatex_thm_toc_title_vspace_dim,
-    title-vspace  .initial:n  = { 0pt },
-    after-vspace  .dim_gset:N = \g__zlatex_thm_toc_after_vspace_dim,
-    after-vspace  .initial:n  = { 0pt },
-    stretch       .fp_gset:N  = \g__zlatex_thm_toc_stretch_fp,
-    stretch       .initial:n  = { 1 },
-  }
-\NewDocumentCommand{\zlatexThmToc}{o}
+\NewDocumentCommand{\zlatexThmToc}{O{1}}
   {
     \bool_gset_true:N \g__zlatex_thm_toc_bool
     \group_begin:
-    \IfValueT {#1}{\zlatex_keys_set:nn {thm/toc}{#1}}
     \legacy_if_set_false:n { @filesw }  
-    {\noindent\tl_use:c {g__zlatex_thm_toc_title_tl}}
-    \addvspace{\fp_to_dim:n {\g__zlatex_thm_toc_stretch_fp*\baselineskip}}
-    \addvspace{\g__zlatex_thm_toc_title_vspace_dim}
-    \renewcommand{\baselinestretch}{\fp_use:N \g__zlatex_thm_toc_stretch_fp}\normalsize 
-    \@starttoc{ thlist }
-    \addvspace{\g__zlatex_thm_toc_after_vspace_dim}
+    \renewcommand{\baselinestretch}{#1}\normalsize 
+    \@input{\jobname.thlist}
     \group_end:
   }
 % thm toc symbols
@@ -446,25 +385,25 @@
 
 
 % ==> thm env definition
-\NewHook{zlatex/thmstyle/before}
-\NewHook{zlatex/thmstyle/begin}
-\NewReversedHook{zlatex/thmstyle/end}
-\NewReversedHook{zlatex/thmstyle/after}
+\NewHook{zlatex/thm/before}
+\NewHook{zlatex/thm/begin}
+\NewReversedHook{zlatex/thm/end}
+\NewReversedHook{zlatex/thm/after}
 \zlatex_label_hook_preamble_last:nn {zlatex-thmptheorem-setup-inner}{
   \newcounter{zlatex@thm@sharecnt}[\g__zlatex_thm_cntparent_tl]
   \clist_map_inline:Nn \g__zlatex_thm_theorem_clist {
     \newcounter{#1}[\g__zlatex_thm_cntparent_tl]
     \__zlatex_cref_math_env:n {#1}
     \DeclareDocumentEnvironment{#1}{O{}}{
-      \UseHook{zlatex/thmstyle/before}
+      \UseHook{zlatex/thm/before}
       \__zlatex_thm_warp_start:nnnn {#1}{##1}{\bfseries}{\ }
       \MakeLinkTarget*{#1.\zlatexThmNumber}\__zlatex_thm_title:   
-      \UseHook{zlatex/thmstyle/begin}
+      \UseHook{zlatex/thm/begin}
       \peek_remove_spaces:n             
     }{
-      \UseHook{zlatex/thmstyle/end}
+      \UseHook{zlatex/thm/end}
       \__zlatex_thm_warp_end:n {#1}
-      \UseHook{zlatex/thmstyle/after}
+      \UseHook{zlatex/thm/after}
     }
   }
 }
@@ -488,20 +427,27 @@
       \cs_set:Npn \__zlatex_hook_add:nn ##1##2
         {
           \int_gincr:N \g__zlatex_thm_hook_index_int
-          \hook_gput_code:nen {zlatex/thmstyle/##1}
+          \hook_gput_code:nen {zlatex/thm/##1}
             {thm-hook.\int_use:N \g__zlatex_thm_hook_index_int}{##2}
         }
     }{
       \cs_set:Npn \__zlatex_hook_add:nn ##1##2
         {
           \int_gincr:N \g__zlatex_thm_hook_index_int
-          \hook_gput_next_code:nn {zlatex/thmstyle/##1}{##2} 
+          \hook_gput_next_code:nn {zlatex/thm/##1}{##2} 
         }
     }
   \keyval_parse:NNn 
     \use_none:n
     \__zlatex_hook_add:nn {#2}
 }
+\hook_gput_code:nnn {zlatex/thm/before}{thm-before-par}{\par}
+\NewDocumentCommand{\zlatexThmBefore}{+m}
+  {
+    \hook_gremove_code:nn {zlatex/thm/before}{thm-before-par}
+    \hook_gput_code:nnn {zlatex/thm/before}{thm-before-par}{#1}
+  }
+\@onlypreamble\zlatexThmBefore
 \DeclareHookRule{env/document/before}
   {zlatex-thmall-setup-user}{<}{zlatex-thmptheorem-setup-inner}
 \DeclareHookRule{env/document/before}

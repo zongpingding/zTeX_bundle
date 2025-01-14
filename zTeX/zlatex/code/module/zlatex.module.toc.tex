@@ -1,4 +1,4 @@
-\ProvidesExplFile{zlatex.module.toc.tex}{2024/10/24}{1.0.0}{toc~module~for~zlatex}
+\ProvidesExplFile{zlatex.module.toc.tex}{2024/12/17}{1.0.0}{toc~module~for~zlatex}
 
 
 %%%%%     toc setup module for zlatex     %%%%%
@@ -19,18 +19,18 @@
     \renewcommand{\baselinestretch}{\fp_use:N \g__zlatex_toc_stretch_fp}\normalsize 
   }
   \AddToHookNext{cmd/@starttoc/after}{
-    \renewcommand{\baselinestretch}{1.0}\normalsize 
+    \renewcommand{\baselinestretch}{1.3}\normalsize 
   }
 }
 
 
 % ==> partial ToC
 \RequirePackage{titletoc}
-\NewDocumentCommand\stopPartToc{mm}{
+\NewDocumentCommand\zlatexPartialTocStop{mm}{
   \int_compare:nNnTF {#2}<{1}
     {\relax}{\stopcontents[#1]}
 }
-\NewDocumentCommand{\partialToc}{O{2}}{
+\NewDocumentCommand{\zlatexPartialToc}{O{2}}{
   % toc depth
   \setcounter{tocdepth}{#1} 
   \titlecontents{psection}[2em]
@@ -43,10 +43,10 @@
   \IfClassLoadedTF{book}{ 
     \startcontents[chapters]
     \printcontents[chapters]{p}{1}{}
-    \AddToHook{cmd/chapter/before}{\stopPartToc{chapters}{\thechapter}}
+    \AddToHook{cmd/chapter/before}{\zlatexPartialTocStop{chapters}{\thechapter}}
   }{
     \startcontents[sections]
     \printcontents[sections]{p}{1}{}
-    \AddToHook{cmd/section/before}{\stopPartToc{section}{\thesection}}
+    \AddToHook{cmd/section/before}{\zlatexPartialTocStop{section}{\thesection}}
   }
 }

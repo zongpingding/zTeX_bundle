@@ -1,4 +1,4 @@
-\ProvidesExplFile{zlatex.library.slide.tex}{2024/10/24}{1.0.0}{slide~library~for~zlatex}
+\ProvidesExplFile{zlatex.library.slide.tex}{2024/12/17}{1.0.0}{slide~library~for~zlatex}
 
 
 %%%%%     slide/presentation library for zlatex     %%%%%
@@ -124,33 +124,34 @@
       {\rule{1\paperwidth}{1\paperheight}}}
   }
 \AddToHook{shipout/background}{
-  \_zslide_status_bar:nnnn {(0, -.9em)}{UL}{.5}{1.25em}
-  \_zslide_status_bar:nnnn {(.5\paperwidth, -.9em)}{UR}{.5}{1.25em}
-  \_zslide_status_bar:nnnn {(0, -\paperheight)}{BL}{.33}{.9em}
-  \_zslide_status_bar:nnnn {(.33\paperwidth, -\paperheight)}{BC}{.34}{.9em}
-  \_zslide_status_bar:nnnn {(.67\paperwidth, -\paperheight)}{BR}{.33}{.9em}
-  \bool_if:NT \g_new_sec_bool {\_zslide_status_bar:nnnn {(0, -2.7em)}{sec}{1}{1.8em}}
+  \_zslide_status_bar:nnnn {UL}{(0,              -.9em)}{.5}{1.25em}
+  \_zslide_status_bar:nnnn {UR}{(.5\paperwidth,  -.9em)}{.5}{1.25em}
+  \_zslide_status_bar:nnnn {BL}{(0,              -\paperheight)}{.33}{.9em}
+  \_zslide_status_bar:nnnn {BC}{(.33\paperwidth, -\paperheight)}{.34}{.9em}
+  \_zslide_status_bar:nnnn {BR}{(.67\paperwidth, -\paperheight)}{.33}{.9em}
+  \bool_if:NT \g_new_sec_bool {
+  \_zslide_status_bar:nnnn {sec}{(0, -2.7em)}{1}{1.8em}}
 }
 \AddToHook{shipout/foreground}{
-  \_slide_status_metadate:nnn {head}{0}  {.5}{ \hfill\_slide_metadate:n {UL}\  }
-  \_slide_status_metadate:nnn {head}{.5} {.5}{ \ \_slide_metadate:n {UR}\hfill }
-  \_slide_status_metadate:nnn {foot}{0}  {.33}{ \hfill\_slide_metadate:n {BL}\hfill }
-  \_slide_status_metadate:nnn {foot}{.33}{.34}{ \hfill\_slide_metadate:n {BC}\hfill }
-  \_slide_status_metadate:nnn {foot}{.67}{.33}{ \hfill\_slide_metadate:n {BR}\quad  }
+  \_zslide_status_info:nnnn {head}{ 0 }{.5 }{ \hfill\_zslide_metadate:n {UL}\  }
+  \_zslide_status_info:nnnn {head}{.5 }{.5 }{ \ \_zslide_metadate:n {UR}\hfill }
+  \_zslide_status_info:nnnn {foot}{ 0 }{.33}{ \hfill\_zslide_metadate:n {BL}\hfill }
+  \_zslide_status_info:nnnn {foot}{.33}{.34}{ \hfill\_zslide_metadate:n {BC}\hfill }
+  \_zslide_status_info:nnnn {foot}{.67}{.33}{ \hfill\_zslide_metadate:n {BR}\quad  }
   \exp_args:Ne \hyper@anchor{zslide@\FirstMark{zslide-left}.\int_use:N \g__zlatex_slide_framecnt_int}
 }
 \cs_new_protected:Npn \_zslide_status_bar:nnnn #1#2#3#4 {
   \ifnum\thepage=0\else
-    \put#1 {\textcolor{\tl_use:c {l__zlatex_slide_#2_bg_tl}}{\rule{#3\paperwidth}{#4}}}
+    \put#2 {\textcolor{\tl_use:c {l__zlatex_slide_#1_bg_tl}}{\rule{#3\paperwidth}{#4}}}
   \fi
 }
-\cs_new_protected:Npn \_slide_status_metadate:nnn #1#2#3#4 {
+\cs_new_protected:Npn \_zslide_status_info:nnnn #1#2#3#4 {
   \ifnum\thepage=0\else\str_case:nn {#1}{ 
     {head} {\put(#2\paperwidth, -.9em+2.5pt) {\hbox~ to~ #3\paperwidth {#4}}}
     {foot} {\put(#2\paperwidth, -\paperheight+2.5pt) {\hbox~ to~ #3\paperwidth {#4}}}
   }\fi
 }
-\cs_set:Npn \zslide@navigate:nnnn #1#2#3#4 {
+\cs_set:Npn \_zslide_navigate:nnnn #1#2#3#4 {
   \int_step_inline:nnn {1}{#1}{
     \int_compare:nNnTF {#2} = {##1}
       {\bool_if:NTF \g__zlatex_hyperref_bool
@@ -213,9 +214,9 @@
   toc / label / chapter         .tl_set:N  = \l__zlatex_slide_toc_label_chapter_tl,
   toc / label / chapter         .initial:n = { \zslideToclabelSet[.25em]{\thecontentslabel.} },
   toc / label / section         .tl_set:N  = \l__zlatex_slide_toc_label_section_tl,
-  toc / label / section         .initial:n = { \zslideToclabelSet[.25em]{\zslidesecIcon} },
+  toc / label / section         .initial:n = { \zslideToclabelSet[.25em]{\zslideTocSecIcon} },
   toc / label / subsection      .tl_set:N  = \l__zlatex_slide_toc_label_subsection_tl,
-  toc / label / subsection      .initial:n = { \zslideToclabelSet[.5em]{\zslidesubsecIcon} },
+  toc / label / subsection      .initial:n = { \zslideToclabelSet[.5em]{\zslideTocSubsecIcon} },
   toc / suffix                  .meta:nn   = { zlatex / slide / toc / suffix }{#1},
   toc / suffix / chapter        .tl_set:N  = \l__zlatex_slide_toc_suffix_chapter_tl,
   toc / suffix / chapter        .initial:n = {  },
@@ -240,7 +241,7 @@
     }
   }
 }
-\cs_new_protected:Npn \_slide_metadate:n #1 {
+\cs_new_protected:Npn \_zslide_metadate:n #1 {
   {\scriptsize\textcolor{\tl_use:c {l__zlatex_slide_#1_fg_tl}}
     {\tl_use:c {l__zlatex_slide_#1_text_tl}}}
 }
@@ -248,7 +249,7 @@
 
 % ==> zslide custom interface
 % zslide users' tools
-\NewDocumentCommand{\zslideFrame}{m}{%
+\NewDocumentCommand{\zslideFrameTotal}{m}{%
   \cs_if_exist:cTF {zsec@#1@cnt}
     {\cs:w zsec@#1@cnt\cs_end:}
     {??}
@@ -259,8 +260,8 @@
 \NewDocumentCommand{\zslideNavigateBall}{O{\(\bullet\)}O{\(\circ\)}}
   {
     \cs_if_exist:cTF {zsec@\Roman{section}@cnt}
-      {\zslide@navigate:nnnn 
-        {\zslideFrame{\Roman{section}}}
+      {\_zslide_navigate:nnnn 
+        {\zslideFrameTotal{\Roman{section}}}
         {\zslideFrameIndex}
         {\textcolor{\l__zlatex_slide_UR_fg_tl}{#1}}
         {\textcolor{\l__zlatex_slide_UR_fg_tl}{#2}}
@@ -305,13 +306,13 @@
     {}{\tl_use:c {l__zlatex_slide_toc_suffix_#1_tl}}
 }
 \setcounter{tocdepth}{2}
-\gdef\zslidesecIcon
+\gdef\zslideTocSecIcon
   {\box_move_up:nn {2pt}
     {\hbox:n {\ztool_resize_to_wd:nn 
       {6pt}{\(\blacktriangleright\)}}
     }
   }
-\gdef\zslidesubsecIcon{\rule[1.5pt]{3pt}{3pt}}
+\gdef\zslideTocSubsecIcon{\rule[1.5pt]{3pt}{3pt}}
 % \AddToHook{cmd/@starttoc/before}{\vspace*{\fill}}
 % \AddToHook{cmd/@starttoc/after}{\vspace*{\stretch{3}}}
 % slide mode setup interface

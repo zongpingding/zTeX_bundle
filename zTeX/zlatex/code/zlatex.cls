@@ -5,8 +5,8 @@
 \NeedsTeXFormat{LaTeX2e}
 \clist_const:Nn \c__zlatex_lang_support_clist    {en, cn}
 \tl_const:Nn \c__zlatex_class_name_tl            {zlatex}
-\tl_const:Nn \c__zlatex_class_version_tl         {1.1.0}
-\tl_const:Nn \c__zlatex_class_date_tl            {2024/10/25}
+\tl_const:Nn \c__zlatex_class_version_tl         {1.0.0}
+\tl_const:Nn \c__zlatex_class_date_tl            {2024/12/17}
 \tl_const:Nn \c__zlatex_class_description_tl     {A~pre-release~latex3~document~class~for~article,~book,~or~slides;
                                                   Support~languages:\clist_use:Nn \c__zlatex_lang_support_clist{,~}}
 
@@ -24,12 +24,12 @@
 \clist_gclear:N \g__zlatex_module_library_loaded_clist
 \cs_new_nopar:Npn \__zlatex_load_module_library:nn #1#2 {
   \clist_map_inline:nn {#2} {
-    \clist_if_in:NnTF \g__zlatex_module_library_loaded_clist {##1} {
+    \clist_if_in:NnTF \g__zlatex_module_library_loaded_clist {#1:##1} {
       \msg_set:nnn {zlatex} {#1-loaded} {zlatex~#1~"##1"~already~loaded,ignored~loading~\msg_line_context:}
       \msg_warning:nnn {zlatex} {#1-loaded} {##1}
     }{
       \file_if_exist:nTF {#1/zlatex.#1.##1.tex}{
-        \clist_gput_right:Nn \g__zlatex_module_library_loaded_clist {##1}
+        \clist_gput_right:Nn \g__zlatex_module_library_loaded_clist {#1:##1}
         \makeatletter\file_input:n {#1/zlatex.#1.##1.tex}
       }{
         \msg_set:nnn {zlatex} {#1-not-found} {zlatex~#1~`##1'~not~found.}
@@ -68,6 +68,12 @@
   { \keys_define:nn { zlatex / #1} }
 \cs_new_protected:Npn \zlatex_keys_set:nn #1
   { \keys_set:nn { zlatex / #1 } }
+\cs_new:Npn \__zlatex_plus_key_aux:nnn #1#2#3
+  {% #1:var; #2:p-key; #3:s-key
+    #2 / #3     .tl_set:N = \exp_not:c { #1 } ,
+    #2 / #3 +   .code:n   = { \tl_put_right:Nn \exp_not:c { #1 } { ##1 } } ,
+    #2 / #3 ~ + .code:n   = { \tl_put_right:Nn \exp_not:c { #1 } { ##1 } }
+  }
 
 
 
@@ -106,8 +112,6 @@
   Current~invalid~language~option~is:~'\g__zlatex_lang_str',~zlatex~only~
   support~'en(english)',~and~'cn(chinese)'~till~now.
 }
-
-
 
 
 
@@ -271,6 +275,10 @@
     \PassOptionsToPackage{quiet}{fontspec}
     \LoadClass{ctexbook}    
   }
+  {l3doc}{
+    \PassOptionsToClass{\g__zlatex_subclass_option_clist}{ l3doc }
+    \LoadClass{l3doc} 
+  }
 }{\zlatex_msg_error:n {option-subclass}}
 
 % baisc document class and packages option
@@ -296,7 +304,7 @@
     }
   }
   {cn} {
-    \sys_if_engine_xetex:F {
+    \sys_if_engine_pdftex:T {
       \zlatex_msg_set:nn {compile-engine-xetex}
         {Current~compile~engine~is~PDFTEX,~For~chinese~material,~use~XETEX~instead.}
       \zlatex_msg_error:n {compile-engine-xetex}
@@ -408,7 +416,7 @@
 % zlatex class options debug
 \newcommand{\zlatexOptions}{
   \textbf{Class~Options:}~
-  \str_use:N \g__zlatex_lang_str~-~
+  \str_use:N \g__zlatex_lang_str {~-~}
   \clist_use:Nn \g__zlatex_subclass_option_clist{~-~}
   \par
 }
@@ -421,6 +429,7 @@
     \MakeFramed{\advance\hsize-\width\FrameRestore}\noindent   
   }{\endMakeFramed}
 }
-\NewDocumentCommand\zlatexFramed{mO{black}}{
-  \zlatexFramed:nn {#1}{#2}
+\NewDocumentCommand\zlatexFramed{O{black}m}{
+  \zlatexFramed:nn {#2}{#1}
 }
+\NewDocumentCommand\zLaTeX{}{z\LaTeX{}}

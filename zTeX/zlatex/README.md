@@ -106,7 +106,7 @@ update `\zlatexverb`, now the definition is:
 
 This command act as an argument in another command, like:
 ```latex
-\foo{\zlatexVerb{<ARGUMENT>}}
+\foo{\zlatexVerb{⟨ARGUMENT⟩}}
 ```
 
 ### ztool package
@@ -201,7 +201,7 @@ zLaTeX now provides these hooks for users to use:
 > These functions now belongs to the group `Class Tools`.
 
 
-### thm title hook (TODO)
+### thm title hook
 There are 2 ways to set the title format of theorem-like envs:
 * hook with args:
 ```latex
@@ -273,6 +273,26 @@ There are 2 ways to set the title format of theorem-like envs:
 \end{document}
 ```
 
+**This feature has been implemented, see `thm` section for more info.**
+
+
+### page mask 
+There is a command `\zlatexPageMask`, syntax as follows:
+```latex 
+\zlatexPageMask*[
+  layer=⟨foreground/background⟩,
+  label=⟨label⟩,
+  anchor=⟨combinatrics of 't,b' and 'l,c,r'⟩,
+  position=⟨dim1, dim2⟩
+]
+\zlatexPagaMask[
+  % similar to the above, but ⟨label⟩ is not allowed.
+]{}
+\zlatexPageMaskRemove{⟨foreground/background>}{<label⟩}
+```
+
+Star Version command will leave content to all of the rest page, while the other only to current page. Hook rule of `pgfrcs` and `⟨zlatexPagemask⟩` has been fixed.
+
 ## key-value interface
 ### setup functions
 Now the key-value setup functions are:
@@ -289,11 +309,60 @@ Now the key-value setup functions are:
 
 > These functions now belongs to the group `Class Tools`.
 
+#### one-time labeled-hook 
+How to make a once hook with label, current survey about this feature:
+```latex 
+%%%%  LaTeX3  INTERNAL  %%%%
+\cs_new_protected:Npn \hook_gput_code:nnn #1 #2 #3
+  {
+    \__hook_replacing_args_false:
+    \__hook_normalize_hook_args:Nnn \__hook_gput_code:nnn {#1} {#2} {#3}
+    \__hook_replacing_args_reset:
+  }
+
+\cs_new_protected:Npn \hook_gput_next_code:nn #1#2
+  {
+    \__hook_replacing_args_false:
+    \__hook_normalize_hook_args:Nn \__hook_gput_next_code:nn {#1} {#2}
+    \__hook_replacing_args_reset:
+  }
+
+% \__hook_gput_code:nnn V.S. \__hook_gput_next_code:nn
+\cs_new_protected:Npn \__hook_gput_code:nnn #1 #2 #3
+  {
+    \__hook_chk_args_allowed:nn {#1} { AddToHook }
+    \__hook_if_execute_immediately:nTF {#1}
+      {
+        \__hook_if_replacing_args:TF
+          {
+            \msg_error:nnnn { hooks } { one-time-args }
+              {#1} { AddToHook }
+          }
+          { }
+        \use:n
+      }
+      { \__hook_gput_code_store:nnn {#1} {#2} }
+      { #3 }
+  }
+\cs_new_protected:Npn \__hook_gput_next_code:nn #1 #2
+  {
+    \__hook_if_disabled:nTF {#1}
+      { \msg_error:nnn { hooks } { hook-disabled } {#1} }
+      {
+        \__hook_if_structure_exist:nTF {#1}
+          { \__hook_gput_next_do:nn }
+          { \__hook_try_declaring_generic_next_hook:nn }
+            {#1} {#2}
+      }
+  }
+```
+
+It seems that there is no need to make such hook command ???
 
 ### key-value level
 Implement most commands with key-value interface, also re-orginiseed some key-value interface level.
 * reset the class k-v interface `XX` from `zlatex / XX` to `zlatex / option / XX`.
-* reset the keys in `zlatex / option / toc` to `column(<int>:1), title(<str>:\contentsname), title-vspace(<dim>:-2em)`.
+* reset the keys in `zlatex / option / toc` to `column(⟨int>:1), title(⟨str⟩:\contentsname), title-vspace(<dim⟩:-2em)`.
 * add `packageOption` k-v interface at k-v level `zlatex / option /`.
 
 Consider move `color` k-v interface to `zlatex / color`.
@@ -495,6 +564,109 @@ A new feature like this need to be added, similar to what `ctex` do:
 }
 ```
 
+#### reference
+The original source code in `ctexart.cls` as below:
+```latex 
+\cs_new_protected:Npn \__ctex_def_heading_keys:n #1
+  {
+    \exp_args:NNe \tl_put_right:Nn \l__ctex_tmp_tl
+      {
+        #1                  .meta:nn = { ctex / #1 } { ##1 } ,
+        #1 / name            .code:n =
+          { \ctex_assign_heading_name:nn {#1} { ##1 } } ,
+        #1 / number        .tl_set:N = \exp_not:c { CTEX@the#1 } ,
+        #1 / beforeskip    .tl_set:N = \exp_not:c { CTEX@#1@beforeskip } ,
+        #1 / afterskip     .tl_set:N = \exp_not:c { CTEX@#1@afterskip} ,
+        #1 / indent        .tl_set:N = \exp_not:c { CTEX@#1@indent } ,
+        #1 / numbering   .bool_set:N = \exp_not:c { CTEX@#1@numbering } ,
+        #1 / numbering    .initial:n = true ,
+        #1 / beforeskip   .initial:n = \c_zero_skip ,
+        #1 / afterskip    .initial:n = \c_zero_skip ,
+        #1 / indent       .initial:n = \c_zero_dim ,
+        #1 / beforeskip   .value_required:n = true ,
+        #1 / afterskip    .value_required:n = true ,
+        #1 / indent       .value_required:n = true ,
+        #1 / afterindent .bool_set:N = \exp_not:c { CTEX@#1@afterindent } ,
+        #1 / fixskip     .bool_set:N = \exp_not:c { CTEX@#1@fixskip } ,
+        #1 / hang        .bool_set:N = \exp_not:c { CTEX@#1@hang } ,
+        #1 / hang         .initial:n = true ,
+        #1 / runin       .bool_set:N = \exp_not:c { CTEX@#1@runin } ,
+        #1 / tocline      .cs_set:Np = \exp_not:c { CTEX@#1@tocline } ##1##2 ,
+        \__ctex_plus_key_aux:nn {#1} { break } ,
+        \__ctex_plus_key_aux:nn {#1} { format } ,
+        \__ctex_plus_key_aux:nn {#1} { nameformat } ,
+        \__ctex_plus_key_aux:nn {#1} { numberformat } ,
+        \__ctex_plus_key_aux:nn {#1} { titleformat } ,
+        \__ctex_plus_key_aux:nn {#1} { aftername } ,
+        \__ctex_plus_key_aux:nn {#1} { aftertitle } ,
+      }
+  }
+\cs_new:Npn \__ctex_plus_key_aux:nn #1#2
+  {
+    #1 / #2   .tl_set:N = \exp_not:c { CTEX@#1@#2 } ,
+    #1 / #2 +   .code:n =
+      { \tl_put_right:Nn \exp_not:c { CTEX@#1@#2 } { ##1 } } ,
+    #1 / #2 ~ + .code:n =
+      { \tl_put_right:Nn \exp_not:c { CTEX@#1@#2 } { ##1 } }
+  }
+```
+
+#### implement
+zlatex has added this feature, an minimal example as below:
+```latex 
+% zlatex.cls 
+\cs_new:Npn \__zlatex_plus_key_aux:nnn #1#2#3
+  {% #1:var; #2:p-key; #3:s-key
+    #2 / #3     .tl_set:N = \exp_not:c { #1 } ,
+    #2 / #3 +   .code:n   = { \tl_put_right:Nn \exp_not:c { #1 } { ##1 } } ,
+    #2 / #3 ~ + .code:n   = { \tl_put_right:Nn \exp_not:c { #1 } { ##1 } }
+  }
+
+% debug.tex
+\InputIfFileExists{zlatex-cfg.tex}{}{}
+\documentclass{../code/zlatex}
+\parindent=0pt
+
+\begin{document}
+\ExplSyntaxOn
+\keys_define:ne {test}{
+  % simple key
+  keyA    .tl_set:N = \exp_not:c {l__test_keyA_tl},
+  keyA+   .code:n   = \tl_put_right:Nn \exp_not:c {l__test_keyA_tl} {#1},
+  keyA~+  .code:n   = \tl_put_right:Nn \exp_not:c {l__test_keyA_tl} {#1},
+  % zlatex internal
+  keyB    .meta:nn  = { text / keyB }{#1},
+  \__zlatex_plus_key_aux:nnn {l__test_keyB_tl}{keyB}{keyB-x},
+  \__zlatex_plus_key_aux:nnn {l__test_keyB_tl}{keyB}{keyB-y},
+}
+\NewDocumentCommand{\testPlusKeyA}{m}{
+  \keys_set:nn {test}{#1}
+  \tl_use:N \l__test_keyA_tl\par
+}
+\NewDocumentCommand{\testPlusKeyB}{m}{
+  \keys_set:nn {test}{#1}
+  \tl_use:N \l__test_keyB_tl\par
+}
+
+\ExplSyntaxOff
+\section{Simple}
+\testPlusKeyA{keyA = AA}
+\testPlusKeyA{keyA+ = aa} 
+\testPlusKeyA{keyA += xx} 
+\testPlusKeyA{keyA=zz}
+
+\section{Internal}
+\testPlusKeyB{keyB/keyB-x = BB}
+\testPlusKeyB{keyB/keyB-x+ = bb}
+\testPlusKeyB{keyB/keyB-x += xx}
+\testPlusKeyB{keyB/keyB-x = zz}
+
+\dotfill\par
+\testPlusKeyB{keyB/keyB-y = BBYY}
+\testPlusKeyB{keyB/keyB-y+ = bbyy}
+\end{document}
+```
+
 ## message system
 ### group name 
 The message system related tools are moved to a new group `message system`.
@@ -528,10 +700,10 @@ People always complain about the compile log LaTeX given, think it hard to read 
 # 1. class option warning
 Class zlatex Warning: You use an unknown class option key:'startPage'. Valid
 (zlatex)              options are:lang, hyper, fancy, class,
-(zlatex)              classOption(<clist>), toc(<key-value>),
-(zlatex)              font(<key-value>), layout(<key-value>),
-(zlatex)              section(<key-value>), mathSpec(<key-value>),
-(zlatex)              bib_index(<key-value>). Assignment Ignored and LaTeX
+(zlatex)              classOption(⟨clist⟩), toc(⟨key-value⟩),
+(zlatex)              font(⟨key-value⟩), layout(⟨key-value⟩),
+(zlatex)              section(⟨key-value⟩), mathSpec(⟨key-value⟩),
+(zlatex)              bib_index(⟨key-value⟩). Assignment Ignored and LaTeX
 (zlatex)              default settings substitute.
 ```
 
@@ -546,7 +718,7 @@ Set an user-friendly interface to handle the exception of these class meta key:
 \zlatex_define:nn { option / font }{
   config              .bool_gset:N  = \g__zlatex_font_config_bool,
   config              .initial:n    = { false }, 
-  unknown             .code:n       = { \zlatex_metakey_warning_msg:nn {font}{config(<bool>:false)} }
+  unknown             .code:n       = { \zlatex_metakey_warning_msg:nn {font}{config(⟨bool⟩:false)} }
 }
 ```
 
@@ -561,7 +733,7 @@ Class zlatex Warning: You use an invalid key "font" or key assign for it in
 
 Class zlatex Warning: You use an invalid key "counter" or key assign for it in
 (zlatex)              the meta key "mathSpec", Valid options
-(zlatex)              are:alias(<bool>:false),envStyle,font(<choice>:newtx,mtpr
+(zlatex)              are:alias(⟨bool⟩:false),envStyle,font(⟨choice⟩:newtx,mtpr
 o2,euler,mathpazo);
 (zlatex)              Assignment Ignored and LaTeX default mathSpec settings
 (zlatex)              substitute.
@@ -569,7 +741,7 @@ o2,euler,mathpazo);
 
 Class zlatex Warning: You use an invalid key "openAll" or key assign for it in
 (zlatex)              the meta key "layout", Valid options
-(zlatex)              are:margin(<bool>:false),slide,aspect; Assignment
+(zlatex)              are:margin(⟨bool⟩:false),slide,aspect; Assignment
 (zlatex)              Ignored and LaTeX default layout settings substitute.
 ```
 
@@ -649,21 +821,21 @@ Now the message looks like:
 ```shell
 Class zlatex Warning: You use an invalid key "zlatex/slide/world" or key
 (zlatex)              assign for it in the meta key "slide", Valid options
-(zlatex)              are:sec(<key-value>:prefix,suffix,bg,fg),
-(zlatex)              UL(<key-value>:text,bg,fg),UR(<key-value>:text,bg,fg),
-(zlatex)              BL(<key-value>:text,bg,fg),BC(<key-value>:text,bg,fg),
-(zlatex)              BR(<key-value>:text,bg,fg); Assignment Ignored and
+(zlatex)              are:sec(⟨key-value⟩:prefix,suffix,bg,fg),
+(zlatex)              UL(⟨key-value⟩:text,bg,fg),UR(⟨key-value⟩:text,bg,fg),
+(zlatex)              BL(⟨key-value⟩:text,bg,fg),BC(⟨key-value⟩:text,bg,fg),
+(zlatex)              BR(⟨key-value⟩:text,bg,fg); Assignment Ignored and
 (zlatex)              zLaTeX default "slide" settings of this key substitute.
 
 
 Class zlatex Warning: You use an invalid key "zlatex/slide/toc/hello" or key
 (zlatex)              assign for it in the meta key "slide/toc", Valid options
-(zlatex)              are:leftmargin(<key-value>:chapter[<dim>:2em],section[<di
-m>:4em],subsection[<dim>:6em]),
-(zlatex)              label(<key-value>:chapter[<tl>:thechapter;hbox:1em],secti
-on[<tl>:thesection;hbox:1em],subsection[<tl>:thesubsection;hbox:2em]),
-(zlatex)              after(<key-value>:chapter[tl:<empty>],section[tl:<empty>]
-,subsection[tl:<empty>]);
+(zlatex)              are:leftmargin(⟨key-value⟩:chapter[⟨dim⟩:2em],section[<di
+m>:4em],subsection[⟨dim⟩:6em]),
+(zlatex)              label(⟨key-value⟩:chapter[⟨tl⟩:thechapter;hbox:1em],secti
+on[⟨tl⟩:thesection;hbox:1em],subsection[⟨tl⟩:thesubsection;hbox:2em]),
+(zlatex)              after(⟨key-value⟩:chapter[tl:⟨empty⟩],section[tl:⟨empty⟩]
+,subsection[tl:⟨empty⟩]);
 (zlatex)              Assignment Ignored and zLaTeX default "slide-toc"
 (zlatex)              settings of this key substitute.
 ```
@@ -675,7 +847,7 @@ Change meta-key level in class option interface, now theese meta key is:
 \zlatex_define:nn { option / font }{
 config              .bool_gset:N  = \g__zlatex_font_config_bool,
 config              .initial:n    = { false }, 
-unknown             .code:n       = { \zlatex_metakey_warning_msg:nn {font}{config(<bool>:false)} }
+unknown             .code:n       = { \zlatex_metakey_warning_msg:nn {font}{config(⟨bool⟩:false)} }
 }
 ```
 
@@ -756,8 +928,8 @@ Now, only some simple configurations have been added to this module, total conte
 ### Update: 2024-09-20
 Now zlatex provide 2 functions for users to costum the slide theme:
 ```latex
-\zslideThemeCreate{<theme-name>}{<key-value-list>}
-\zslideThemeUse[<overwrite-keys-assign>]{<theme-name>}
+\zslideThemeCreate{⟨theme-name⟩}{⟨key-value-list⟩}
+\zslideThemeUse[⟨overwrite-keys-assign⟩]{⟨theme-name⟩}
 ```
 
 both all these 2 commands can be only used in preamble. To create a simple color scheme, something like the below:
@@ -797,7 +969,7 @@ You can change some properties of the loaded theme by command `\zslideThemeUse` 
 ### Update: 2024-09-17
 zLaTeX now provides command `\zslideSetup` for slide mode setup, command args spec:
 ```latex
-\zslideSetup[<sub-key>]{<key-value list>}
+\zslideSetup[⟨sub-key⟩]{⟨key-value list⟩}
 ```
 
 ### Update 2024-10-24
@@ -838,32 +1010,32 @@ A simple solution may be:
 
 But this method is NOT too reflexiable. The better method may be use package `adjustbox` as:
 ```latex
-\includegraphics[max width=\linewidth]{<image file name>}
+\includegraphics[max width=\linewidth]{⟨image file name⟩}
 ```
 
 Then i WON'T Implement this feature. For more detail, see: [Scale (resize) large images (graphics) that exceed page margins](https://tex.stackexchange.com/q/6073/294585)
 
 ### hyperref support
 Hyperref is support now, such anchors are available:
-* `page.<page num>`: link to abusolute page index `<page num>`
-* `zslide@\FirstMark{zslide-left}.<frame index>`: link to frame indexd at `<frame index>` in section `\FirstMark{zslide-left}` (roughly equals to current section).
+* `page.⟨page num⟩`: link to abusolute page index `⟨page num⟩`
+* `zslide@\FirstMark{zslide-left}.⟨frame index⟩`: link to frame indexd at `⟨frame index⟩` in section `\FirstMark{zslide-left}` (roughly equals to current section).
 
-A users' interface `\zslide@navigate:nnnn` have been created, syntax as follows:
+A users' interface `\_zslide_navigate:nnnn` have been created, syntax as follows:
 ```latex
-\zslide@navigate:nnnn 
-    {<total frame num>}
-    {<current frame index>}
-    {<current frame symbol>}
-    {<other frame symbols>}
+\_zslide_navigate:nnnn 
+    {⟨total frame num⟩}
+    {⟨current frame index⟩}
+    {⟨current frame symbol⟩}
+    {⟨other frame symbols⟩}
 ```
 
-You can access the total frame num by macro: `\zslideFrame{<Roman number>}`, `I`, `II`, `\Roman{section}` and so forth, which will return the total frames the current section has. Current frame number can be retrived by command `\zslideFrameIndex`.
+You can access the total frame num by macro: `\zslideFrame{⟨Roman number⟩}`, `I`, `II`, `\Roman{section}` and so forth, which will return the total frames the current section has. Current frame number can be retrived by command `\zslideFrameIndex`.
 
 > In the future, command `\zslideFrame` maybe extends to `chapter` or `subsection`, not just counting `section`'s frame total number.
 
 Add one function `\zslideIfPageTF{}{}{}` to check page number, syntax as follows:
 ```latex
-\zslideIfPageTF{<operators><num>}{<True Branch>}{<False Branch>}
+\zslideIfPageTF{⟨operators⟩⟨num⟩}{⟨True Branch⟩}{⟨False Branch⟩}
 ```
 
 #### basic settings
@@ -892,7 +1064,7 @@ i.e., `\l__zlatex_slide_UR_fg_tl`. See current definition below:
 ```latex
 \NewDocumentCommand{\zslideNavigateBall}{O{\(\bullet\)}O{\(\circ\)}}{
   \cs_if_exist:cTF {zsec@\Roman{section}@cnt}
-    {\zslide@navigate:nnnn 
+    {\_zslide_navigate:nnnn 
       {\zslideFrame{\Roman{section}}}
       {\zslideFrameIndex}
       {\textcolor{\l__zlatex_slide_UR_fg_tl}{#1}}
@@ -1000,13 +1172,226 @@ Now the toc interface syntax is:
 ```latex
 \zlatexSetup{
   toc={
-    column=<int>,
-    title=<title>,
-    title-vspace=<dim>,
-    stretch=<float>
+    column=⟨int⟩,
+    title=⟨title⟩,
+    title-vspace=⟨dim⟩,
+    stretch=⟨float⟩
   }
 }
 ```
+
+### new interface 
+#### l3keys
+There was once a trial, which makes it easy to use by `l3keys`, see below:
+```latex 
+\ProvidesExplFile{zlatex.module.secformat.tex}{2024/10/24}{1.0.0}{secformat~module~for~zlatex}
+%%%%%     sec format module for zlatex     %%%%%
+% ==> title class interface
+% ⟨begin-shape⟩ 
+%     ⟨format⟩⟨label⟩
+%     ⟨sep⟩     % \vskip or \hskip
+%     ⟨before-code⟩
+%     ⟨text⟩
+%     ⟨after-code⟩
+% ⟨end-shape⟩
+\RequirePackage{titlesec}
+% custom title format 
+% TODO: add label-align, title-align keys 
+\zlatex_keys_define:nn { title/style }
+  {
+    shape           .tl_set:N  = \l__zlatex_title_shape_tl,
+    shape           .initial:n = {hang},
+    align           .tl_set:N  = \l__zlatex_title_align_tl,
+    align           .choice:,
+    align / center  .code:n    = { \tl_set:Nn \l__zlatex_title_align_tl {\centering} },
+    align / left    .code:n    = { \tl_set:Nn \l__zlatex_title_align_tl {\raggedright} },
+    align / right   .code:n    = { \tl_set:Nn \l__zlatex_title_align_tl {\raggedleft} },
+    align           .initial:n = {left},
+    titlecmd        .tl_set:N  = \l__zlatex_title_titlecmd_tl,
+    titlecmd        .initial:n = {},
+    format          .tl_set:N  = \l__zlatex_title_format_tl,
+    format          .initial:n = {},
+    titleformat     .tl_set:N  = \l__zlatex_title_titleformat_tl,
+    titleformat     .initial:n = {},
+    label           .tl_set:N  = \l__zlatex_title_label_tl,
+    label           .initial:n = {},
+    labelformat     .tl_set:N  = \l__zlatex_title_labelformat_tl,
+    labelformat     .initial:n = {},
+    sep             .dim_set:N = \l__zlatex_title_sep_dim,
+    sep             .initial:n = {0pt},
+    before          .tl_set:N  = \l__zlatex_title_before_tl,
+    before          .initial:n = {},
+    after           .tl_set:N  = \l__zlatex_title_after_tl,
+    after           .initial:n = {},
+  }
+\tl_new:N \c__zlatex_title_format_initial_tl 
+\keys_precompile:nnN { zlatex/title/style }
+  {} \c__zlatex_title_format_initial_tl 
+% \tl_show:N \c__zlatex_title_format_initial_tl
+\cs_new:Nn \__zlatex_title_format_copy:nnnnnnn 
+  {
+    \titleformat{#1}[#2]{#3}{#4}{#5}{#6}[#7]
+  }
+\cs_generate_variant:Nn \__zlatex_title_format_copy:nnnnnnn { ooffofo }
+\cs_new:Npn \zlatex_title_format:nn #1#2 
+  {
+    \zlatex_keys_set:nn { title/style } {#2}
+    \__zlatex_title_format_copy:ooffofo
+      {\cs:w #1\cs_end:}
+      { \l__zlatex_title_shape_tl }
+      {
+        \l__zlatex_title_align_tl
+        \l__zlatex_title_format_tl
+      }
+      { \group_begin: 
+        \l__zlatex_title_labelformat_tl 
+        \l__zlatex_title_label_tl 
+        \group_end:
+      }
+      { \l__zlatex_title_sep_dim }
+      { 
+        \l__zlatex_title_before_tl 
+        \l__zlatex_title_titleformat_tl
+        \l__zlatex_title_titlecmd_tl
+      }
+      { \l__zlatex_title_after_tl }
+    % restore initial value ---> bug !!!
+    \tl_use:N \c__zlatex_title_format_initial_tl
+  }
+\NewDocumentCommand{\zlatexTitleStyle}{mm}
+  {
+    \zlatex_title_format:nn {#1}{#2} 
+  }
+\@onlypreamble\zlatexTitleStyle
+% create new title
+\cs_new:Npn \zlatex_title_new:nnn #1#2#3 
+  { % #1: class; #2: name; #3: format
+    \exp_args:Noo \titleclass{\cs:w #2\cs_end:}{#1}
+    \zlatex_title_format:nn {#2}{#3}
+  }
+\NewDocumentCommand{\zlatexTitleNew}{omm}
+  {% #1: format; #2: class; #3: name
+    \IfValueTF {#1}
+      {\zlatex_title_new:nnn {#2}{#3}{#1}}
+      {\zlatex_title_new:nnn {#2}{#3}{}}
+  }
+% ==> predefined title format
+% numbered chapter format
+\zlatex_title_format:nn {chapter}
+  {
+    shape = display,
+    align = right,
+    sep = 10pt,
+    label = {
+      \MakeUppercase{\chaptertitlename}
+      \hspace{1ex}\scalebox{2.5}{\thechapter}
+    },
+    format = {\bfseries},
+    labelformat = {
+      \Large
+      \color{\tl_use:N \l__zlatex_chapter_color_tl}
+    },
+    titleformat = {
+      \raggedright\bfseries\huge\color{black}
+    },
+    before = {
+      \color{\tl_use:N \l__zlatex_chapter_rule_color_tl}
+      \titlerule\vspace{15pt}
+    }
+  }
+% unnumbered chapter format
+\titleformat{name=\chapter, numberless}
+  {\bfseries\Huge}
+  {}{0pt}{}
+% chapter space
+\titlespacing{\chapter}{0pt}{-30pt}{40pt}
+```
+
+#### xtemplate
+A trial that use `xtemplate` as below:
+```latex 
+\DeclareObjectType{title}{1}
+\DeclareTemplateInterface{title}{default}{1}
+  {
+    shape:tokenlist       = hang,
+    titlecmd:function 1   = \textbf{#1},
+    format:tokenlist      = ,
+    titleformat:tokenlist = ,
+    label:tokenlist       = ,
+    labelformat:tokenlist = ,
+    sep:length            = 0pt,
+    before:tokenlist      = ,
+    after:tokenlist       = ,
+    align:choice{center, left, right} = left,
+  }
+\DeclareTemplateCode{title}{default}{1}
+  {
+    shape       = \l_shape_tl,
+    titlecmd    = \title_cmd:n,
+    format      = \l_format_tl,
+    titleformat = \l_titleformat_tl,
+    label       = \l_label_tl,
+    labelformat = \l_labelformat_tl,
+    sep         = \l_sep_dim,
+    before      = \l_before_tl,
+    after       = \l_after_tl,
+    align       = {
+      left   = \raggedright,
+      center = \centering,
+      right  = \raggedleft,
+    },
+  }{
+    \__zlatex_titlesec_copy:ooffofo
+      {\cs:w #1\cs_end:}
+      { \l_shape_tl }
+      {
+        % \KeyValue{align} % --> How to get the value of align key?
+        \raggedleft
+        \l_format_tl
+      }
+      { \group_begin: 
+        \l_labelformat_tl 
+        \l_label_tl 
+        \group_end:
+      }
+      { \l_sep_dim }
+      { 
+        \l_before_tl 
+        \l_titleformat_tl
+        \title_cmd:n {#1} % this argument is redundant ???
+      }
+      { \l_after_tl }
+  }
+\def\testcmd#1{\textbf{(#1]}}
+\DeclareInstance{title}{chapter}{default}
+  {
+    shape       = display,
+    format      = \bfseries,
+    % align     = left,
+    titlecmd    = \testcmd,
+    sep         = 10pt,
+    label       = \MakeUppercase{\chaptertitlename}\hspace{1ex}\scalebox{2.5}{\thechapter},
+    labelformat = \Large\color{\tl_use:N \l__zlatex_chapter_color_tl},
+    titleformat = \raggedright\bfseries\huge\color{black},
+    before      = \color{\tl_use:N \l__zlatex_chapter_rule_color_tl}\titlerule\vspace{15pt},
+    after       = \vspace{15pt}
+  }
+\DeclareInstance{title}{section}{default}
+  {
+    shape       = hang,
+    % titlecmd  = \testcmd, % --> BUG
+  }
+\UseInstance{title}{section}{section}
+\UseInstance{title}{chapter}{chapter}
+```
+
+#### future plan
+Maybe i will refer to `xcontents` in the offical LaTeX repo or use `cus-struct` from `CUS` repo.
+
+What features we need to implement ? see Problem: [thoughts about wrting a package like titlesec and titletoc](https://tex.stackexchange.com/q/731231/294585).
+
+
+**WARN**: I may drop the dependency: `titlesec` and `titletoc` in the future.
 
 ## thm module
 ### intro 
@@ -1030,18 +1415,18 @@ The main commands of this module are:
 % NOTE: This command will overwrite the existing environments
 \zlatexThmTitle % thm title content
 \zlatexThmTitleSwitch % thm title inline or not
-\zlatexThmTitleFormat{<format>, <content, such as:\zlatexThmNumber, \zlatexThmName, \zlatexThmNote>}
-\zlatexThmTitleFormat*{<format>, <content, such as:\zlatexThmNumber, \zlatexThmName, \zlatexThmNote>}
-\zlatexThmCnt{share, parent=<counter name:section, subsection, ...>}
+\zlatexThmTitleFormat{⟨format⟩, ⟨content, such as:\zlatexThmNumber, \zlatexThmName, \zlatexThmNote⟩}
+\zlatexThmTitleFormat*{⟨format⟩, ⟨content, such as:\zlatexThmNumber, \zlatexThmName, \zlatexThmNote⟩}
+\zlatexThmCnt{share, parent=⟨counter name:section, subsection, ...⟩}
 
 
 % 3. change the style of theorem-like envs
 \zlatexThmStyle{elegant}
-\zlatexThmColorSetup{<theorem/proof-like envs' name>=<color>}
+\zlatexThmColorSetup{⟨theorem/proof-like envs' name⟩=⟨color⟩}
 
 
 % 4. custom the warper of each theorem-like envs
-\zlatexThmStyleNew{<style>={begin=<.>, end=<.>, option=<.>}}
+\zlatexThmStyleNew{⟨style⟩={begin=⟨.⟩, end=⟨.⟩, option=⟨.⟩}}
 
 
 % 5. thm envs names setup interface of different languages
@@ -1063,34 +1448,35 @@ The main commands of this module are:
 
 
 % 6. thm hooks
-\zlatexThmHook{<next hook>}
-\zlatexThmHook*{<next all hook>}
+\zlatexThmHook{⟨next hook⟩}
+\zlatexThmHook*{⟨next all hook⟩}
+\zlatexThmBefore{⟨code⟩}
 
 
 % 7. list of theorems
 \zlatexThmToc[
-  title-vspace=<dim>, 
-  title=<title>,
-  after-vspace=<dim>,
-  stretch=<float>
+  title-vspace=⟨dim⟩, 
+  title=⟨title⟩,
+  after-vspace=⟨dim⟩,
+  stretch=⟨float⟩
 ]
-\zlatexThmTocPrefix{<prefix>}
+\zlatexThmTocPrefix{⟨prefix⟩}
 \zlatexThmTocSymbol{
-  lemma=<lemma symbol>,
-  definition=<definition symbol>,
+  lemma=⟨lemma symbol⟩,
+  definition=⟨definition symbol⟩,
   ....
 }
 % clear all predefined thm toc symbol
 \zlatexThmTocSymbolClear 
-\zlatexThmSecAdd[name=<toc name>]{<toc level:chapter, section, etc.>}
+\zlatexThmTocAdd[name=⟨toc name⟩]{⟨toc level:chapter, section, etc.⟩}
 ```
 
 ### bug fixed 
 Fixed bug: optional braces, brackets around `\zlatexThmNote` when it is empty. Now the syntax is:
 ```latex 
-\zlatexThmNote{<before>}{<end>}
+\zlatexThmNote{⟨before⟩}{⟨end⟩}
 % --> output:
-% <before><Thm-Note><end>
+% ⟨before⟩⟨Thm-Note⟩⟨end⟩
 ```
 
 To define a complex Thm title format, users may use command `\zlatexThmNoteEmptyTF`, which is provided by `thm` module in zlatex, to check whether it's empty or not, definition of this command as below:
@@ -1137,23 +1523,23 @@ Command `\zlatexColorSetup` is only available in preamble. Though, I do NOT reco
 ### thm hooks 
 Now the `thm` module provides 4 hooks for users to custom the theorem-like envs. The places of these hooks are:
 ```latex
-(zlatex/thmstyle/before) --> (warper begin) 
---> (thm-title) --> (zlatex/thmstyle/begin) --> (thm-content) --> (zlatex/thmstyle/end) --> 
-(warper end) --> (zlatex/thmstyle/after)
+(zlatex/thm/before) --> (warper begin) 
+--> (thm-title) --> (zlatex/thm/begin) --> (thm-content) --> (zlatex/thm/end) --> 
+(warper end) --> (zlatex/thm/after)
 ```
 
 The implementation as below:
 ```latex
 \NewDocumentEnvironment{#1}{O{}}{
   \refstepcounter{#1}
-  \UseHook{zlatex/thmstyle/before}
+  \UseHook{zlatex/thm/before}
   \__zlatex_thm_warp_start:nnnn {#1}{##1}{\bfseries}{\ }
   \__zlatex_thm_title:                                  
-  \UseHook{zlatex/thmstyle/begin}
+  \UseHook{zlatex/thm/begin}
 }{
-  \UseHook{zlatex/thmstyle/end}
+  \UseHook{zlatex/thm/end}
   \__zlatex_thm_warp_end:
-  \UseHook{zlatex/thmstyle/after}
+  \UseHook{zlatex/thm/after}
 }
 ```
 
@@ -1161,25 +1547,27 @@ Command `\zlatexThmHook` is used to add your own code chunks to these places, sy
 ```latex 
 % only add to the next one
 \zlatexThmHook{
-    before=<BEFORE code>, 
-    begin=<BEGIN code>, 
-    end=<END code>, 
-    after=<AFTER code>
+    before=⟨BEFORE code⟩, 
+    begin=⟨BEGIN code⟩, 
+    end=⟨END code⟩, 
+    after=⟨AFTER code⟩
 }
 
 % add to all thm ebv below
 \zlatexThmHook*{
-    before=<BEFORE code>, 
-    begin=<BEGIN code>, 
-    end=<END code>, 
-    after=<AFTER code>
+    before=⟨BEFORE code⟩, 
+    begin=⟨BEGIN code⟩, 
+    end=⟨END code⟩, 
+    after=⟨AFTER code⟩
 }
 ```
 
 Remark:
 * the function `\zlatexThmStyleNew`(this function can be only used in preamble) are based on these hooks.
 * the macro `\zlatexThmTitle` and `\zlatexThmTitleSwitch` may be useful for you to custom the title format of theorem-like envs.
-* The hooks `zlatex/thmstyle/end` and `zlatex/thmstyle/after` are reversed.
+* The hooks `zlatex/thm/end` and `zlatex/thm/after` are reverse hook.
+* the default code chunk in `zlatex/thm/before` is `\par`.
+
 
 For that the original `HOOK` thm style is removed, thus the original definition of `\zlatexThmStyleNew`:
 ```latex 
@@ -1197,10 +1585,10 @@ For that the original `HOOK` thm style is removed, thus the original definition 
 
 % definition
 \NewDocumentCommand{\zlatexThmStyleNew}{mm}{
-  \AddToHook{zlatex/thmstyle/begin}{#1}
-  \AddToHook{zlatex/thmstyle/end}{#2}
-  \ActivateGenericHook{zlatex/thmstyle/begin}
-  \ActivateGenericHook{zlatex/thmstyle/end}
+  \AddToHook{zlatex/thm/begin}{#1}
+  \AddToHook{zlatex/thm/end}{#2}
+  \ActivateGenericHook{zlatex/thm/begin}
+  \ActivateGenericHook{zlatex/thm/end}
   \tl_gset:Nn \g__zlatex_thm_style_tl {HOOK}
 }
 \@onlypreamble\zlatexThmStyleNew
@@ -1215,22 +1603,37 @@ Now the implementation is:
 }
 ```
 
-> In the future, this function maybe be changed, i will use this function to add more `thm` style like the `\_zslide_theme_create:nn` function in `slide` library plays on.
-> please use this command with `*` in the preamble, or some unexpected error may occur.
+> * In the future, this function maybe be changed, i will use this function to add more `thm` style like the `\_zslide_theme_create:nn` function in `slide` library plays on.
+> * please use this command with `*` in the preamble, or some unexpected error may occur.
 
-Update: 2024-11-13
+To change the default before code chunk in hook `zlatex/thm/before`, you can use command `\zlatexThmBefore`, an simple example maybe:
+```latex 
+\zlatexThmBefore{\par\noindent\dotfill\par}
+```
+
+Implementation of this command is:
+```latex 
+\hook_gput_code:nnn {zlatex/thm/before}{thm-before-par}{\par}
+\NewDocumentCommand{\zlatexThmBefore}{+m}
+  {
+    \hook_gremove_code:nn {zlatex/thm/before}{thm-before-par}
+    \hook_gput_code:nnn {zlatex/thm/before}{thm-before-par}{#1}
+  }
+```
+
+### Update:2024-11-13
 Now the command `\zlatexThmStyleNew` is implemented by `l3keys`, then you could add your own thm style freely. The Syntax of this function as follows:
 ```latex 
 \zlatexThmStyleNew {
-  <thm style name> = {
-    begin  = <env begin code>, 
-    end    = <env end code>, 
-    option = <env begin option>
+  ⟨thm style name⟩ = {
+    begin  = ⟨env begin code⟩, 
+    end    = ⟨env end code⟩, 
+    option = ⟨env begin option⟩
   },
 }
 ```
 
-What you need pay attention to is `<env begin option>`, in this part, you can specify whether to display `thm title` inline or hang on the top like in tcolorbox. Use function:
+What you need pay attention to is `⟨env begin option⟩`, in this part, you can specify whether to display `thm title` inline or hang on the top like in tcolorbox. Use function:
 ```latex
 \__zlatex_thm_title_inline:n {T}
 % T: inline 
@@ -1331,7 +1734,7 @@ Package tcolorbox Warning: Using nobreak failed. Try to enlarge `lines before br
 Now you can use command `\zlatexThmToc` to create a table of the previous theorem-like env. You can use it for proof-like environments. Once this command is invoke in your source, there will be a file named `\jobname.thlist` occurs in your working dir. This command takes 1 option argument, in form of key-value, syntax as follows:
 
 ```latex 
-\zlatexThmToc[vspace=<dim>, title=<title>]
+\zlatexThmToc[vspace=⟨dim⟩, title=⟨title⟩]
 ```
 
 Additionally, you can use command `\zlatexThmTocLevel` to change the default thm entry level, a simple example:
@@ -1351,6 +1754,149 @@ Now the syntax is as follows, a simple example:
   after-vspace=20pt
 ]
 ```
+
+Update: when there is no `\tableofcontents` before, stretch for thm toc will lose. The new implement is:
+
+```latex 
+\zlatex_keys_define:nn {thm/toc}
+  {
+    title         .tl_gset:N  = \g__zlatex_thm_toc_title_tl,
+    title         .initial:n  = { \Large\bfseries List\ of\ Theorems },
+    title-vspace  .dim_gset:N = \g__zlatex_thm_toc_title_vspace_dim,
+    title-vspace  .initial:n  = { 0pt },
+    after-vspace  .dim_gset:N = \g__zlatex_thm_toc_after_vspace_dim,
+    after-vspace  .initial:n  = { 0pt },
+    stretch       .fp_gset:N  = \g__zlatex_thm_toc_stretch_fp,
+    stretch       .initial:n  = { 1 },
+  }
+
+\NewDocumentCommand{\zlatexThmToc}{o}
+  {
+    \bool_gset_true:N \g__zlatex_thm_toc_bool
+    \group_begin:
+    \IfValueT {#1}{\zlatex_keys_set:nn {thm/toc}{#1}}
+    \legacy_if_set_false:n { @filesw }  
+    {\par\noindent\tl_use:c {g__zlatex_thm_toc_title_tl}}
+    \addvspace{\g__zlatex_thm_toc_title_vspace_dim}
+    \addvspace{-\fp_to_dim:n {\g__zlatex_thm_toc_stretch_fp*\baselineskip}+\baselineskip}
+    {
+      \renewcommand{\baselinestretch}{\fp_use:N \g__zlatex_thm_toc_stretch_fp}\normalsize 
+      \@input{\jobname.thlist}
+    }
+    \addvspace{\g__zlatex_thm_toc_after_vspace_dim}
+    \group_end:
+  }
+```
+
+But this new implementation still has been deprecated. I remove `title` part. This part will be controled be the users.
+
+### theme library
+#### predefined thm theme
+zlatex `thm` module and `theme` library contains many predefined thm themes that can be used out of box. List of predefined themes in `thm` module are:
+* plain (default theme)
+* background
+* leftbar 
+* fancy
+
+To use these themes, an example is:
+```latex 
+\zlatexThmStyle{fancy}
+```
+
+themes in `theme` library are:
+* shadow
+* paris 
+* elegant
+* obsidian
+* lapsis
+
+To use these them , the syntax is simple:
+```latex 
+\zlatexloadlibrary{theme}
+\zlatexThmStyle{lapsis}
+```
+
+> In thm them `lapsis`, there is a new feature, the command -- `\tcblower`, which is used to split current thm env into 2 parts, each of which has a different style. Have a try immediately to see how it actually looks like. 
+
+When you load `theme` library, `tikz` and `tcolorbox` will be loaded, so do these many libraries belong to them. Up to now, the optioanl preamble commands are:
+```latex 
+\RequirePackage[many]{tcolorbox}
+\RequirePackage{adjustbox}
+\RequirePackage{tikz}
+\RequirePackage{etoolbox}
+\patchcmd{\pgfutil@InputIfFileExists}{\input #1}{
+  \@pushfilename
+  \xdef\@currname{#1}
+  \input #1
+  \@popfilename
+}{}{}
+\usetikzlibrary{fadings, calc}
+\RequirePackage{pifont}
+```
+
+
+#### create new thm theme
+Users can create new thm themes easily based on the interface thm module provides. 
+
+To create a new theme, you can use the commands decribed in section `thm:main commands`. What need to be decribed here are two internal macros:
+* `\thm@temp@color`: temp name for each thm env, such as `red, blue, zlatex@thm@theorem`, etc
+* `\thm@temp@name`: temp name for each thm, such as `theorem, definition, axiom`, etc.
+
+These 2 macros will NOT be exposed to normal users, for advanced users, you can use theme. Besides, original definitions of these 2 comamnds are:
+```latex 
+% \cs_new:Npn \__zlatex_thm_warp_start:nnnn #1#2#3#4 {
+  ...
+  \def\thm@temp@color{\tl_use:c {l__zlatex_#1_color_tl}}
+  \def\thm@temp@name{#1}
+  ..
+% }
+```
+
+An simple example of creating a new them(also the implementation of `lapsis` theme):
+```latex 
+\zlatexThmStyleNew{
+  % lapsis theme from: Foundation Mathematics for the Physical Sciences
+  lapsis = {
+    begin = {
+      \begin{tcolorbox}[
+        enhanced,  breakable,
+        top=1.5pt, bottom=1.5pt,
+        left=2pt,  leftlower=-3pt,
+        right=3pt, arc=0pt, frame~hidden,
+        bicolor,   colback=\thm@temp@color!60,
+        opacitybacklower=0,
+        frame~code~app={
+          \draw[color=\thm@temp@color, thick] 
+            (frame.north~west)++(-5cm, -1pt)--($(frame.north~east)+(5cm, 0pt)$);
+          \draw[color=\thm@temp@color, thick] 
+            (frame.south~west)++(-5cm, -1pt)--($(frame.south~east)+(5cm, 0pt)$);
+          \fill[color=\thm@temp@color!50, path~fading=east] 
+            (frame.north~west)++(-5cm, -1pt) rectangle ($(frame.south~east)+(5cm, 0pt)$);
+        },
+      ]\zlatex@llapnote{\zlatexThmTitle}
+    },
+    end = {\hfill$\mathcolor{\thm@temp@color}{\blacktriangleleft}$\end{tcolorbox}},
+    option = {
+      \__zlatex_thm_title_inline:n {F}
+      \__zlatex_thm_tcolorbox_warning:
+    },
+    preamble = {
+      \DeclareMathSymbol{\blacktriangleleft}{\mathrel}{AMSa}{"4A}
+      \zlatexThmTitleFormat*{\sffamily\bfseries
+        \zlatexThmName\ \zlatexThmNumber
+        \zlatexThmNoteEmptyTF{}{\\}
+        \zlatexThmNote{}{}
+      }
+      \newcommand{\zlatex@llapnote}[1]{
+        \mbox{}\llap{
+        \adjustbox{set~height=0pt, set~depth=0pt}{
+          \parbox[t]{2.85cm}{\raggedleft #1}}\hspace*{.75em}}
+      }
+    }
+  },
+}
+```
+
 
 ### source file backup
 The test files is as below:

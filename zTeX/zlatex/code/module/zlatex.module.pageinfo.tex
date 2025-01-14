@@ -1,4 +1,4 @@
-\ProvidesExplFile{zlatex.module.pageinfo.tex}{2024/10/24}{1.0.0}{pageinfo~module~for~zlatex}
+\ProvidesExplFile{zlatex.module.pageinfo.tex}{2024/12/17}{1.0.0}{pageinfo~module~for~zlatex}
 
 
 %%%%%     pageinfo module for zlatex     %%%%%
@@ -58,8 +58,8 @@
 
 % ==> title page
 \let\orimaketitle\maketitle
-\def\Maketitle{
-  \newgeometry{margin=1in}
+\newcommand\Maketitle[1][1in]{
+  \newgeometry{margin=#1}
   \orimaketitle
   \restoregeometry
 }
@@ -104,18 +104,20 @@
 % \RequirePackage{transparent}
 \dim_const:Nn \zph {\paperheight}
 \dim_const:Nn \zpw {\paperwidth}
+\cs_generate_variant:Nn \hook_gput_code:nnn {nne}
 \cs_new_protected:Npn \__zlatex_page_annotate:nnnnn #1#2#3#4#5
   {
     \tl_if_empty:eTF {#5}
-    {
-      \hook_gput_code:nnn {shipout/#1}
-        {zlatex-page-annotation}
-        {\put#2{\makebox(0, 0)[#3]{#4}}}
-    }{
-      \hook_gput_next_code:nn {shipout/#1}
-        {\put#2{\makebox(0, 0)[#3]{#4}}}
-    }
+      {
+        \hook_gput_code:nnn {shipout/#1}
+          {zlatex@page@mask-\l__zlatex_page_mask_label_tl}
+          {\put#2{\makebox(0, 0)[#3]{#4}}}
+      }{
+        \hook_gput_next_code:nn {shipout/#1}
+          {\put#2{\makebox(0, 0)[#3]{#4}}}
+      }
   }
+\DeclareHookRule{shipout/background}{.}{<}{pgfrcs}
 \zlatex_keys_define:nn { page/mask }{
   layer    .tl_set:N  = \l__zlatex_page_mask_layer_tl,
   layer    .initial:n = background,
@@ -123,6 +125,8 @@
   position .initial:n = {(.5\zpw, .5\zph)},
   anchor   .tl_set:N  = \l__zlatex_page_mask_anchor_tl,
   anchor   .initial:n = c,
+  label    .tl_set:N  = \l__zlatex_page_mask_label_tl,
+  label    .initial:n = { DEFAULT },
 }
 \cs_generate_variant:Nn \__zlatex_page_annotate:nnnnn {eee}
 \cs_new:Npn \__page_mask@pos_parse:w (#1, #2) 
@@ -130,14 +134,29 @@
     \dim_to_decimal:n {#1} pt, 
     \dim_to_decimal:n {#2-\paperheight} pt
   )}
-\NewDocumentCommand{\zlatexPageMask}{so+m}{
-  \group_begin:
-  \IfBooleanTF{#1}{\gdef\@once@hook@sign{}}{\gdef\@once@hook@sign{*}}
-  \IfValueT{#2}{\zlatex_keys_set:nn { page/mask }{#2}}
-  \__zlatex_page_annotate:eeenn 
-    {\l__zlatex_page_mask_layer_tl}
-    {\exp_after:wN \__page_mask@pos_parse:w \l__zlatex_page_mask_position_tl}
-    {\l__zlatex_page_mask_anchor_tl}{#3}
-    {\@once@hook@sign}
-  \group_end:
-}
+\zlatex_msg_set:nn {pageinfo}{Only~star~version~of~\string\zlatexPageMask\ is~label-allowed.}
+\NewDocumentCommand{\zlatexPageMask}{so+m}
+  {
+    \group_begin:
+    \IfValueT{#2}{\zlatex_keys_set:nn { page/mask }{#2}}
+    \IfBooleanTF{#1}{\gdef\@once@hook@sign{}}{
+      \gdef\@once@hook@sign{*}
+      \tl_if_eq:enF {\l__zlatex_page_mask_label_tl}
+        { DEFAULT }
+        { \zlatex_msg_warn:n {pageinfo} }
+    }
+    \exp_args:Neee \DeclareHookRule{shipout/\l__zlatex_page_mask_layer_tl}
+      {zlatex@page@mask-\l__zlatex_page_mask_label_tl}
+      {<}{pgfrcs}
+    \__zlatex_page_annotate:eeenn 
+      {\l__zlatex_page_mask_layer_tl}
+      {\exp_after:wN \__page_mask@pos_parse:w \l__zlatex_page_mask_position_tl}
+      {\l__zlatex_page_mask_anchor_tl}{#3}
+      {\@once@hook@sign}
+    \group_end:
+  }
+\NewDocumentCommand{\zlatexPageMaskRemove}{mm}
+  {
+    \hook_gremove_code:nn {shipout/#1}
+      {zlatex@page@mask-#2}
+  }
