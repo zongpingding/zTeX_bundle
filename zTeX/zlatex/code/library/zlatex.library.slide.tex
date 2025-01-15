@@ -57,6 +57,10 @@
     [\thispagestyle{empty}]
   }
 }{\relax}
+\dim_new:N \g_zslide_status_info_sec_B_dim
+\dim_new:N \g_zslide_status_info_sec_L_dim
+\dim_gset:Nn \g_zslide_status_info_sec_B_dim {-2.25em}
+\dim_gset:Nn \g_zslide_status_info_sec_L_dim {1cm}
 \renewcommand\sectionmark[1]{\mark_insert:nn {zslide-left}{#1}}
 \renewcommand\subsectionmark[1]{\mark_insert:nn {zslide-right}{\thesubsection\ #1}}
 \titlespacing*{\section}{0pt}{*0}{0pt}
@@ -64,7 +68,7 @@
   {\Large}{}{0pt}
   {
     \AddToHookNext{shipout/foreground}{
-      \put(1cm, -2.25em){\Large
+      \put(\dim_use:c {g_zslide_status_info_sec_L_dim}, \dim_use:c {g_zslide_status_info_sec_B_dim}){\Large
         \textcolor{\tl_use:N \l__zlatex_slide_sec_fg_tl}{
           \tl_use:N \l__zlatex_slide_sec_prefix_tl #1
           \tl_use:N \l__zlatex_slide_sec_suffix_tl
@@ -123,14 +127,28 @@
       {\tl_use:N \l__zlatex_slide_doc_bgcolor_tl}
       {\rule{1\paperwidth}{1\paperheight}}}
   }
+
+% interface for status bar and metadata
+\dim_new:N \g_zslide_status_bar_head_H_dim
+\dim_new:N \g_zslide_status_bar_foot_H_dim
+\dim_new:N \g_zslide_status_bar_sec_H_dim
+\dim_new:N \g_zslide_status_bar_sec_B_dim
+\dim_gset:Nn \g_zslide_status_bar_head_H_dim {.9em}
+\dim_gset:Nn \g_zslide_status_bar_foot_H_dim {.9em}
+\dim_gset:Nn \g_zslide_status_bar_sec_H_dim  {1.8em}
+\dim_gset:Nn \g_zslide_status_bar_sec_B_dim  {-2.7em}
 \AddToHook{shipout/background}{
-  \_zslide_status_bar:nnnn {UL}{(0,              -.9em)}{.5}{1.25em}
-  \_zslide_status_bar:nnnn {UR}{(.5\paperwidth,  -.9em)}{.5}{1.25em}
-  \_zslide_status_bar:nnnn {BL}{(0,              -\paperheight)}{.33}{.9em}
-  \_zslide_status_bar:nnnn {BC}{(.33\paperwidth, -\paperheight)}{.34}{.9em}
-  \_zslide_status_bar:nnnn {BR}{(.67\paperwidth, -\paperheight)}{.33}{.9em}
+  \_zslide_status_bar:nnnn {UL}{(0,              -\dim_use:c {g_zslide_status_bar_head_H_dim})}{.5}{\dim_use:c {g_zslide_status_bar_head_H_dim}}
+  \_zslide_status_bar:nnnn {UR}{(.5\paperwidth,  -\dim_use:c {g_zslide_status_bar_head_H_dim})}{.5}{\dim_use:c {g_zslide_status_bar_head_H_dim}}
+  \_zslide_status_bar:nnnn {BL}{(0,              -\paperheight)}{.33}{\dim_use:c {g_zslide_status_bar_foot_H_dim}}
+  \_zslide_status_bar:nnnn {BC}{(.33\paperwidth, -\paperheight)}{.34}{\dim_use:c {g_zslide_status_bar_foot_H_dim}}
+  \_zslide_status_bar:nnnn {BR}{(.67\paperwidth, -\paperheight)}{.33}{\dim_use:c {g_zslide_status_bar_foot_H_dim}}
   \bool_if:NT \g_new_sec_bool {
-  \_zslide_status_bar:nnnn {sec}{(0, -2.7em)}{1}{1.8em}}
+    \_zslide_status_bar:nnnn {sec}
+      {(0, \dim_use:c {g_zslide_status_bar_sec_B_dim})}
+      {1}
+      {\dim_use:c {g_zslide_status_bar_sec_H_dim}}
+  }
 }
 \AddToHook{shipout/foreground}{
   \_zslide_status_info:nnnn {head}{ 0 }{.5 }{ \hfill\_zslide_metadate:n {UL}\  }
@@ -145,11 +163,15 @@
     \put#2 {\textcolor{\tl_use:c {l__zlatex_slide_#1_bg_tl}}{\rule{#3\paperwidth}{#4}}}
   \fi
 }
+\dim_new:N \g_zslide_status_info_head_B_dim
+\dim_new:N \g_zslide_status_info_foot_B_dim
+\dim_gset:Nn \g_zslide_status_info_head_B_dim {-.9em+2.5pt}
+\dim_gset:Nn \g_zslide_status_info_foot_B_dim {-\paperheight+2.5pt}
 \cs_new_protected:Npn \_zslide_status_info:nnnn #1#2#3#4 {
-  \ifnum\thepage=0\else\str_case:nn {#1}{ 
-    {head} {\put(#2\paperwidth, -.9em+2.5pt) {\hbox~ to~ #3\paperwidth {#4}}}
-    {foot} {\put(#2\paperwidth, -\paperheight+2.5pt) {\hbox~ to~ #3\paperwidth {#4}}}
-  }\fi
+  \ifnum\thepage=0\else
+    \put(#2\paperwidth, \dim_use:c {g_zslide_status_info_#1_B_dim}) 
+      {\hbox~ to~ #3\paperwidth {#4}}
+  \fi
 }
 \cs_set:Npn \_zslide_navigate:nnnn #1#2#3#4 {
   \int_step_inline:nnn {1}{#1}{
@@ -242,8 +264,10 @@
   }
 }
 \cs_new_protected:Npn \_zslide_metadate:n #1 {
-  {\scriptsize\textcolor{\tl_use:c {l__zlatex_slide_#1_fg_tl}}
-    {\tl_use:c {l__zlatex_slide_#1_text_tl}}}
+  \bool_if:NT \g__zlatex_hyperref_bool
+    {\hyper@link{link}{zslide@titlepage}}
+    {\scriptsize\textcolor{\tl_use:c {l__zlatex_slide_#1_fg_tl}}
+      {\tl_use:c {l__zlatex_slide_#1_text_tl}}}
 }
 
 
@@ -376,8 +400,8 @@
 \NewDocumentCommand{\zslideDefaultBR}{}
   {
     \zslideDate\quad 
-    \thepage/\hyper@link{link}{zslide@lastpage}
-      {
+    \thepage/\bool_if:NT \g__zlatex_hyperref_bool
+      {\hyper@link{link}{zslide@lastpage}}{
         \textcolor{\l__zlatex_slide_BR_fg_tl}
           {\pageref*{zslide-last-page}}
       }

@@ -22,7 +22,7 @@
 \zlatexColorSetup{
   link=purple
 }
-\geometry{left=1.75in, right=1.25in, vmargin=1.1in}
+\geometry{left=2in, right=1in}
 \usepackage{zhnumber}
 \usepackage{tikzlings}
 \usepackage{booktabs}
@@ -69,7 +69,6 @@
 \makeatother
 \definecolor{bg}{rgb}{0.95,0.95,0.95}
 \setminted{
-  fontsize=\small,
   bgcolor=bg,
   breaklines=true, 
   tabsize=2,
@@ -100,6 +99,7 @@
     autogobble,
     escapeinside=#2,
     bgcolor=,
+    fontsize=\small,
   }
 }
 \newcommand{\zlatex}{z\LaTeX{}}
@@ -194,7 +194,7 @@ representation of, as far as I know, the things in themselves;}
 \section{宏包机制}
 \begin{function}[updated=2024-11-05]{zslide-last-page}
   \begin{syntax}
-    \cmd{\pageref\{zslide-last-page\}}
+    \cmd{\pageref}\zarg{zslide-last-page}
   \end{syntax}
   引用当前文档的最后一页, 用于 slide 制作时的页码引用.
 \end{function}
@@ -251,9 +251,9 @@ representation of, as far as I know, the things in themselves;}
   \begin{syntax}
     \cs{usepackage}\zarg{ztool}
   \end{syntax}
-  本宏集以独立实现了一个 \pkg{ztool} 模块, 此模块中包含原来已被废弃的 \pkg{l3sys-shell} 中的所有命令.
-  \pkg{ztool} 实现了box 以及 文件 IO 操作相关的函数. 在 \pkg{ztool} 的协助下，\zlatex{} 能够较少
-  \cmd{-shell-escape} 的调用.
+  本宏集以独立实现了一个 \pkg{ztool} 宏包, 此模块中包含原来已被废弃的 \pkg{l3sys-shell} 中的所有命令.
+  \pkg{ztool} 实现了box 以及 文件 IO 操作相关的函数. 在 \pkg{ztool} 的协助下，\zlatex{} 能够避免或减少
+  \cmd{-shell-escape} 相关的调用. \pkg{ztool} 宏包手册请参见 \cref{pkg:ztool}.
 \end{function}
 
 由于\zlatex{} 还没有传入CTAN(未来可能会考虑)，所以想要使用此文档类，可以有如下的两种方法:
@@ -381,10 +381,10 @@ representation of, as far as I know, the things in themselves;}
 各个 module 和 library 的加载方式请参见如下示例:
 \begin{DocExample}
 % \documentclass{zlatex}
-\zlatexloadlibrary{/\zarg{fancy}/}
-\zlatexloadlibrary{/\zarg{mathalias}/}
-\zlatexloadlibrary{/\zarg{slide}/}
-\zlatexloadlibrary{/\zarg{theme}/}
+\zlatexloadlibrary/\zarg{fancy}/
+\zlatexloadlibrary/\zarg{mathalias}/
+\zlatexloadlibrary/\zarg{slide}/
+\zlatexloadlibrary/\zarg{theme}/
 \end{DocExample}
 
 你当然可以编写一个你自己的 module, 不妨假设其名称为 \meta{moduleA}; 将此文件命名为 \texttt{zlatex.module.\meta{moduleA}.tex}, 
@@ -509,7 +509,7 @@ representation of, as far as I know, the things in themselves;}
   layout={
     margin=/\meta{bool\zdefault{false}}/,
     slide=/\meta{bool\zdefault{false}}/,
-    aspect=/\meta{float|float\zdefault{12:9}}/,
+    aspect=/\meta{float|float\zdefault{12|9}}/,
     theme=/\meta{str\zdefault{AnnArborDefault}}/
   },
 ]{zlatex}
@@ -621,6 +621,29 @@ representation of, as far as I know, the things in themselves;}
   \end{syntax}
   此命令表示当前文档中一个空格的宽度.
 \end{function}
+
+
+\clearpage
+\section{状态检测}
+因 \zlatex{} 的选项配置比较庞大，其中涉及到诸多的宏包和命令的加载，所以在文档编译时，我们需要对文档的各种状态进行检测，
+\zlatex{} 提供了一系列的命令用于检测文档中各个变量状态的命令.
+
+
+\begin{function}[added=2025-01-15]{\zlatexHyperTF, \zlatexFancyTF, \zlatexMarginTF, \zlatexSlideTF, \zlatexFontConfigTF, \zlatexMathAliasTF, \zlatexBibIndexLoadTF}
+  \begin{syntax}
+    \cs{zlatexHyperTF}\marg{true code}\marg{false code}
+  \end{syntax}
+  此命令用于检测当前文档中是否开启了超链接功能，如果开启了，那么执行 \meta{true code}, 否则执行 \meta{false code}, 其余命令的使用方法同理. 一个使用样例如下:
+\end{function}
+\begin{DocExample}*
+\zlatexHyperTF{Hyperref is loaded.}{Hyperref is not loaded.}\par
+\zlatexFancyTF{Fancy is loaded.}{Fancy is not loaded.}\par
+\zlatexMarginTF{Margin does set.}{Margin does NOT set.}\par
+\zlatexSlideTF{Slide is loaded.}{Slide is not loaded.}\par
+\zlatexFontConfigTF{Font config is loaded.}{Font config is not loaded.}\par
+\zlatexMathAliasTF{Math alias is loaded.}{Math alias is not loaded.}\par
+\zlatexBibIndexLoadTF{Bib index is loaded.}{Bib index is not loaded.}
+\end{DocExample}
 
 
 \clearpage
@@ -804,15 +827,18 @@ representation of, as far as I know, the things in themselves;}
     layer=/\meta{tl:\zdefault*{background}, foreground}/, 
     position=/\meta{tl:(dim1, dim2)}/,
     label=/\meta{tl:\zdefault*{DEFAULT}}/, 
-    anchor=/\meta{tl:\zdefault*{c}, tl, tc, tr, bl, bc, br}/
+    anchor=/\meta{tl:\zdefault*{c}, tl, tc, tr, bl, bc, br, etc}/
   ]{/\meta{item}/}
 \end{DocExample}
-其中\meta{position}以页面的左下角为原点，向上向右为正方向. 注意: \pkg{transparent}宏包仅可以在 \hologo{pdfLaTeX} 和 
-\hologo{LuaLaTeX} 下正常工作. 一个简单的示例, 给当前页面添加一个水印:
+其中\meta{position}以页面的左下角为原点，向上向右为正方向. \meta{anchor} 为两个字符: 一个为水平位置,另一个为垂直位置。
+水平位置包括：左(\texttt{l})、中(\texttt{c})、右(\texttt{r})、内侧(\texttt{i})、外侧(\texttt{o})；垂直位置包括：
+顶部(\texttt{t})、中部(\texttt{m})、底部(\texttt{b}). 
+
+注意: \pkg{transparent}宏包仅可以在 \hologo{pdfLaTeX} 和 \hologo{LuaLaTeX} 下正常工作. 一个简单的示例, 给当前页面添加一个水印:
 \begin{DocExample}*
   % \usepackage{tikzlings}
   \zlatexPageMask{
-    \transparent{.5}\includegraphics{latex-logo.pdf};
+    \transparent{.5}\includegraphics{latex-logo.pdf}
   }
   \zlatexPageMask[anchor=tr, position={(\zpw, \zph)}]{
     \begin{tikzpicture}[scale=2]
@@ -822,6 +848,14 @@ representation of, as far as I know, the things in themselves;}
 \end{DocExample}
 上述的 \cmd{\zpw}, \cmd{\zph} 分别表示当前纸张的宽和高.
 
+
+\begin{function}[added=2024-12-05]{\zpw, \zph}
+  \begin{syntax}
+    \cs{zpw}
+    \cs{zph}
+  \end{syntax}
+  此二命令表示当前纸张的宽和高, 命令原型为 \cs{paperwidth} 和 \cs{paperheight}.
+\end{function}
 
 \begin{function}[added=2024-12-05]{\zlatexPageMaskRemove}
   \begin{syntax}
@@ -846,7 +880,7 @@ representation of, as far as I know, the things in themselves;}
   \begin{itemize}
     \item 章节标题类: \zlatexVerb{chapter, chapter-rule}
     \item 超链接类: \zlatexVerb{link, cite, url}
-    \item 定理环境类: \env{axiom, definition, theorem, proposition, lemma, corollary, proof, example, solution}
+    \item 数学环境类: \env{axiom, definition, theorem, proposition, lemma, corollary, proof, example, solution}
   \end{itemize}
   在颜色指定上，\zlatex{} 实现了一套自己的颜色指定方式, 在指定色彩时可以不必要提前定义. 参见如下使用案例:
   \begin{DocExample}
@@ -1081,11 +1115,19 @@ Hook, 方便用户直接对环境进行操作.
 \end{function}
 \begin{DocExample}*
   \begin{theorem}[AAA-4]
-    This is a theorem AAA-4.
+    This is a 'plain' style theorem AAA-4.
+  \end{theorem}
+  \zlatexThmStyle{leftbar}
+  \begin{theorem}[BBB-4]
+    This is a 'leftbar' style theorem BBB-4.
+  \end{theorem}
+  \zlatexThmStyle{background}
+  \begin{theorem}[CCC-4]
+    This is a 'background' style theorem CCC-4.
   \end{theorem}
   \zlatexThmStyle{fancy}
-  \begin{theorem}[BBB-4]
-    This is a fancy theorem BBB-4.
+  \begin{theorem}[DDD-4]
+    This is a 'fancy' style theorem DDD-4.
   \end{theorem}
 \end{DocExample}
 \zlatexThmStyle{plain}
@@ -1155,7 +1197,7 @@ Hook, 方便用户直接对环境进行操作.
 \zlatexThmToc[1.25]
 \begin{proposition}[AAA-6]proposition AAA-6\end{proposition}
 \begin{lemma}[BBB-6]lemma BBB-6\end{lemma}
-\begin{corollary}[CCC-3]corollary CCC-3\end{corollary}
+\begin{corollary}[CCC-5]corollary CCC-5\end{corollary}
 \end{DocExample}
 
 \begin{function}[updated=2024-12-05]{\zlatexThmTocAdd}
@@ -1249,7 +1291,7 @@ Hook, 方便用户直接对环境进行操作.
 library. 
 
 所有的 library 均不默认加载，用户需要使用 \cmd{\zlatexloadlibrary}\texttt{\marg{library name}} 手动加载, 
-详细的 \meta{library name} 请参见命令 \cmd{\zlatexloadlibrary} 的说明. 
+详细的 \meta{library name} 列表请参见命令 \cmd{\zlatexloadlibrary} 的说明. 
 
 \subsection{fancy}
 此 library 用于章节的格式化以及部分的，目前仅对 \cmd{\chapter} 进行了重定义. 如果此时 \meta{fancy}\texttt{=true},
@@ -1278,18 +1320,18 @@ library.
   \item 自动括号命令(试验阶段)
 \end{itemize}
 
-对于自动括号命令，目前还很不成熟，如果不清楚对应的命令原理请勿使用。正对此特性，推荐用于使用 \pkg{pyhsics 2} 
+对于自动括号命令，目前还很不成熟，如果不清楚对应的命令原理请勿使用。针对此特性，推荐用于使用 \pkg{pyhsics 2} 
 宏包.
 
 \begin{function}[updated=2024-12-05]{\F, \R, \K, \C, \B, \S, \FF}
   \begin{syntax}
-    \cs{F}\marg{math char}
-    \cs{R}\marg{math char}
-    \cs{K}\marg{math char}
-    \cs{C}\marg{math char}
-    \cs{B}\marg{math char}
-    \cs{S}\marg{math char}
-    \cs{FF}\marg{math char}
+    \cs{F}\marg{tokens}
+    \cs{R}\marg{tokens}
+    \cs{K}\marg{tokens}
+    \cs{C}\marg{tokens}
+    \cs{B}\marg{tokens}
+    \cs{S}\marg{tokens}
+    \cs{FF}\marg{tokens}
   \end{syntax}
   以上各命令的原始定义: \cmd{\F} 为 \cmd{\boldsymbol}, \cmd{\R} 为 \cmd{\mathrm}, 
   \cmd{\K} 为 \cmd{\mathfrak}, \cmd{\C} 为 \cmd{\mathcal}, \cmd{\B} 为 \cmd{\mathbb},
@@ -1494,6 +1536,9 @@ Alias Version: $\displaystyle \zab(\frac12), \zab[\frac12], \zab\{\frac12\}$
 
 由于此 library 内部 patch 了很多的 \LaTeX{} 内部命令, 所以请谨慎加载. 另外, 加载此 library 并不会牺牲太多的编译速度. 
 
+zslide 中的坐标系统:如果不加说明，那么 zslide 中的坐标系统均以当前页面的左上角为原点，取向下向右为正方向. 这就意味着你的纵坐标
+往往为负值，横坐标往往为正值.
+
 \begin{function}[updated=2024-11-05]{\zslideFrameCntAux:nn}
   \begin{syntax}
     \cs{zslideFrameCntAux:nn} \marg{name}\marg{number}
@@ -1506,10 +1551,10 @@ Alias Version: $\displaystyle \zab(\frac12), \zab[\frac12], \zab\{\frac12\}$
   \begin{syntax}
     \cmd{\_zslide_status_bar:nnnn} \marg{type}\marg{coordinate}\marg{width}\marg{height}
   \end{syntax}
-  此命令用于创建 slide 的页面状态栏, 其中 \meta{coordinate} 为坐标, 形如 \zlatexVerb{(10pt, .1\linewidth)}, 以当前页面的
-  左上角为原点, 向下向右为正方向; \meta{type} 为状态栏类型, 目前所有可选值有:\cmd{UR}, \cmd{UL}, \cmd{BL}, \cmd{BC}, \cmd{BR}, \cmd{sec}; 
-  \meta{width} 为宽度, 接受一个浮点数, 默认以 \cmd{\paperwidth} 为单位. \meta{height} 为状态栏的高度，接受一个合法的 \texttt{dim} 类型值, 
-  如 \zlatexVerb{10pt, 2em} 等. 
+  此命令用于创建 slide 的页面背景色快, 为方便叙述，我们称其为 \meta{BOX}. 其中 \meta{coordinate} 为此 \meta{BOX} 的左下角坐标, 形如
+  \zlatexVerb{(10pt, -.1\paperwidth)}, 以当前页面的左上角为原点, 向下向右为正方向; \meta{type} 为状态栏类型, 目前所有可选值有:\cmd{UR}, \cmd{UL}, 
+  \cmd{BL}, \cmd{BC}, \cmd{BR}, \cmd{sec}; \meta{width} 为宽度, 接受一个浮点数, 默认以 \cmd{\paperwidth} 为单位. \meta{height} 为状态栏的高度，
+  接受一个合法的 \texttt{dim} 类型值, 如 \zlatexVerb{10pt, 2em} 等. 
   
   注意:普通用户不应该直接调用此命令，此命令主要提供给模板的开发者.
 \end{function}
@@ -1520,11 +1565,12 @@ Alias Version: $\displaystyle \zab(\frac12), \zab[\frac12], \zab\{\frac12\}$
     \cs{_zslide_status_info:nnnn} \marg{type}\marg{coordinate}\marg{width}\marg{content}
   \end{syntax}
   此命令用于创建 slide 的页面元信息, 其被置于一个 box 中，为方便叙述，我们称其为 \meta{BOX}. 其中 \meta{type} 表示 \meta{BOX} 在页面上的
-  位置, 可选值有: \cmd{foot}, \cmd{head}; \meta{coordinate} 表示 \meta{BOX} 的左侧坐标, 接受一个浮点数, 以 \cmd{\linewidth} 为单位. 此参数以
-  当前页面的左上角为原点, 向下向右为正方向.; \meta{width} 为当前 \meta{BOX} 的(弹性)宽度, 接受一个浮点数, 以 \cmd{\linewidth} 为单位. \meta{content} 
+  位置, 可选值有: \cmd{foot}, \cmd{head}; \cs{g_zslide_status_info_head_B_dim} 和 \cs{g_zslide_status_info_foot_B_dim} 两个寄存器存放了 head 
+  和 foot 中文字基线的纵坐标. \meta{coordinate} 表示 \meta{BOX} 的左下角坐标, 接受一个浮点数, 以 \cmd{\paperwidth} 为单位. 此参数以当前页面的
+  左上角为原点, 向下向右为正方向.; \meta{width} 为当前 \meta{BOX} 的(弹性)宽度, 接受一个浮点数, 以 \cmd{\paperwidth} 为单位. \meta{content} 
   表示 \meta{BOX} 中存放的文本或图片内容. 
 
-  注意:普通用户不应该直接调用此命令，此命令主要提供给模板的开发者.
+  注意:此命令需放入 \cmd{shipout/background} 或 \cmd{shipout/foreground} 这两个 Hook 中, 普通用户不应该直接调用此命令，此命令主要提供给模板的开发者.
 \end{function}
 
 \begin{function}[updated=2024-11-05]{\_zslide_navigate:nnnn}
@@ -1535,8 +1581,35 @@ Alias Version: $\displaystyle \zab(\frac12), \zab[\frac12], \zab\{\frac12\}$
   在 $0\sim \meta{range}$ 内的正整数，表示选定的编号. \meta{target symbol} 为选定的编号的符号, \meta{other symbol} 为
   其它编号的符号.
 
-  注意:普通用户不应该直接调用此命令，此命令主要提供给模板的开发者.
+  注意:此命令需放入 \cmd{shipout/background} 或 \cmd{shipout/foreground} 这两个 Hook 中, 普通用户不应该直接调用此命令，此命令主要提供给模板的开发者.
 \end{function}
+
+
+\begin{function}[added=2025-01-14]{\g_zslide_status_info_head_B_dim, \g_zslide_status_info_foot_B_dim, \g_zslide_status_info_sec_L_dim, \g_zslide_status_info_sec_B_dim}
+  \begin{syntax}
+    \cs{g_zslide_status_info_head_B_dim}\dotfill\zdefault{-.9em+2.5pt}
+    \cs{g_zslide_status_info_foot_B_dim}\dotfill\zdefault{-\string\paperheight+2.5pt}
+    \cs{g_zslide_status_info_sec_L_dim}\dotfill\zdefault{1cm}
+    \cs{g_zslide_status_info_sec_B_dim}\dotfill\zdefault{-2.25em}
+  \end{syntax}
+  前两个寄存器存放了 head 和 foot 中文字基线的纵坐标, 前者的默认值为 \texttt{-.9em+2.5pt}, 后者的默认值
+  为 \zlatexVerb{-\paperheight+2.5pt}. \cs{g_zslide_status_info_sec_L_dim} 中存放了 section 文本距离页面左边界的距离, 
+  默认值为 \texttt{1cm}; \cs{g_zslide_status_info_sec_B_dim} 中存放了 section 文本基线的纵坐标, 默认值为 \texttt{-2.25em}.
+\end{function}
+
+
+\begin{function}[added=2025-01-14]{\g_zslide_status_bar_head_H_dim, \g_zslide_status_bar_foot_H_dim, \g_zslide_status_bar_sec_H_dim, \g_zslide_status_bar_sec_B_dim}
+  \begin{syntax}
+    \cs{g_zslide_status_bar_head_H_dim}\dotfill\zdefault{.9em}
+    \cs{g_zslide_status_bar_foot_H_dim}\dotfill\zdefault{.9em}
+    \cs{g_zslide_status_bar_sec_H_dim}\dotfill\zdefault{1.8em}
+    \cs{g_zslide_status_bar_sec_B_dim}\dotfill\zdefault{-2.7em}
+  \end{syntax}
+  前两个寄存器存放了 slide 中 head 和 foot 对应背景色块的高度, 默认值均为 \texttt{.9em}; \cs{g_zslide_status_bar_sec_H_dim} 中存放了 section 的背景
+  色块的高度, 默认值为 \texttt{1.8em}; \cs{g_zslide_status_bar_sec_B_dim} 中存放了 section 的背景色块中文字的基线的纵坐标, 默认值为 \texttt{-2.7em};
+  当改变此此三个寄存器的值时, 对应色块的基线保持不变，其高度会做出相应的改变.
+\end{function}
+
 
 \begin{function}[updated=2024-11-05]{\zslideTitle, \zslideAuthor, \zslideDate}
   \begin{syntax}
@@ -1563,8 +1636,8 @@ Alias Version: $\displaystyle \zab(\frac12), \zab[\frac12], \zab\{\frac12\}$
     \cs{zslideFrameTotal}\marg{name}
   \end{syntax}
   用户可以在自定义导航栏时使用此命令, 此命令可以根据 \meta{name} 来获取 \zlatexVerb{\jobname.aux} 中变
-  量 \cmd{\zsec@\meta{name}@cnt} 的值. 默认返回整个 slide 的 Frame 总数, 第一次编译或者变量 \cmd{\zsec@\meta{name}@cnt} 
-  不存在时则返回 \cmd{??}.
+  量 \cmd{\zsec@\meta{name}@cnt} 的值. 默认返回当前 section 下的 Frame 总数, 第一次编译亦或者是变
+  量 \cmd{\zsec@\meta{name}@cnt} 不存在, 命令 \cs{zslideFrameTotal} 将会返回 \cmd{??}.
 \end{function}
 
 \begin{function}[updated=2024-11-05]{\zslideFrameIndex}
@@ -1719,7 +1792,7 @@ Subsection Icon: \rule[1.5pt]{3pt}{3pt}
 
 \begin{function}[updated=2024-11-05]{AnnArborDefault}
   \begin{syntax}
-    \cmd{\documentclass}\texttt{[layout={slide, theme=AnnArborDefault}]{zlatex}}
+    \cmd{\documentclass}|[layout={slide, theme=AnnArborDefault}]{zlatex}|
     \cs{zslideThemeUse}\oarg{spec}\zarg{AnnArborDefault}
   \end{syntax}  
   可以在加载文档类时选择此主题, 还可以使用上述命令根据 \meta{spec} 对此主题进行部分配置进行重定义. 本主题具体效果
@@ -1729,7 +1802,7 @@ Subsection Icon: \rule[1.5pt]{3pt}{3pt}
 
 \begin{function}[updated=2024-11-05]{AnnArborBeaver}
   \begin{syntax}
-    \cmd{\documentclass}\texttt{[layout={slide, theme=AnnArborBeaver}]{zlatex}}
+    \cmd{\documentclass}|[layout={slide, theme=AnnArborBeaver}]{zlatex}|
     \cs{zslideThemeUse}\oarg{spec}\zarg{AnnArborBeaver}
   \end{syntax}  
   可以在加载文档类时选择此主题, 还可以使用上述命令根据 \meta{spec} 对此主题进行部分配置进行重定义. 本主题具体效果
@@ -1738,7 +1811,7 @@ Subsection Icon: \rule[1.5pt]{3pt}{3pt}
 
 \begin{function}[updated=2024-11-05]{AnnArborAlbatross}
   \begin{syntax}
-    \cmd{\documentclass}\texttt{[layout={slide, theme=AnnArborAlbatross}]{zlatex}}
+    \cmd{\documentclass}|[layout={slide, theme=AnnArborAlbatross}]{zlatex}|
     \cs{zslideThemeUse}\oarg{spec}\zarg{AnnArborAlbatross}
   \end{syntax}  
   可以在加载文档类时选择此主题, 还可以使用上述命令根据 \meta{spec} 对此主题进行部分配置进行重定义. 本主题具体效果
@@ -1747,7 +1820,7 @@ Subsection Icon: \rule[1.5pt]{3pt}{3pt}
 
 \begin{function}[updated=2024-11-05]{AnnArborSeahorse}
   \begin{syntax}
-    \cmd{\documentclass}\texttt{[layout={slide, theme=AnnArborSeahorse}]{zlatex}}
+    \cmd{\documentclass}|[layout={slide, theme=AnnArborSeahorse}]{zlatex}|
     \cs{zslideThemeUse}\oarg{spec}\zarg{AnnArborSeahorse}
   \end{syntax}  
   可以在加载文档类时选择此主题, 还可以使用上述命令根据 \meta{spec} 对此主题进行部分配置进行重定义. 本主题具体效果
@@ -1757,7 +1830,7 @@ Subsection Icon: \rule[1.5pt]{3pt}{3pt}
 
 \begin{function}[updated=2024-12-05]{AnnArborSpruce}
   \begin{syntax}
-    \cmd{\documentclass}\texttt{[layout={slide, theme=AnnArborSpruce}]{zlatex}}
+    \cmd{\documentclass}|[layout={slide, theme=AnnArborSpruce}]{zlatex}|
     \cs{zslideThemeUse}\oarg{spec}\zarg{AnnArborSpruce}
   \end{syntax}  
   可以在加载文档类时选择此主题, 还可以使用上述命令根据 \meta{spec} 对此主题进行部分配置进行重定义. 本主题具体效果
@@ -1840,7 +1913,7 @@ reason is a representation of, as far as I know, the things in themselves;%
 \zlatexThmStyle{obsidian}
 \begin{DocExample}*
 % \zlatexloadlibrary{mathalias}
-\begin{proposition}[CCC-4]
+\begin{proposition}[CCC-7]
 As any dedicated reader can clearly see, the Ideal of practical
 reason is a representation of, as far as I know, the things in themselves; 
 \begin{align}
@@ -1870,7 +1943,7 @@ reason is a representation of, as far as I know, the things in themselves;%
 \zlatexThmStyle{lapsis}
 \begin{DocExample}*
 % \zlatexloadlibrary{mathalias}
-\begin{lemma}[DDD-1]
+\begin{lemma}[DDD-5]
 As any dedicated reader can clearly see, the Ideal of practical
 reason is a representation of, as far as I know, the things in themselves; 
 \begin{align}
@@ -1899,7 +1972,7 @@ reason is a representation of, as far as I know, the things in themselves;%
 \zlatexThmStyle{elegant}
 \begin{DocExample}*
 % \zlatexloadlibrary{mathalias}
-\begin{definition}[DDD-1]
+\begin{definition}[DDD-6]
 As any dedicated reader can clearly see, the Ideal of practical
 reason is a representation of, as far as I know, the things in themselves; 
 \begin{align}
@@ -1912,6 +1985,284 @@ reason is a representation of, as far as I know, the things in themselves;%
 \end{definition}
 \end{DocExample}
 \endgroup
+
+
+\clearpage
+\section{ztool}\label{pkg:ztool}
+\subsection{l3sys-shell}
+本部分主要介绍 \pkg{ztool} 中实现的原始 \pkg{l3sys-shell} 宏包中的命令. 所以使用本部分的命令时需在编译
+\LaTeX{} 文档时启用 \cmd{-shell-escape} 参数, 否则此系列命令将不会指向任何操作.
+
+\vskip2em
+\noindent\textcolor{red}{\sffamily WARNING: 请谨慎使用此部分的命令, 部分不当操作可能导致系统崩溃.}
+
+\begin{function}[updated=2024-12-05]{\ztool_shell_escape:n, \ztool_shell_escape:e}
+  \begin{syntax}
+    \cs{ztool_shell_escape:n} \marg{command}
+  \end{syntax}
+  当 \cmd{-shell-escape} 参数启用时, 此命令会在 shell 中执行 \meta{command}, 如果 \cmd{-shell-escape} 参数未启用,
+  此命令将不会执行任何操作.
+\end{function}
+
+
+\begin{function}[updated=2024-12-05]{\ztool_shell_mkdir:n, \ztool_shell_mkdir:e}
+  \begin{syntax}
+    \cs{ztool_shell_mkdir:n} \marg{dir}
+  \end{syntax}
+  当 \cmd{-shell-escape} 参数启用时, 此命令会创建一个目录 \meta{dir}, 如果 \cmd{-shell-escape} 参数未启用,
+  此命令将不会执行任何操作.
+\end{function}
+
+
+\begin{function}[updated=2024-12-05]{\ztool_shell_cp:nn, \ztool_shell_cp:ee, \ztool_shell_cp:ne, \ztool_shell_cp:en}
+  \begin{syntax}
+    \cs{ztool_shell_cp:nn} \marg{source}\marg{target}
+  \end{syntax}
+  当 \cmd{-shell-escape} 参数启用时, 此命令将把文件 \meta{source} 复制为文件 \meta{target}, 如果 \cmd{-shell-escape} 参数未启用,
+  此命令将不会执行任何操作.
+\end{function}
+
+
+\begin{function}[updated=2024-12-05]{\ztool_shell_mv:nn, \ztool_shell_mv:ee, \ztool_shell_mv:ne, \ztool_shell_mv:en}
+  \begin{syntax}
+    \cs{ztool_shell_mv:nn} \marg{source}\marg{target}
+  \end{syntax}
+  当 \cmd{-shell-escape} 参数启用时, 此命令将把文件 \meta{source} 移动到目录 \meta{target}, 如果 \cmd{-shell-escape} 参数未启用,
+  此命令将不会执行任何操作.
+\end{function}
+
+\begin{function}[updated=2024-12-05]{\ztool_shell_rm:n, \ztool_shell_rm:e}
+  \begin{syntax}
+    \cs{ztool_shell_rm:n} \marg{file}
+  \end{syntax}
+  当 \cmd{-shell-escape} 参数启用时, 此命令将删除文件 \meta{file}, 如果 \cmd{-shell-escape} 参数未启用,
+  此命令将不会执行任何操作.
+\end{function}
+
+\begin{function}[updated=2024-12-05]{\ztool_shell_rmdir:n, \ztool_shell_rmdir:e}
+  \begin{syntax}
+    \cs{ztool_shell_rmdir:n} \marg{dir}
+  \end{syntax}
+  当 \cmd{-shell-escape} 参数启用时, 此命令将删除目录 \meta{dir}, 如果 \cmd{-shell-escape} 参数未启用,
+  此命令将不会执行任何操作.
+\end{function}
+
+\begin{function}[updated=2024-12-05]{\ztool_get_shell_pwd:N, \ztool_get_shell_pwd:c}
+  \begin{syntax}
+    \cs{ztool_get_shell_pwd:N} \meta{tl}
+  \end{syntax}
+  当 \cmd{-shell-escape} 参数启用时, 此命令将返回当前的工作目录, 并将其存放在 \meta{tl} 中, 如果 \cmd{-shell-escape} 参数未启用,
+  此命令将不会执行任何操作.
+\end{function}
+
+
+\begin{function}[updated=2024-12-05]{\ztool_shell_split_ls:nN}
+  \begin{syntax}
+    \cs{ztool_shell_split_ls:nN} \marg{dir}\marg{tl}
+  \end{syntax}
+  当 \cmd{-shell-escape} 参数启用时, 此命令将返回目录 \meta{dir} 下的所有文件名, 并将其存放在 \meta{tl} 中, 如果 \cmd{-shell-escape} 参数未启用,
+  此命令将不会执行任何操作.
+\end{function}
+
+
+\clearpage
+\subsection{文件 IO 操作}
+本部分主要介绍 \pkg{ztool} 中实现的文件 IO 操作, 包括: 读取文件, 写入文件, 追加文件等操作.
+
+\begin{function}[updated=2024-12-05]{\ztool_read_file_as_seq:nnN, \ztool_read_file_as_seq:neN, \ztool_read_file_as_seq:nnc, \ztool_read_file_as_seq:nec}
+  \begin{syntax}
+    \cs{ztool_read_file_as_seq:nnN} \marg{bool}\marg{file}\marg{seq}
+  \end{syntax}
+  此命令用于读取文件 \meta{file} 的内容, 并将其存放在 \meta{seq} 中, 如果 \meta{file} 不存在, 则会返回一个空的 \meta{seq}.
+  \meta{bool} 用于控制是否保留行尾的空格, 可选值有:\cs{c_true_bool}, \cs{c_false_bool}, 默认为 \cs{c_true_bool}; 如果 \meta{bool} 
+  为 \cs{c_true_bool}, 则保留行尾的空格, 否则不保留.
+
+  此命令仅在一个组内有效, 且不可嵌套.
+\end{function}
+
+
+\begin{function}[updated=2025-01-05]{\ztool_gread_file_as_seq:nnN, \ztool_gread_file_as_seq:neN, \ztool_gread_file_as_seq:nnc, \ztool_gread_file_as_seq:nec}
+  \begin{syntax}
+    \cs{ztool_read_file_as_seq:nnN} \marg{bool}\marg{file}\marg{seq}
+  \end{syntax}
+  此命令用于读取文件 \meta{file} 的内容, 并将其存放在 \meta{seq} 中, 如果 \meta{file} 不存在, 则会返回一个空的 \meta{seq}.
+  \meta{bool} 用于控制是否保留行尾的空格, 可选值有:\cs{c_true_bool}, \cs{c_false_bool}, 默认为 \cs{c_true_bool}; 如果 \meta{bool} 
+  为 \cs{c_true_bool}, 则保留行尾的空格, 否则不保留.
+
+  此命令作用于全局, 不可嵌套.
+\end{function}
+
+
+\begin{function}[updated=2024-01-05]{\ztool_append_to_file:nn, \ztool_append_to_file:no, \ztool_append_to_file:nf, \ztool_append_to_file:ee}
+  \begin{syntax}
+    \cs{ztool_append_to_file:nn} \marg{file}\marg{content}
+  \end{syntax}
+  此命令用于将 \meta{content} 追加到文件 \meta{file} 中, 如果 \meta{file} 不存在, 则会创建一个名为 \meta{file} 的新文件.
+\end{function}
+
+
+\begin{function}[updated=2024-01-05]{\ztool_replace_file_line:nnn, \ztool_replace_file_line:enn, \ztool_replace_file_line:ene, \ztool_replace_file_line:eee}
+  \begin{syntax}
+    \cs{ztool_replace_file_line:nnn} \marg{file}\marg{line}\marg{content}
+  \end{syntax}
+  此命令用于将文件 \meta{file} 中的第 \meta{line} 行替换为 \meta{content}, 如果 \meta{file} 不存在, 则不会进行任何操作.
+\end{function}
+
+
+\begin{function}[updated=2024-01-05]{\ztool_insert_to_file:nnn, \ztool_insert_to_file:nen, \ztool_insert_to_file:nfn, \ztool_insert_to_file:een}
+  \begin{syntax}
+    \cs{ztool_insert_to_file:nnn} \marg{file}\marg{line}\marg{content}
+  \end{syntax}
+  此命令用于将 \meta{content} 插入到文件 \meta{file} 的第 \meta{line} 行之前, 如果 \meta{file} 不存在, 则不会进行任何操作.
+\end{function}
+
+
+\newpage
+下面一个示例展示了如何使用 \pkg{ztool} 中的几个文件 IO 操作命令:
+\begin{DocExample}*
+\begin{filecontents}[noheader]{testIO.txt}
+original content 
+\end{filecontents}
+\ExplSyntaxOn
+\seq_new:N \l_ztool_tmp_seq \seq_clear:N \l_ztool_tmp_seq
+\ztool_append_to_file:nn {testIO.txt} {|APPEND-CONTENT|}
+\ztool_insert_to_file:nnn {testIO.txt} {2} {|~~INSERT-CONTENT~~|}
+\ztool_gread_file_as_seq:nnN {\c_false_bool} {testIO.txt} \l_ztool_tmp_seq
+\seq_use:Nn \l_ztool_tmp_seq {\\}
+\ExplSyntaxOff
+\inputminted{text}{testIO.txt}
+\end{DocExample}
+
+
+\clearpage
+\subsection{Box 操作}
+本部分介绍 \pkg{ztool} 中实现的 Box 操作, 包括 box 的测量以及 box 的简单变换.
+
+
+\begin{function}[updated=2024-12-05]{\ztool_set_to_ht:Nn, \ztool_set_to_ht:Ne, \ztool_set_to_ht:Nc}
+  \begin{syntax}
+    \cs{ztool_set_to_ht:Nn} \meta{dim}\marg{content}
+  \end{syntax}
+  此命令用于将 \meta{content} 的高度保存在 \meta{dim} 这一寄存器中.
+\end{function}
+
+\begin{function}[updated=2024-12-05]{\ztool_set_to_wd:Nn, \ztool_set_to_wd:Ne, \ztool_set_to_wd:Nc}
+  \begin{syntax}
+    \cs{ztool_set_to_wd:Nn} \meta{dim}\marg{content}
+  \end{syntax}
+  此命令用于将 \meta{content} 的宽度保存在 \meta{dim} 这一寄存器中.
+\end{function}
+
+\begin{function}[updated=2024-12-05]{\ztool_gset_to_ht:Nn, \ztool_gset_to_ht:Ne, \ztool_gset_to_ht:Nc}
+  \begin{syntax}
+    \cs{ztool_gset_to_ht:Nn} \meta{dim}\marg{content}
+  \end{syntax}
+  此命令用于将 \meta{content} 的高度保存在 \meta{dim} 这一寄存器中, 并且此操作是全局的.
+\end{function}
+
+\begin{function}[updated=2024-12-05]{\ztool_gset_to_wd:Nn, \ztool_gset_to_wd:Ne, \ztool_gset_to_wd:Nc}
+  \begin{syntax}
+    \cs{ztool_gset_to_wd:Nn} \meta{dim}\marg{content}
+  \end{syntax}
+  此命令用于将 \meta{content} 的宽度保存在 \meta{dim} 这一寄存器中, 并且此操作是全局的.
+\end{function}
+
+
+\begin{function}[updated=2024-12-05]{\ztool_resize_to_wd:nn, \ztool_resize_to_wd:en, \ztool_resize_to_wd:ne}
+  \begin{syntax}
+    \cs{ztool_resize_to_wd:nn} \marg{dim}\marg{content}
+  \end{syntax}
+  此命令用于将 \meta{content} 的宽度调整为 \meta{dim}.
+\end{function}
+
+\begin{function}[updated=2024-12-05]{\ztool_resize_to_ht:nn, \ztool_resize_to_ht:en, \ztool_resize_to_ht:ne}
+  \begin{syntax}
+    \cs{ztool_resize_to_ht:nn} \marg{dim}\marg{content}
+  \end{syntax}
+  此命令用于将 \meta{content} 的高度调整为 \meta{dim}.
+\end{function}
+
+下面一个示例展示了如何使用 \pkg{ztool} 中的几个 Box 操作命令:
+\begin{DocExample}*
+\ExplSyntaxOn
+% get dim of content
+\dim_new:N \l_ztool_tmp_H_dim
+\dim_new:N \l_ztool_tmp_W_dim
+\ztool_set_to_ht:Nn \l_ztool_tmp_H_dim {Hello,~world!}
+\ztool_set_to_wd:Nn \l_ztool_tmp_W_dim {Hello,~world!}
+\dim_use:N \l_ztool_tmp_H_dim \quad \dim_use:N \l_ztool_tmp_W_dim\\
+% set content to dim
+Hello,~world!\\
+\ztool_resize_to_ht:nn {.5cm} {Hello,~world!}\\
+\ztool_resize_to_wd:nn {15pt} {Hello,~world!}
+\ExplSyntaxOff
+\end{DocExample}
+
+
+% ----------------------------------------------------------------------
+%                              Implement
+% ----------------------------------------------------------------------
+\cleardoublepage
+\newgeometry{left=1in, top=.75in, right=.9in, bottom=.75in}
+\section{\zlatex{} Implementation}
+\pagestyle{empty}
+\zlatexPageMask*[anchor=mr, position={(\zpw, .5\zph)}]{{\sffamily\color{gray}\scalebox{5}{\thepage}}}
+\renewcommand{\theFancyVerbLine}{\sffamily
+  \textcolor{gray}{\small\oldstylenums{\arabic{FancyVerbLine}}}}
+\setminted{ bgcolor=, linenos=true, numbers=both }
+
+
+\subsection{zlatex.cls}
+\inputminted{latex}{../code/zlatex.cls}
+
+\newpage
+\subsection{module.fontcfg}
+\inputminted{latex}{../code/module/zlatex.module.fontcfg.tex}
+
+\newpage
+\subsection{module.indexref}
+\inputminted{latex}{../code/module/zlatex.module.indexref.tex}
+
+\newpage
+\subsection{module.layout}
+\inputminted{latex}{../code/module/zlatex.module.layout.tex}
+
+\newpage
+\subsection{module.pageinfo}
+\inputminted{latex}{../code/module/zlatex.module.pageinfo.tex}
+
+\newpage
+\subsection{module.theme}
+\inputminted{latex}{../code/module/zlatex.module.theme.tex}
+
+\newpage
+\subsection{module.thm}
+\inputminted{latex}{../code/module/zlatex.module.thm.tex}
+
+\newpage
+\subsection{module.titlesec}
+\inputminted{latex}{../code/module/zlatex.module.titlesec.tex}
+
+\newpage
+\subsection{module.toc}
+\inputminted{latex}{../code/module/zlatex.module.toc.tex}
+
+\newpage
+\subsection{library.fancy}
+\inputminted{latex}{../code/library/zlatex.library.fancy.tex}
+
+\newpage
+\subsection{library.mathalias}
+\inputminted{latex}{../code/library/zlatex.library.mathalias.tex}
+
+\newpage
+\subsection{library.slide}
+\inputminted{latex}{../code/library/zlatex.library.slide.tex}
+
+\newpage
+\subsection{library.theme}
+\inputminted{latex}{../code/library/zlatex.library.theme.tex}
+
 
 \clearpage
 \PrintIndex

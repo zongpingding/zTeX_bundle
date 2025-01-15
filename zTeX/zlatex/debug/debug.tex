@@ -1,3 +1,128 @@
+% ==> Test thm style warning msg
+\InputIfFileExists{zlatex-cfg.tex}{}{}
+\documentclass[
+  % hyper,
+]{../code/zlatex}
+
+\zlatexThmStyle{aaa}
+\begin{document}
+AAA
+\end{document}
+
+
+
+
+% ==> Make Metropolis slide theme
+\InputIfFileExists{zlatex-cfg.tex}{}{}
+\documentclass[
+  hyper,
+  layout={slide, aspect=16|9, theme=AnnArborSpruce},
+]{../code/zlatex}
+\zslideThemeUse[
+  UL={bg=white, text=}, 
+  UR={bg=white, text=},
+  BL={bg=white, text=},
+  BC={bg=white, text=},
+  BR={bg=white, text=},  
+]{AnnArborSpruce}
+\ExplSyntaxOn
+\dim_gset:Nn \g_zslide_status_bar_sec_H_dim {2.2em}
+\dim_gset:Nn \g_zslide_status_bar_sec_B_dim {-2.2em}
+\dim_gset:Nn \g_zslide_status_info_sec_B_dim {-1.55em}
+\dim_gset:Nn \g_zslide_status_info_head_B_dim {-2.5em}
+% navigator
+\AddToHook{shipout/foreground}{
+  \_zslide_status_info:nnnn {head}{0}{1}{
+    \zslideNavigateBall[
+      \RPITEM[red]
+    ][
+      \RPITEM
+    ]
+  }
+}
+\newcommand\ITEM[1][gray]{\hspace*{-4pt}\pgfornamenthan[color=#1, scale=0.06]{39}}
+\newcommand\RPITEM[1][gray]{\prg_replicate:nn {10}{\ITEM[#1]}}
+\ExplSyntaxOff
+\usepackage{pgfornament-han}
+
+
+\title{zSlide Metropolis Theme}
+\author{Eureka}
+\date{\today}
+\begin{document}
+\maketitle
+
+
+\section{SECTION AAA}
+AAA
+
+\zslideNavigateBall[\ITEM[red]][\ITEM]
+
+\newpage
+% \section{SECTION BBB}
+BBB 
+\newpage
+% \section{SECTION CCC}
+CCC 
+\newpage
+% \section{SECTION DDD}
+DDD 
+
+\end{document}
+
+
+
+
+% ==> Test zlatex working condition
+\InputIfFileExists{zlatex-cfg.tex}{}{}
+\documentclass[
+  % hyper,
+  layout={slide, aspect=16|9, theme=AnnArborSpruce},
+]{../code/zlatex}
+\zslideThemeUse[
+  UR={text=\zLaTeX{} Slide:\ \zslideNavigateBall},
+]{AnnArborSpruce}
+\zslidelogo[width=4em, exclude={0, 2, 4}]{example-image-duck}
+
+% BEGIN TEST INTERFACE
+\ExplSyntaxOn
+\AddToHook{shipout/background}{
+  \_zslide_status_bar:nnnn {BC}{(.5\paperwidth, -.5\paperheight)}{.2}{80pt}
+}
+\AddToHook{shipout/foreground}{
+  \_zslide_status_info:nnnn {foot}{.66}{.75}{AAA\zslideNavigateBall[\textcolor{red}{XX}][\textcolor{gray}{XX}]}
+}
+\ExplSyntaxOff
+% END TEST INTERFACE
+
+\title{TEST}  
+\author{Eureka}
+\date{\today}
+\begin{document}
+\maketitle
+
+
+\section{FIRST SEC}
+Hello world, 
+
+\newpage
+
+aaa 
+
+\newpage
+
+bbb
+
+\section{SECOND SEC}
+this is me.
+
+\section{THIRD SEC}
+HAHA.
+
+\end{document}
+
+
+
 % ==> l3doc function env
 \keys_define:nn { l3doc/function }
 {

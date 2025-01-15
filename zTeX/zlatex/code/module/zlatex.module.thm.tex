@@ -76,6 +76,7 @@
     {g__zlatex_thm_name_prop}
     {g__zlatex_thm_name_\g__zlatex_lang_math_tl _prop}
 }
+\@onlypreamble\zlatexThmLang
 \prop_new:c {g__zlatex_thm_name_prop}
 \prop_gclear:c {g__zlatex_thm_name_prop}
 \zlatex_hook_preamble_last:n {
@@ -128,7 +129,7 @@
     { #2 }
   }
 }
-% \@onlypreamble\zlatexThmCreate
+\@onlypreamble\zlatexThmCreate
 
 
 % ==> new thm style interface
@@ -215,7 +216,7 @@
 % ==> thm format and style setup
 \zlatex_msg_set:nn {mathEnv-style}{
   You~use~an~incorrect~MathEnv~style:~'\g__zlatex_thm_style_tl',~All~valid~
-  MathEnv~are:'plain',~'leftbar',~'ba\zlatexThmNameckground',~'fancy',~'shadow',~'paris'.
+  MathEnv~are:'plain',~'leftbar',~'background',~'fancy',~'shadow',~'paris'.
 }
 % thm counter
 \bool_new:N \g__zlatex_thm_cntshare_bool
@@ -237,6 +238,9 @@
   \def\thm@temp@name{#1}
   \__zlatex_thm_title_item:nnnn {#1}{#2}{#3}{#4}
   \tl_use:c {g__zlatex_thm_style_\g__zlatex_thm_style_tl _option_tl}
+  \tl_if_exist:cTF {g__zlatex_thm_style_\g__zlatex_thm_style_tl _option_tl}
+    {\tl_use:c {g__zlatex_thm_style_\g__zlatex_thm_style_tl _option_tl}}
+    {\zlatex_msg_error:n {mathEnv-style}}
   \tl_if_exist:cTF {g__zlatex_thm_style_\g__zlatex_thm_style_tl _begin_tl}
     {\tl_use:c {g__zlatex_thm_style_\g__zlatex_thm_style_tl _begin_tl}}
     {\zlatex_msg_error:n {mathEnv-style}}
@@ -248,7 +252,9 @@
 \@onlypreamble\zlatexThmTocPrefix
 \cs_new:Npn \__zlatex_thm_warp_end:n #1 
   {
-    \tl_use:c {g__zlatex_thm_style_\g__zlatex_thm_style_tl _end_tl}
+    \tl_if_exist:cTF {g__zlatex_thm_style_\g__zlatex_thm_style_tl _end_tl}
+      {\tl_use:c {g__zlatex_thm_style_\g__zlatex_thm_style_tl _end_tl}}
+      {\zlatex_msg_error:n {mathEnv-style}}
     \__zlatex_thm_toc_add:eeee 
       {\g__zlatex_thm_table_level}
       { 

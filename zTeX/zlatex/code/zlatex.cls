@@ -398,6 +398,33 @@
 
 
 % ----------------------------------------------------------------------
+%                          bool check user interface
+% ----------------------------------------------------------------------
+\NewDocumentCommand\zlatexHyperTF{mm}{
+  \bool_if:NTF \g__zlatex_hyperref_bool {#1}{#2}
+}
+\NewDocumentCommand\zlatexFancyTF{mm}{
+  \bool_if:NTF \g__zlatex_fancy_bool {#1}{#2}
+}
+\NewDocumentCommand\zlatexMarginTF{mm}{
+  \bool_if:NTF \g__zlatex_margin_bool {#1}{#2}
+}
+\NewDocumentCommand\zlatexSlideTF{mm}{
+  \bool_if:NTF \g__zlatex_slide_bool {#1}{#2}
+}
+\NewDocumentCommand\zlatexFontConfigTF{mm}{
+  \bool_if:NTF \g__zlatex_font_config_bool {#1}{#2}
+}
+\NewDocumentCommand\zlatexMathAliasTF{mm}{
+  \bool_if:NTF \g__zlatex_math_alias_bool {#1}{#2}
+}
+\NewDocumentCommand\zlatexBibIndexLoadTF{mm}{
+  \bool_if:NTF \g__zlatex_bib_index_load_bool {#1}{#2}
+}
+
+
+
+% ----------------------------------------------------------------------
 %                           extra commands
 % ----------------------------------------------------------------------
 % Graphics 
