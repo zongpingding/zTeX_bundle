@@ -108,6 +108,7 @@
 }
 \AddToHook{shipout/firstpage}{
   \setcounter{page}{0}
+  \label{zslide-title-page}
   \hyper@anchor{zslide@titlepage}
 }
 \AddToHook{shipout/lastpage}{
@@ -293,10 +294,10 @@
   }
 \zlatex_keys_define:nn { slide / logo }
   {
-    position  .tl_gset:N     = \g__zlatex_slide_logo_position_tl,
+    position  .tl_gset:N    = \g__zlatex_slide_logo_position_tl,
     % position  .initial:n  = { (\textwidth/2+\paperwidth/2, 1.5em) }, % deprecated
     position  .initial:n    = { (\paperwidth-\c_zlatex_quad_dim, 1.5em) },
-    width     .dim_gset:N    = \g__zlatex_slide_logo_width_dim,
+    width     .dim_gset:N   = \g__zlatex_slide_logo_width_dim,
     width     .initial:n    = { 2.5em },
     exclude   .clist_gset:N = \g__zlatex_slide_logo_exclude_clist,
     exclude   .initial:n    = { 0 },

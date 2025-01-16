@@ -40,7 +40,7 @@ HELLO
     \alt, \im
   \end{align}
 
-  \zlatexMathAliasOpSet{alt=ALT, im=IM}
+  % \zlatexMathAliasOpSet{alt=ALT, im=IM}
   \begin{align}
     \alt, \im
   \end{align}
@@ -52,6 +52,21 @@ HELLO
 \begin{proposition}[PROP]
   This is a proposition.
 \end{proposition}
+
+
+\ExplSyntaxOn
+% \ztool_read_file_as_seq:nnN {\c_true_bool}{aaa.txt}\l_tmpa_seq
+% \seq_show:N \l_tmpa_seq
+
+% \ztool_gread_file_as_seq:nnN {\c_true_bool}{texput.log}\g_tmpa_seq
+% \seq_show:N \g_tmpa_seq
+
+% \ztool_file_new:nn {\c_false_bool}{bbb.txt}
+% \ztool_file_new:nn {\c_true_bool}{bbb.txt}
+% \ztool_append_to_file:nn {bbb.txt}{BBB2-content}
+% \ztool_replace_file_line:nnn {bbxxb.txt}{2}{BBB1-content}
+\ztool_insert_to_file:nnn {bbb.txt}{2}{NEW-content}
+\ExplSyntaxOff
 
 \end{document}
 

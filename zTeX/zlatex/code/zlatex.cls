@@ -118,7 +118,6 @@
 % ----------------------------------------------------------------------
 %                             class option 
 % ----------------------------------------------------------------------
-\RequirePackage {l3keys2e}
 % package options passing
 \cs_new:Npn \zlatex_package_options_pass:nn #1#2 {
   \PassOptionsToPackage{#2}{#1}
@@ -247,7 +246,7 @@
 }
 
 % option setup
-\ProcessKeysOptions { zlatex / option }
+\ProcessKeyOptions [ zlatex / option ]
 \NewDocumentCommand{\zlatexSetup}{m}{ \zlatex_keys_set:nn {option}{#1} }
 
 

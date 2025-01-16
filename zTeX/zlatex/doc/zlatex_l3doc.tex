@@ -58,15 +58,12 @@
 \ExplSyntaxOff
 \newcommand{\block}[1]{{\color{#1}\rule{1em}{1em}}}
 \newcommand{\Footnote}[1]{\stepcounter{footnote}\footnote[\thefootnote]{#1}}
-\def\mstyle#1{\noindent\lower.25ex\hbox{\ding{224}}\;\textbf{#1}\par}
 \definecolor{slideRed}{HTML}{a30000}
 \definecolor{slideGray}{HTML}{e0e0e0}
 \definecolor{slideWhite}{HTML}{f0f0f0}
 \definecolor{zchapColor}{HTML}{7f8184}
 \definecolor{Ann-default-I}{HTML}{0000a3}
-\makeatletter
 \colorlet{RoyalRed}{zlatex@color@royalred}
-\makeatother
 \definecolor{bg}{rgb}{0.95,0.95,0.95}
 \setminted{
   bgcolor=bg,
@@ -149,6 +146,11 @@ representation of, as far as I know, the things in themselves;}
 
 \zlatexThmCreate{theorem}{Zaxiom, Ztheorem=Thm|{HTML}{a0d911}, Zproposition=Prop|blue}
 \zlatexThmCreate{proof}{Zproof, Zexample=EXAMPLE|red, Zsolution=Solution|}
+
+\let\OzlatexThmLang\zlatexThmLang
+\let\OzlatexThmCreate\zlatexThmCreate
+\let\OzlatexThmStyle\zlatexThmStyle
+\let\OzlatexMathAliasOpSet\zlatexMathAliasOpSet
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 
@@ -158,6 +160,10 @@ representation of, as far as I know, the things in themselves;}
 \author{Eureka}
 \date{\today}
 \begin{document}
+\let\zlatexThmLang\OzlatexThmLang
+\let\zlatexThmCreate\OzlatexThmCreate
+\let\zlatexThmStyle\OzlatexThmStyle
+\let\zlatexMathAliasOpSet\OzlatexMathAliasOpSet
 \maketitle
 % \includepdf[pages=-]{zlatex-l3doc-cover.pdf}
 % \part{Document}
@@ -192,8 +198,9 @@ representation of, as far as I know, the things in themselves;}
 
 
 \section{宏包机制}
-\begin{function}[updated=2024-11-05]{zslide-last-page}
+\begin{function}[updated=2024-11-05]{zslide-title-page, zslide-last-page}
   \begin{syntax}
+    \cmd{\pageref}\zarg{zslide-title-page}
     \cmd{\pageref}\zarg{zslide-last-page}
   \end{syntax}
   引用当前文档的最后一页, 用于 slide 制作时的页码引用.
@@ -214,10 +221,9 @@ representation of, as far as I know, the things in themselves;}
     rowspec={|Q[m]|Q[m]|Q[m]|Q[m]|Q[m]|},
     cells={cmd=\pkg}
   }
-  l3keys2e  & geometry  & fancyhdr & graphicx \\
-  amsmath   & amsfonts  & esint    & framed   \\
-  xcolor    & cleveref & sidenotes & titlesec \\
-  titletoc  &  \\ 
+  geometry  & fancyhdr  & graphicx  & xcolor   \\
+  amsmath   & amsfonts  & esint     & framed   \\
+  cleveref  & sidenotes & titlesec  & titletoc \\ 
   \end{tblr}
   \caption{\zlatex{} 文档类基本宏包}
   \label{tab:basic-package}
@@ -334,9 +340,8 @@ representation of, as far as I know, the things in themselves;}
 \end{function}
 
 \zlatex{} 的配置选项可以在文档类加载时指定，也可以通过命令 \cmd{\zlatexSetup} 进行指定. \zlatex{} 的 \meta{key-value} 被划分为
-两个层级, 第一层的 \meta{key} 为: \zkey{layout, mathSpec, font, bib\_index, toc, packageOption, classOption, section, lang, toc}. 
-其中前 7 个键 \meta{key} 均具有自己的独立子键 \meta{sub-key}; 后两者不具有自己的子键，直接指定即可. 关于各层 \meta{key-value} 的关系
-请见\cref{fig:zlatex-options}.
+两个层级; 第一层中的 \zkey{layout, mathSpec, toc, packageOption, classOption, toc} 均具有自己的独立子键(\meta{sub-key}), 其余的键
+可以直接指定. 关于各层 \meta{key-value} 的关系请见\cref{fig:zlatex-options}.
 
 \begin{figure}[!htb]
   \centering
@@ -1129,6 +1134,7 @@ Hook, 方便用户直接对环境进行操作.
   一个基本的使用样例:
 \end{function}
 \begin{DocExample}*
+  \zlatexThmStyle{plain}
   \begin{theorem}[AAA-4]
     This is a 'plain' style theorem AAA-4.
   \end{theorem}
@@ -1355,7 +1361,7 @@ library.
 
 \begin{function}[updated=2024-11-05]{\zchapterSaying}
   \begin{syntax}
-    \cs{zchapterSaying}\oarg[author]\marg{saying}
+    \cs{zchapterSaying}\oarg{author}\marg{saying}
   \end{syntax}
   当 \pkg{fancy} library 被加载时, 此命令用于设置章节的引言. \meta{author} 为可选参数，用于指定
   引言的作者.
@@ -1491,7 +1497,7 @@ Alias Version: $a\da b, a\Da b, a\nda b, a\Nda b, a\dda b, a\Dda b$.
     \cs{xxra}\oarg{above}\parg{below}
     \cs{xxra*}\oarg{above}\parg{below}   
   \end{syntax}
-  以上所有带有 \texttt{*} 命令中的 \meta{above} 参数均会被放入 \cmd{\text} 命令中, 以上命令的原始定义: \cmd{\xla} 为 \cs{xleftarrow}, 
+  以上所有带有 \texttt{*} 命令中的 \meta{above} 和 \meta{below} 参数均会被放入 \cmd{\text} 命令中, 以上命令的原始定义: \cmd{\xla} 为 \cs{xleftarrow}, 
   \cmd{\Xla} 为 \cs{xLeftarrow}, \cmd{\xxla} 为 \cs{xLongleftarrow}, \cmd{\xra} 为 \cs{xrightarrow}, \cmd{\Xra} 为 \cs{xRightarrow},
   \cmd{\xxra} 为 \cs{xLongrightarrow}. 
   使用示例如下:
@@ -1641,7 +1647,10 @@ zslide 中的坐标系统:如果不加说明，那么 zslide 中的坐标系统�
     \cs{pageref}{zslide@titlepage}
     \cs{pageref}{zslide@lastpage}
   \end{syntax}
-  上述两命令分别用于引用当前文档的第一页和最后一页, 在 zslide 中, 标题页的页码为 0.
+  上述两 Targets 由命令 \cs{hyper@anchor} 设置, 分别应用于引用当前文档的第一页和最后一页, 在 zslide 中, 标题页的页码为 0.
+
+  注意:普通用户不应该直接使用这两个 Targets，此二 Targets 主要提供给模板的开发者, 用于应使用位于首页和尾页的 \texttt{zslide-title-page} 
+  和 \texttt{zslide-last-page} 两 label.
 \end{function}
 
 \begin{function}[updated=2024-11-05]{\zslideFrameCntAux:nn}
@@ -1702,7 +1711,7 @@ zslide 中的坐标系统:如果不加说明，那么 zslide 中的坐标系统�
   为 \zlatexVerb{-\paperheight+2.5pt}. \cs{g_zslide_status_info_sec_L_dim} 中存放了 section 文本距离页面左边界的距离, 
   默认值为 \texttt{1cm}; \cs{g_zslide_status_info_sec_B_dim} 中存放了 section 文本基线的纵坐标, 默认值为 \texttt{-2.25em}.
 
-  注意:普通用户不应该直接调用此命令，此命令主要提供给模板的开发者.
+  注意:普通用户不应该直接修改此系列寄存器, 此命令主要提供给模板的开发者.
 \end{function}
 
 
@@ -1717,7 +1726,7 @@ zslide 中的坐标系统:如果不加说明，那么 zslide 中的坐标系统�
   色块的高度, 默认值为 \texttt{1.8em}; \cs{g_zslide_status_bar_sec_B_dim} 中存放了 section 的背景色块中文字的基线的纵坐标, 默认值为 \texttt{-2.7em};
   当改变此此三个寄存器的值时, 对应色块的基线保持不变，其高度会做出相应的改变.
   
-  注意:普通用户不应该直接调用此命令，此命令主要提供给模板的开发者.
+  注意:普通用户不应该直接修改此系列寄存器，此命令主要提供给模板的开发者.
 \end{function}
 
 
@@ -1882,7 +1891,7 @@ Subsection Icon: \rule[1.5pt]{3pt}{3pt}
 
 \begin{function}[updated=2024-11-05]{\zslideThemeCreate}
   \begin{syntax}
-    \cs{zslideThemeCreate}\marg{name}{spec}
+    \cs{zslideThemeCreate}\marg{name}\marg{spec}
   \end{syntax}
   此命令会按照 \meta{spec} 创建名为 \meta{name} 的 slide \textbf{颜色主题}. 具体的可调整选项请参见
   命令 \cmd{\zslideSetup} 中的 \meta{spec} 参数说明.  
@@ -2177,13 +2186,22 @@ reason is a representation of, as far as I know, the things in themselves;%
 
 \clearpage
 \subsection{文件 IO 操作}
-本部分主要介绍 \pkg{ztool} 中实现的文件 IO 操作, 包括: 读取文件, 写入文件, 追加文件等操作.
+本部分主要介绍 \pkg{ztool} 中实现的文件 IO 操作, 包括: 读取文件, 写入文件, 追加文件等操作. 本部分的系列命令均不需要启用 \cmd{-shell-escape} 参数.
+
+
+\begin{function}[updated=2024-12-05]{\ztool_file_new:nn}
+  \begin{syntax}
+    \cs{ztool_file_new:nn} \marg{boolean}\marg{file}
+  \end{syntax}
+  此命令用于创建一个名为 \meta{file} 的新文件, 如果 \meta{file} 不存在, 则会创建一个名为 \meta{file} 的新文件.
+  若文件已存在，那么当 \meta{boolean} 为 \cs{c_true_bool} 时，\textcolor{red}{\sffamily 会覆盖原文件}，否则不会进行任何操作.
+\end{function}
 
 \begin{function}[updated=2024-12-05]{\ztool_read_file_as_seq:nnN, \ztool_read_file_as_seq:neN, \ztool_read_file_as_seq:nnc, \ztool_read_file_as_seq:nec}
   \begin{syntax}
     \cs{ztool_read_file_as_seq:nnN} \marg{bool}\marg{file}\marg{seq}
   \end{syntax}
-  此命令用于读取文件 \meta{file} 的内容, 并将其存放在 \meta{seq} 中, 如果 \meta{file} 不存在, 则会返回一个空的 \meta{seq}.
+  此命令用于读取文件 \meta{file} 的内容, 并将其存放在 \meta{seq} 中, 如果 \meta{file} 不存在, 则 \meta{seq} 会被置为空.
   \meta{bool} 用于控制是否保留行尾的空格, 可选值有:\cs{c_true_bool}, \cs{c_false_bool}, 默认为 \cs{c_true_bool}; 如果 \meta{bool} 
   为 \cs{c_true_bool}, 则保留行尾的空格, 否则不保留.
 
@@ -2195,7 +2213,7 @@ reason is a representation of, as far as I know, the things in themselves;%
   \begin{syntax}
     \cs{ztool_read_file_as_seq:nnN} \marg{bool}\marg{file}\marg{seq}
   \end{syntax}
-  此命令用于读取文件 \meta{file} 的内容, 并将其存放在 \meta{seq} 中, 如果 \meta{file} 不存在, 则会返回一个空的 \meta{seq}.
+  此命令用于读取文件 \meta{file} 的内容, 并将其存放在 \meta{seq} 中, 如果 \meta{file} 不存在, 则 \meta{seq} 会被置为空.
   \meta{bool} 用于控制是否保留行尾的空格, 可选值有:\cs{c_true_bool}, \cs{c_false_bool}, 默认为 \cs{c_true_bool}; 如果 \meta{bool} 
   为 \cs{c_true_bool}, 则保留行尾的空格, 否则不保留.
 
@@ -2207,7 +2225,7 @@ reason is a representation of, as far as I know, the things in themselves;%
   \begin{syntax}
     \cs{ztool_append_to_file:nn} \marg{file}\marg{content}
   \end{syntax}
-  此命令用于将 \meta{content} 追加到文件 \meta{file} 中, 如果 \meta{file} 不存在, 则会创建一个名为 \meta{file} 的新文件.
+  此命令用于将 \meta{content} 追加到文件 \meta{file} 中, 如果 \meta{file} 不存在, 则会创建一个名为 \meta{file} 的新文件, 并将 \meta{content} 写入其中.
 \end{function}
 
 
@@ -2227,7 +2245,6 @@ reason is a representation of, as far as I know, the things in themselves;%
 \end{function}
 
 
-\newpage
 下面一个示例展示了如何使用 \pkg{ztool} 中的几个文件 IO 操作命令:
 \begin{DocExample}*
 \begin{filecontents}[noheader]{testIO.txt}
