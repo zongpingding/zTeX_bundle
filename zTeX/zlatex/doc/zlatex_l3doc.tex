@@ -237,7 +237,7 @@ representation of, as far as I know, the things in themselves;}
 \section{安装使用}
 \subsection{在线使用}
 为了让部分用户可以直接体验到 \zlatex{}，免去``繁杂''的环境配置.我已将本模板部署在 \TeX{}Page 上，
-地址为: \href{https://www.texpage.com/share/71cb8cc2106a4788b830e773fc77c5ab}{TeXPgae \zlatex{}  Project}，
+地址为: \href{https://www.texpage.com/share/e420ac8364a640b78231d65c9d5d7090}{TeXPgae \zlatex{}  Project}，
 直接打开此地址即可体验. Github 上的项目内容包含本手册以及 zTikZ 文档的源码与文档. 由于部分的技术原因，zTikZ 
 请在本地体验.
 
@@ -1130,8 +1130,9 @@ Hook, 方便用户直接对环境进行操作.
     \cs{zlatexThmStyle}\marg{style}
   \end{syntax}
   此命令用于设置定理类环境的样式, 仅能在导言区使用, 但为了说明此命令的使用方法, 本手册中此命令
-  的定义被临时改变了. 可用的 \meta{style} 请参见 \meta{mathSpec} 的说明.
-  一个基本的使用样例:
+  的定义被临时改变了. \textcolor{red}{\sffamily 由于技术原因, 当用户需要加载后续的 \pkg{theme} library 时, 
+  必须将命令 \cs{zlatexThmStyle} 置于 \cs{zlatexloadlibrary}\zarg{theme} 之前}. 可用的 \meta{style} 请参
+  见 \meta{mathSpec} 的说明. 一个基本的使用样例:
 \end{function}
 \begin{DocExample}*
   \zlatexThmStyle{plain}
@@ -1961,6 +1962,11 @@ Subsection Icon: \rule[1.5pt]{3pt}{3pt}
 本 library 中定义了一系列的定理类主题, 在加载 \pkg{theme} library 的同时，会自动导入 \pkg{tcolorbox}, \pkg{tikz} 和 \pkg{pifont} 
 三个宏包. 同时也会加载 \pkg{tikz} 的 \pkg{fadings}, \pkg{calc} 两个库. 如此数量的宏包导入必然会拖慢整个文档的编译，请酌情考虑加载此 
 library.
+
+\vskip2em
+\textcolor{red}{\sffamily 如用户在自定义定理类环境样式时需要更改 \zlatex{} 的默认配色, 请将 \cs{zlatex_keys_set:nn} 命令放置于%
+命令 \cs{zlatexThmStyleNew} 对应样式的 \meta{preamble} 中而非 \meta{option} 中, 否则 \zlatex{} 中的一系列与 \cs{zlatexColorSetup} 相关的函数将失去%
+对新定义数学类环境样式的色彩控制能力.}
 
 \begin{function}[updated=2024-12-05]{shadow}
   \begin{syntax}
