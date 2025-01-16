@@ -3,10 +3,56 @@
 \documentclass[
   % hyper,
 ]{../code/zlatex}
+\zlatexloadlibrary{mathalias}
+% \zlatexMathAliasOpSet{alt=ALT, im=IM}
 
-\zlatexThmStyle{aaa}
+\zlatexThmStyle{background}
+\zlatexThmCreate{theorem}{Ztheorem=NEW-THM|orange}
+% \zlatexThmColorSetup{theorem=blue!50} % EXPETC: works ---> pass
+\zlatexThmColorSetup{Ztheorem=blue!50}  % EXPETC: works ---> pass
+% \zlatexThmColorSetup{link=blue!50}    % EXPETC: error ---> pass
 \begin{document}
-AAA
+
+\zlatexThmToc[1.25]
+\vskip4em
+
+HELLO 
+
+\begin{Ztheorem}[AAA]
+  This is a theorem AAA.
+\end{Ztheorem}
+
+
+\ExplSyntaxOn
+\keys_define:nn {colorTest}{
+  keyA    .tl_set:N     =  \l__zlatex_keyA_color_tl,
+  keyA    .code:n       =  { \__zlatex_color_set:n {#1} },
+}
+\keys_set:nn {colorTest}{keyA={RGB}{55, 183, 98}}
+\textcolor{zlatex@color@keyA}{This~is~a~test.}
+\ExplSyntaxOff
+
+
+\begin{lemma}[LEMMA]
+  This is a lemma.
+
+  \begin{align}
+    \alt, \im
+  \end{align}
+
+  \zlatexMathAliasOpSet{alt=ALT, im=IM}
+  \begin{align}
+    \alt, \im
+  \end{align}
+\end{lemma}
+
+\newpage
+\zlatexThmTocAdd[section]{name=NEW-SEC}
+\zlatexThmTocStop
+\begin{proposition}[PROP]
+  This is a proposition.
+\end{proposition}
+
 \end{document}
 
 

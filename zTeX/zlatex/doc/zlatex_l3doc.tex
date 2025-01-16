@@ -214,10 +214,10 @@ representation of, as far as I know, the things in themselves;}
     rowspec={|Q[m]|Q[m]|Q[m]|Q[m]|Q[m]|},
     cells={cmd=\pkg}
   }
-  l3keys2e  & geometry  & fancyhdr & graphicx\\
-  amsmath   & amsfonts  & esint    & framed \\
-  graphicx  & xcolor    & cleveref & sidenotes \\
-  titlesec  & titletoc  &  \\ 
+  l3keys2e  & geometry  & fancyhdr & graphicx \\
+  amsmath   & amsfonts  & esint    & framed   \\
+  xcolor    & cleveref & sidenotes & titlesec \\
+  titletoc  &  \\ 
   \end{tblr}
   \caption{\zlatex{} 文档类基本宏包}
   \label{tab:basic-package}
@@ -230,7 +230,7 @@ representation of, as far as I know, the things in themselves;}
 
 \section{安装使用}
 \subsection{在线使用}
-为了让部分用户可以直接体验到 \zlatex{}，免去``繁杂''的环境配置.我已将本模板部署在 Overleaf 上，
+为了让部分用户可以直接体验到 \zlatex{}，免去``繁杂''的环境配置.我已将本模板部署在 \TeX{}Page 上，
 地址为: \href{https://www.texpage.com/share/71cb8cc2106a4788b830e773fc77c5ab}{TeXPgae \zlatex{}  Project}，
 直接打开此地址即可体验. Github 上的项目内容包含本手册以及 zTikZ 文档的源码与文档. 由于部分的技术原因，zTikZ 
 请在本地体验.
@@ -251,7 +251,7 @@ representation of, as far as I know, the things in themselves;}
   \begin{syntax}
     \cs{usepackage}\zarg{ztool}
   \end{syntax}
-  本宏集以独立实现了一个 \pkg{ztool} 宏包, 此模块中包含原来已被废弃的 \pkg{l3sys-shell} 中的所有命令.
+  本宏集已独立实现了一个 \pkg{ztool} 宏包, 此模块中包含原来已被废弃的 \pkg{l3sys-shell} 中的所有命令.
   \pkg{ztool} 实现了box 以及 文件 IO 操作相关的函数. 在 \pkg{ztool} 的协助下，\zlatex{} 能够避免或减少
   \cmd{-shell-escape} 相关的调用. \pkg{ztool} 宏包手册请参见 \cref{pkg:ztool}.
 \end{function}
@@ -259,7 +259,7 @@ representation of, as far as I know, the things in themselves;}
 由于\zlatex{} 还没有传入CTAN(未来可能会考虑)，所以想要使用此文档类，可以有如下的两种方法:
 \begin{itemize}
     \item 把此文档类 -- \file{zlatex} 目录中的所有内容放入当前项目文件夹下
-    \item 在命令行运行命令: \zlatexVerb{kpsewhich -var-value=TEXMFHOME}, 在Windows上一般是: \zlatexVerb{C:/Users/\meta{name}/texmf/}, 在Linux下一般是
+    \item 在命令行运行命令: \zlatexVerb{kpsewhich -var-value=TEXMFHOME}, 在Windows上一般是: \zlatexVerb{C:/Users/}\meta{name}\zlatexVerb{/texmf/}, 在Linux下一般是
       \zlatexVerb{~/texmf/}; 具体路径以自己的实际情况为准. 在此路径下新建文件夹 \file{tex/latex/zlatex}, 此文件夹对应的路径记为 \meta{z\TeX}; 
       然后把 \file{zlatex} 目录中的所有内容放入 \meta{z\TeX} 下.
 \end{itemize}
@@ -315,7 +315,7 @@ representation of, as far as I know, the things in themselves;}
   \begin{syntax}
     \cs{zlatexSetup}\marg{key-value}
   \end{syntax}
-  \zlatex{} 接受一系列的键值对进行配置，部分的配置尽可以在加载文档类时指定. 为区分二者，我们约定:
+  \zlatex{} 接受一系列的键值对进行配置，部分的配置仅可以在加载文档类时指定. 为区分二者，我们约定:
   \begin{itemize}
     \item 名字后带有 \zclassArg{} 号的选项，只能作为宏包/文档类选项，需要在引入宏包/文档类的时候指定；
     \item 名字后带有 \zcmdArg{} 号的选项，只能通过 \zlatex{} 宏集提供的用户接口 \cmd{\zlatexSetup} 来设定
@@ -405,7 +405,7 @@ representation of, as far as I know, the things in themselves;}
     colspec={|X[1, c]|X[1.5, c]|X[1, c]|X[1, c]|X[1, c]|},
     rowspec={|Q[m]|Q[m]|}
   }
-  lang=en & \pkg{inputenc}(pdftex) & \pkg{fontenc} & \pkg{babel} & \pkg{microtype} \\
+  lang=en & \pkg{inputenc}(\hologo{pdfTeX}) & \pkg{fontenc} & \pkg{babel} & \pkg{microtype} \\
   lang=cn & \pkg{fontspec} & \pkg{ctex} \\
   \end{tblr}
   \caption{\zlatex{} 文档类语言宏包}
@@ -432,7 +432,7 @@ representation of, as far as I know, the things in themselves;}
     class=\meta{\zdefault*{article}, book, ctexbook} 
   \end{syntax}
   此选项用于指定加载的基文档类，默认为 \cls{article}. 在加载 \cls{ctexbook}文档类后可以使用此文档类
-  提供的 \cmd{\ctexset\{\}} 命令进行相关选项的配置. 
+  提供的 \cmd{\ctexset} 命令进行相关选项的配置. 
 \end{function}
 
 \begin{function}[rEXP, updated=2024-11-05]{classOption}
@@ -628,8 +628,7 @@ representation of, as far as I know, the things in themselves;}
 因 \zlatex{} 的选项配置比较庞大，其中涉及到诸多的宏包和命令的加载，所以在文档编译时，我们需要对文档的各种状态进行检测，
 \zlatex{} 提供了一系列的命令用于检测文档中各个变量状态的命令.
 
-
-\begin{function}[added=2025-01-15]{\zlatexHyperTF, \zlatexFancyTF, \zlatexMarginTF, \zlatexSlideTF, \zlatexFontConfigTF, \zlatexMathAliasTF, \zlatexBibIndexLoadTF}
+\begin{function}[added=2025-01-15, EXP]{\zlatexHyperTF, \zlatexFancyTF, \zlatexMarginTF, \zlatexSlideTF, \zlatexFontConfigTF, \zlatexMathAliasTF, \zlatexBibIndexLoadTF}
   \begin{syntax}
     \cs{zlatexHyperTF}\marg{true code}\marg{false code}
   \end{syntax}
@@ -666,7 +665,7 @@ representation of, as far as I know, the things in themselves;}
 \begin{syntax}
   \cs{blacktriangleright}
 \end{syntax}
-本命令(符号)来自 AMSb 字体, \meta{slot}\zlatexVerb{="49}. 主要用于在 \meta{slide}\zlatexVerb{=true} 时对此符号进行 Patch.
+本命令(符号)来自 AMSa 字体, \meta{slot}\zlatexVerb{="49}. 主要用于在 \meta{slide}\zlatexVerb{=true} 时对此符号进行 Patch.
 \end{function}
 
 
@@ -695,8 +694,8 @@ representation of, as far as I know, the things in themselves;}
   \begin{syntax}
     \cmd{\hyper@linkstart}\marg{context}\marg{destination name}
   \end{syntax}
-  此命令用于开启一个超链接\textbf{域}, 在此\textbf{域}中可以是任意的文本或其它图片对象. 此命令需结合后续的
-  \cmd{\hyper@linkend} 命令使用，此二命令可以和上述的 \cmd{\hyper@link} 命令基本等效.
+  此命令用于开启一个超链接\textbf{域}, 此\textbf{域}中的内容可以是任意的文本或其它图片对象. 此命令需结合后续的
+  \cmd{\hyper@linkend} 命令使用，此二命令结合使用时基本和上述的 \cmd{\hyper@link} 命令基本等效.
 \end{function}
 
 
@@ -707,6 +706,13 @@ representation of, as far as I know, the things in themselves;}
   用于结束由 \cmd{\hyper@linkstart} 开启的\textbf{域}.
 \end{function}
 
+
+\begin{function}[added=2024-12-05]{\hyper@linkfile}
+  \begin{syntax}
+    \cmd{\hyper@linkfile}\marg{link text}\marg{filename}\marg{destname}
+  \end{syntax}
+  此命令用于创建一个超链接, 点击\meta{link text} 即可跳转到对应的 \meta{filename} 文件中的 \meta{destname} 处.
+\end{function}
 
 \begin{function}[added=2024-12-05]{\MakeLinkTarget,\MakeLinkTarget*}
   \begin{syntax}
@@ -764,7 +770,7 @@ representation of, as far as I know, the things in themselves;}
 \clearpage
 \subsection{pageinfo}
 本模块主要包含与页面生成以及页面标注相关(页眉页脚)的命令, 如 \cmd{\maketitle},\-\cmd{\zlatexPageMask}; 
-通过本模块，用户可以方便的制作自己的独特页面样式以及添加水印.
+通过本模块，用户可以方便制作独特的页面样式以及水印添加.
 
 \begin{function}[updated=2024-11-05]{\orimaketitle}
   \begin{syntax}
@@ -921,9 +927,15 @@ representation of, as far as I know, the things in themselves;}
   不同。此命令仅能在 \cmd{\keys_define:nn} 中使用，新定义的色彩名为 \zlatexVerb{zlatex@color@\l_keys_key_str}. 
   关于参数 \meta{color spec} 的使用，可以参见如下示例:
 \end{function}
-\begin{DocExample}
-\__zlatex_color_set:n {red}
-\__zlatex_color_set:n {{HTML}{393D44}}
+\begin{DocExample}*
+  \ExplSyntaxOn
+  \keys_define:nn {colorTest}{
+    keyA    .tl_set:N     =  \l__zlatex_keyA_color_tl,
+    keyA    .code:n       =  { \__zlatex_color_set:n {#1} },
+  }
+  \keys_set:nn {colorTest}{keyA={HTML}{d9d9d9}}
+  \textcolor{zlatex@color@keyA}{This is a test.}
+  \ExplSyntaxOff
 \end{DocExample}
 
 
@@ -988,7 +1000,7 @@ Hook, 方便用户直接对环境进行操作.
     \cs{zlatexThmNumber}
   \end{syntax}
   此命令表示对应环境的编号, 类似于 \pkg{amsthm} 中的 \cmd{\thmnumber}. 用户不应在除 \cmd{\zlatexThmTitleFormat} 外的
-  任何地方使用, 在此命令之外, 此命令输出的内容无任何实际意义.
+  任何地方使用, 在命令 \cs{zlatexThmTitleFormat} 之外, 此命令输出的内容无任何实际意义.
 \end{function}
 
 \begin{function}[EXP, updated=2024-11-05]{\zlatexThmName}
@@ -996,7 +1008,7 @@ Hook, 方便用户直接对环境进行操作.
     \cs{zlatexThmName}
   \end{syntax}
   此命令表示对应环境的名称, 类似于 \pkg{amsthm} 中的 \cmd{\thmname}. 用户不应在除 \cmd{\zlatexThmTitleFormat} 外的
-  任何地方使用, 在此命令之外, 此命令输出的内容无任何实际意义.
+  任何地方使用, 在命令 \cs{zlatexThmTitleFormat} 之外, 此命令输出的内容无任何实际意义.
 \end{function}
 
 \begin{function}[EXP, updated=2024-12-05]{\zlatexThmNote}
@@ -1004,7 +1016,7 @@ Hook, 方便用户直接对环境进行操作.
     \cs{zlatexThmNote}\marg{prefix}\marg{suffix}
   \end{syntax}
   此命令表示对应环境的注释, 类似于 \pkg{amsthm} 中的 \cmd{\thmnote}. 用户不应在除 \cmd{\zlatexThmTitleFormat} 外的
-  任何地方使用, 在此命令之外, 此命令输出的内容无任何实际意义.
+  任何地方使用, 在命令 \cs{zlatexThmTitleFormat} 之外, 此命令输出的内容无任何实际意义.
 \end{function}
 
 \begin{function}[EXP, updated=2024-11-05]{\zlatexThmTitle}
@@ -1017,12 +1029,12 @@ Hook, 方便用户直接对环境进行操作.
 % \clearpage
 
 
-\begin{function}[updated=2024-11-05]{\zlatexThmTitleSwitch}
+\begin{function}[updated=2024-11-05]{\zlatexThmTitleSwitch, \zlatexThmTitleSwitch*}
   \begin{syntax}
     \cs{zlatexThmTitleSwitch}
   \end{syntax}
-  此命令用于切换 \cmd{\zlatexThmTitle} 是否显示, 在自定义环境样式时比较有用. 用户不应该对此命令
-  进行直接的调用.
+  命令 \cmd{\zlatexThmTitleSwitch} 用于隐藏定理类环境的标题, 命令 \cmd{\zlatexThmTitleSwitch*} 用于显示标题; 在自定义环境
+  样式时比较有用. 用户不应该对此命令进行直接的调用.
 \end{function}
 \begin{DocExample}*
   \begin{theorem}[AAA-3]
@@ -1043,10 +1055,11 @@ Hook, 方便用户直接对环境进行操作.
     \cs{zlatexThmTitleFormat}\marg{format}
   \end{syntax}
   此命令用于指定 \cmd{\zlatexThmTitle} 的格式, 默认格式为:
-  \begin{DocExample}
-    \zlatexThmName\ \zlatexThmNumber\ \zlatexThmNote{(}{)}
-  \end{DocExample}
 \end{function}
+\begin{DocExample}
+  \zlatexThmName\ \zlatexThmNumber\ \zlatexThmNote{(}{)}
+\end{DocExample}
+使用样例请参见命令 \cs{zlatexThmNoteEmptyTF} 中的示例.
 
 
 \begin{function}[updated=2024-12-05]{\zlatexThmNoteEmptyTF}
@@ -1102,15 +1115,17 @@ Hook, 方便用户直接对环境进行操作.
   \begin{syntax}
     \cs{zlatexThmColorSetup}\marg{key-value}
   \end{syntax}
-  此命令和 \cmd{\zlatexColorSetup} 类似，但其仅用于对数学环境的色彩设置，且仅能在导言区使用. 
-  所有合法的 \meta{key} 选项请参见 \zlatex{} 文档类选项 \cmd{mathSpec} 中的数学环境.
+  此命令和 \cmd{\zlatexColorSetup} 类似，但其仅用于对数学环境的色彩设置(比如, 你不能在此命令中设置 \meta{link} 对应的色彩)，
+  且仅能在导言区使用. 所有合法的 \meta{key} 选项请参见 \zlatex{} 文档类选项 \cmd{mathSpec} 中的数学环境，如果其中的 \meta{key} 不在
+  已有的定理类或者是证明类环境(包括由命令 \cs{zlatexThmCreate} 所创建的环境)中，那么 \zlatex{} 会抛出错误.
 \end{function}
 
 \begin{function}[updated=2024-11-05]{\zlatexThmStyle}
   \begin{syntax}
     \cs{zlatexThmStyle}\marg{style}
   \end{syntax}
-  此命令用于设置定理类环境的样式, 仅能在导言区使用. 可用的 \meta{style} 请参见 \meta{mathSpec} 的说明.
+  此命令用于设置定理类环境的样式, 仅能在导言区使用, 但为了说明此命令的使用方法, 本手册中此命令
+  的定义被临时改变了. 可用的 \meta{style} 请参见 \meta{mathSpec} 的说明.
   一个基本的使用样例:
 \end{function}
 \begin{DocExample}*
@@ -1136,7 +1151,8 @@ Hook, 方便用户直接对环境进行操作.
   \begin{syntax}
     \cs{zlatexThmStyleNew}\marg{key-value}
   \end{syntax}
-  此命令用于定义新的定理类环境的样式, 仅能在导言区使用. 调用格式为:
+  此命令用于定义新的定理类环境样式, 仅能在导言区使用, 但为了说明此命令的使用方法, 本手册中此命令
+  的定义被临时改变了. 此命令的调用格式如下:
 \end{function}
 \begin{DocExample}
   \zlatexThmStyleNew{
@@ -1155,7 +1171,8 @@ Hook, 方便用户直接对环境进行操作.
     ...
   }
 \end{DocExample}
-在声明对应的 \meta{style} 后，使用命令 \cmd{\zlatexThmStyle}\marg{style} 进行切换.
+
+在声明对应的 \meta{style} 后，在导言区使用命令 \cmd{\zlatexThmStyle}\texttt{\marg{style}} 进行切换.
 
 
 \begin{function}[updated=2024-11-05]{\zlatexThmHook, \zlatexThmHook*}
@@ -1202,22 +1219,29 @@ Hook, 方便用户直接对环境进行操作.
 
 \begin{function}[updated=2024-12-05]{\zlatexThmTocAdd}
   \begin{syntax}
-    \cs{zlatexThmTocAdd}\oarg{key-value}\marg{counter}
+    \cs{zlatexThmTocAdd}\oarg{level}\oarg{key-value}
   \end{syntax}
-  此命令用于向定理类环境目录中添加条目, \meta{counter} 为计数器名, 可以为 \zlatexVerb{section}, 
-  \zlatexVerb{subsection} 等. \meta{key-value} 为可选参数, 用于指定所添加的条目的其它信息. 一个使用样例如下:
+  此命令用于向定理类环境目录中添加条目, \meta{level} 为计数器名, 表示该条目在目录中的层级. 可以为 \zlatexVerb{section}, 
+  \zlatexVerb{subsection} 等, 该可选参数默认为 \texttt{section}. \meta{key-value} 为必选参数, 用于指定所添加的条目的其它信息. 
+  一个使用样例如下:
 \end{function}
 \begin{DocExample}
-\zlatexThmTocAdd[name=SEC-NAME]{section}
+\zlatexThmTocAdd[section]{name=SEC-NAME}
 \end{DocExample}
 
+
+\begin{function}[updated=2024-12-05]{\zlatexThmTocStop}
+  \begin{syntax}
+    \cs{zlatexThmTocStop}
+  \end{syntax}
+  此命令用于停止向定理类环境目录中添加条目, 目前处于实验阶段, 用户暂时不应使用此命令.
+\end{function}
 
 \begin{function}[updated=2024-12-05]{\zlatexThmTocLevel}
   \begin{syntax}
     \cs{zlatexThmTocLevel}\marg{depth}
   \end{syntax}
-  此命令用于设置定理类环境目录的最大深度, 仅能在导言区使用, 但为了说明此命令的使用方法, 本手册中此命令
-  的定义被临时改变了. \meta{depth} 为一个 $\ge 1$ 的整数.
+  此命令用于设置定理类环境目录的最大深度, 仅能在导言区使用, \meta{depth} 为一个 $\ge 1$ 的整数.
 \end{function}
 
 \begin{function}[updated=2024-12-05]{\zlatexThmTocPrefix}
@@ -1231,8 +1255,8 @@ Hook, 方便用户直接对环境进行操作.
   \begin{syntax}
     \cs{zlatexThmTocSymbol}\marg{key-value}
   \end{syntax}
-  此命令用于分别设置所有定理类环境名在目录中的前缀, 仅能在导言区使用, 但为了说明此命令的使用方法, 本手册中此命令
-  的定义被临时改变了. 所有可用的选项为:
+  此命令用于分别设置所有定理类环境名在目录中的前缀, 仅能在导言区使用, 命令 \cs{zlatexThmTocSymbolClear} 可以用于清楚其设置的前缀. 
+  所有可用的选项为:
 \end{function}
 \begin{DocExample}
 \zlatexThmTocSymbol{
@@ -1308,6 +1332,36 @@ library.
 \end{DocExample}
 
 
+\begin{function}[updated=2024-11-05]{\zsubtitle}
+  \begin{syntax}
+    \cs{zsubtitle}\marg{subtitle}
+  \end{syntax}
+  当 \pkg{fancy} library 被加载时, 此命令用于设置章节的副标题
+\end{function}
+
+\begin{function}[updated=2024-11-05]{\zchapterLContent}
+  \begin{syntax}
+    \cs{zchapterLContent}\marg{content}
+  \end{syntax}
+  当 \pkg{fancy} library 被加载时, 此命令用于设置章节的左侧内容
+\end{function}
+
+\begin{function}[updated=2024-11-05]{\zchapterRContent}
+  \begin{syntax}
+    \cs{zchapterRContent}\marg{content}
+  \end{syntax}
+  当 \pkg{fancy} library 被加载时, 此命令用于设置章节的右侧内容
+\end{function}
+
+\begin{function}[updated=2024-11-05]{\zchapterSaying}
+  \begin{syntax}
+    \cs{zchapterSaying}\oarg[author]\marg{saying}
+  \end{syntax}
+  当 \pkg{fancy} library 被加载时, 此命令用于设置章节的引言. \meta{author} 为可选参数，用于指定
+  引言的作者.
+\end{function}
+
+
 \clearpage
 \subsection{mathalias}
 本模块主要为一系列命令的别名定义, 后文称此为 alias, 用于简化用户在数学环境中的命令输入. 此 libray 建立了以下几个
@@ -1322,6 +1376,11 @@ library.
 
 对于自动括号命令，目前还很不成熟，如果不清楚对应的命令原理请勿使用。针对此特性，推荐用于使用 \pkg{pyhsics 2} 
 宏包.
+
+\vskip2em
+\noindent\textcolor{red}{\sffamily WARNING: 此 library 加载的大量自定义命令可能会与已有的命令的冲突, 请用户%
+在加载此 library 前做出仔细的考虑.}
+
 
 \begin{function}[updated=2024-12-05]{\F, \R, \K, \C, \B, \S, \FF}
   \begin{syntax}
@@ -1342,12 +1401,20 @@ Normal Version: $\mathbf{A} + \mathrm{A} + \mathfrak{a} + \mathcal{A} + \mathbb{
 Alias Version: $\F{A} + \R{A} + \K{a} + \C{A} + \B{A} + \S{A} + \FF{A}$
 \end{DocExample}
 
+\noindent 此 library 定义的一系列命令遵循如下的规则:
+\begin{itemize}
+  \item 首字母重复表示长对应箭头的加长,
+  \item 首字母大写表示对应箭头的双线版本,
+  \item 前置 \texttt{n} 或 \texttt{N} 表示对应箭头的否定.
+\end{itemize}
+
 \begin{function}[updated=2024-12-05]{\ma, \mma}
   \begin{syntax}
     \cs{ma}
     \cs{mma}
   \end{syntax}
-  以上各命令的原始定义: \cmd{\ma} 为 \cs{mapsto}, \cmd{\mma} 为 \cs{longmapsto}. 使用示例如下:
+  以上各命令的原始定义: \cmd{\ma} 为 \cs{mapsto}, \cmd{\mma} 为 \cs{longmapsto}. 注意: 此命令及其
+  后续类似命令均表示该命令在未来可能会有改动, 比如未来其可能会接受参数。该命令的使用示例如下:
 \end{function}
 \begin{DocExample}*
 Normal Version: $a\mapsto b, a\longmapsto b$ \\
@@ -1409,7 +1476,7 @@ Alias Version: $a\da b, a\Da b, a\nda b, a\Nda b, a\dda b, a\Dda b$.
 \end{DocExample}
 
 
-\begin{function}[updated=2024-12-05]{\xla, \xla*, \Xla, \Xla*, \xxla, \xxla*, \xra, \xra*, \Xra, \Xra*, \xxra, \xxra*, \hla, \hla*, \hra, \hra*}
+\begin{function}[updated=2024-12-05]{\xla, \xla*, \Xla, \Xla*, \xxla, \xxla*, \xra, \xra*, \Xra, \Xra*, \xxra, \xxra*}
   \begin{syntax}
     \cs{xla}\oarg{above}\parg{below}
     \cs{xla*}\oarg{above}\parg{below}
@@ -1422,22 +1489,36 @@ Alias Version: $a\da b, a\Da b, a\nda b, a\Nda b, a\dda b, a\Dda b$.
     \cs{Xra}\oarg{above}\parg{below}
     \cs{Xra*}\oarg{above}\parg{below}
     \cs{xxra}\oarg{above}\parg{below}
-    \cs{xxra*}\oarg{above}\parg{below}
-    \cs{hla}\oarg{above}\parg{below}
-    \cs{hla*}\oarg{above}\parg{below}
-    \cs{hra}\oarg{above}\parg{below}
-    \cs{hra*}\oarg{above}\parg{below}    
+    \cs{xxra*}\oarg{above}\parg{below}   
   \end{syntax}
   以上所有带有 \texttt{*} 命令中的 \meta{above} 参数均会被放入 \cmd{\text} 命令中, 以上命令的原始定义: \cmd{\xla} 为 \cs{xleftarrow}, 
   \cmd{\Xla} 为 \cs{xLeftarrow}, \cmd{\xxla} 为 \cs{xLongleftarrow}, \cmd{\xra} 为 \cs{xrightarrow}, \cmd{\Xra} 为 \cs{xRightarrow},
-  \cmd{\xxra} 为 \cs{xLongrightarrow}, \cmd{\hla} 为 \cs{xhookleftarrow}, \cmd{\hra} 为 \cs{xhookrightarrow}. 
+  \cmd{\xxra} 为 \cs{xLongrightarrow}. 
   使用示例如下:
 \end{function}
 \begin{DocExample}*
-Normal Version: $\xleftarrow[b]{a} + \xLeftarrow[b]{a} + \xLongleftarrow[b]{a} + \xrightarrow[b]{a} + \xRightarrow[b]{a} + \xLongrightarrow[b]{a} + \xhookleftarrow[b]{a} + \xhookrightarrow[b]{a}$ \\ 
+Normal Version: $\xleftarrow[b]{a} + \xLeftarrow[b]{a} + \xLongleftarrow[b]{a} + \xrightarrow[b]{a} + \xRightarrow[b]{a} + \xLongrightarrow[b]{a}$ \\ 
 Alias Version: $\xla[a](b) + \Xla[a](b) + \xxla[a](b) + \xra[a](b) + \Xra[a](b) + \xxra[a](b) + \hla[a](b) + \hra[a](b)$ \\
-Alias Text Version: $\xla*[a](b) + \Xla*[a](b) + \xxla*[a](b) + \xra*[a](b) + \Xra*[a](b) + \xxra*[a](b) + \hla*[a](b) + \hra*[a](b)$
+Alias Text Version: $\xla*[a](b) + \Xla*[a](b) + \xxla*[a](b) + \xra*[a](b) + \Xra*[a](b) + \xxra*[a](b)$
 \end{DocExample}
+
+
+\begin{function}[updated=2024-12-05]{\hla, \hla*, \hra, \hra*}
+  \begin{syntax}
+    \cs{hla}\oarg{above}\parg{below}
+    \cs{hla*}\oarg{above}\parg{below}
+    \cs{hra}\oarg{above}\parg{below}
+    \cs{hra*}\oarg{above}\parg{below}
+  \end{syntax}
+  以上所有带有 \texttt{*} 命令中的 \meta{above} 参数均会被放入 \cmd{\text} 命令中, 以上命令的原始定义: \cmd{\hla} 为 \cs{xhookleftarrow}, 
+  \cmd{\hra} 为 \cs{xhookrightarrow}. 使用示例如下:
+\end{function}
+\begin{DocExample}*
+Normal Version: $\xhookleftarrow[b]{a} + \xhookrightarrow[b]{a}$ \\
+Alias Version: $\hla[a](b) + \hra[a](b)$ \\
+Alias Text Version: $\hla*[a](b) + \hra*[a](b)$
+\end{DocExample}
+
 
 \begin{function}[updated=2024-12-05]{\A, \E}
   \begin{syntax}
@@ -1470,7 +1551,7 @@ Alias Version: $\ns, \se, \sse$
   \begin{syntax}
     \cmd{\dd}
   \end{syntax}
-  此命令主要用于替代默认的 \zlatexVerb{\mathrm{dd}}, 与此同时，其会自动处理左右间隔, 更加规范的处理可以参见 \pkg{fixdiff}. 
+  此命令主要用于替代默认的 \zlatexVerb{\mathrm{d}}, 与此同时，其会自动处理左右间隔, 更加规范的处理可以参见 \pkg{fixdiff}. 
   一个简单的使用示例如下:
 \end{function}
 \begin{DocExample}*
@@ -1509,7 +1590,8 @@ Alias Version: $\CC, \RR, \NN, \ZZ$
     \cs{sign}
     \cs{trace}
   \end{syntax}
-  以上所有命令均使用 \cs{DeclareMathOperator} 进行声明, 其会自动处理前后间距. 一个使用样例如下:
+  以上所有命令均使用 \cs{DeclareMathOperator} 进行声明, 其会自动处理前后间距, 可以使用命令 \cs{zlatexMathAliasOpSet} 进行重定义.
+  一个使用样例如下:
 \end{function}
 \begin{DocExample}*
 Normal Version: $\operatorname{alt}, \operatorname{rot}, \operatorname{div}, \operatorname{curl}, \operatorname{grad}, \operatorname{Id}, \operatorname{Im}, \operatorname{Ker}, \operatorname{Cok}, \operatorname{Hom}, \operatorname{sign}, \operatorname{trace}$ \\
@@ -1517,11 +1599,26 @@ Alias Version: $\alt, \rot, \div, \curl, \grad, \id, \im, \ker, \cok, \hom, \sig
 \end{DocExample}
 
 
+\begin{function}[updated=2024-12-05]{\zlatexMathAliasOpSet}
+  \begin{syntax}
+    \cs{zlatexMathAliasOpSet}\marg{key-value}
+  \end{syntax}
+  此命令用于设置上述各数学算子的名称, 仅可在导言区使用, 但为了说明此命令的使用方法，在本手册中，此命令的定义被临时改变了.
+  一个使用样例如下:
+\end{function}
+\begin{DocExample}*
+  \[ \alt, \im \]
+  \zlatexMathAliasOpSet{alt=ALT, im=IM}
+  \[ \alt, \im \]
+\end{DocExample}
+
+
 \begin{function}[updated=2024-12-05]{\zab}
   \begin{syntax}
     \cs{zab}\meta{(), [], \textbackslash\{\textbackslash\}}
   \end{syntax}
-  此命令用于处理括号的自动缩放, 一个使用样例如下:
+  此命令用于处理括号的自动缩放, 该命令现在正处于实验性阶段，可能存在潜在的问题，请谨慎使用. 该命令的一个
+  使用样例如下:
 \end{function}
 \begin{DocExample}*
 Normal Version: $\displaystyle \left( \frac{1}{2} \right), \left[ \frac{1}{2} \right], \left\{ \frac12 \right\}$ \\
@@ -1531,32 +1628,41 @@ Alias Version: $\displaystyle \zab(\frac12), \zab[\frac12], \zab\{\frac12\}$
 
 \clearpage
 \subsection{slide}
-此 library 用于从文档模式切换到 slide 模式，无需用户对代码进行任何的更改，仅需在导言区加载此 library 即可.
+此 library 用于从文档模式切换到 slide 模式，无需用户对文档源码进行任何的更改，仅需在导言区加载此 library 即可.
 \zlatex{} 会自动处理文档的分页. 
 
 由于此 library 内部 patch 了很多的 \LaTeX{} 内部命令, 所以请谨慎加载. 另外, 加载此 library 并不会牺牲太多的编译速度. 
 
-zslide 中的坐标系统:如果不加说明，那么 zslide 中的坐标系统均以当前页面的左上角为原点，取向下向右为正方向. 这就意味着你的纵坐标
+zslide 中的坐标系统:如果不加说明，那么 zslide 中的坐标系统均以当前页面的左上角为原点，取向上向右为正方向. 这就意味着你的纵坐标
 往往为负值，横坐标往往为正值.
+
+\begin{function}[updated=2024-11-05]{zslide@titlepage, zslide@lastpage}
+  \begin{syntax}
+    \cs{pageref}{zslide@titlepage}
+    \cs{pageref}{zslide@lastpage}
+  \end{syntax}
+  上述两命令分别用于引用当前文档的第一页和最后一页, 在 zslide 中, 标题页的页码为 0.
+\end{function}
 
 \begin{function}[updated=2024-11-05]{\zslideFrameCntAux:nn}
   \begin{syntax}
     \cs{zslideFrameCntAux:nn} \marg{name}\marg{number}
   \end{syntax}
   此命令会向文件 \zlatexVerb{\jobname.aux} 中写入一个变量, 其名称为: \cmd{\zsec@\meta{name}@cnt}, 其值为:
-  \meta{number}. 此命令在制作目录或向后搜集文档内容时是十分有用的.
+  \meta{number}; \meta{name} 一般为一大写罗马数字, 如 I, II, III, IV 等. 此命令在制作目录或向后搜集文档内容时
+  是十分有用的.
 \end{function}
 
 \begin{function}[updated=2024-11-05]{\_zslide_status_bar:nnnn}
   \begin{syntax}
     \cmd{\_zslide_status_bar:nnnn} \marg{type}\marg{coordinate}\marg{width}\marg{height}
   \end{syntax}
-  此命令用于创建 slide 的页面背景色快, 为方便叙述，我们称其为 \meta{BOX}. 其中 \meta{coordinate} 为此 \meta{BOX} 的左下角坐标, 形如
-  \zlatexVerb{(10pt, -.1\paperwidth)}, 以当前页面的左上角为原点, 向下向右为正方向; \meta{type} 为状态栏类型, 目前所有可选值有:\cmd{UR}, \cmd{UL}, 
+  此命令用于创建 slide 的页面背景色块, 为方便叙述，我们称其为 \meta{BOX}. 其中 \meta{coordinate} 表示 \meta{BOX} 左下角坐标, 形如
+  \zlatexVerb{(10pt, -.1\paperwidth)}, 以当前页面的左上角为原点, 取向上向右为正方向; \meta{type} 为状态栏类型, 目前所有可选值有:\cmd{UR}, \cmd{UL}, 
   \cmd{BL}, \cmd{BC}, \cmd{BR}, \cmd{sec}; \meta{width} 为宽度, 接受一个浮点数, 默认以 \cmd{\paperwidth} 为单位. \meta{height} 为状态栏的高度，
   接受一个合法的 \texttt{dim} 类型值, 如 \zlatexVerb{10pt, 2em} 等. 
   
-  注意:普通用户不应该直接调用此命令，此命令主要提供给模板的开发者.
+  注意:此命令需放入 \cmd{shipout/background} 或 \cmd{shipout/foreground} 这两个 Hook 中; 普通用户不应该直接调用此命令，此命令主要提供给模板的开发者.
 \end{function}
 
 
@@ -1567,10 +1673,10 @@ zslide 中的坐标系统:如果不加说明，那么 zslide 中的坐标系统�
   此命令用于创建 slide 的页面元信息, 其被置于一个 box 中，为方便叙述，我们称其为 \meta{BOX}. 其中 \meta{type} 表示 \meta{BOX} 在页面上的
   位置, 可选值有: \cmd{foot}, \cmd{head}; \cs{g_zslide_status_info_head_B_dim} 和 \cs{g_zslide_status_info_foot_B_dim} 两个寄存器存放了 head 
   和 foot 中文字基线的纵坐标. \meta{coordinate} 表示 \meta{BOX} 的左下角坐标, 接受一个浮点数, 以 \cmd{\paperwidth} 为单位. 此参数以当前页面的
-  左上角为原点, 向下向右为正方向.; \meta{width} 为当前 \meta{BOX} 的(弹性)宽度, 接受一个浮点数, 以 \cmd{\paperwidth} 为单位. \meta{content} 
+  左上角为原点, 取向上向右为正方向; \meta{width} 为当前 \meta{BOX} 的(弹性)宽度, 接受一个浮点数, 以 \cmd{\paperwidth} 为单位. \meta{content} 
   表示 \meta{BOX} 中存放的文本或图片内容. 
 
-  注意:此命令需放入 \cmd{shipout/background} 或 \cmd{shipout/foreground} 这两个 Hook 中, 普通用户不应该直接调用此命令，此命令主要提供给模板的开发者.
+  注意:此命令需放入 \cmd{shipout/background} 或 \cmd{shipout/foreground} 这两个 Hook 中; 普通用户不应该直接调用此命令，此命令主要提供给模板的开发者.
 \end{function}
 
 \begin{function}[updated=2024-11-05]{\_zslide_navigate:nnnn}
@@ -1581,7 +1687,7 @@ zslide 中的坐标系统:如果不加说明，那么 zslide 中的坐标系统�
   在 $0\sim \meta{range}$ 内的正整数，表示选定的编号. \meta{target symbol} 为选定的编号的符号, \meta{other symbol} 为
   其它编号的符号.
 
-  注意:此命令需放入 \cmd{shipout/background} 或 \cmd{shipout/foreground} 这两个 Hook 中, 普通用户不应该直接调用此命令，此命令主要提供给模板的开发者.
+  注意:此命令需放入 \cmd{shipout/background} 或 \cmd{shipout/foreground} 这两个 Hook 中; 普通用户不应该直接调用此命令，此命令主要提供给模板的开发者.
 \end{function}
 
 
@@ -1595,6 +1701,8 @@ zslide 中的坐标系统:如果不加说明，那么 zslide 中的坐标系统�
   前两个寄存器存放了 head 和 foot 中文字基线的纵坐标, 前者的默认值为 \texttt{-.9em+2.5pt}, 后者的默认值
   为 \zlatexVerb{-\paperheight+2.5pt}. \cs{g_zslide_status_info_sec_L_dim} 中存放了 section 文本距离页面左边界的距离, 
   默认值为 \texttt{1cm}; \cs{g_zslide_status_info_sec_B_dim} 中存放了 section 文本基线的纵坐标, 默认值为 \texttt{-2.25em}.
+
+  注意:普通用户不应该直接调用此命令，此命令主要提供给模板的开发者.
 \end{function}
 
 
@@ -1608,6 +1716,8 @@ zslide 中的坐标系统:如果不加说明，那么 zslide 中的坐标系统�
   前两个寄存器存放了 slide 中 head 和 foot 对应背景色块的高度, 默认值均为 \texttt{.9em}; \cs{g_zslide_status_bar_sec_H_dim} 中存放了 section 的背景
   色块的高度, 默认值为 \texttt{1.8em}; \cs{g_zslide_status_bar_sec_B_dim} 中存放了 section 的背景色块中文字的基线的纵坐标, 默认值为 \texttt{-2.7em};
   当改变此此三个寄存器的值时, 对应色块的基线保持不变，其高度会做出相应的改变.
+  
+  注意:普通用户不应该直接调用此命令，此命令主要提供给模板的开发者.
 \end{function}
 
 
@@ -1700,8 +1810,8 @@ Subsection Icon: \rule[1.5pt]{3pt}{3pt}
 \end{DocExample}
 
 \cs{zslideToclabelSet} 用于设置 slide 模式下目录中各条目的格式. \meta{extra width} 表示 \cs{thecontentslabel}
-右侧额外的间距. \meta{item} 可以选择使用 \cs{thecontentslabel}, \cs{zslidesecIcon}, \cs{zslidesubsecIcon} 或这是
-其它用户自定义的符号.
+右侧额外的间距. \meta{item} 可以选择使用 \cs{thecontentslabel}, \cs{zslidesecIcon}, \cs{zslidesubsecIcon} 或
+其它用户自定义符号.
 
 
 \begin{function}[updated=2024-11-05]{\zslideDocTextColor}
@@ -1738,7 +1848,7 @@ Subsection Icon: \rule[1.5pt]{3pt}{3pt}
   \begin{syntax}
     \cs{zslideSetup}\oarg{key}\marg{spec}
   \end{syntax}
-  此命令用于设置 slide 模式下，用于调整 \zlatex{} 中关于 slide 相关的配置. \meta{key} 表示 \zlatex{} 中 
+  在加载 \pkg{slide} 库后, 此命令用于调整 \zlatex{} 关于 slide 的默认配置. \meta{key} 表示 \zlatex{} 中 
   \meta{key-value} 的层级名称. 此参数的所有合法选项仅有 \cmd{logo}, 或者置为空. \meta{spec} 表示对具体项目的设置，
   所有可用的选项如下:
 \end{function}
@@ -2093,7 +2203,7 @@ reason is a representation of, as far as I know, the things in themselves;%
 \end{function}
 
 
-\begin{function}[updated=2024-01-05]{\ztool_append_to_file:nn, \ztool_append_to_file:no, \ztool_append_to_file:nf, \ztool_append_to_file:ee}
+\begin{function}[updated=2025-01-05]{\ztool_append_to_file:nn, \ztool_append_to_file:no, \ztool_append_to_file:nf, \ztool_append_to_file:ee}
   \begin{syntax}
     \cs{ztool_append_to_file:nn} \marg{file}\marg{content}
   \end{syntax}
@@ -2101,7 +2211,7 @@ reason is a representation of, as far as I know, the things in themselves;%
 \end{function}
 
 
-\begin{function}[updated=2024-01-05]{\ztool_replace_file_line:nnn, \ztool_replace_file_line:enn, \ztool_replace_file_line:ene, \ztool_replace_file_line:eee}
+\begin{function}[updated=2025-01-05]{\ztool_replace_file_line:nnn, \ztool_replace_file_line:enn, \ztool_replace_file_line:ene, \ztool_replace_file_line:eee}
   \begin{syntax}
     \cs{ztool_replace_file_line:nnn} \marg{file}\marg{line}\marg{content}
   \end{syntax}
@@ -2109,7 +2219,7 @@ reason is a representation of, as far as I know, the things in themselves;%
 \end{function}
 
 
-\begin{function}[updated=2024-01-05]{\ztool_insert_to_file:nnn, \ztool_insert_to_file:nen, \ztool_insert_to_file:nfn, \ztool_insert_to_file:een}
+\begin{function}[updated=2025-01-05]{\ztool_insert_to_file:nnn, \ztool_insert_to_file:nen, \ztool_insert_to_file:nfn, \ztool_insert_to_file:een}
   \begin{syntax}
     \cs{ztool_insert_to_file:nnn} \marg{file}\marg{line}\marg{content}
   \end{syntax}
@@ -2192,9 +2302,9 @@ original content
 \ztool_set_to_wd:Nn \l_ztool_tmp_W_dim {Hello,~world!}
 \dim_use:N \l_ztool_tmp_H_dim \quad \dim_use:N \l_ztool_tmp_W_dim\\
 % set content to dim
-Hello,~world!\\
-\ztool_resize_to_ht:nn {.5cm} {Hello,~world!}\\
-\ztool_resize_to_wd:nn {15pt} {Hello,~world!}
+Hello,~world!|
+\ztool_resize_to_ht:nn {.5cm} {Hello,~world!}|
+\ztool_resize_to_wd:nn {25pt} {Hello,~world!}
 \ExplSyntaxOff
 \end{DocExample}
 

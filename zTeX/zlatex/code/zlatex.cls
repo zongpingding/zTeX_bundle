@@ -258,7 +258,7 @@
 % pass clist options main subclass: 'article', 'book', 'ctexbook'
 \zlatex_msg_set:nn {option-subclass}{
   subclass~option:"\g__zlatex_subclass_type_str"~is~not~
-  accessible,~Valid~options~are:article,~book~and~ctexbook.
+  accessible,~Valid~options~are:article,~book,~l3doc~and~ctexbook.
 }
 \str_case:VnF \g__zlatex_subclass_type_str {
   {article}{
@@ -400,25 +400,25 @@
 % ----------------------------------------------------------------------
 %                          bool check user interface
 % ----------------------------------------------------------------------
-\NewDocumentCommand\zlatexHyperTF{mm}{
+\newcommand\zlatexHyperTF[2]{
   \bool_if:NTF \g__zlatex_hyperref_bool {#1}{#2}
 }
-\NewDocumentCommand\zlatexFancyTF{mm}{
+\newcommand\zlatexFancyTF[2]{
   \bool_if:NTF \g__zlatex_fancy_bool {#1}{#2}
 }
-\NewDocumentCommand\zlatexMarginTF{mm}{
+\newcommand\zlatexMarginTF[2]{
   \bool_if:NTF \g__zlatex_margin_bool {#1}{#2}
 }
-\NewDocumentCommand\zlatexSlideTF{mm}{
+\newcommand\zlatexSlideTF[2]{
   \bool_if:NTF \g__zlatex_slide_bool {#1}{#2}
 }
-\NewDocumentCommand\zlatexFontConfigTF{mm}{
+\newcommand\zlatexFontConfigTF[2]{
   \bool_if:NTF \g__zlatex_font_config_bool {#1}{#2}
 }
-\NewDocumentCommand\zlatexMathAliasTF{mm}{
+\newcommand\zlatexMathAliasTF[2]{
   \bool_if:NTF \g__zlatex_math_alias_bool {#1}{#2}
 }
-\NewDocumentCommand\zlatexBibIndexLoadTF{mm}{
+\newcommand\zlatexBibIndexLoadTF[2]{
   \bool_if:NTF \g__zlatex_bib_index_load_bool {#1}{#2}
 }
 

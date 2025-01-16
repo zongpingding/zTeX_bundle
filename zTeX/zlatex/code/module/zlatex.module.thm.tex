@@ -88,12 +88,38 @@
   \tl_use:N \g__zlatex_thm_title_tl
 }
 \bool_new:N \g__zlatex_thm_title_inline_bool
-\NewDocumentCommand{\zlatexThmTitleSwitch}{}{
-  \bool_gset_inverse:N \g__zlatex_thm_title_inline_bool
+\NewDocumentCommand{\zlatexThmTitleSwitch}{s}{
+  \IfBooleanTF{#1}
+    { \bool_gset_true:N \g__zlatex_thm_title_inline_bool }
+    { \bool_gset_false:N \g__zlatex_thm_title_inline_bool}
 }
-\NewDocumentCommand{\zlatexThmColorSetup}{m}{
-  \zlatex_keys_set:nn {color}{#1}
-}
+\cs_new:Npn \__zlatex_thm_color_set_check:nn #1#2 
+  {
+    \clist_clear:N \l_tmpa_clist
+    \clist_put_right:NV \l_tmpa_clist \g__zlatex_thm_theorem_clist
+    \clist_put_right:NV \l_tmpa_clist \g__zlatex_thm_proof_clist
+    \zlatex_msg_set:nn {thm-color-set}{
+      Your~color~spec~key~'#1'~is~not~in~the~thm~env~list,~please~check~it~again.
+    }
+    \clist_if_in:NnF \l_tmpa_clist {#1}
+      { \zlatex_msg_error:n {thm-color-set} }
+  }
+\NewDocumentCommand{\zlatexThmColorSetup}{m}
+  {
+    % the checker may lower the performance ???
+    \zlatex_label_hook_preamble_last:nn {zlatex-thmcolor-setup-user}{
+      \keyval_parse:nnn 
+        { \use_none:n }
+        { \__zlatex_thm_color_set_check:nn }
+        { #1 }
+      \zlatex_keys_set:nn {color}{#1}
+    }
+  }
+\DeclareHookRule{env/document/before}
+  {zlatex-thmcolor-setup-user}{>}{zlatex-thmall-setup-user}
+\@onlypreamble\zlatexThmColorSetup
+
+
 % create new thm env
 \cs_new:Npn \__zlatex_mid_first:w #1|#2\q_stop {#1}
 \cs_new:Npn \__zlatex_thm_color_set:w #1\q_stop #2|#3\q_stop 
@@ -124,7 +150,7 @@
 \NewDocumentCommand{\zlatexThmCreate}{mm}{
   \zlatex_label_hook_preamble_last:nn {zlatex-thmall-setup-user}{
   \keyval_parse:nnn
-    { \__zlatex_thm_create__:nn {#1} }
+    { \__zlatex_thm_create__:nn {#1}  }
     { \__zlatex_thm_create__:nnn {#1} }
     { #2 }
   }
@@ -135,9 +161,9 @@
 % ==> new thm style interface
 \NewDocumentCommand{\zlatexThmStyleNew}{+m}{
   \keyval_parse:nnn
-    {\use_none:n}
-    {\__zlatex_thm_new_style:nn} 
-    {#1}
+    { \use_none:n }
+    { \__zlatex_thm_new_style:nn } 
+    { #1 }
 }
 \cs_new_protected:Npn \__zlatex_thm_new_style:nn #1#2 {
   \zlatex_keys_define:nn { thm/style } {
@@ -255,7 +281,7 @@
     \tl_if_exist:cTF {g__zlatex_thm_style_\g__zlatex_thm_style_tl _end_tl}
       {\tl_use:c {g__zlatex_thm_style_\g__zlatex_thm_style_tl _end_tl}}
       {\zlatex_msg_error:n {mathEnv-style}}
-    \__zlatex_thm_toc_add:eeee 
+    \__zlatex_thm_toc_add:eeoe 
       {\g__zlatex_thm_table_level}
       { 
         \exp_not:N \__zlatex_thm_toc_prefix_tl
@@ -264,7 +290,8 @@
         \tl_if_empty:eF {\zlatexThmNote{}{}}{\ }
         \zlatexThmNote{(}{)}
       }
-      {\thepage}{#1.\zlatexThmNumber}
+      {\zlatexHyperTF{\exp_not:N \hyperlink{page.\thepage}{\thepage}}{\thepage}}
+      {#1.\zlatexThmNumber}
   }
 % thm title interface
 \NewHook{zlatex/thm/titleformat}
@@ -329,6 +356,12 @@
       \iow_open:Nn \tf@thlist { \c_sys_jobname_str.thlist }
     }
   }
+\NewDocumentCommand\zlatexThmTocStop{}
+  {
+    \bool_gset_false:N \g__zlatex_thm_toc_bool
+    % \iow_close:N \tf@thlist
+    \cs_set:Npn \__zlatex_thm_toc_add:nnnn ##1##2##3##4 {}
+  }
 \cs_new:Npn \__zlatex_thm_toc_add:nnnn #1#2#3#4 
   {
     \iow_now:Ne \@auxout 
@@ -338,7 +371,7 @@
           \token_to_str:N \protected@file@percent}
       }
   }
-\cs_generate_variant:Nn \__zlatex_thm_toc_add:nnnn { eeee, nnee }
+\cs_generate_variant:Nn \__zlatex_thm_toc_add:nnnn { eeee, eeoe, nnee, nnoe }
 \zlatex_keys_define:nn { thm/add }
   {
     % level   .tl_set:N  = \l__zlatex_add_thm_toc_level_tl,
@@ -346,12 +379,13 @@
     name      .tl_set:N  = \l__zlatex_add_thm_toc_name_tl,
     name      .initial:n = { ?? },
   }
-\NewDocumentCommand{\zlatexThmTocAdd}{om}{
+\NewDocumentCommand{\zlatexThmTocAdd}{O{section}m}{
   \group_begin:
-  \zlatex_keys_set:nn {thm/add}{#1}
-  \__zlatex_thm_toc_add:nnee {#2}
+  \zlatex_keys_set:nn {thm/add}{#2}
+  \__zlatex_thm_toc_add:nnoe {#1}
     {\l__zlatex_add_thm_toc_name_tl}
-    {\thepage}{#2.\cs:w the#2\cs_end:}
+    {\zlatexHyperTF{\exp_not:N \hyperlink{page.\thepage}{\thepage}}{\thepage}}
+    {#1.\cs:w the#1\cs_end:}
   \group_end:
 }
 \tl_new:N \g__zlatex_thm_table_level
