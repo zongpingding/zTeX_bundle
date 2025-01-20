@@ -459,3 +459,6 @@
   \zlatexFramed:nn {#2}{#1}
 }
 \NewDocumentCommand\zLaTeX{}{z\LaTeX{}}
+% constant
+\dim_new:N \c_zlatex_quad_dim 
+\ztool_gget_wd:Nn \c_zlatex_quad_dim {\quad}

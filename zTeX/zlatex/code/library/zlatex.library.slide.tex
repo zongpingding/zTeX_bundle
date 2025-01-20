@@ -3,14 +3,12 @@
 
 %%%%%     slide/presentation library for zlatex     %%%%%
 % ==> slide initialization
-\dim_new:N \c_zlatex_quad_dim 
-\ztool_gset_to_wd:Nn \c_zlatex_quad_dim {\quad}
 \exp_args:NNnx \seq_set_split:Nnn \l_tmpa_seq {|}{\g__zlatex_aspectratio_tl}
 \RequirePackage[explicit]{titlesec}
 \RequirePackage{titletoc}
 \geometry {
   papersize={\seq_item:Nn \l_tmpa_seq {1}cm, \seq_item:Nn \l_tmpa_seq {2}cm},
-  hmargin=1cm, top=.4cm, includefoot, bottom=5.5pt,
+  hmargin=1.25cm, top=.8cm, includefoot, bottom=5.5pt,
   footskip=\dim_eval:n {1.25em + 5pt}
 }
 
@@ -32,11 +30,6 @@
   \renewcommand\mainmatter{}
   \renewcommand\frontmatter{}
   \renewcommand\part{
-    \if@openright
-      \cleardoublepage
-    \else
-      \clearpage
-    \fi
     \thispagestyle{empty}
     \if@twocolumn
       \onecolumn
@@ -49,11 +42,11 @@
   }
   \titleformat{\chapter}
     {\Huge}{}{0pt}
-    {\hspace{0pt}\vfill\centerline{\makebox(0, 0){#1}}\vfill\hspace{0pt}}
+    {\centerline{\makebox(0, 0){#1}}}
     [\thispagestyle{empty}]
   \titleformat{name=\chapter, numberless}
     {\Huge}{}{0pt}
-    {\hspace{0pt}\vfill\centerline{\makebox(0, 0){#1}}\vfill\hspace{0pt}}
+    {\centerline{\makebox(0, 0){#1}}}
     [\thispagestyle{empty}]
   }
 }{\relax}
@@ -302,7 +295,7 @@
     exclude   .clist_gset:N = \g__zlatex_slide_logo_exclude_clist,
     exclude   .initial:n    = { 0 },
   }
-\NewDocumentCommand{\zslidelogo}{om}
+\NewDocumentCommand{\zslideLogo}{om}
   {
     \IfValueT{#1}{\zlatex_keys_set:nn { slide / logo }{#1}}
     \__zlatex_page_annotate:eeenn 
@@ -314,12 +307,12 @@
           {\includegraphics[width=\g__zlatex_slide_logo_width_dim]{#2}}
       }{}
   }
-\@onlypreamble\zslidelogo
+\@onlypreamble\zslideLogo
 % slide toc customization
 \let\zslideTocPage\contentspage
 % bug: can NOT alias for command:'\thecontentslabel'
 \NewDocumentCommand{\zslideToclabelSet}{om}{
-  \ztool_set_to_wd:Nn \l_tmpa_dim {#2}
+  \ztool_get_wd:Nn \l_tmpa_dim {#2}
   \IfNoValueTF {#1}{\dim_set:Nn \l_tmpb_dim {\l_tmpa_dim}}
     {\dim_set:Nn \l_tmpb_dim {\l_tmpa_dim + #1}}
   \contentslabel[#2]{\dim_use:N \l_tmpb_dim}
@@ -327,19 +320,17 @@
 \clist_map_inline:nn {chapter, section, subsection}{
   \titlecontents{#1}
     [\dim_use:c {l__zlatex_slide_toc_leftmargin_#1_dim}]
-    {\vspace*{\fill}}{\tl_use:c {l__zlatex_slide_toc_label_#1_tl}}
+    {}{\tl_use:c {l__zlatex_slide_toc_label_#1_tl}}
     {}{\tl_use:c {l__zlatex_slide_toc_suffix_#1_tl}}
 }
 \setcounter{tocdepth}{2}
 \gdef\zslideTocSecIcon
   {\box_move_up:nn {2pt}
-    {\hbox:n {\ztool_resize_to_wd:nn 
+    {\hbox:n {\ztool_set_to_wd:nn 
       {6pt}{\(\blacktriangleright\)}}
     }
   }
-\gdef\zslideTocSubsecIcon{\rule[1.5pt]{3pt}{3pt}}
-% \AddToHook{cmd/@starttoc/before}{\vspace*{\fill}}
-% \AddToHook{cmd/@starttoc/after}{\vspace*{\stretch{3}}}
+\gdef\zslideTocSubsecIcon{\rule[2pt]{3pt}{3pt}}
 % slide mode setup interface
 \NewDocumentCommand{\zslideSetup}{om}{
   \IfNoValueTF {#1}{
@@ -420,7 +411,7 @@
       doc = {
         bg-color = white,
         text-color = black,
-        text-style = \sfdefault
+        text-style = sfdefault
       },
       UL = {
         bg   = Ann-default-I,
@@ -465,7 +456,7 @@
       doc = {
         bg-color = white,
         text-color = black,
-        text-style = \sfdefault
+        text-style = sfdefault
       },
       UL = {
         bg   = Ann-bea-I,
@@ -513,7 +504,7 @@
       doc = {
         bg-color = Ann-alb-V,
         text-color = Ann-alb-VI,
-        text-style = \sfdefault
+        text-style = sfdefault
       },
       UL = {
         bg   = Ann-alb-I,
@@ -558,7 +549,7 @@
       doc = {
         bg-color = white,
         text-color = black,
-        text-style = \sfdefault
+        text-style = sfdefault
       },
       UL = {
         bg   = Ann-sea-I,
@@ -605,7 +596,7 @@
       doc = {
         bg-color = white,
         text-color = black,
-        text-style = \sfdefault
+        text-style = sfdefault
       },
       UL = {
         bg   = Ann-spr-I,
@@ -651,10 +642,11 @@
 
 % ==> slide mode init options
 \_zslide_theme_use:nn { \str_use:N \g__zlatex_slide_theme_str }{}
-\zslide_set_doc_text_color:n { \tl_use:N \l__zlatex_slide_doc_textcolor_tl }
-\renewcommand{\familydefault}{ \tl_use:N \l__zlatex_slide_doc_textstyle_tl }
 \zlatex_hook_preamble_last:n 
   { 
     \pagestyle{empty} 
     \__zlatex_text_symbol_patch:
+    \zslide_set_doc_text_color:n { \tl_use:N \l__zlatex_slide_doc_textcolor_tl }
+    \renewcommand{\familydefault}{ \tl_use:c {\l__zlatex_slide_doc_textstyle_tl} }
+    \renewcommand{\CJKfamilydefault}{ \tl_use:c {CJK\l__zlatex_slide_doc_textstyle_tl} }
   }

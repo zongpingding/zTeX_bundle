@@ -94,7 +94,7 @@
 - [x] add hyperref support.
 - [x] fixed bug: annotations added by `\zlatexPageMask` are invisible.
 - [x] Unified color scheme for `UR` and `BR` text.
-- [x] provide an `\zslidelogo` command for slide mode.
+- [x] provide an `\zslideLogo` command for slide mode.
 
 
 ## `toc` module

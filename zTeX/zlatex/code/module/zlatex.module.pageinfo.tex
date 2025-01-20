@@ -69,19 +69,20 @@
       \phantomsection
       \hypertarget{zslide-title-page}{}
     }
+    \newgeometry{margin=1cm}
     \null\vfill\begin{center}
       \begin{tabular}{c}{\huge\zslideTitle}\\[2em]
       \zslideAuthor\\[2em]\zslideDate\end{tabular}
-      \vspace{\stretch{2}}\end{center}
+    \end{center}\vfill\null
     \thispagestyle{empty}\setcounter{page}{0}
-    \newpage
+    \restoregeometry
   }
 }{
   \renewcommand{\maketitle}{
     \thispagestyle{empty}
     % calc max width, add '1pt' for right padding in case of wrong line break
-    \ztool_set_to_wd:Nn \l_tmpa_dim {\hbox:n {\huge\bfseries\@title}}
-    \ztool_set_to_wd:Nn \l_tmpb_dim {\hbox:n {\Large\bfseries\@author}}
+    \ztool_get_wd:Nn \l_tmpa_dim {\hbox:n {\huge\bfseries\@title}}
+    \ztool_get_wd:Nn \l_tmpb_dim {\hbox:n {\Large\bfseries\@author}}
     \dim_set:Nn \l_tmpa_dim {\dim_max:nn {\l_tmpa_dim}{\l_tmpb_dim} + 1pt}
     % typeset info
     \begin{center}\vfill\vspace*{40pt}
@@ -92,7 +93,6 @@
     }
     \par\vfill{\Large\textcolor{gray}{\@date}}
     \end{center}
-    \restoregeometry
   }
 }
 
@@ -160,3 +160,24 @@
     \hook_gremove_code:nn {shipout/#1}
       {zlatex@page@mask-#2}
   }
+
+
+
+% ==> page target
+\AddToHook{shipout/firstpage}{
+  \label{zlatex-title-page}
+  \hyper@anchor{zlatex@titlepage}
+}
+\AddToHook{shipout/lastpage}{
+  \label{zlatex-last-page}
+  \hyper@anchor{zlatex@lastpage}
+}
+
+
+
+% ==> doc info
+\zlatex_hook_preamble_last:n {
+  \let\zlatexTitle\@title
+  \let\zlatexAuthor\@author
+  \let\zlatexDate\@date
+}

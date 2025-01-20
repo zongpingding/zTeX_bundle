@@ -1103,7 +1103,7 @@ Remove dependency: `ascii` package, use the existing `AMSb` symbols font to decl
 % in 'slide' library 
 \gdef\zslidesecIcon
   {\box_move_up:nn {2pt}
-    {\hbox:n {\ztool_resize_to_wd:nn 
+    {\hbox:n {\ztool_set_to_wd:nn 
       {6pt}{\(\blacktriangleright\)}}
     }
   }
@@ -1136,12 +1136,12 @@ Add a new theme: `AnnArborSpruce`,which is based on `green`. For more color them
 
 - [x] fixed bug: annotations added by `\zlatexPageMask` are invisible.
 - [x] Unified color scheme for `UR` and `BR` text.
-- [x] Provide an `\zslidelogo` command for slide mode.
+- [x] Provide an `\zslideLogo` command for slide mode.
 - [x] fixed warning: dupicate hyper target when use `\tableofcontents`.
 
-Syntax of command: `\zslidelogo` (only accessiable in preamble):
+Syntax of command: `\zslideLogo` (only accessiable in preamble):
 ```latex 
-\zslidelogo[
+\zslideLogo[
   width=3em, 
   exclude={0, 1},
   position={(20pt, 30pt)}

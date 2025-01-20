@@ -1,3 +1,335 @@
+% ==> tcolorbox icon add
+\documentclass{article}
+\usepackage[many]{tcolorbox}
+\usepackage{pifont}
+\usepackage{lipsum}
+\usepackage{graphicx}
+\newcounter{test}
+
+
+\begin{document}
+Hello world.
+
+\begin{tcolorbox}[
+  enhanced,
+  overlay unbroken and first = {
+    \node[anchor = north east, outer sep=0pt, text=red] 
+      at (frame.north east) { \stepcounter{test}\thetest:\ding{73} };
+  }
+]
+\lipsum[1-2]
+\end{tcolorbox}
+
+Hello world. \ding{73}
+
+% \vskip5em
+\begin{tcolorbox}[
+  enhanced,breakable,
+  overlay unbroken and first = {
+    \node[anchor = north east, outer sep=0pt, text=red] 
+      at (frame.north east) { \stepcounter{test}\thetest:Example 7.12 };
+  }
+]
+\lipsum[1-2]
+\end{tcolorbox}
+\end{document}
+
+
+
+% ==> bug of thm toc add function: \__zlatex_thm_toc_add:eeoe
+\InputIfFileExists{zlatex-cfg.tex}{}{}
+\documentclass{../code/zlatex}
+\usepackage{pifont}
+\let\OzlatexThmLang\zlatexThmLang
+\zlatexThmTitleFormat{\bfseries\color{red}\zlatexThmNumber|\ :|\zlatexThmNote{[}{]}:(\zlatexThmName)}
+
+
+\begin{document}
+\let\zlatexThmLang\OzlatexThmLang
+\zlatexThmToc[1.25]
+
+% \begin{DocExample}*
+\begin{theorem}[AAA-1-$\alpha + \beta$]
+  This is a theorem AAA-1.
+\end{theorem}
+\zlatexThmLang{fr}
+\begin{theorem}[BBB-1-\ding{56}]
+  This is a france theorem BBB-1.
+\end{theorem}
+\zlatexThmLang{en}
+\begin{theorem}[CCC-1]
+  This is a english theorem CCC-1.
+\end{theorem}
+% \end{DocExample}
+
+
+% ==> BUG: \bfseries can NOT be used in 'e'-type
+% \ExplSyntaxOn
+% \tl_set:Ne \l_tmpa_tl {\bfseries AA} % log:! Incomplete \iffalse; all text was ignored after line 29.
+% \tl_use:N \l_tmpa_tl
+% \ExplSyntaxOff
+\end{document}
+
+
+
+
+
+% ==> bug of \zlatexThmToc and \zlatexPartialToc bug in 'slide' mode
+\documentclass{article}
+\usepackage{lipsum, titletoc}
+\usepackage{pifont}
+\titlecontents{subsection}
+  [3.8em] % ie, 1.5em (chapter) + 2.3em
+  {}
+  {\contentslabel{2.3em}}
+  {\hspace*{-2.3em}}
+  {\titlerule*[1pc]{.}\contentspage}
+
+
+\begin{document}
+\input{TOC.txt}
+
+% \contentsline {subsection}{\numberline {2.1}\ding {74}\;2.1:[DEFINITION]:({Définition})}{6}{definition.2.1}%
+% \contentsline {subsection}{\numberline {2.1}\ding {98}\;2.1:[REMARK]:({Remarque})}{9}{remark.2.1}%
+
+
+% \section{First Chapter}
+% \lipsum[1]
+% akhdsghkjk dshk  gasjhdg gajfg:
+% \startcontents[sections]
+% \printcontents[sections]{p}{2}{}
+
+
+% \subsection{AAA}
+
+% \stopcontents[sections]
+% \section{Second Chapter}
+% \subsection{First subsection}
+% \section{Third Chapter}
+% \subsection{Second subsection}
+% \subsubsection{First subsubsection}
+\end{document}
+
+\InputIfFileExists{zlatex-cfg.tex}{}{}
+\documentclass[
+    lang=cn,
+    fancy,
+    toc={stretch=1.5},
+    class=book,
+    % font={config=true},
+    layout={slide, aspect=16|9}
+]{../code/zlatex}
+\usepackage{pifont}
+\usepackage{lipsum, zhlipsum}
+
+%%%%%% zlatex config %%%%%%%
+\zlatexThmStyle{lapsis} % must bofore the loading of 'theme' library
+\zlatexloadlibrary{mathalias, theme}
+\zlatexThmColorSetup{remark=red!75, definition=orange!75}
+\newcounter{PRB}
+\zlatexThmCreate{proof}{problem={PRB\ \thePRB}|red}
+\zlatexPageMask[anchor=tl, position={(0pt, \zph)}]{\parbox{\paperwidth}{\color{gray}\itshape\huge\lipsum[1-4]}}
+% \zlatexThmTocSymbol{
+% definition=\ding{74}\;,
+% remark=\ding{98}\;,
+% }
+\zlatexColorSetup{
+definition=blue,
+}
+\zlatexThmLang{fr}
+\zlatexThmTitleFormat*{\color{green}\zlatexThmNumber|\ :|\zlatexThmNote{[}{]}:(\zlatexThmName)}
+%%%% slide setup
+\zslideSetup[doc]{
+bg-color=yellow!20,
+text-color=red
+}
+\zslideSetup[toc/leftmargin]{
+  chapter=2em,
+  section=8em,
+}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%    
+
+
+\title{\zLaTeX{} Online}
+\author{Eureka}
+\date{\today}
+\begin{document}
+\maketitle
+\frontmatter
+\tableofcontents
+\newpage
+\mainmatter
+
+\part{这是一个 Part}
+\chapter{欢迎使用 \zLaTeX{}}
+\section{定理列表}
+\subsection{AAA}
+\noindent 本章节涉及到的所有定理如下所示：
+\zlatexThmToc[1.25]
+% \input{TOC.txt}
+
+% \contentsline {subsection}{\numberline {2.1}\ding {74}\;2.1:[DEFINITION]:({Définition})}{6}{definition.2.1}%
+% \contentsline {subsection}{\numberline {2.1}\ding {98}\;2.1:[REMARK]:({Remarque})}{9}{remark.2.1}%
+
+
+% \vskip5em
+% \contentsline {subsection}{\numberline {2.1}\ding {74}\;2.1:[DEFINITION]:({Définition})}{6}{definition.2.1}%
+% \contentsline {subsection}{\numberline {2.1}\ding {98}\;2.1:[REMARK]:({Remarque})}{9}{remark.2.1}%
+
+% \contentsline {subsection}{\ding {74}\;{Définition}\ 2.1\ (DEFINITION)}{6}{definition.2.1}%
+% \contentsline {subsection}{\ding {98}\;{Remarque}\ 2.1\ (REMARK)}{9}{remark.2.1}%
+% \contentsfinish 
+
+% BUG: uncomment the following 2 lines will cause error:
+% log: ! LaTeX Error: Something's wrong--perhaps a missing \item.
+% \lipsum[1][1-4]
+% \zlatexPartialToc
+
+
+\section{FIRST}
+\lipsum[1] 
+\begin{definition}[DEFINITION]
+As any dedicated reader can clearly see, the Ideal of practical
+reason is a representation of, as far as I know, the things in themselves;
+\begin{align}
+\underset{}{\mathbf{v} \bigotimes \mathbf{w}}
+& = \sum_{i=1}^3\left(a_{i1}u^iv^1+a_{i2}u^iv^2+a_{i3}u^iv^3\right) \\
+& = \int x \dd x = \frac12 x^2 + \R{C}
+\end{align}
+As any dedicated reader can clearly see, the Ideal of practical
+reason is a representation of, as far as I know, the things in themselves;%
+\end{definition}
+\lipsum[2]
+
+下面是一个测试所用的 problem 环境:
+
+\begin{problem}
+这是一个问题环境, 一些含无意义的废话:
+\begin{align}
+  \int x \dd x = \frac12 x^2 + \R{C}
+\end{align}
+\end{problem}
+
+\begin{proof}
+这是一个问题环境, 一些含无意义的废话:
+\begin{align}
+    \int x \dd x = \frac12 x^2 + \R{C}
+\end{align}
+这是一个问题环境, 一些含无意义的废话.
+\end{proof}
+
+% BUG: uncomment the following 2 lines will cause error:
+% log: ! LaTeX Error: Something's wrong--perhaps a missing \item.
+% \subsection{BUG-SUBSECTION} 
+% 你好, \zLaTeX{} 
+
+\lipsum[1][1-5]\footnote{这是一个脚注-1}\footnote{这是一个脚注-2}\par
+\zhlipsum[1]
+\begin{remark}[REMARK]
+As any dedicated reader can clearly see, the Ideal of practical
+reason is a representation of, as far as I know, the things in themselves;
+\begin{align}
+\underset{}{\mathbf{v} \bigotimes \mathbf{w}}
+& = \sum_{i=1}^3\left(a_{i1}u^iv^1+a_{i2}u^iv^2+a_{i3}u^iv^3\right) \\
+& = \int x \dd x = \frac12 x^2 + \R{C}
+\end{align}
+As any dedicated reader can clearly see, the Ideal of practical
+reason is a representation of, as far as I know, the things in themselves;%
+\end{remark}
+\zhlipsum[2]
+\end{document}
+
+
+\InputIfFileExists{zlatex-cfg.tex}{}{}
+\documentclass[lang=cn,layout={slide}]{../code/zlatex}
+
+
+\begin{document}
+Hello world
+\end{document}
+
+
+
+
+
+
+% ==> Test zLaTeX TeXPage Online
+\InputIfFileExists{zlatex-cfg.tex}{}{}
+\documentclass[lang=cn]{../code/zlatex}
+\zlatexThmStyle{lapsis}
+\zlatexloadlibrary{mathalias, theme}
+\zlatexThmColorSetup{remark=orange!75, definition=green!75}
+\newcounter{PRB}
+\zlatexThmCreate{proof}{problem={PRB\ \thePRB}|red}
+\usepackage{lipsum}
+\usepackage{zhlipsum}
+
+\usepackage{adjustbox}
+% \makeatletter
+% \newcommand{\zlatex@llapnote}[1]{
+%   \mbox{}\llap{
+%   \adjustbox{set height=0pt, set depth=0pt}{
+%     \parbox[t]{2.85cm}{\raggedleft #1}}\hspace*{.75em}}
+% }
+% \makeatother
+
+\title{\zLaTeX{} Online}
+\author{Eureka}
+\date{\today}
+\begin{document}
+\maketitle
+
+
+\AAA
+\section{定理列表}
+\noindent 本章节涉及到的所有定理如下所示：
+\zlatexThmToc[1.25]
+
+\section{FIRST}
+\lipsum[1] 
+\begin{definition}[DEFINITION]
+As any dedicated reader can clearly see, the Ideal of practical
+reason is a representation of, as far as I know, the things in themselves;
+\begin{align}
+\underset{}{\mathbf{v} \bigotimes \mathbf{w}}
+& = \sum_{i=1}^3\left(a_{i1}u^iv^1+a_{i2}u^iv^2+a_{i3}u^iv^3\right) \\
+& = \int x \dd x = \frac12 x^2 + \R{C}
+\end{align}
+As any dedicated reader can clearly see, the Ideal of practical
+reason is a representation of, as far as I know, the things in themselves;%
+\end{definition}
+\lipsum[2]
+
+下面是一个测试所用的 problem 环境:
+
+\begin{problem}
+这是一个问题环境, 一些含无意义的废话:
+\begin{align}
+    \int x \dd x = \frac12 x^2 + \R{C}
+\end{align}
+\end{problem}
+
+\subsection{FIRST-I}
+你好, \zLaTeX{} 
+
+\zhlipsum[1]
+\begin{remark}[REMARK]
+As any dedicated reader can clearly see, the Ideal of practical
+reason is a representation of, as far as I know, the things in themselves;
+\begin{align}
+\underset{}{\mathbf{v} \bigotimes \mathbf{w}}
+& = \sum_{i=1}^3\left(a_{i1}u^iv^1+a_{i2}u^iv^2+a_{i3}u^iv^3\right) \\
+& = \int x \dd x = \frac12 x^2 + \R{C}
+\end{align}
+As any dedicated reader can clearly see, the Ideal of practical
+reason is a representation of, as far as I know, the things in themselves;%
+\end{remark}
+\zhlipsum[2]
+\end{document}
+
+
+
+
 % ==> Test thm style warning msg
 \InputIfFileExists{zlatex-cfg.tex}{}{}
 \documentclass[
@@ -143,7 +475,7 @@ DDD
 \zslideThemeUse[
   UR={text=\zLaTeX{} Slide:\ \zslideNavigateBall},
 ]{AnnArborSpruce}
-\zslidelogo[width=4em, exclude={0, 2, 4}]{example-image-duck}
+\zslideLogo[width=4em, exclude={0, 2, 4}]{example-image-duck}
 
 % BEGIN TEST INTERFACE
 \ExplSyntaxOn
@@ -953,7 +1285,7 @@ A simple theorem environment follows the above definition as below:
 
 \section{SET to HEIGHT}
 \ExplSyntaxOn
-\ztool_resize_to_ht:nn {2.5pt}{XXX}
+\ztool_set_to_ht:nn {2.5pt}{XXX}
 \ExplSyntaxOff
 
 
@@ -988,8 +1320,8 @@ Test List of Theorems:
 \makeatother
 \zlatexPageMask*[layer=foreground]{AAA}
 \zlatexPageMask[layer=foreground]{BBB}
-% \zslidelogo[position={(40pt, 10pt)}, exclude={0, 2}]{Epmmy.jpg}
-\zslidelogo[width=3em, exclude={0, 1}]{Epmmy.jpg}
+% \zslideLogo[position={(40pt, 10pt)}, exclude={0, 2}]{Epmmy.jpg}
+\zslideLogo[width=3em, exclude={0, 1}]{Epmmy.jpg}
 
 
 \title{Debug}
@@ -1004,7 +1336,7 @@ Test List of Theorems:
 BULLET TEST: \textbullet
 
 \ExplSyntaxOn
-m\ztool_resize_to_wd:nn {1em}{mmmm}\par 
+m\ztool_set_to_wd:nn {1em}{mmmm}\par 
 
 \rule{1em}{3pt}
 \ExplSyntaxOff

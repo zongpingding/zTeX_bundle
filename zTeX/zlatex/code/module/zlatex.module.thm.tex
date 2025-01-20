@@ -84,9 +84,9 @@
                   {g__zlatex_thm_name_\g__zlatex_lang_math_tl _prop}
 }
 \tl_new:N \g__zlatex_thm_title_tl
-\NewDocumentCommand{\zlatexThmTitle}{}{
-  \tl_use:N \g__zlatex_thm_title_tl
-}
+\def\zlatexThmTitle{\@ifstar\@zlatexThmTitle\@@zlatexThmTitle}
+\def\@zlatexThmTitle{\__zlatex_thm_title:}
+\def\@@zlatexThmTitle{\tl_use:N \g__zlatex_thm_title_tl}
 \bool_new:N \g__zlatex_thm_title_inline_bool
 \NewDocumentCommand{\zlatexThmTitleSwitch}{s}{
   \IfBooleanTF{#1}
@@ -259,10 +259,10 @@
 }
 \@onlypreamble\zlatexThmCnt
 % thm env warper
-\cs_new:Npn \__zlatex_thm_warp_start:nnnn #1#2#3#4 {
+\cs_new:Npn \__zlatex_thm_warp_start:nnn #1#2#3 {
   \def\thm@temp@color{\tl_use:c {l__zlatex_#1_color_tl}}
   \def\thm@temp@name{#1}
-  \__zlatex_thm_title_item:nnnn {#1}{#2}{#3}{#4}
+  \__zlatex_thm_title_item:nnn {#1}{#2}{#3}
   \tl_use:c {g__zlatex_thm_style_\g__zlatex_thm_style_tl _option_tl}
   \tl_if_exist:cTF {g__zlatex_thm_style_\g__zlatex_thm_style_tl _option_tl}
     {\tl_use:c {g__zlatex_thm_style_\g__zlatex_thm_style_tl _option_tl}}
@@ -281,21 +281,20 @@
     \tl_if_exist:cTF {g__zlatex_thm_style_\g__zlatex_thm_style_tl _end_tl}
       {\tl_use:c {g__zlatex_thm_style_\g__zlatex_thm_style_tl _end_tl}}
       {\zlatex_msg_error:n {mathEnv-style}}
-    \__zlatex_thm_toc_add:eeoe 
+    \__zlatex_thm_toc_add:eeoe
       {\g__zlatex_thm_table_level}
       { 
+        % \zlatexSlideTF {\exp_not:N \exp_not:N \exp_not:N \numberline {\zlatexThmNumber}}{}
         \exp_not:N \__zlatex_thm_toc_prefix_tl
         \exp_not:n {\prop_item:Nn \g_zlatex_thm_toc_symbols_prop {#1}}
-        \zlatexThmName\ \zlatexThmNumber
-        \tl_if_empty:eF {\zlatexThmNote{}{}}{\ }
-        \zlatexThmNote{(}{)}
+        \g__zlatex_thm_title_tl 
       }
       {\zlatexHyperTF{\exp_not:N \hyperlink{page.\thepage}{\thepage}}{\thepage}}
       {#1.\zlatexThmNumber}
   }
 % thm title interface
 \NewHook{zlatex/thm/titleformat}
-\cs_new:Npn \__zlatex_thm_title_item:nnnn #1#2#3#4 {
+\cs_new:Npn \__zlatex_thm_title_item:nnn #1#2#3 {
   \tl_set:Nn \l_tmpa_tl {\exp_not:n {#2}}
   \cs_set:Npn \zlatexThmName {
     % \textcolor{\tl_use:c {l__zlatex_#1_color_tl}}
@@ -317,26 +316,29 @@
       \stepcounter{#1}
     }
   \tl_gset:Nn \g__zlatex_thm_title_tl {
-    #3\zlatexThmName #4 \zlatexThmNumber
-    \tl_if_empty:eF {\zlatexThmNote{}{}}{#4}
-    \zlatexThmNote{(}{)} #4
+    \zlatexThmName #3 \zlatexThmNumber
+    \tl_if_empty:eF {\zlatexThmNote{}{}}{#3}
+    \zlatexThmNote{(}{)} #3
   }
   \UseHook{zlatex/thm/titleformat}
 }
 \cs_new:Npn \__zlatex_thm_title: {
-  \bool_if:NT \g__zlatex_thm_title_inline_bool
-    {\group_begin:\noindent\tl_use:N \g__zlatex_thm_title_tl\group_end:}
+  \group_begin:
+    \noindent\bfseries
+    \tl_use:N \g__zlatex_thm_title_tl
+  \group_end:
 }
 % users' interface of thm title format
 \NewDocumentCommand{\zlatexThmTitleFormat}{sm}{
   \IfBooleanTF{#1}{
     \AddToHook{zlatex/thm/titleformat}
-      {\tl_gset:Nn \g__zlatex_thm_title_tl {#2}}
+      {\cs_set:Npn \__zlatex_thm_title: {\group_begin:\noindent #2\group_end:}}
   }{
     \AddToHookNext{zlatex/thm/titleformat}
-      {\tl_gset:Nn \g__zlatex_thm_title_tl {#2}}
+      {\cs_set:Npn \__zlatex_thm_title: {\group_begin:\noindent #2\group_end:}}
   }
 }
+\@onlypreamble\zlatexThmTitleFormat
 \NewDocumentCommand{\zlatexThmNoteEmptyTF}{mm}
   {
     \tl_if_empty:eTF {\zlatexThmNote{}{}}
@@ -424,6 +426,7 @@
   { \prop_gclear:N \g_zlatex_thm_toc_symbols_prop }
 
 
+
 % ==> thm env definition
 \NewHook{zlatex/thm/before}
 \NewHook{zlatex/thm/begin}
@@ -436,8 +439,9 @@
     \__zlatex_cref_math_env:n {#1}
     \DeclareDocumentEnvironment{#1}{O{}}{
       \UseHook{zlatex/thm/before}
-      \__zlatex_thm_warp_start:nnnn {#1}{##1}{\bfseries}{\ }
-      \MakeLinkTarget*{#1.\zlatexThmNumber}\__zlatex_thm_title:   
+      \__zlatex_thm_warp_start:nnn {#1}{##1}{\ }
+      \MakeLinkTarget*{#1.\zlatexThmNumber}
+      \bool_if:NT \g__zlatex_thm_title_inline_bool {\__zlatex_thm_title:}   
       \UseHook{zlatex/thm/begin}
       \peek_remove_spaces:n             
     }{

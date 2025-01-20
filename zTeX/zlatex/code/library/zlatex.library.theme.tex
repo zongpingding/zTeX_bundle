@@ -91,7 +91,7 @@
         lower~separated=false, separator~sign={.},
         attach~boxed~title~to~top~left={yshift=-0.11in, xshift=0.15in},
         boxed~title~style={boxrule=0pt, colframe=white, arc=0pt, outer~arc=0pt},
-        title=\zlatexThmTitle,
+        title=\zlatexThmTitle*,
         coltitle = white,           colbacktitle = \thm@temp@color,
         colframe = \thm@temp@color, colback  = \thm@temp@color!5,
       ]
@@ -100,6 +100,8 @@
     option = {
       \__zlatex_thm_title_inline:n {F}
       \__zlatex_thm_tcolorbox_warning:
+    },
+    preamble = {
       \zlatex_keys_set:nn {color}{
         axiom       = {HTML}{2c3e50},
         definition  = {RGB}{0, 166, 82},
@@ -119,7 +121,7 @@
         left=10pt,  right=10pt,
         arc=3pt,    frame~hidden, 
         colback = \thm@temp@color!20,
-      ] { \zlatexThmTitle }\par
+      ] { \zlatexThmTitle* }\par
     },
     end = {\end{tcolorbox}},
     preamble = {
@@ -168,7 +170,7 @@
           \draw[color=\thm@temp@color, thick] 
             (frame.south~west)++(-5cm, -1pt)--($(frame.south~east)+(5cm, 0pt)$);
         },
-      ]\zlatex@llapnote{\zlatexThmTitle}
+      ]\zlatex@llapnote{\zlatexThmTitle*}
     },
     end = {\hfill$\mathcolor{\thm@temp@color}{\blacktriangleleft}$\end{tcolorbox}},
     option = {
