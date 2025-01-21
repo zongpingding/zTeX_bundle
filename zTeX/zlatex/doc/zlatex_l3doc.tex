@@ -990,7 +990,7 @@ representation of, as far as I know, the things in themselves;}
 \zlatex{} 的默认配色\Footnote{zchapColor 还未整理, 目前只能单独重定义}如下:
 \begin{table}[H]
   \begin{tblr}{
-    colspec={|X[1.25, c]|X[1.1, c]|X[1.65, c]|X[1.1, c]|X[1, c]|X[1.1, c]|X[2, c]|X[2, c]|},
+    colspec={|X[1.25, c]|X[1.1, c]|X[1.85, c]|X[1.2, c]|X[.9, c]|X[1.65, c]|X[2, c]|X[1.75, c]|},
     rowspec={|Q[m]|Q[m]|Q[m]|Q[m]|},
     cells={cmd=\small\env}
   }
@@ -1007,7 +1007,7 @@ representation of, as far as I know, the things in themselves;}
 定理类环境的色彩保存于变量 \cmd{zlatex@color@\meta{name}} 中, 其中 \meta{name} 为对应环境的名称. 不推荐用户 使用命令 \cmd{\definecolor}, \cmd{\colorlet} 
 直接对这类色彩变量进行重定义, \zlatex{} 鼓励用户通过 \cmd{\zlatexColorSetup} 命令进行色彩的重定义.
 
-注意: \cmd{zlatexThmColor} 仅能用于数学类环境的色彩自定义, 所以对于 \texttt{link, chapter} 等色彩请使用 \cmd{\zlatexColorSetup} 命令进行设置.
+注意: \cmd{\zlatexThmColor} 仅能用于数学类环境的色彩自定义, 所以对于 \texttt{link, chapter} 等色彩请使用 \cmd{\zlatexColorSetup} 命令进行设置.
 
 \begin{function}[updated=2024-12-05]{\__zlatex_color_set:n}
   \begin{syntax}
@@ -1025,7 +1025,7 @@ representation of, as far as I know, the things in themselves;}
     keyA    .code:n       =  { \__zlatex_color_set:n {#1} },
   }
   \keys_set:nn {colorTest}{keyA={HTML}{d9d9d9}}
-  \textcolor{zlatex@color@keyA}{This is a test.}
+  \textcolor{zlatex@color@keyA}{This~is~a~test.}
   \ExplSyntaxOff
 \end{DocExample}
 
@@ -1476,8 +1476,8 @@ library.
 宏包.
 
 \vskip2em
-\noindent\textcolor{red}{\sffamily WARNING: 此 library 加载的大量自定义命令可能会与已有的命令的冲突, 请用户%
-在加载此 library 前做出仔细的考虑.}
+\noindent\textcolor{red}{\sffamily WARNING: 此 library 加载的大量自定义命令可能会与已有的命令的冲突, 请谨慎%
+加载此 library.}
 
 
 \begin{function}[updated=2024-12-05]{\F, \R, \K, \C, \B, \S, \FF}
@@ -2394,14 +2394,14 @@ reason is a representation of, as far as I know, the things in themselves;%
 
 \begin{function}[updated=2024-12-05]{\ztool_get_ht:Nn, \ztool_get_ht:Ne, \ztool_get_ht:ce}
   \begin{syntax}
-    \cs{ztool_set_to_ht:Nn} \meta{dim}\marg{content}
+    \cs{ztool_get_ht:Nn} \meta{dim}\marg{content}
   \end{syntax}
   此命令用于将 \meta{content} 的高度保存在 \meta{dim} 这一寄存器中.
 \end{function}
 
 \begin{function}[updated=2024-12-05]{\ztool_get_wd:Nn, \ztool_get_wd:Ne, \ztool_get_wd:ce}
   \begin{syntax}
-    \cs{ztool_set_to_wd:Nn} \meta{dim}\marg{content}
+    \cs{ztool_get_wd:Nn} \meta{dim}\marg{content}
   \end{syntax}
   此命令用于将 \meta{content} 的宽度保存在 \meta{dim} 这一寄存器中.
 \end{function}
@@ -2416,14 +2416,14 @@ reason is a representation of, as far as I know, the things in themselves;%
 
 \begin{function}[updated=2024-12-05]{\ztool_gget_ht:Nn, \ztool_gget_ht:Ne, \ztool_gget_ht:ce}
   \begin{syntax}
-    \cs{ztool_gset_to_ht:Nn} \meta{dim}\marg{content}
+    \cs{ztool_gget_ht:Nn} \meta{dim}\marg{content}
   \end{syntax}
   此命令用于将 \meta{content} 的高度保存在 \meta{dim} 这一寄存器中, 并且此操作是全局的.
 \end{function}
 
 \begin{function}[updated=2024-12-05]{\ztool_gget_wd:Nn, \ztool_gget_wd:Ne, \ztool_gget_wd:ce}
   \begin{syntax}
-    \cs{ztool_gset_to_wd:Nn} \meta{dim}\marg{content}
+    \cs{ztool_gget_wd:Nn} \meta{dim}\marg{content}
   \end{syntax}
   此命令用于将 \meta{content} 的宽度保存在 \meta{dim} 这一寄存器中, 并且此操作是全局的.
 \end{function}
@@ -2487,15 +2487,18 @@ Hello,~world!|
   \item 完善 \pkg{thm} module 中 \texttt{paris} 主题的分页样式. 
   \item 使用 \pkg{ztool} 缩放 \pkg{thm} module 中 \texttt{obsidian} 样式标题中的 icon.
   \item 重新实现部分的 \pkg{xcoffins} 宏包中的命令, 目标为: 实现 \cs{parbox} 的功能，并且比之更加的易用.
-  \item 封装 plain\TeX{} 中的 \cs{parshape} 及其相关命令，使之更加的易用.
-  \item 封装 \texttt{\lastbox} 相关命令, 实现段落的分割和盒子的跨页需求.
+  \item 封装 Plain\TeX{} 中的 \cs{parshape} 及其相关命令，使之更加的易用.
+  \item 封装 \cmd{\lastbox} 相关命令, 实现段落的分割和盒子的跨页需求.
   \item 在实现跨页盒子的基础上，手动实现 \pkg{framed} 宏包的功能，在替代该宏包原有功能的基础上, 提供更加易用的接口.
   \item 增加一个基于任意变换矩阵的盒子(内容)操作命令, 也许是依赖 \pkg{l3draw} ??
   \item 提供列表设置的相关命令, 目标是成为宏包 \pkg{enumerate} 的一个可选替代. (直接从原始的 \env{list} 环境出发 ?? 未来会把这部分命令抽离到一个新的单独模块)
-  \item 在 \pkg{pageinfo} 中实现一个强化的 \cs{marginpar} 命令, 目的是成为 \pkg{sidenotes} 宏包的一个可选替代.
+  \item 在 \pkg{pageinfo} 中实现一个增强的 \cs{marginpar} 命令, 目的是成为 \pkg{sidenotes} 宏包的一个可选替代.
   \item 实现 \cs{hyper@icon} 接口, 用于设置文档中的超链接图标. (没有 icon 的超链接未免过于单调)
   \item 优化 module 和 library 的加载检测机制, 完善相关变量的检测设置, 如在 \pkg{mathalias} 这一 library 中将变量 
         \cs{g__zlatex_math_alias_bool} 显示的设置为 \texttt{true}.
+  \item 创建 \cs{MathAliasOn}, \cs{MathAliasOff} 两命令用于限制 \pkg{mathalias} library 中命令的使用范围.
+  \item 在部分 \zlatex{} 内置命令的实现中增加 \cs{__zlatex_plus_key_aux:nnn} 命令，用于在保留原内容的基础上增加内容.
+  \item 修复 \cs{zlatexThmTocAdd} 增加的定理条目超链接跳转异常这一问题.
 \end{enumerate}
 
 

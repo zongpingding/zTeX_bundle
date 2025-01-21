@@ -5,8 +5,8 @@
 \NeedsTeXFormat{LaTeX2e}
 \clist_const:Nn \c__zlatex_lang_support_clist    {en, cn}
 \tl_const:Nn \c__zlatex_class_name_tl            {zlatex}
-\tl_const:Nn \c__zlatex_class_version_tl         {1.0.0}
-\tl_const:Nn \c__zlatex_class_date_tl            {2024/12/17}
+\tl_const:Nn \c__zlatex_class_version_tl         {1.0.1}
+\tl_const:Nn \c__zlatex_class_date_tl            {2025/01/20}
 \tl_const:Nn \c__zlatex_class_description_tl     {A~pre-release~latex3~document~class~for~article,~book,~or~slides;
                                                   Support~languages:\clist_use:Nn \c__zlatex_lang_support_clist{,~}}
 
