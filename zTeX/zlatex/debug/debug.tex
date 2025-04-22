@@ -1,3 +1,780 @@
+% ==> zlatex thm icon interface test
+\InputIfFileExists{zlatex-cfg.tex}{}{}
+\documentclass{../code/zlatex}
+\zlatexThmStyle{paris}
+\zlatexloadlibrary{theme}
+\usepackage{lipsum}
+% \geometry{a1paper, margin=20em}
+
+\begin{document}
+\section{FIRST}
+\lipsum[1]
+
+\begin{remark}[REMARK]
+  \lipsum[2][1-5]
+  \begin{align}
+    a^2 + b^2 = c^2
+  \end{align}
+  \lipsum[2][6-8]
+  \begin{align*}
+    a^2 + b^2 = c^2
+  \end{align*}
+\end{remark}
+
+\lipsum[2-3]
+\begin{proposition}[PROP]
+  \lipsum[2][1-5]
+  \begin{align}
+    a^2 + b^2 = c^2
+  \end{align}
+  \lipsum[2][6-8]
+  \begin{align*}
+    a^2 + b^2 = c^2
+  \end{align*}
+\end{proposition}
+\end{document}
+
+
+% ==> fixed:wrong bookmark target for contents
+\InputIfFileExists{zlatex-cfg.tex}{}{}
+% \DocumentMetadata{} % this line + lualatex ==> cause this bug.
+% \documentclass{l3doc} % works
+\documentclass[hyper, class=l3doc]{../code/zlatex}
+
+
+\begin{document}
+\tableofcontents
+\newpage
+
+\section{A}
+\subsection{A-1}
+\subsection{A-2}
+
+\newpage
+\section{B}
+\subsection{B-1}
+\subsection{B-2}
+\end{document}
+
+
+% ==> add CUS struct module to zlatex
+% ==> THANKS TO:https://github.com/Sophanatprime/cus
+\InputIfFileExists{zlatex-cfg.tex}{}{}
+% \documentclass{ctexart}
+% % \usepackage{cus}
+% % \usepackage{ctex}
+% \def\text{Lorem ipsum dolor sit amet, consectetuer adipiscing elit. Ut purus elit, vestibulum
+% ut, placerat ac, adipiscing vitae, felis. Curabitur dictum gravida mauris. Nam arcu
+% libero, nonummy eget, consectetuer id, vulputate a, magna. Donec vehicula augue
+% eu neque.}
+% % \setuptitle[section]{
+% %   runin=true,
+% % }
+% \ctexset{
+%   section/runin = true,
+%   section/aftertitle={}, % important
+% }
+% \usepackage{xtemplate}
+
+% \begin{document}
+% \section{FIRST}
+% \text
+% \end{document}
+
+\documentclass[
+  cus,
+  lang=cn,
+  class=book,
+  hyper
+]{../code/zlatex}
+\usepackage{newtxtext}
+\CUSLoadLibrary{box}
+\usepackage{lipsum}
+\usepackage{tabto}
+\usepackage[hshift=0mm,vshift=0mm]{fgruler}
+\setuptitle[section]{
+  runin=true,
+  aftertitle={},
+  % name={XX, YY},
+  % format+=\raggedright,
+}
+% \setuptitle[chapter]{numbering=false, pagestyle=}     % default latex style toc
+\setuptitle[chapter]{numbering=true, pagestyle=plain} % custom style toc
+\def\text{Lorem ipsum dolor sit amet, consectetuer adipiscing elit. Ut purus elit, vestibulum
+ut, placerat ac, adipiscing vitae, felis. Curabitur dictum gravida mauris. Nam arcu
+libero, nonummy eget, consectetuer id, vulputate a, magna. Donec vehicula augue
+eu neque.}
+
+
+\enablecombinedlist
+\begin{document}
+\frontmatter
+\def\contentsname{\textsc{Contents}}
+% \tableofcontents 
+% \multicolplaincombinedlist[ragged,outer-sep=0pt]{\contentsname}{toc}
+
+
+%%%%%% STYLE I
+\makeatletter
+\templatetoc[
+  * = { ignore=true }, show = {chapter,section},
+  section = {
+    code.before=\S\sbox{\@tempboxa}{\tmcblthetitle}\needhspace{\wd\@tempboxa},
+    code.after=\quad,
+    code.leader=---, code.page=\tmcblthepage,
+    space.left=0pt, space.right=0pt, space.hang=0pt
+  },
+  chapter = { 
+    code.before=\par, space.before=1pt plus 1pt,
+    code.leader=\tabto{5cm}, % 使得页码移动到距页面左侧 5 厘米处
+    code.after=\hfill\zkern\par, % 加上 \hfill\kern0pt 使得不会出现 underfull 警告
+    code.name=\ifx\tmcblthename\empty
+      \makebox[1em]{\rule{1ex}{1ex}}\quad
+    \else
+      \tmcbl@name@
+    \fi
+  },
+]
+\makeatother
+
+
+%%%%%% STYLE II
+% \centerline{\huge\textbf{\contentsname}}
+% \vskip2em
+% \startmulticolumns[ragged,outer-sep=0pt,column-sep=2em]
+% \colorlet{tocgreen}{green!65!black}
+% \hypersetup{hidelinks}
+% \newcommand{\tochyperpage}{\toclink{\tocthepage}}
+% \makeatletter
+% \tocsetstyle {chapter}
+%   {}
+%   {\noindent}
+%   {\fparbox{\linewidth}[padding={0pt,\fboxsep},
+%       border-color=tocgreen, background-color=tocgreen]
+%     {\bfseries\large \raggedright \color{white}%
+%       \hangindent4\ccwd \hangafter1 % 更推荐使用 list 环境或 description 环境 
+%       \strut \tocifnamed{\tocthename\unskip\quad}{}\tocthetitle
+%       \breakablefiller[space]\tochyperpage \strut\par }\par }
+%   {\smallskip}
+%   {}
+% \tocsetstyle {section}
+%   {\smallskip
+%     \begin{list}{}{\leftmargin3\ccwd \labelsep\z@ \rightmargin 2em 
+%       \itemindent-\ccwd \listparindent\itemindent
+%       \topsep\z@ \partopsep\z@ \itemsep\z@ \parsep\z@ \parskip\z@}}
+%   {\item \begingroup\color{tocgreen}\bfseries}
+%   {\tocifnamed{\tocthename\unskip\quad}{}\tocthetitle \breakablefiller[space]%
+%     \rlap{\makebox[2em][r]{\tochyperpage\;}}\par }
+%   {\endgroup}
+%   {\end{list}}
+% \tocsetstyle {subsection}
+%   {}
+%   {\begingroup\color{black}\bfseries}
+%   {\tocifnamed{\tocthename\unskip\quad}{}\tocthetitle \breakablefiller[dotted]%
+%     \rlap{\makebox[2em][r]{\tochyperpage\;}}\par }
+%   {\endgroup}
+%   {}
+% \makeatother 
+% \specifiedtoc
+% \stopmulticolumns
+
+
+%%%%%% STYLE III
+% \makeatletter
+% \ekeysdeclarecmd\fixedwidthtext{smm}{\leavevmode@ifvmode
+%   \setbox\z@\hbox{{#3}}%
+%   \ifdim\dimeval{#2}>\wd\z@ 
+%     \hbox to\dimeval{#2}{\IfBooleanTF{#1}{\spreadtext*{#2}{#3}}{#3\hfill}}%
+%   \else
+%     \resizebox{\dimeval{#2}}{\height}{#3}%
+%   \fi}
+% \definecolor{toccol1}{HTML}{006DAA}
+% \definecolor{toccol2}{HTML}{C4D4E3}
+% \newcommand*{\zhphantom}{\vphantom{好hig}}
+
+% \tocsetstyle{chapter}{}
+%   {}
+%   {\begingroup\noindent \bfseries\large \fboxrule\z@ 
+%     \fcolorbox{toccol1}{toccol1}{\zhphantom\color{white}%
+%       \tocifnamed{\fixedwidthtext*{4\ccwd}{\tocthename\unskip}}
+%         {\fixedwidthtext*{4\ccwd}{\tocthetitle}}}%
+%     \toclinkbox{\fcolorbox{toccol2}{toccol2}{\zhphantom
+%       \fixedwidthtext{\linewidth-4\ccwd-4\fboxsep-\@pnumwidth}
+%         {\tocifnamed{\tocthetitle}{}}%
+%       \makebox[\@pnumwidth][r]{\tocthepage}}}
+%     \endgroup\par \medskip}
+%   {\bigskip}{}
+% \tocsetstyle{section}{}{}
+%   {\@dottedtocline{\tocthelevel}{1.5em}{2.3em}{\tocthename\enskip\tocthetitle}
+%     {\hss\toclink{\tocthepage}\hspace{\fboxsep}}}
+%   {}{}
+% \tocsetstyle{subsection}{}{}
+%   {\@dottedtocline{\tocthelevel}{3.8em}{3.2em}{\tocthename\enskip\tocthetitle}
+%     {\hss\toclink{\tocthepage}\hspace{\fboxsep}}}
+%   {}{}
+% \renewcommand*{\@pnumwidth}{1.3em}
+% \makeatother
+% \startmulticolumns[ragged,outer-sep=0pt,column-sep=1.5em]
+% \specifiedtoc 
+% \stopmulticolumns
+\newpage% ----------> START NEW PAGE
+\mainmatter
+\pagestyle{fancy}
+
+
+\zlatexPageMask{\rule{3em}{3em}}
+\chapter{CHAPTER FIRST}
+\section{FIRST}% \thispagestyle{empty}
+\CusTeX{} \text
+
+\subsection{sss-1}
+\begin{align}
+  a^2 + b^2 = c^2
+\end{align}
+\lipsum[1][6-10]
+
+\subsection{sss-2}
+\noindent\llap{|}\dashfiller [.5ex]\par
+\lipsum[2]
+
+\section{SECOND}
+\text
+\subsection{sss-3}
+\text
+\subsection{sss-4} 
+
+\section{THIRD}
+\text
+\subsection{sss-5}
+\text
+\subsection{sss-6} 
+
+\section{FOURTH}
+\text
+\subsection{sss-7}
+\text
+\subsection{sss-8} 
+
+\chapter{CHAPTER SECON}
+\section{FIFTH}
+\text
+\fvarbox[c]{3cm}[border-color={}]{可以分段的\par \verb|\lfbox|}
+
+\subsection{sss-9}
+\text
+\subsection{sss-10} 
+
+\section{SIXTH}
+\text
+\subsection{sss-11}
+\text
+\subsection{sss-12} 
+
+\chapter{CHAPTER THIRD}
+\section{SEVENTH}
+\text
+\subsection{sss-13}
+\text
+\subsection{sss-14} 
+
+\section{EIGHTH}
+\text
+\subsection{sss-15}
+\text
+\subsection{sss-16} 
+
+\end{document}
+
+
+% ==> Test zref-clever and cleveref
+\InputIfFileExists{zlatex-cfg.tex}{}{}
+\documentclass[hyper, lang=cn]{../code/zlatex}
+% \creflabelformat{lemma}{#2(#1)#3}
+% \documentclass{article}
+% \usepackage{hyperref}
+% \usepackage[nameinlink]{cleveref}
+% \creflabelformat{lemma}{#2[#1)#3}
+% \crefname{lemma}{lemmaXX}{lemmas}
+% \newtheorem{lemma}{Lemma}[section]
+% \newcounter{lemma}
+% \newenvironment{lemma}{\par\refstepcounter{lemma}\textbf{\thelemma}:}{}
+% NOTE: without '\refstepcounter', cleveref labelformat will be lost.
+% \zlatexThmCnt{share}
+
+
+\begin{document}
+\section{First}
+Reference a single lemma: \cref{definition:cc}, \cref{axiom:aa}; Or 
+multi-labels, two labels: \zcref{lemma:bb,lemma:cc}, Three labels: \cref{axiom:aa,lemma:cc,theorem:dd}.
+
+\begin{axiom}\label{axiom:aa}
+  This a axiom:
+  \[a^2 + b^2 = c^2\]
+\end{axiom}
+
+\begin{lemma}\label{lemma:bb}
+  This a lemma:
+  \[a^2 + b^2 = c^2\]
+\end{lemma}
+
+Can NOT Reference a section using \verb|\cref{sec:test}| in cleveref package after loading \verb|\usepackage[headings]{ctex}|, 
+for that the patches for headings in C\TeX{} are conflict to cleveref.
+
+But you can ref a section item using zref-clever: \cref{sec:test}.
+
+\begin{lemma}\label{lemma:cc}
+  This a lemma II:
+  \[a^2 + b^2 = c^2\]
+\end{lemma}
+
+\begin{definition}\label{definition:cc}
+  This a definition III:
+  \[a^2 + b^2 = c^2\]
+\end{definition}
+
+\section{SECOND}\label{sec:test}
+\begin{theorem}\label{theorem:dd}
+  This a theorem IV:
+  \[a^2 + b^2 = c^2\]
+\end{theorem}
+\end{document}
+
+
+
+% ==> cleverref bug: see:https://github.com/CTeX-org/ctex-kit/issues/725
+% I shall move to 'zref-clever' instead !!!
+\documentclass{article}
+\usepackage{zref-clever}
+\zcsetup{nameinlink, lang=EEE}
+\usepackage[colorlinks,linkcolor=blue]{hyperref}
+\zcLanguageSetup{english}{
+  type = part,
+    name-sg = XXXX,
+  type = chapter,
+    name-sg = chapterXXX,
+  type = section,
+    Name-sg = Section,
+    name-sg = sectionXXXX,
+    Name-pl = Sections,
+    name-pl = sections,
+  type = figure,
+    Name-sg = FigureXXX,
+}
+% \zcsetup{
+
+% }
+\zcDeclareLanguageAlias{EEE}{english}
+\newtheorem{lemma}{Lemma}[section]
+
+\begin{document}
+% \chapter{XXX}\label{chap:aaa}
+\section{Section 1}\label{sec:section-1}
+A Test figure as follows:
+\begin{figure}[!htb]
+\centerline{\rule{5em}{5em}}
+\caption{Figure 1}
+\label{fig:figure-1}
+\end{figure}
+
+
+% Chapter \zcref{chap:aaa} 
+A reference to \zcref[S]{sec:section-1} \zcref{sec:section-1}. \zcref[S]{fig:figure-1} shows some
+interesting information.
+A page reference can be done with either \zcpageref{sec:section-1} or with
+\zcref[page]{sec:section-1}.
+A reference can also be made to multiple labels, as in \zcref{sec:section-1,fig:figure-1}.
+
+
+\section{Second}
+\begin{lemma}\label{lemma:aa}
+  This is a lemma:
+  \[a^2 + b^2 = c^2\]
+\end{lemma}
+
+Reference a lemma: \zcref{lemma:aa}.
+\end{document}
+
+
+
+% \InputIfFileExists{zlatex-cfg.tex}{}{}
+% \documentclass[lang=cn]{../code/zlatex}
+
+% \documentclass{article}
+% \usepackage{ctex}
+% ! Extra \endcsname.
+% <recently read> \endcsname                          
+% l.12 Hello world:\cref{sec:second}
+\documentclass{ctexart}
+\usepackage{hyperref}
+\usepackage{cleveref}
+
+
+\begin{document}
+\section{First}
+Hello world:\cref{sec:second}
+
+\section{Second}\label{sec:second}
+It me. 
+\end{document}
+
+
+% ==> make mathalias command only valid in a group.
+\InputIfFileExists{zlatex-cfg.tex}{}{}
+\documentclass[]{../code/zlatex}
+% \usepackage{ascii}
+\zlatexloadlibrary{mathalias}
+\zlatexMathAliasOpSet{rot=Rot}
+\makeatletter
+% \let\asciiFF\FF
+% \let\FF\z@FF
+% \newcommand\internal@cmda[1]{CMD-A:#1}
+% \def\MathAliasOn{\let\cmdA\internal@cmda}
+% \def\MathAliasOff{\def\cmdA{UNDEFINED}}
+
+\begin{document}
+\meaning\B
+
+% The FF is:\FF
+
+% Hello world: $\B{R}$
+
+\zlatexMathAliasOn
+Hello world I: $\B{R}, \S{A}, \FF{B}$.
+
+\begin{align}
+  f:A\ra B \mid x\ma y\in \RR \\
+  g:\im(f)\xra[\ZZ](\NN) \rot(h)
+\end{align}
+
+\meaning\FF\par
+\meaning\xra
+\zlatexMathAliasOff
+
+% then the FF is:\FF
+
+\begin{zlatexMathAlias}
+  Hello world II: $\B{R}, \K{A}$
+  \begin{align}
+    f:A\ra B \mid x\ma y\in \RR \\
+    g:\im(f)\xra[\ZZ](\NN) \rot(h)
+  \end{align}
+\end{zlatexMathAlias}
+
+\ExplSyntaxOn
+\clist_map_inline:Nn \g__zlatex_mathalias_user_clist {\string #1\par}
+\vskip3em
+\hrule
+
+\clist_map_inline:Nn \g__zlatex_mathalias_internal_clist {\string #1\par}
+\ExplSyntaxOff
+
+
+
+%%%%% EXP3 seq TEST %%%%%
+% \ExplSyntaxOn
+% \let\B\mathbb 
+% \prop_gput_from_keyval:Nn \l_tmpa_prop {\B=\mathbb}
+% \prop_map_inline:Nn \l_tmpa_prop
+%   {
+%     \typeout{--->#1:#2}
+%     % \exp_after:wN \cs_set:Npn \cs:w #1\cs_end: {#2} %B=\mathbb, it works !
+%     % \exp_after:wN \cs_set:Npn \exp_after:wN \exp_not:N #1 {#2} % error:\inaccessible
+%     % \cs_set:Npn #1 {#2} %error: \inaccessible 
+%     % \exp_after:wN \xdef #1 {\exp_not:N #2}
+%     % Analysis: Maybe this is the limitation of '\prop_map_inline:Nn', 
+%     %           the 'key' can not be a macro ?
+%   }
+
+% use 2 seqs instead:
+% \seq_set_from_clist:Nn \l_tmpa_seq {\B, \F}
+% \seq_set_from_clist:Nn \l_tmpb_seq {\mathbb, \mathbf}
+% \seq_map_indexed_inline:Nn \l_tmpa_seq {
+%   \cs_set:Npe #2 {\seq_item:Nn \l_tmpb_seq {#1}}
+% }
+% \cs_set:Npn \set_alias:nn #1#2 {
+%   \cs_set:Npn #1 {#2}
+% }
+% \seq_map_pairwise_function:NNN 
+%   \l_tmpa_seq \l_tmpb_seq 
+%   \set_alias:nn
+% \meaning\B\par
+% \meaning\F
+% \ExplSyntaxOff
+%%%%% EXP3 seq TEST %%%%%
+\end{document}
+
+
+
+
+
+% ==> Test proof interface
+\InputIfFileExists{zlatex-cfg.tex}{}{}
+\documentclass[]{../code/zlatex}
+
+\author{Our own fastidiousness requires us to point out that the familiar adjective}
+\title{Eureka}
+\date{\today}
+\begin{document}
+\maketitle
+
+Hello world
+
+\end{document}
+
+
+
+
+% ==> Test proof interface
+\InputIfFileExists{zlatex-cfg.tex}{}{}
+\documentclass[
+  lang=cn,
+  % fancy,
+  class=book,
+  % mathSpec={font=euler},
+  % layout={slide, aspect=16|9},
+]{../code/zlatex}
+\makeatletter
+\zlatexThmTitleFormat*{\color{\thm@temp@color}\bfseries【\zlatexThmName\;\zlatexThmNumber】\ }
+\zlatexThmTitleFormat*[proof]{\color{\thm@proof@temp@color}\kaishu\underline{\zlatexThmName}.\;\,}
+\makeatother
+\zlatexThmCnt{share=true}
+
+
+\title{TEST}
+\author{Eureka}
+\date{\today}
+\begin{document}
+\maketitle
+\chapter{集合与映射}
+\section{集合}
+\begin{definition}
+  设 $A, B$ 是两个集合, 如果 $A$ 中的每一个元素都是 $B$ 中的元素, 则称 $A$ 是 $B$ 的\textbf{子集}, 记作 $A \subseteq B$.
+  此时也称 $B$ 包含 $A$, 记作 $B \supseteq A$. 若 $A \subseteq B$ 且 $B \subseteq A$, 则称 $A$ 与 $B$ \textbf{相等}, 记作 $A = B$.
+\end{definition}
+
+\begin{theorem}
+\end{theorem}
+
+\begin{lemma}
+  $(a, b) = (c, d)$ 当且仅当 $a = c$ 且 $b = d$.
+\end{lemma}
+\begin{proof}
+  充分性是显然的. 下证必要性. 如果 $(a, b) = (c, d)$, 那么:
+  \begin{align}
+    \{\{a\}, \{a, b\}\} =\{\{c\}, \{c, d\}\}
+  \end{align} 
+  \begin{enumerate}
+    \item 若 $a = b$, 那么 $\{a\} = \{a, b\}$, 从而 $\{a\} = \{c\}$, 也就是 $a = c$.
+    \item 若 $a \neq b$, 那么 $\{a\} \neq \{a, b\}$, 从而 $\{a\} = \{c, d\}$, 也就是 $a = c$.
+  \end{enumerate}
+\end{proof}
+\end{document}
+
+
+
+
+
+% ==> spaces in the very beginning of a thm/proof env
+\InputIfFileExists{zlatex-cfg.tex}{}{}
+\documentclass{../code/zlatex}
+
+
+
+\begin{document}
+Hello world 
+
+\begin{theorem}[THM-1]
+                      A theorem 1.
+\end{theorem}
+
+\begin{theorem}[THM-2]%
+  A theorem 2.
+\end{theorem}
+
+\begin{proof}
+  AA This is a proof 1.
+\end{proof}
+
+\begin{proof}%
+              A This is a proof 2.
+\end{proof}
+\end{document}
+
+
+
+
+% ==> bug of \zlatexThmTitleBefore
+\InputIfFileExists{zlatex-cfg.tex}{}{}
+\documentclass{../code/zlatex}
+\zlatexThmTitleBefore[proof]{|PRF-LIKE|}
+
+
+\begin{document}
+Hello world
+
+\begin{solution}
+  This is solution I.
+\end{solution}
+\end{document}
+
+
+% ==> thm detailed hooks
+% if there is no indicate to a zlatex thm command or variable, 
+%    then this command is related to theorem-like env NOT proof-like env.
+\InputIfFileExists{zlatex-cfg.tex}{}{}
+\documentclass[lang=cn]{../code/zlatex}
+\zlatexThmProofHook*[solution]{
+  before=\noindent\textbf{\color{red}BEFORE},
+  begin=\textbf{\color{red}BEGIN},
+  end=\textbf{\color{red}END},
+  after=\textbf{\color{red}AFTER},
+}
+\zlatexThmColorSetup{proof=blue!50, solution=green!50}
+% \zlatexThmTitleBefore{THM}
+% \zlatexThmTitleBefore[proof]{PRF}
+% \zlatexThmTitleBefore[proof]{|PRF-LIKE|}
+% \zlatexThmBefore{}
+% \zlatexThmBefore[proof]{\par}
+\makeatletter
+\zlatexThmTitleFormat*{\bfseries\color{\thm@temp@color}\zlatexThmName|\zlatexThmNote{\{}{\}}|\zlatexThmNumber\ }
+\zlatexThmTitleFormat*[proof]{\color{\thm@proof@temp@color}\bfseries|:\scshape\zlatexThmName:|\ }
+\makeatother
+
+\zlatexThmNameSet{cn}{
+  theorem=新定理,
+  proof=证
+}
+\zlatexThmLang{cn}
+
+\zlatexThmCreate{Zaxiom, Ztheorem=Thm|{HTML}{a0d911}, Zproposition=Prop|blue}
+\zlatexThmCreate[proof]{Zproof, Zexample=EXAMPLE|red, Zsolution=Solution|}
+\let\OzlatexThmCreate\zlatexThmCreate
+\let\OzlatexThmTitleBefore\zlatexThmTitleBefore
+
+\begin{document}
+\let\zlatexThmCreate\OzlatexThmCreate
+\let\zlatexThmTitleBefore\OzlatexThmTitleBefore
+Hello world
+
+\section{new thm}
+\begin{Zproof}[zlatexThmCreate-1]
+This is an Zproof zlatexThmCreate-1.
+\end{Zproof}
+
+\begin{Zexample}[zlatexThmCreate-2]
+This is an Zexample zlatexThmCreate-2.
+\end{Zexample}
+
+\begin{Ztheorem}[zlatexThmCreate-3]
+This is a Ztheorem zlatexThmCreate-3
+\end{Ztheorem}
+
+
+\section{theorem like}
+Inline item:
+\begin{theorem}
+A is a theorem.%
+\end{theorem}%
+\begin{proposition}
+  This is proposition I.
+\end{proposition}
+\begin{proposition}[PROP]
+  A is proposition II.
+\end{proposition}
+
+\begin{remark}
+  this is a remark.
+\end{remark}
+
+
+\section{proof like}
+\begin{proof}
+  This is a proof.
+\end{proof}
+
+\begin{solution}
+  This is solution I.
+\end{solution}
+
+\zlatexThmTitleBefore[proof]{|PRF-LIKE|}
+\begin{solution}
+  This is solution II.
+\end{solution}
+\zlatexThmTitleBefore[proof]{\noindent}
+
+\begin{problem}
+  This is a problem.
+\end{problem}
+
+\section{peek problem}
+\ExplSyntaxOn
+\peek_remove_spaces:n {~|A~is~B~|}
+\tl_trim_spaces:n {~|A~is~B~|}
+\ExplSyntaxOff
+\end{document}
+
+
+
+
+
+
+
+% ==> thm hooks re-define
+\InputIfFileExists{zlatex-cfg.tex}{}{}
+\documentclass{../code/zlatex}
+% \usepackage{lipsum}
+% \newif\ifShowSolution
+% \ShowSolutiontrue     %显示答案
+% \ShowSolutionfalse  %隐藏答案
+% \newenvironment{showsolu}{\ifShowSolution}{\fi} % does NOT work
+% \NewDocumentEnvironment{ShowSolu}{+b}{\ifShowSolution#1\fi}{} % works
+% \newcommand{\ShowSolu}[1]{\ifShowSolution#1\fi}   % works
+% \AddToHook{env/solution/before}{\ifShowSolution}
+% \AddToHook{env/solution/after}{\fi}
+% \zlatexThmProofHook*{
+%   before=BEFORE,
+%   begin=BEGIN,
+%   end=END,
+%   after=AFTER,
+%   before=\ifShowSolution,
+%   after=\fi
+% }
+% \usepackage{version} % does NOT work
+% \excludeversion{solution}
+\usepackage{environ}
+\AtBeginDocument{\RenewEnviron{solution}{}} % works
+
+
+
+\begin{document}
+Hello world\vskip5em
+
+\begin{solution}
+  This is a solution:
+  \begin{align}
+    a^2 + b^2 = c^2
+  \end{align}
+\end{solution}
+
+% \begin{showsolu}
+%   \textbf{This is a solution}
+% \end{showsolu}\vskip3em                % do NOT work
+% \ShowSolu{This is a solution}\vskip3em % works
+% \begin{ShowSolu}
+%   This is a solution
+%   \begin{align}
+%     a^2 + b^2 = c^2
+%   \end{align}
+% \end{ShowSolu}\vskip3em                % works
+
+
+% \ifShowSolution
+% \lipsum[1-2]
+% \fi                                    % works                 
+\end{document}
+
+
+
 % ==> tcolorbox icon add
 \documentclass{article}
 \usepackage[many]{tcolorbox}

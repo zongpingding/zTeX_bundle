@@ -1,7 +1,14 @@
-\ProvidesExplFile{zlatex.module.thm.tex}{2025/01/20}{1.0.1}{thm~module~for~zlatex}
+\ProvidesExplFile{zlatex.module.thm.tex}{2025/04/21}{1.0.1}{thm~module~for~zlatex}
 
 
 %%%%%     Math-envs for zlatex     %%%%%
+% basic packages
+\RequirePackage{amsfonts, amsmath}          
+\RequirePackage{esint} 
+\counterwithin{equation}{section}
+
+
+
 % ==> module init
 \clist_gclear:N \g__zlatex_thm_theorem_clist
 \clist_gclear:N \g__zlatex_thm_proof_clist
@@ -20,7 +27,7 @@
 
 % thm title definition
 \cs_new_protected:Npn \zlatex_thm_name_set:nn #1#2 {
-  \prop_set_from_keyval:cn {g__zlatex_thm_name_#1_prop} {#2}
+  \prop_gset_from_keyval:cn {g__zlatex_thm_name_#1_prop} {#2}
 }
 \zlatex_thm_name_set:nn {en}{
   axiom       = Axiom, 
@@ -67,6 +74,10 @@
 \tl_if_exist:NF \g__zlatex_lang_math_tl {
   \tl_set_eq:cc {g__zlatex_lang_math_tl}{g__zlatex_lang_str}
 }
+\NewDocumentCommand{\zlatexThmNameSet}{mm}{
+  \prop_gput_from_keyval:cn {g__zlatex_thm_name_#1_prop} {#2}
+}
+
 
 
 % ==> thm module tools
@@ -83,10 +94,10 @@
   \prop_set_eq:cc {g__zlatex_thm_name_prop}
                   {g__zlatex_thm_name_\g__zlatex_lang_math_tl _prop}
 }
-\tl_new:N \g__zlatex_thm_title_tl
+\tl_new:N \g__zlatex_thm_theorem_title_tl
 \def\zlatexThmTitle{\@ifstar\@zlatexThmTitle\@@zlatexThmTitle}
-\def\@zlatexThmTitle{\__zlatex_thm_title:}
-\def\@@zlatexThmTitle{\tl_use:N \g__zlatex_thm_title_tl}
+\def\@zlatexThmTitle{\__zlatex_thm_theorem_title:}
+\def\@@zlatexThmTitle{\tl_use:N \g__zlatex_thm_theorem_title_tl}
 \bool_new:N \g__zlatex_thm_title_inline_bool
 \NewDocumentCommand{\zlatexThmTitleSwitch}{s}{
   \IfBooleanTF{#1}
@@ -147,7 +158,7 @@
   \prop_gput:cee {g__zlatex_thm_name_prop}
     {#2}{\exp_last_unbraced:Ne \__zlatex_mid_first:w #3\q_stop}
 }
-\NewDocumentCommand{\zlatexThmCreate}{mm}{
+\NewDocumentCommand{\zlatexThmCreate}{O{theorem}m}{
   \zlatex_label_hook_preamble_last:nn {zlatex-thmall-setup-user}{
   \keyval_parse:nnn
     { \__zlatex_thm_create__:nn {#1}  }
@@ -262,7 +273,7 @@
 \cs_new:Npn \__zlatex_thm_warp_start:nnn #1#2#3 {
   \def\thm@temp@color{\tl_use:c {l__zlatex_#1_color_tl}}
   \def\thm@temp@name{#1}
-  \__zlatex_thm_title_item:nnn {#1}{#2}{#3}
+  \__zlatex_thm_theorem_title_item:nnn {#1}{#2}{#3}
   \tl_use:c {g__zlatex_thm_style_\g__zlatex_thm_style_tl _option_tl}
   \tl_if_exist:cTF {g__zlatex_thm_style_\g__zlatex_thm_style_tl _option_tl}
     {\tl_use:c {g__zlatex_thm_style_\g__zlatex_thm_style_tl _option_tl}}
@@ -287,55 +298,93 @@
         % \zlatexSlideTF {\exp_not:N \exp_not:N \exp_not:N \numberline {\zlatexThmNumber}}{}
         \exp_not:N \__zlatex_thm_toc_prefix_tl
         \exp_not:n {\prop_item:Nn \g_zlatex_thm_toc_symbols_prop {#1}}
-        \g__zlatex_thm_title_tl 
+        \g__zlatex_thm_theorem_title_tl 
       }
       {\zlatexHyperTF{\exp_not:N \hyperlink{page.\thepage}{\thepage}}{\thepage}}
       {#1.\zlatexThmNumber}
   }
-% thm title interface
-\NewHook{zlatex/thm/titleformat}
-\cs_new:Npn \__zlatex_thm_title_item:nnn #1#2#3 {
-  \tl_set:Nn \l_tmpa_tl {\exp_not:n {#2}}
-  \cs_set:Npn \zlatexThmName {
-    % \textcolor{\tl_use:c {l__zlatex_#1_color_tl}}
-      {\prop_item:cn {g__zlatex_thm_name_prop}{#1}}
+
+% thm theorem title interface
+\NewHook{zlatex/thm-theorem/titleformat}
+\cs_new:Npn \__zlatex_thm_theorem_title_item:nnn #1#2#3 
+  {% #1:env-name; #2:note; #3:separator
+    \tl_set:Nn \l_tmpa_tl {\exp_not:n {#2}}
+    \cs_set:Npn \zlatexThmName {
+      % \textcolor{\tl_use:c {l__zlatex_#1_color_tl}}
+        {\prop_item:cn {g__zlatex_thm_name_prop}{#1}}
+      }
+    \cs_set:Npn \zlatexThmNote ##1##2
+      {
+        \tl_if_empty:nF {#2}
+          {##1\exp_not:n {\l_tmpa_tl}##2}
+      }
+    \bool_if:NTF \g__zlatex_thm_cntshare_bool
+      {\cs_set:Npn \zlatexThmNumber {
+        \cs:w the\g__zlatex_thm_cntparent_tl\cs_end:
+          .\arabic{zlatex@thm@sharecnt}}
+        \refstepcounter{zlatex@thm@sharecnt}
+      }{\cs_set:Npn \zlatexThmNumber {
+        \cs:w the\g__zlatex_thm_cntparent_tl\cs_end:
+          .\arabic{#1}}
+        \refstepcounter{#1}
+      }
+    \tl_gset:Nn \g__zlatex_thm_theorem_title_tl {
+      \zlatexThmName #3 \zlatexThmNumber
+      \tl_if_empty:eF {\zlatexThmNote{}{}}{#3}
+      \zlatexThmNote{(}{)} #3
     }
-  \cs_set:Npn \zlatexThmNote ##1##2
-    {
-      \tl_if_empty:nF {#2}
-        {##1\exp_not:n {\l_tmpa_tl}##2}
-    }
-  \bool_if:NTF \g__zlatex_thm_cntshare_bool
-    {\cs_set:Npn \zlatexThmNumber {
-      \cs:w the\g__zlatex_thm_cntparent_tl\cs_end:
-        .\cs:w thezlatex@thm@sharecnt\cs_end:}
-      \stepcounter{zlatex@thm@sharecnt}
-    }{\cs_set:Npn \zlatexThmNumber {
-      \cs:w the\g__zlatex_thm_cntparent_tl\cs_end:
-        .\cs:w the#1\cs_end:}
-      \stepcounter{#1}
-    }
-  \tl_gset:Nn \g__zlatex_thm_title_tl {
-    \zlatexThmName #3 \zlatexThmNumber
-    \tl_if_empty:eF {\zlatexThmNote{}{}}{#3}
-    \zlatexThmNote{(}{)} #3
+    \UseHook{zlatex/thm-theorem/titleformat}
   }
-  \UseHook{zlatex/thm/titleformat}
-}
-\cs_new:Npn \__zlatex_thm_title: {
-  \group_begin:
-    \noindent\bfseries
-    \tl_use:N \g__zlatex_thm_title_tl
-  \group_end:
-}
+\cs_new:Npn \__zlatex_thm_theorem_title: 
+  {
+    \group_begin:
+      \noindent\bfseries
+      \tl_use:N \g__zlatex_thm_theorem_title_tl
+    \group_end:
+  }
+% thm proof title interface
+\tl_new:N \g__zlatex_thm_proof_title_tl
+\NewHook{zlatex/thm-proof/titleformat}
+\cs_new:Npn \__zlatex_thm_proof_title_item:nn #1#2 
+  {% #1:env-name; #2:separator
+    \cs_set:Npn \zlatexThmName {
+        {\prop_item:cn {g__zlatex_thm_name_prop}{#1}}
+      }
+    \def\thm@proof@temp@color{\tl_use:c {l__zlatex_#1_color_tl}}
+    \tl_gset:Nn \g__zlatex_thm_proof_title_tl {
+      \zlatexThmName #2
+    }
+    \UseHook{zlatex/thm-proof/titleformat}
+  }
+\cs_new:Npn \__zlatex_thm_proof_title: 
+  {
+    \group_begin:
+      \noindent\bfseries\color{\thm@proof@temp@color}
+      \tl_use:N \g__zlatex_thm_proof_title_tl :\,
+    \group_end:
+  }
 % users' interface of thm title format
-\NewDocumentCommand{\zlatexThmTitleFormat}{sm}{
+\tl_new:N \g__zlatex_thm_proof_title_before_tl
+\tl_new:N \g__zlatex_thm_theorem_title_before_tl
+\tl_gset:Nn \g__zlatex_thm_proof_title_before_tl {\noindent}
+\tl_gset:Nn \g__zlatex_thm_theorem_title_before_tl {\noindent}
+\NewDocumentCommand{\zlatexThmTitleBefore}{O{theorem}m}{
+  \tl_gset:cn {g__zlatex_thm_#1_title_before_tl} {#2}
+}
+\newcommand{\zlatex@title@before}[1]{
+  \tl_use:c {g__zlatex_thm_#1_title_before_tl}
+}
+\NewDocumentCommand{\zlatexThmTitleFormat}{sO{theorem}m}{
   \IfBooleanTF{#1}{
-    \AddToHook{zlatex/thm/titleformat}
-      {\cs_set:Npn \__zlatex_thm_title: {\group_begin:\noindent #2\group_end:}}
+    \AddToHook{zlatex/thm-#2/titleformat}{
+      \cs_set:cpn {__zlatex_thm_#2_title:} 
+        {\group_begin:#3\group_end:}
+    }
   }{
-    \AddToHookNext{zlatex/thm/titleformat}
-      {\cs_set:Npn \__zlatex_thm_title: {\group_begin:\noindent #2\group_end:}}
+    \AddToHookNext{zlatex/thm-#2/titleformat}{
+      \cs_set:cpn {__zlatex_thm_#2_title:} 
+        {\group_begin:#3\group_end:}
+    }
   }
 }
 \@onlypreamble\zlatexThmTitleFormat
@@ -345,6 +394,7 @@
       {#1}
       {#2}
   }
+
 
 
 % ==> Thm Toc interface
@@ -428,70 +478,151 @@
 
 
 % ==> thm env definition
-\NewHook{zlatex/thm/before}
-\NewHook{zlatex/thm/begin}
-\NewReversedHook{zlatex/thm/end}
-\NewReversedHook{zlatex/thm/after}
-\zlatex_label_hook_preamble_last:nn {zlatex-thmptheorem-setup-inner}{
-  \newcounter{zlatex@thm@sharecnt}[\g__zlatex_thm_cntparent_tl]
-  \clist_map_inline:Nn \g__zlatex_thm_theorem_clist {
-    \newcounter{#1}[\g__zlatex_thm_cntparent_tl]
-    \__zlatex_cref_math_env:n {#1}
-    \DeclareDocumentEnvironment{#1}{O{}}{
-      \UseHook{zlatex/thm/before}
-      \__zlatex_thm_warp_start:nnn {#1}{##1}{\ }
-      \MakeLinkTarget*{#1.\zlatexThmNumber}
-      \bool_if:NT \g__zlatex_thm_title_inline_bool {\__zlatex_thm_title:}   
-      \UseHook{zlatex/thm/begin}
-      \peek_remove_spaces:n             
-    }{
-      \UseHook{zlatex/thm/end}
-      \__zlatex_thm_warp_end:n {#1}
-      \UseHook{zlatex/thm/after}
-    }
+% theorem-like env
+\zlatex_label_hook_preamble_last:nn {zlatex-thmptheorem-setup-inner}
+  {
+    \newcounter{zlatex@thm@sharecnt}[\g__zlatex_thm_cntparent_tl]
+    \def\thezlatex@thm@sharecnt
+      {
+        \cs:w the\g__zlatex_thm_cntparent_tl\cs_end:
+          .\arabic{zlatex@thm@sharecnt}
+      }
+    \clist_map_inline:Nn \g__zlatex_thm_theorem_clist 
+      {
+        \newcounter{#1}[\g__zlatex_thm_cntparent_tl]
+        \exp_after:wN \def\cs:w the#1\cs_end:
+          {\cs:w the\g__zlatex_thm_cntparent_tl\cs_end:.\arabic{#1}}
+        \__zlatex_cref_math_env:n {#1}
+        \DeclareDocumentEnvironment{#1}{O{}}
+          {
+            \UseHook{zlatex/thm-theorem/before} \UseHook{zlatex/thm-theorem-#1/before}
+            \__zlatex_thm_warp_start:nnn {#1}{##1}{\ }
+            \MakeLinkTarget*{#1.\zlatexThmNumber}
+            \bool_if:NT \g__zlatex_thm_title_inline_bool { 
+              \group_begin: 
+              \zlatex@title@before{theorem}\__zlatex_thm_theorem_title:
+              \group_end:
+            }   
+            \UseHook{zlatex/thm-theorem/begin} \UseHook{zlatex/thm-theorem-#1/begin}
+            \tl_trim_spaces:n            
+          }{
+            \UseHook{zlatex/thm-theorem/end} \UseHook{zlatex/thm-theorem-#1/end}
+            \__zlatex_thm_warp_end:n {#1}
+            \UseHook{zlatex/thm-theorem/after} \UseHook{zlatex/thm-theorem-#1/after}
+          }
+      }
   }
-}
+% proof-like env
 \newcommand{\qedsymbol}{\ensuremath{\square}}
-\zlatex_label_hook_preamble_last:nn {zlatex-thmprooof-setup-inner}{
-  \clist_map_inline:Nn \g__zlatex_thm_proof_clist {
-    \DeclareDocumentEnvironment{#1}{O{}}{
-      \noindent{\color{\tl_use:c {l__zlatex_#1_color_tl}}
-      \bfseries\prop_item:cn {g__zlatex_thm_name_prop}{#1}:}
-      \tl_set:Nn \l__arg_one_tl {#1}
-    }{\str_if_eq:VnTF \l__arg_one_tl {proof}{\hfill\qedsymbol\par}{\par}}
+\zlatex_label_hook_preamble_last:nn {zlatex-thmprooof-setup-inner}
+  {
+    \clist_map_inline:Nn \g__zlatex_thm_proof_clist 
+      {
+        \DeclareDocumentEnvironment{#1}{O{}}
+          {
+            \UseHook{zlatex/thm-proof/before} \UseHook{zlatex/thm-proof-#1/before}
+            \__zlatex_thm_proof_title_item:nn {#1}{\,} 
+            \group_begin:
+              \zlatex@title@before{proof} \__zlatex_thm_proof_title:
+            \group_end:
+            \UseHook{zlatex/thm-proof/begin} \UseHook{zlatex/thm-proof-#1/begin}
+            \tl_set:Nn \l__thm_proof_name_tl {#1} 
+            \tl_trim_spaces:n
+          }{
+            \UseHook{zlatex/thm-proof/end} \UseHook{zlatex/thm-proof-#1/end}
+            \str_if_eq:VnTF \l__thm_proof_name_tl {proof}{\hfill\qedsymbol\par}{\par}
+            \UseHook{zlatex/thm-proof/after} \UseHook{zlatex/thm-proof-#1/after}
+          }
+      }
   }
-}
-% zlatex thm hook
-\int_new:N \g__zlatex_thm_hook_index_int
-\int_gzero:N \g__zlatex_thm_hook_index_int
+
+
+
+% ==> thm theorem-like env hook interface
+% general thm hook
+\NewHook{zlatex/thm-theorem/before}
+\NewHook{zlatex/thm-theorem/begin}
+\NewReversedHook{zlatex/thm-theorem/end}
+\NewReversedHook{zlatex/thm-theorem/after}
+\NewHook{zlatex/thm-proof/before}
+\NewHook{zlatex/thm-proof/begin}
+\NewReversedHook{zlatex/thm-proof/end}
+\NewReversedHook{zlatex/thm-proof/after}
+\int_new:N \g__zlatex_thm_proof_hook_index_int
+\int_new:N \g__zlatex_thm_theorem_hook_index_int
+\int_gzero:N \g__zlatex_thm_proof_hook_index_int
+\int_gzero:N \g__zlatex_thm_theorem_hook_index_int
+
+% specific thm hook
+\clist_map_inline:nn {theorem, proof}
+  {
+    \clist_map_inline:cn {g__zlatex_thm_#1_clist} 
+      {
+        \NewHook{zlatex/thm-#1-##1/before}
+        \NewHook{zlatex/thm-#1-##1/begin}
+        \NewReversedHook{zlatex/thm-#1-##1/end}
+        \NewReversedHook{zlatex/thm-#1-##1/after}
+        \int_new:c {g__zlatex_thm_#1_##1_hook_index_int}
+        \int_gzero:c {g__zlatex_thm_#1_##1_hook_index_int}
+      }
+  }
 \cs_generate_variant:Nn \hook_gput_code:nnn {ne}
-\NewDocumentCommand{\zlatexThmHook}{sm}{
-  \IfBooleanTF{#1}
-    {
-      \cs_set:Npn \__zlatex_hook_add:nn ##1##2
-        {
-          \int_gincr:N \g__zlatex_thm_hook_index_int
-          \hook_gput_code:nen {zlatex/thm/##1}
-            {thm-hook.\int_use:N \g__zlatex_thm_hook_index_int}{##2}
-        }
-    }{
-      \cs_set:Npn \__zlatex_hook_add:nn ##1##2
-        {
-          \int_gincr:N \g__zlatex_thm_hook_index_int
-          \hook_gput_next_code:nn {zlatex/thm/##1}{##2} 
-        }
-    }
+\cs_new_protected:Npn \__zlatex_thm_hook_add:nnn #1#2#3
+  {% #1:if-star; #2:hook-type(theorem/proof); #3:env name; 
+    \IfBooleanTF{#1}
+      {
+        \cs_set:Npn \__zlatex_thm_hook_parser:nn ##1##2
+          {
+            \IfValueTF{#3}{
+              \int_gincr:c {g__zlatex_thm_#2_#3_hook_index_int}
+              \hook_gput_code:nen {zlatex/thm-#2-#3/##1}
+                {thm-#2-#3-hook.\int_use:c {g__zlatex_thm_#2_#3_hook_index_int}}
+                {##2}
+            }{
+              \int_gincr:c {g__zlatex_thm_#2_hook_index_int}
+              \hook_gput_code:nen {zlatex/thm-#2/##1}
+                {thm-#2-hook.\int_use:c {g__zlatex_thm_#2_hook_index_int}}
+                {##2}
+            }
+          }
+      }{
+        \cs_set:Npn \__zlatex_thm_hook_parser:nn ##1##2
+          {
+            \IfValueTF{#3}{
+              \int_gincr:c {g__zlatex_thm_#2_#3_hook_index_int}
+              \hook_gput_next_code:nn {zlatex/thm-#2-#3/##1}{##2}
+            }{
+              \int_gincr:c {g__zlatex_thm_#2_hook_index_int}
+              \hook_gput_next_code:nn {zlatex/thm-#2/##1}{##2} 
+            }
+          }
+      }
+  }
+
+% users' interface of thm hook
+\NewDocumentCommand{\zlatexThmHook}{sO{theorem}m}{
+  \__zlatex_thm_hook_add:nnn {#1}{theorem}{#2}
   \keyval_parse:NNn 
     \use_none:n
-    \__zlatex_hook_add:nn {#2}
+    \__zlatex_thm_hook_parser:nn {#3}
 }
-\hook_gput_code:nnn {zlatex/thm/before}{thm-before-par}{\par}
-\NewDocumentCommand{\zlatexThmBefore}{+m}
-  {
-    \hook_gremove_code:nn {zlatex/thm/before}{thm-before-par}
-    \hook_gput_code:nnn {zlatex/thm/before}{thm-before-par}{#1}
-  }
+\NewDocumentCommand{\zlatexThmProofHook}{sO{proof}m}{
+  \__zlatex_thm_hook_add:nnn {#1}{proof}{#2}
+  \keyval_parse:NNn 
+    \use_none:n
+    \__zlatex_thm_hook_parser:nn {#3}
+}
+\hook_gput_code:nnn {zlatex/thm-theorem/before}{thm-theorem-before-par}{\par}
+\hook_gput_code:nnn {zlatex/thm-proof/before}{thm-proof-before-par}{\par}
+\NewDocumentCommand{\zlatexThmBefore}{O{theorem}+m}{
+  \hook_gremove_code:nn {zlatex/thm-#1/before}{thm-#1-before-par}
+  \hook_gput_code:nnn {zlatex/thm-#1/before}{thm-#1-before}{#2}
+}
 \@onlypreamble\zlatexThmBefore
+
+
+
+% ==> zlatex thm hooks seq order
 \DeclareHookRule{env/document/before}
   {zlatex-thmall-setup-user}{<}{zlatex-thmptheorem-setup-inner}
 \DeclareHookRule{env/document/before}

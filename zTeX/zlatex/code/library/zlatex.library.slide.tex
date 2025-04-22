@@ -1,7 +1,8 @@
-\ProvidesExplFile{zlatex.library.slide.tex}{2025/01/20}{1.0.1}{slide~library~for~zlatex}
+\ProvidesExplFile{zlatex.library.slide.tex}{2025/02/04}{1.0.1}{slide~library~for~zlatex}
 
 
 %%%%%     slide/presentation library for zlatex     %%%%%
+\bool_gset_true:N \g__zlatex_slide_bool
 % ==> slide initialization
 \exp_args:NNnx \seq_set_split:Nnn \l_tmpa_seq {|}{\g__zlatex_aspectratio_tl}
 \RequirePackage[explicit]{titlesec}
@@ -648,5 +649,8 @@
     \__zlatex_text_symbol_patch:
     \zslide_set_doc_text_color:n { \tl_use:N \l__zlatex_slide_doc_textcolor_tl }
     \renewcommand{\familydefault}{ \tl_use:c {\l__zlatex_slide_doc_textstyle_tl} }
-    \renewcommand{\CJKfamilydefault}{ \tl_use:c {CJK\l__zlatex_slide_doc_textstyle_tl} }
+    \str_case:VnF \g__zlatex_lang_str {
+      {cn} {\renewcommand{\CJKfamilydefault}{ \tl_use:c {CJK\l__zlatex_slide_doc_textstyle_tl} }}
+      {fr} {}
+    }{\relax} 
   }

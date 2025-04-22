@@ -85,12 +85,12 @@ Overfull \hbox (53.7989pt too wide) in paragraph at lines 68--81
  [] 
 
 [1{/var/lib/texmf/fonts/map/pdftex/updmap/pdftex.map} <./ztikz_output/mma_data/
-mma_1.wls.pdf> <./ztikz_output/tikz_data/debug-figure0.pdf>]
+mma_1.wls.pdf> ⟨./ztikz_output/tikz_data/debug-figure0.pdf⟩]
 current hash is 69B6C9CA9B8E58DF9E9089165B7DB3F5
 (./ztikz_output/python_data/sympy_1.out)
 skip recompile, using the cache sympy result 1
 
-[2 <./ztikz_output/tikz_data/debug-figure1.pdf> <./ztikz_output/gnuplot_data/pl
+[2 ⟨./ztikz_output/tikz_data/debug-figure1.pdf⟩ <./ztikz_output/gnuplot_data/pl
 ot_3d_1.pdf>]
 using python float module calculating...
 clear ztikz hash successfully ...
@@ -211,14 +211,14 @@ Overfull \hbox (53.7989pt too wide) in paragraph at lines 68--81
  []
 
 [1{c:/texlive/2024/texmf-var/fonts/map/pdftex/updmap/pdftex.map} <./ztikz_outpu
-t/mma_data/mma_1.wls.pdf> <./ztikz_output/tikz_data/main-figure0.pdf>]        1 file(s) copied.
+t/mma_data/mma_1.wls.pdf> ⟨./ztikz_output/tikz_data/main-figure0.pdf⟩]        1 file(s) copied.
 
 current hash is F29F6A3BC2FEE14A658851EE9CE7F1D4
 current hash is unique --> recorded
         1 file(s) copied.
 using python sympy calculating question 1...
 (./ztikz_output/python_data/sympy_1.out)
-[2 <./ztikz_output/tikz_data/main-figure1.pdf> <./ztikz_output/gnuplot_data/plo
+[2 ⟨./ztikz_output/tikz_data/main-figure1.pdf⟩ <./ztikz_output/gnuplot_data/plo
 t_3d_1.pdf>]
 using python float module calculating...
 clear ztikz hash successfully ...
@@ -226,7 +226,7 @@ clear ztikz hash successfully ...
 
 ### new feature
 add functions:
-* `\ztikzHashCurrent[<seperator>]`: get current cached hash 
+* `\ztikzHashCurrent[⟨seperator⟩]`: get current cached hash 
 * `\ztikzHashClean`: clear all cached hash
 * implement all functions in `gnuplot` library with key-value syntax.
 

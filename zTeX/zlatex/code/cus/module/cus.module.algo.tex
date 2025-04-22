@@ -1,0 +1,94 @@
+\CUSProvideExplModule{algo}{\cus@d@te}{\cus@versi@n}{algorithms written in TeX}
+
+\cs_new_protected:Npn \__cus_algo_init:N #1 { \cs_set_eq:NN #1 \c_empty_tl }
+\cs_new:Npn \__cus_algo_map:NN #1#2
+  { 
+    \exp_after:wN \__tl_map_function:Nnnnnnnnn \exp_after:wN #2 #1
+      \s__tl_stop \s__tl_stop \s__tl_stop \s__tl_stop
+      \s__tl_stop \s__tl_stop \s__tl_stop \s__tl_stop
+    \prg_break_point:Nn \tl_map_break: { }
+  }
+\cs_new:Npn \__cus_algo_map:Nn #1#2
+  { 
+    \__cus_expanded:w { \exp_not:n { \__tl_map_tokens:nnnnnnnnn {#2} } \exp_after:wN } #1
+      \s__tl_stop \s__tl_stop \s__tl_stop \s__tl_stop
+      \s__tl_stop \s__tl_stop \s__tl_stop \s__tl_stop
+    \prg_break_point:Nn \tl_map_break: { }
+  }
+\cs_new_protected:Npn \__cus_algo_put_right:Nn #1#2
+  {
+    \elkernel_tl_set:Nx #1
+      { \elkernel_exp_not:w \exp_after:wN {#1} { \elkernel_exp_not:w {#2} } }
+  }
+\cs_new_protected:Npn \__cus_algo_push:Nn #1#2
+  { 
+    \elkernel_tl_set:Nx #1
+      { { \elkernel_exp_not:w {#2} } \elkernel_exp_not:w \exp_after:wN {#1} }
+  }
+\cs_new_protected:Npn \__cus_algo_pop:NNTF #1#2
+  {
+    \if_meaning:w #1 \c_empty_tl
+      \tl_set_eq:NN #2 \q_no_value
+      \exp_after:wN \use_ii:nn
+    \else:
+      \elkernel_tl_set:Nx #2 
+        { \exp_after:wN \__cus_algo_pop_aux:Nn \exp_after:wN #1 #1 } \if_false: { \fi: }
+      \exp_after:wN \use_i:nn
+    \fi:
+  }
+\cs_new_protected:Npn \__cus_algo_pop:NN #1#2
+  {
+    \if_meaning:w #1 \c_empty_tl
+      \tl_set_eq:NN #2 \q_no_value 
+    \else:
+      \elkernel_tl_set:Nx #2 
+        { \exp_after:wN \__cus_algo_pop_aux:Nn \exp_after:wN #1 #1 } \if_false: { \fi: }
+    \fi:
+  }
+\cs_new:Npn \__cus_algo_pop_aux:Nn #1#2
+  { 
+    \elkernel_exp_not:w {#2} \if_false: { \fi: } 
+    \exp_after:wN \elkernel_tl_set:Nx \exp_after:wN #1 \exp_after:wN { \if_false: } \fi:
+    \elkernel_exp_not:w \exp_after:wN { \if_false: } \fi:
+  }
+
+%region 拓扑排序
+% 拓扑排序是一种对有向无环图（DAG）的顶点进行线性排序的方法，使得对于每一条有向边uv，顶点u在排序中出现在v之前。
+% 为了实现拓扑排序，我们可以使用以下算法：
+% - 计算每个顶点的入度（指向该顶点的边的数量），并初始化已访问顶点的计数为0。
+% - 选择所有入度为0的顶点，并将它们加入一个队列（入队操作）。
+% - 当队列不为空时，重复以下步骤：
+% -- 从队列中取出一个顶点（出队操作），并将其加入排序结果中。
+% -- 增加已访问顶点的计数。
+% -- 遍历该顶点的所有邻接顶点，如果邻接顶点的入度减1后变为0，则将其加入队列。
+% - 如果已访问顶点的计数等于图中顶点的总数，则说明拓扑排序成功，否则说明图中存在环，无法进行拓扑排序。
+
+\tl_new:N \l__cus_sort_a_tl 
+\tl_new:N \l__cus_sort_b_tl 
+\tl_new:N \g__cus_sort_result_tl 
+\bool_new:N \g__cus_sort_bool 
+\cs_new_protected:Npn \cus_topological_sort:nnN #1#2#3 % getter, setter, result tl 
+  {
+    \bool_gset_false:N \g__cus_sort_bool
+    \tl_build_gbegin:N \g__cus_sort_result_tl
+    \cs_set:Npn \__cus_sort_get:n ##1 {#1}
+    \cs_set:Npn \__cus_sort_set:n ##1 {#2}
+    \__cus_topological_sort:
+    \tl_build_gend:N \g__cus_sort_result_tl
+    \tl_set_eq:NN #3 \g__cus_sort_result_tl
+  }
+\cs_new_protected:Npn \cus_topological_sort:NNN #1#2#3
+  {
+    \bool_gset_false:N \g__cus_sort_bool
+    \tl_build_gbegin:N \g__cus_sort_result_tl
+    \cs_set_eq:NN \__cus_sort_get:n #1
+    \cs_set_eq:NN \__cus_sort_set:n #2
+    \__cus_topological_sort:
+    \tl_build_gend:N \g__cus_sort_result_tl
+    \tl_set_eq:NN #3 \g__cus_sort_result_tl
+  }
+\cs_new_protected:Npn \__cus_topological_sort: 
+  {
+    
+  }
+%endregion

@@ -1,0 +1,234 @@
+\CUSLibraryDelayedUntil*{}
+\CUSDependency{package={paracol,longfbox},module={util,box}}
+\CUSProvideExplLibrary{box}{\cus@d@te}{\cus@versi@n}{much more box and multicols}
+
+\dim_if_exist:NF \@tempdimd { \dim_new:N \@tempdimd }
+
+\options{/longbox,
+  math/.new~style*={insert-before=$\displaystyle,insert-after=$},
+  highlight~math/.new~style*={}}
+\options{/fbox,
+  top/.new~style={padding-top={#1}},bottom/.new~style={padding-bottom={#1}},
+  left/.new~style={padding-left={#1}},right/.new~style={padding-right={#1}},
+  vertical/.new~style={padding-top={#1},padding-bottom={#1}},
+  horizontal/.new~style={padding-left={#1},padding-right={#1}}}
+\newcommand\lfboxmath[1][]{\lfbox[math,#1]}
+\newcommand\lfboxhighmath[1][]{\lfbox[highlight~math,math,#1]}
+\ekeysdeclarecmd \lfmathbox { &s #@W { <> [] } { {equation} { } } }
+  {\abovedisplayskip\z@skip \belowdisplayskip\z@skip 
+    \edef\@lfmathbox{\def\noexpand\@currenvir{\@currenvir} \exp_not:c {#2#1} }
+    \edef\end@lfmathbox{ \exp_not:c {end#2#1} }
+    \longfbox[{#3}]\linespread{1}\selectfont
+    {\fontsize{\f@size}{\f@size}\selectfont\makebox[.6\linewidth]{}\strut\par}
+    \nointerlineskip\vskip-\baselineskip\@lfmathbox}
+\protected\def\endlfmathbox{\end@lfmathbox\par\nointerlineskip\endlongfbox}
+
+\keys_define:nn { cus/frame }
+  {
+    lfbox-frame  .meta:n = { frame  = { \lfbox [{#1}] } } ,
+    lfbox-frame .default:n = { border-style = solid } ,
+    lfbox-first  .meta:n = { first  = { \lfbox [{#1}] } } ,
+    lfbox-first .default:n = { border-style = solid } ,
+    lfbox-middle .meta:n = { middle = { \lfbox [{#1}] } } ,
+    lfbox-middle .default:n = { border-style = solid } ,
+    lfbox-last   .meta:n = { last   = { \lfbox [{#1}] } } ,
+    lfbox-last .default:n = { border-style = solid } ,
+    lfbox-whole  .meta:n = { whole  = { \lfbox [{#1}] } } ,
+    lfbox-whole .default:n = { border-style = solid } ,
+  }
+
+
+\NewDocumentCommand \fparbox { O{c} O{\relax} O{s} m O{} }
+  {
+    \group_begin:
+    \clist_set:Nn \l__cus_fparbox_options_clist {#5}
+    \__cus_filter_geometry_options:NNN 
+      \l__cus_fparbox_options_clist 
+      \l__cus_fparbox_geometry_clist 
+      \l__cus_fparbox_options_clist 
+    \exp_args:No \fboxset \l__cus_fparbox_geometry_clist 
+    \use:e 
+      {
+        \collectn_minipage:Nnnnnnw \l__cus_tmpc_box 
+          { 
+            \exp_not:N \lfbox [ \exp_not:o \l__cus_fparbox_options_clist ] 
+              { \box_use_drop:N \l__cus_tmpc_box } 
+            \group_end: 
+          }
+          {#1} { \exp_not:n {#2} } {#3}
+          {#4-
+            \dimexpr(\option{/fbox/padding-left}+\option{/fbox/padding-right}
+            +\option{/fbox/border-left-width}+\option{/fbox/border-right-width})\relax}
+      }
+  }
+\NewDocumentCommand \fvarbox { O{c} O{\relax} O{s} m O{} }
+  {
+    \group_begin:
+    \clist_set:Nn \l__cus_fvarbox_options_clist {#5}
+    \__cus_filter_geometry_options:NNN 
+      \l__cus_fvarbox_options_clist 
+      \l__cus_fvarbox_geometry_clist 
+      \l__cus_fvarbox_options_clist 
+    \exp_args:No \fboxset \l__cus_fvarbox_geometry_clist 
+    \use:e 
+      {
+        \collectn_varwidth:Nnnnnnw \l__cus_tmpc_box 
+          { 
+            \exp_not:N \lfbox [ \exp_not:o \l__cus_fvarbox_options_clist ] 
+              { \box_use_drop:N \l__cus_tmpc_box } 
+            \group_end: 
+          }
+          {#1} { \exp_not:n {#2} } {#3}
+          {#4-
+            \dimexpr(\option{/fbox/padding-left}+\option{/fbox/padding-right}
+            +\option{/fbox/border-left-width}+\option{/fbox/border-right-width})\relax}
+      }
+  }
+
+
+%% 中英文篇幅比例约为：1:1.8
+
+\tl_new:N \l__cus_paracol_cols_tl 
+\tl_set:Nn \l__cus_paracol_cols_tl { 2 }
+\tl_new:N \l__cus_paracol_numleft_tl 
+\tl_set:Nn \l__cus_paracol_numleft_tl { \l__cus_paracol_cols_tl }
+\keys_define:nn { cus/paracol }
+  {
+    cols .code:n = \tl_set:Nx \l__cus_paracol_cols_tl { \int_eval:n {#1} } ,
+    heading .tl_set:N = \l__cus_paracol_heading_tl ,
+    numleft .code:n = \tl_set:Nx \l__cus_paracol_numleft_tl { \int_eval:n {#1} } ,
+    paired .bool_set:N = \l__cus_paracol_paired_bool ,
+    paired .initial:n = true ,
+
+    ensurevspace .code:n = \tl_set:Nx \pcol@ensurevspace { \dim_eval:n {#1} } ,
+    column-ratio .code:n = 
+      { 
+        \exp_last_unbraced:Ne \__cus_paracol_columnratio:nw 
+          { \cus_split_bracket_tail_default:nn {#1} {#1} }
+      } ,
+    column-ratio-left .code:n = \__cus_paracol_columnratio_left:n {#1} ,
+    column-ratio-right .code:n = \__cus_paracol_columnratio_right:n {#1} ,
+    column-width .code:n = 
+      {
+        \exp_last_unbraced:Ne \__cus_paracol_columnwidth:nw 
+          { \cus_split_bracket_tail_default:nn {#1} {#1} }
+      } ,
+    column-width-left .code:n = \__cus_paracol_columnwidth_left:n {#1} ,
+    column-width-right .code:n = \__cus_paracol_columnwidth_right:n {#1} ,
+    twosided .multichoice: ,
+    twosided / page .code:n = \@twosidetrue ,
+    twosided / p .code:n = \@twosidetrue ,
+    twosided / column .code:n = \pcol@swapcolumntrue ,
+    twosided / c .code:n = \pcol@swapcolumntrue ,
+    twosided / margin .code:n = \pcol@swapmarginpartrue ,
+    twosided / m .code:n = \pcol@swapmarginpartrue ,
+    twosided / background .code:n = \pcol@bg@swaptrue ,
+    twosided / b .code:n = \pcol@bg@swaptrue ,
+    twosided / all .code:n = 
+      \@twosidetrue\pcol@swapcolumntrue\pcol@swapmarginpartrue\pcol@bg@swaptrue ,
+    twosided / none .code:n = 
+      \@twosidefalse\pcol@swapcolumnfalse\pcol@swapmarginparfalse\pcol@bg@swapfalse ,
+    twosided .default:n = all ,
+    marginpar-threshold .code:n = 
+      \exp_last_unbraced:Ne \__cus_paracol_marginpar_threshold:nw 
+        { \cus_split_bracket_tail_default:nn {#1} {#1} } ,
+    marginpar-threshold-left .code:n = \__cus_paracol_marginpar_threshold_left:n {#1} ,
+    marginpar-threshold-right .code:n = \__cus_paracol_marginpar_threshold_right:n {#1} ,
+    counter-global .code:n = 
+      \str_if_eq:nnTF {#1} {*} 
+        { \cs_gset_eq:NN \pcol@gcounters \cl@@ckpt }
+        { \clist_map_function:nN {#1} \pcol@globalcounter } ,
+    counter-local .code:n =  { \clist_map_function:nN {#1} \localcounter } ,
+    column-sep-rule .dim_set:N = \columnseprule ,
+    before  .tl_set:N = \l__cus_paracol_before_tl ,
+    before+ .code:n = \tl_put_right:Nn \l__cus_paracol_before_tl {#1} ,
+    after   .tl_set:N = \l__cus_paracol_after_tl  ,
+    after+  .code:n = \tl_put_right:Nn \l__cus_paracol_after_tl {#1} ,
+    contents .code:n = \addcontentsonly #1 ,
+
+    unknown .code:n = 
+      {
+        \cus_if_head_int:nTF { \l_keys_key_str }
+          { \tl_set:Nx \l__cus_paracol_cols_tl { \int_eval:n { \l_keys_key_str } } }
+          { 
+            \__cus_str_if_startswith:ooTF \l_keys_key_str { \tl_to_str:n { preamble } }
+              { \exp_last_unbraced:Ne \__cus_paracol_set_preamble:nw { \exp_args:No \cus_split_bracket_tail_default:nn { \l_keys_key_str } { -1 } } }
+              { \msg_error:nnxx { cus } { unknown-key } { paracol } { \l_keys_key_str } }
+          }
+      } ,
+  }
+\cs_new_protected:Npn \__cus_paracol_set_preamble:nw #1 [#2]
+  { \tl_set_eq:cN { pcol@colpream \int_eval:n {#2} } \l_keys_value_tl }
+\cs_new_protected:Npn \__cus_paracol_columnratio_left:n #1
+  {
+    \cs_set_eq:NN \pcol@colwidthspecleft \scan_stop:
+    \tl_set:Nn \pcol@columnratioleft {#1} 
+  }
+\cs_new_protected:Npn \__cus_paracol_columnratio_right:n #1
+  {
+    \tl_set:Nn \pcol@columnratioright {#1} 
+  }
+\cs_new_protected:Npn \__cus_paracol_columnratio:nw #1 [#2]
+  {
+    \__cus_paracol_columnratio_left:n {#1}
+    \__cus_paracol_columnratio_right:n {#2}
+  }
+\cs_new_protected:Npn \__cus_paracol_columnwidth_left:n #1
+  {
+    \cs_set_eq:NN \pcol@columnratioleft \scan_stop:
+    \tl_set:Nn \pcol@colwidthspecleft {#1} 
+  }
+\cs_new_protected:Npn \__cus_paracol_columnwidth_right:n #1
+  {
+    \tl_set:Nn \pcol@colwidthspecright {#1} 
+  }
+\cs_new_protected:Npn \__cus_paracol_columnwidth:nw #1 [#2]
+  {
+    \__cus_paracol_columnwidth_left:n {#1}
+    \__cus_paracol_columnwidth_right:n {#2}
+  }
+\cs_new_protected:Npn \__cus_paracol_marginpar_threshold_left:n #1
+  { \tl_set:Nx \pcol@mpthreshold@l { \int_eval:n {#1} } }
+\cs_new_protected:Npn \__cus_paracol_marginpar_threshold_right:n #1
+  { \tl_set:Nx \pcol@mpthreshold@r { \int_eval:n {#1} } }
+\cs_new_protected:Npn \__cus_paracol_marginpar_threshold:nw #1 [#2]
+  {
+    \__cus_paracol_marginpar_threshold_left:n {#1}
+    \__cus_paracol_marginpar_threshold_right:n {#2}
+  }
+\cs_new_protected_nopar:Npn \cus@startparacol { \begin{paracol} }
+\cs_new_protected_nopar:Npn \cus@stopparacol { \end{paracol} }
+\cs_new_protected:Npn \__cus_paracol_init: 
+  {
+    \cs_set_eq:NN \pcol@colwidthspecleft \scan_stop:
+    \__cus_paracol_columnratio:nw {} []
+  }
+\NewDocumentCommand \startparacol { +O{} }
+  { 
+    \group_begin: 
+    \__cus_paracol_init: 
+    \keys_set:nn { cus/paracol } {#1}
+    \l__cus_paracol_before_tl 
+    \int_compare:nNnTF \l__cus_paracol_cols_tl < 2
+      {
+        \cs_set_eq:NN \cus@stopparacol \prg_do_nothing:
+        \l__cus_paracol_heading_tl 
+      }
+      {
+        \tl_if_empty:NTF \l__cus_paracol_heading_tl 
+          { 
+            \bool_if:NTF \l__cus_paracol_paired_bool 
+              { \cus@startparacol [\l__cus_paracol_numleft_tl]{\l__cus_paracol_cols_tl} }
+              { \cus@startparacol [\l__cus_paracol_numleft_tl]*{\l__cus_paracol_cols_tl} }
+          }
+          { 
+            \bool_if:NTF \l__cus_paracol_paired_bool 
+              { \cus@startparacol [\l__cus_paracol_numleft_tl]{\l__cus_paracol_cols_tl} }
+              { \cus@startparacol [\l__cus_paracol_numleft_tl]*{\l__cus_paracol_cols_tl} }
+                [\l__cus_paracol_heading_tl]
+          }
+      }
+    % \nointerlineskip
+  }
+\cs_new_protected_nopar:Npn \stopparacol 
+  { \cus@stopparacol \l__cus_paracol_after_tl \group_end: }

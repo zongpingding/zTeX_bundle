@@ -1,32 +1,37 @@
 \documentclass[aspectratio=169]{beamer}
 \usepackage[
-  minted, 
-  lang=cn, 
-  math-alias=true, 
-  Math-envStyle=fancy, 
-  serif=math
-]{zslide}
+  % lang=cn,
+  minted,
+  % serif=math,
+  block={split, rounded},
+]{../code/zslide}
 \usepackage{lipsum}
-\def\ee{\mathrm{e}}
-\def\dd{\;\mathrm{d}}
+\usepackage{setspace}
 
 \title{Beamer Template}
 \author{Eureka}
 \date{\today}
 % \logo{\includegraphics[width=4em]{./Arch.png}} 
 \begin{document}
-  \begin{frame}[plain]
+\section{FIRST}
+\subsection{FIRST-I}
+  \begin{frame}%[plain]
     \titlepage
   \end{frame}
   
-  \begin{frame}
+  \begin{frame}{Table of Contents}
     \tableofcontents
   \end{frame}
 
   \section{sec 1}
   \subsection{subsec 1}
   \begin{frame}
-    Hello
+    \begin{block}{BLOCK TITLE}
+      This is a simple block %你好
+      \begin{align}
+        \sum_{i=1}^{+\infty}{\int_{0}^{i}-\frac{1}{t}\mathrm{d}t} = \frac{\pi^2}{6}
+      \end{align}
+    \end{block}
   \end{frame} 
   \begin{frame}
     \begin{multicols}{2}
@@ -58,18 +63,22 @@
     \end{multicols}
   \end{frame}
   \subsection{subsec 2}
-  \begin{frame}
-    \begin{lemma}[哥德巴赫]\upshape
-      令 $\ee(\alpha) = \ee^{2\pi i}\alpha, S(\alpha) = \sum_{n=M+1}^{M+N}{a_n\ee(n\alpha)}, Z = \sum_{n=M+1}^{M+N}{|a_n|^2}$,
-      其中 $a_n$是任意的实数. 我们用 $\sum_{\chi_q}^{*}$来表示和式之中经过且只经过 $q$模的所有原特征,则有
+  \begin{frame}\setstretch{1.5}
+    \begin{lemma}[Goldbach's conjecture]
+      %\upshape\ %
+      dass jede Zahl, welche aus zweyen numeris primis zusammengesetzt ist, ein aggregatum so vieler 
+      numerorum primorum sey, 
       \begin{align}
           & \sum_{q\leq x}\frac{q}{\varphi(q)}\sum_{x_{q}}^{*}\Big|\sum_{n=M+1}^{M+N}a_{n}\chi_{q}(n)\Big|^{2}\le (X^{2}+\pi N)\sum_{n=M+1}^{M+N}\Big|u_{n}\Big|^{2} \\
-          & \sum_{D<q\leq Q}\frac{1}{\varphi(q)}\sum_{x_{q}}^{*}\Big|\sum_{n=M+1}^{M+N}a_{n}\chi_{q}(n)\Big|^{2}\LL\Big(Q+\frac{N}{D}\Big)\sum_{n=M+1}^{M+N}|a_{n}|^{2}
+          % & \sum_{D<q\leq Q}\frac{1}{\varphi(q)}\sum_{x_{q}}^{*}\Big|\sum_{n=M+1}^{M+N}a_{n}\chi_{q}(n)\Big|^{2}\ll \Big(Q+\frac{N}{D}\Big)\sum_{n=M+1}^{M+N}|a_{n}|^{2}
       \end{align}
+      dass jede Zahl, welche aus zweyen numeris primis zusammengesetzt ist, ein aggregatum so vieler numerorum primorum sey,
     \end{lemma}
   \end{frame} 
   \begin{frame}
-    world
+    \begin{block}{Title}
+      \lipsum[1]
+    \end{block}
   \end{frame} 
 
   \section{sec 2}

@@ -1,34 +1,95 @@
-\ProvidesExplFile{zlatex.library.mathalias.tex}{2025/01/20}{1.0.1}{mathalias~library~for~zlatex}
+\ProvidesExplFile{zlatex.library.mathalias.tex}{2025/04/20}{1.0.1}{mathalias~library~for~zlatex}
 
 
 %%%%%     mathalias for zlatex     %%%%%
+% In case of duplicated macro name, save the original one 
+% in your preamble, for example the '\FF' in package 'ascii', 
+%   1. put '\let\asciiFF\FF' in your preamble to store it 
+%   2. or load 'mathalias' library after 'ascii' package
+\bool_gset_true:N \g__zlatex_math_alias_bool
 \RequirePackage{amssymb, mathrsfs}
 \RequirePackage{mathtools}
-\let\oldS\S
-\let\S\undefined       
+\let\oldS\S    
 \let\olddiv\div
 \let\oldhom\hom
 
 
+% ==> Alias switch on/off
+\bool_new:N \g__zlatex_math_alias_switch_bool
+\bool_gset_false:N \g__zlatex_math_alias_switch_bool
+\NewDocumentCommand{\zlatexMathAliasOn}{o}
+  {
+    \group_begin:
+    \bool_gset_true:N \g__zlatex_math_alias_switch_bool
+  }
+\NewDocumentCommand{\zlatexMathAliasOff}{o}
+  {
+    \bool_gset_false:N \g__zlatex_math_alias_switch_bool
+    \group_end:
+  }
+\NewDocumentCommand{\zlatexMathAliasError}{}
+  {
+    \zlatex_msg_set:nn {math-alias-cmd}{
+      Math~alias~related~commands~only~available~ 
+      between~'\zlatexMathAliasOn'~and~'\zlatexMathAliasOff'~
+      or~in~the~environment~'zlatexMathAlias'
+    }
+    \zlatex_msg_error:n {math-alias-cmd}
+  }
+\NewDocumentEnvironment{zlatexMathAlias}{}
+  { \group_begin:
+    \bool_gset_true:N \g__zlatex_math_alias_switch_bool
+  }{
+    \bool_gset_false:N \g__zlatex_math_alias_switch_bool
+    \group_end:
+  }
+
+
+% ==> mathalias commands setup interface
+\clist_new:N \g__zlatex_mathalias_user_clist
+\clist_new:N \g__zlatex_mathalias_internal_clist
+\clist_gclear:N \g__zlatex_mathalias_user_clist
+\clist_gclear:N \g__zlatex_mathalias_internal_clist
+\cs_new:Npn \zlatex_mathalias_set:nn #1#2
+  {% #1:the users' interface; #2: the internal interface
+    \clist_push:Nn \g__zlatex_mathalias_user_clist {#1}
+    \clist_push:Nn \g__zlatex_mathalias_internal_clist {#2}
+    \seq_set_from_clist:Nn \l_tmpa_seq {#1}
+    \seq_set_from_clist:Nn \l_tmpb_seq {#2}
+    \seq_map_pairwise_function:NNN 
+      \l_tmpa_seq \l_tmpb_seq 
+      \__zlatex_math_alias_set:nn
+  }
+\cs_set:Npn \__zlatex_math_alias_set:nn #1#2 
+  {
+    % \typeout{--->\string #1:\string #2}
+    \cs_set:Npn #1 
+      {
+        \bool_if:NTF \g__zlatex_math_alias_switch_bool
+          { #2 }
+          { \zlatexMathAliasError }
+      }
+  }
+
+
 % ==> Math Font 
-\cs_new_protected:Npn \zlatex_math_alias:nn #1#2 
-  { \cs_new:cpn {#1}{#2} }
-\newcommand{\F}[1]{\ensuremath{\boldsymbol{#1}}}
-\newcommand{\R}[1]{\ensuremath{\mathrm{#1}}}
-\newcommand{\K}[1]{\ensuremath{\mathfrak{#1}}}
-\newcommand{\C}[1]{\ensuremath{\mathcal{#1}}}
-\newcommand{\B}[1]{\ensuremath{\mathbb{#1}}}
-\newcommand{\S}[1]{\ensuremath{\mathscr{#1}}}
-\@ifpackageloaded{ascii}
-  {\let\asciiFF\FF\renewcommand{\FF}[1]{\ensuremath{\mathbf{#1}}}}
-  {\newcommand{\FF}[1]{\ensuremath{\mathbf{#1}}}}
+\newcommand{\z@R}[1]{\ensuremath{\mathrm{#1}}}
+\newcommand{\z@K}[1]{\ensuremath{\mathfrak{#1}}}
+\newcommand{\z@C}[1]{\ensuremath{\mathcal{#1}}}
+\newcommand{\z@B}[1]{\ensuremath{\mathbb{#1}}}
+\newcommand{\z@S}[1]{\ensuremath{\mathscr{#1}}}
+\newcommand{\z@F}[1]{\ensuremath{\boldsymbol{#1}}}
+\newcommand{\z@FF}[1]{\ensuremath{\mathbf{#1}}}
+\zlatex_mathalias_set:nn
+  { \R,   \K,   \C,   \B,   \S,   \F,   \FF   }
+  { \z@R, \z@K, \z@C, \z@B, \z@S, \z@F, \z@FF }
 
 
 % ==> Math Arrow 
 % simple arrow
 \prop_new:N \g_zlatex_math_simple_arrow_prop
 \prop_set_from_keyval:Nn \g_zlatex_math_simple_arrow_prop 
-  {% 1.double:long;  2.capital:double line; 
+  { % 1.double:long;  2.capital:double line; 
     % 3.neg:negation; 4.No '\nlongleftarrow', '\nLongleftarrow' etc.
     ma   = \mapsto,
     mma  = \longmapsto,
@@ -56,11 +117,20 @@
   }
 \prop_map_inline:Nn \g_zlatex_math_simple_arrow_prop 
   {
-    \zlatex_math_alias:nn {#1}{#2}
+    \cs_new:cpn {z@#1}{#2}
   }
+\zlatex_mathalias_set:nn 
+  { \ma,  \mma, \la, \La, \nla, \Nla, 
+    \lla, \Lla, \ra, \Ra, \nra, \Nra, 
+    \rra, \Rra, \da, \Da, \nda, \Nda, 
+    \dda, \Dda }
+  { \z@ma,  \z@mma, \z@la, \z@La, \z@nla, \z@Nla,
+    \z@lla, \z@Lla, \z@ra, \z@Ra, \z@nra, \z@Nra,
+    \z@rra, \z@Rra, \z@da, \z@Da, \z@nda, \z@Nda, 
+    \z@dda, \z@Dda }
 % extend text arrow
 \cs_new:Npn \ext_arrow_set:nn #1#2 
-  { \exp_args:Nee \NewDocumentCommand{\use:c {#1}}{sO{}D(){}}
+  { \exp_args:Nee \NewDocumentCommand{\use:c {z@#1}}{sO{}D(){}}
       {
         \IfBooleanTF{##1}
           {#2[\text{##3}]{\text{##2}}}
@@ -78,24 +148,30 @@
     hla  = \xhookleftarrow,
     hra  = \xhookrightarrow,
   }
+\zlatex_mathalias_set:nn 
+  { \xla,   \Xla,   \xxla,   \xra,   \Xra,   \xxra,   \hla,   \hra }
+  { \z@xla, \z@Xla, \z@xxla, \z@xra, \z@Xra, \z@xxra, \z@hla, \z@hra }
 
 
 % ==> Math Operator and symbols
 % REF: 1. https://en.wikipedia.org/wiki/List_of_mathematical_abbreviations
 %      2. https://tex.stackexchange.com/a/289946/294585
-\newcommand{\A}{\ensuremath{\forall}}
-\newcommand{\E}{\ensuremath{\exists}}
-\newcommand{\ns}{\ensuremath{\varnothing}}
-\newcommand{\se}{\ensuremath{\backsimeq}}
-\newcommand{\sse}{\ensuremath{\cong}}
-\newcommand{\CC}{\ensuremath{\mathbb{C}}}
-\newcommand{\RR}{\ensuremath{\mathbb{R}}}
-\newcommand{\ZZ}{\ensuremath{\mathbb{Z}}}
-\newcommand{\NN}{\ensuremath{\mathbb{N}}}
-\newcommand{\dd}{\ensuremath{\mathchoice{\:}{\mspace{1.5mu}}{}{}\mathrm{d}}}
+\newcommand{\z@A}{\ensuremath{\forall}}
+\newcommand{\z@E}{\ensuremath{\exists}}
+\newcommand{\z@ns}{\ensuremath{\varnothing}}
+\newcommand{\z@se}{\ensuremath{\backsimeq}}
+\newcommand{\z@sse}{\ensuremath{\cong}}
+\newcommand{\z@CC}{\ensuremath{\mathbb{C}}}
+\newcommand{\z@RR}{\ensuremath{\mathbb{R}}}
+\newcommand{\z@ZZ}{\ensuremath{\mathbb{Z}}}
+\newcommand{\z@NN}{\ensuremath{\mathbb{N}}}
+\newcommand{\z@dd}{\ensuremath{\mathchoice{\:}{\mspace{1.5mu}}{}{}\mathrm{d}}}
+\zlatex_mathalias_set:nn 
+  { \A, \E, \ns, \se, \sse, \CC, \RR, \ZZ, \NN, \dd }
+  { \z@A, \z@E, \z@ns, \z@se, \z@sse, \z@CC, \z@RR, \z@ZZ, \z@NN, \z@dd }
 % math operator alias setup
 \cs_set_protected:Npn \zlatex_op_name_set:nn #1#2 
-  { \exp_args:Nee \DeclareMathOperator{\use:c {z#1}}{\exp_not:n {#2}} }
+  { \exp_args:Nee \DeclareMathOperator{\use:c {z@#1}}{\exp_not:n {#2}} }
 \prop_set_from_keyval:Nn \g_zlatex_math_op_prop 
   {
     alt   = alt,
@@ -113,29 +189,37 @@
   }
 \prop_map_inline:Nn \g_zlatex_math_op_prop 
   {
-    \zlatex_op_name_set:nn {#1}{\prop_item:Nn \g_zlatex_math_op_prop {#1}}
+    \zlatex_op_name_set:nn {#1}
+      { \prop_item:Nn \g_zlatex_math_op_prop {#1} }
   }
+\zlatex_mathalias_set:nn 
+  { \alt, \rot, \div, \curl, \grad, \id, 
+    \im,  \ker, \cok, \hom,  \sign, \trace }
+  { \z@alt, \z@rot, \z@div, \z@curl, \z@grad, \z@id, 
+    \z@im,  \z@ker, \z@cok, \z@hom,  \z@sign, \z@trace }
+% additional math spacing spec
 \tl_const:Nn \c_zlatex_math_ops_tl { \cdot \wedge \times \oplus \otimes }
 \clist_map_inline:nn 
-  { trace, alt, rot, div, curl, grad, id, im, ker, cok, hom, sign }
-  {\cs_set_protected_nopar:cpn {#1}{\use:c {z#1} \peek_after:Nw \zlatex_op_check:}}
+  { alt, rot, div, curl, grad, id, im, ker, cok, hom, sign, trace }
+  { \cs_set_protected_nopar:cpn {#1}{\use:c {z@#1} \peek_after:Nw \zlatex_op_check:} }
 \cs_new_protected:Nn \zlatex_op_check: { 
   \tl_map_inline:Nn \c_zlatex_math_ops_tl {
-    \token_if_eq_meaning:NNT \l_peek_token ##1 {\tl_map_break:n {{\!}}}
+    \token_if_eq_meaning:NNT \l_peek_token ##1 { \tl_map_break:n {{\!}} }
   }
 }
 \NewDocumentCommand\zlatexMathAliasOpSet{m}
   {
-    \prop_set_from_keyval:Nn \g_zlatex_math_op_prop {#1}
+    \prop_put_from_keyval:Nn \g_zlatex_math_op_prop {#1}
   }
 \@onlypreamble\zlatexMathAliasOpSet
 
 
 % ==> pyhsics package commands (\qty, ...) implementation ???
 % \qty(#1) --> \left(#1\right)
-\NewDocumentCommand{\zab}{d()d[]d\{\}}
+\NewDocumentCommand{\z@ab}{d()d[]d\{\}}
   { 
     \IfValueT{#1}{ \left(#1\right) }
     \IfValueT{#2}{ \left[#2\right] }
     \IfValueT{#3}{ \left\{#3\right\} }
   }
+\zlatex_mathalias_set:nn { \zab }{ \z@ab }

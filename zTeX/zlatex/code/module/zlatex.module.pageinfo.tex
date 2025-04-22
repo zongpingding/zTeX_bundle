@@ -1,8 +1,11 @@
-\ProvidesExplFile{zlatex.module.pageinfo.tex}{2025/01/20}{1.0.1}{pageinfo~module~for~zlatex}
+\ProvidesExplFile{zlatex.module.pageinfo.tex}{2025/03/10}{1.0.1}{pageinfo~module~for~zlatex}
 
 
 %%%%%     pageinfo module for zlatex     %%%%%
 % TODO: implement this by new mark mechanism
+% basic packages 
+\RequirePackage{sidenotes}
+
 
 
 % ==> fancy page settings
@@ -64,6 +67,7 @@
   \restoregeometry
 }
 \bool_if:NTF \g__zlatex_slide_bool {
+  \definecolor{zslide@color@title}{HTML}{d9d9d9}
   \renewcommand\maketitle{
     \bool_if:NT \g__zlatex_hyperref_bool {
       \phantomsection
@@ -71,28 +75,46 @@
     }
     \newgeometry{margin=1cm}
     \null\vfill\begin{center}
-      \begin{tabular}{c}{\huge\zslideTitle}\\[2em]
-      \zslideAuthor\\[2em]\zslideDate\end{tabular}
+      \begin{tabular}{c}
+        {\colorbox{zslide@color@title}{
+          \hspace*{.075\textwidth}
+          \parbox{.80\textwidth}{\centering\huge\zslideTitle}
+        \hspace*{.075\textwidth}}}\\[3em]
+        \zslideAuthor\\[2em]
+        \zslideDate
+      \end{tabular}
     \end{center}\vfill\null
     \thispagestyle{empty}\setcounter{page}{0}
     \restoregeometry
   }
 }{
+  \cs_generate_variant:Nn \ztool_get_ht:Nn {No}
+  \long\def\format@title{{\huge\bfseries\@title}}
+  \long\def\format@author{{\Large\bfseries\@author}}
+  \long\def\format@date{{\Large\textcolor{gray}{\@date}}}
+  \newcommand\title@upper@box[2][0pt]{
+    \parbox[b][#2][r]{\l_tmpa_dim}{
+      {\format@title}\\[#1]
+      {\format@author}
+    }
+  }
   \renewcommand{\maketitle}{
     \thispagestyle{empty}
-    % calc max width, add '1pt' for right padding in case of wrong line break
-    \ztool_get_wd:Nn \l_tmpa_dim {\hbox:n {\huge\bfseries\@title}}
-    \ztool_get_wd:Nn \l_tmpb_dim {\hbox:n {\Large\bfseries\@author}}
-    \dim_set:Nn \l_tmpa_dim {\dim_max:nn {\l_tmpa_dim}{\l_tmpb_dim} + 1pt}
+    % calc max width/height, add '1pt' for right padding in case of wrong line break
+    \ztool_get_wd:Nn \l_tmpa_dim {\hbox:n {\format@title}}
+    \ztool_get_wd:Nn \l_tmpb_dim {\hbox:n {\format@author}}
+    \dim_set:Nn \l_tmpa_dim {
+      \dim_min:nn {
+        \dim_max:nn {\l_tmpa_dim}{\l_tmpb_dim} 
+    }{.8\textwidth} + 1pt} 											              % the max title width
+    \ztool_get_ht:Nn \l_tmpb_dim {\title@upper@box{}} 
+    \dim_set:Nn \l_tmpb_dim {\dim_max:nn {80pt}{\l_tmpb_dim}} % the total title height
     % typeset info
-    \begin{center}\vfill\vspace*{40pt}
-    \rule{6pt}{80pt}\enskip
-    \parbox[b][80pt][r]{\l_tmpa_dim}{
-      {\huge\bfseries\@title}\\[\fill]
-      {\Large\bfseries\@author}
-    }
-    \par\vfill{\Large\textcolor{gray}{\@date}}
-    \end{center}
+    \vfill\vspace*{20pt}\begin{center}
+      \rule{6pt}{\l_tmpb_dim}\enskip
+      \title@upper@box[\fill]{\l_tmpb_dim}
+      \par\vfill\format@date
+    \end{center}\newpage
   }
 }
 

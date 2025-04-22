@@ -6,7 +6,7 @@
 \clist_const:Nn \c__zlatex_lang_support_clist    {en, cn}
 \tl_const:Nn \c__zlatex_class_name_tl            {zlatex}
 \tl_const:Nn \c__zlatex_class_version_tl         {1.0.1}
-\tl_const:Nn \c__zlatex_class_date_tl            {2025/01/20}
+\tl_const:Nn \c__zlatex_class_date_tl            {2025/04/21}
 \tl_const:Nn \c__zlatex_class_description_tl     {A~pre-release~latex3~document~class~for~article,~book,~or~slides;
                                                   Support~languages:\clist_use:Nn \c__zlatex_lang_support_clist{,~}}
 
@@ -137,6 +137,10 @@
   hyper           .initial:n    = { false },
   fancy           .bool_gset:N  = \g__zlatex_fancy_bool,
   fancy           .initial:n    = { false },
+  cus             .bool_gset:N  = \g__zlatex_cus_load_bool,
+  cus             .initial:n    = { false },
+  cref-backend    .str_gset:N   = \g__zlatex_cref_backend_str,
+  cref-backend    .initial:n    = { zref-clever },
   % sub class and options
   class           .str_gset:N   = \g__zlatex_subclass_type_str,
   class           .initial:n    = { article },
@@ -324,32 +328,6 @@
 % ----------------------------------------------------------------------
 \RequirePackage{xcolor}
 \RequirePackage{framed}
-\RequirePackage{amsfonts, amsmath}          
-\RequirePackage{esint} 
-\counterwithin{equation}{section}
-
-
-
-% ----------------------------------------------------------------------
-%                              font  config
-% ----------------------------------------------------------------------
-\__zlatex_load_module_library:nn {module}{fontcfg}
-
-
-
-% ----------------------------------------------------------------------
-%                               layout
-% ----------------------------------------------------------------------
-\__zlatex_load_module_library:nn {module}{layout}
-
-
-
-% ----------------------------------------------------------------------
-%                               slide mode
-% ----------------------------------------------------------------------
-\bool_if:NTF \g__zlatex_slide_bool {
-  \__zlatex_load_module_library:nn {library}{slide}
-}{\newcommand\zslideSetup[1]{}}
 
 
 
@@ -357,14 +335,6 @@
 %                              page info
 % ----------------------------------------------------------------------
 \__zlatex_load_module_library:nn {module}{pageinfo}
-
-
-
-% ----------------------------------------------------------------------
-%                        ref and hyperref
-% ----------------------------------------------------------------------
-\__zlatex_load_module_library:nn {module}{indexref}
-\__zlatex_load_module_library:nn {module}{theme}
 
 
 
@@ -379,20 +349,46 @@
 
 
 % ----------------------------------------------------------------------
-%                              toc setup
+%                        ref and hyperref
 % ----------------------------------------------------------------------
-\__zlatex_load_module_library:nn {module}{toc}
+\__zlatex_load_module_library:nn {module}{indexref}
+\__zlatex_load_module_library:nn {module}{theme}
 
 
 
 % ----------------------------------------------------------------------
-%                            sec format
+%                               slide mode
 % ----------------------------------------------------------------------
-\bool_if:NTF \g__zlatex_fancy_bool {
-  \__zlatex_load_module_library:nn {library}{fancy}
-}{
-  \__zlatex_load_module_library:nn {module}{titlesec}
-}
+% NOTE: 'slide' lib need before 'fancy' or 'titlesec' to avoid 
+%       'titlesec' package's option clash conflict.
+\bool_if:NTF \g__zlatex_slide_bool {
+  \__zlatex_load_module_library:nn {library}{slide}
+}{\newcommand\zslideSetup[1]{}}
+
+
+
+% ----------------------------------------------------------------------
+%                      sec and toc format:CUS/zlatex
+% ----------------------------------------------------------------------
+\bool_if:NTF \g__zlatex_cus_load_bool 
+  {
+    \RequirePackage{cus}
+  }{
+    \__zlatex_load_module_library:nn {module}{toc}
+    \bool_if:NTF \g__zlatex_fancy_bool {
+      \__zlatex_load_module_library:nn {library}{fancy}
+    }{
+      \__zlatex_load_module_library:nn {module}{titlesec}
+    }
+  }
+\__zlatex_load_module_library:nn {module}{layout}
+
+
+
+% ----------------------------------------------------------------------
+%                              font  config
+% ----------------------------------------------------------------------
+\__zlatex_load_module_library:nn {module}{fontcfg}
 
 
 
@@ -420,6 +416,11 @@
 \newcommand\zlatexBibIndexLoadTF[2]{
   \bool_if:NTF \g__zlatex_bib_index_load_bool {#1}{#2}
 }
+\bool_new:N \g__zlatex_theme_lib_load_bool
+\bool_gset_false:N \g__zlatex_theme_lib_load_bool
+\newcommand\zlatexThemeLibLoadTF[2]{
+  \bool_if:NTF \g__zlatex_theme_lib_load_bool {#1}{#2}
+}
 
 
 
@@ -428,7 +429,6 @@
 % ----------------------------------------------------------------------
 % Graphics 
 \RequirePackage{graphicx}
-\RequirePackage{sidenotes}
 \graphicspath{
   {./figure/}{./figures/}{./image/}{./images/}
   {./Pictures/}{./picture/}{./Pics/}{./pics/}

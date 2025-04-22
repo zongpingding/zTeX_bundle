@@ -1,4 +1,4 @@
-\ProvidesExplFile{zlatex.module.theme.tex}{2025/01/20}{1.0.1}{theme~module~for~zlatex}
+\ProvidesExplFile{zlatex.module.theme.tex}{2025/02/04}{1.0.1}{theme~module~for~zlatex}
 
 
 %%%%%     color module for zlatex thm and structure    %%%%%
@@ -91,6 +91,9 @@
   solution        .tl_set:N     =  \l__zlatex_solution_color_tl,
   solution        .initial:n    =  { black },
   solution        .code:n       =  { \__zlatex_color_set:n {#1} },
+  problem         .tl_set:N     =  \l__zlatex_problem_color_tl,
+  problem         .initial:n    =  { black },
+  problem         .code:n       =  { \__zlatex_color_set:n {#1} },
 }
 
 
