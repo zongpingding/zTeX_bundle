@@ -12,6 +12,8 @@
 *.cb2
 .*.lb
 *.Identifier
+*.ttf
+*.ttc
 *.out
 *.tmp
 
@@ -49,6 +51,8 @@
 latex.out/
 ztikz_output/
 keytheorems/
+*.hd
+testIO.txt
 # debug.*
 # debug/
 

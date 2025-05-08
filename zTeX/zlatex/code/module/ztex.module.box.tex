@@ -1,0 +1,27 @@
+\ProvidesExplFile{ztex.module.box.tex}{2025/04/28}{1.0.1}{box~module~for~ztex}
+
+
+%%%%%     box module for ztex     %%%%%
+\RequirePackage{ztool}
+\ztex_msg_set:nn {boxitem-align}{Valid~align~options~are:'left',~'center',~'right'~and~'scatter'.}
+\ztex_keys_define:nn { box / align }
+  {
+    cmd   .tl_set:N  = \l__ztex_boxitem_align_cmd_tl,
+    cmd   .initial:n = { \use:n },
+    type  .tl_set:N = \l__ztex_boxitem_align_type_tl,
+    type  .initial:n = { center },
+  }
+% NOTE: any explicit blank space in 'object' will be absored.
+\NewDocumentCommand{\zboxitemalign}{omm}
+  {% #1:cmd, #2:width; #3:object
+    \group_begin:
+    \ztex_keys_set:nn { box / align }{#1}
+    \tl_if_in:nVF {left, center, right, scatter}
+      \l__ztex_boxitem_align_type_tl
+      { \ztex_msg_error:n {boxitem-align} }
+    \ztool_box_item_align:onno 
+      { \l__ztex_boxitem_align_cmd_tl }
+      { #2 }{ #3 }
+      { \l__ztex_boxitem_align_type_tl }
+    \group_end:
+  }

@@ -5,7 +5,7 @@
   mathSpec={envStyle=leftbar, alias},
   toc={redef}
 ]{zlatex}
-\zlatexColorSetup{
+\zcolorset{
   % link        = teal,
   definition  = blue
 }
@@ -23,9 +23,9 @@
   breaksymbolleft=,
 }
 % print macro
-\let\cmd\zlatexVerb
+\let\cmd\ztexverb
 \newcommand{\Footnote}[1]{\stepcounter{footnote}\footnote[\thefootnote]{#1}}
-\zlatexFramed{leftbar}[gray]
+\ztexframe{leftbar}[gray]
 \newcommand{\zkey}[1]{\texttt{<#1>}}
 
 

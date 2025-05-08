@@ -7,7 +7,7 @@
 \usepackage{tikz}
 \usetikzlibrary{calc}
 \usepackage{fontspec}
-\newfontfamily{\Cinzel}[Path=../Fonts/]{CinzelRegular.ttf}[
+\newfontfamily{\cinzel}[Path=../Fonts/]{CinzelRegular.ttf}[
     BoldFont=CinzelBold.ttf,
     ItalicFont=SabonItalic.ttf
 ]
@@ -51,12 +51,12 @@
         font=\Large\bfseries, color=chpcolor] at (B) {An Introduction to Mathematical Logic};
     \node[anchor=south west, inner sep=0pt,
         yshift=2em, xshift=1\chaplinexshift,
-        font=\Cinzel\Huge\bfseries, color=chpcolor] at (B) {MATHEMATICAL LOGIC};
+        font=\cinzel\Huge\bfseries, color=chpcolor] at (B) {MATHEMATICAL LOGIC};
     % 4. parbox insert
     \node[anchor=north west, inner sep=0pt, 
         color=chpTextColor] at ($(B)+(-5em, -1.7em)$) {%
         % left parbox insert
-        \parbox[t][][r]{.25\paperwidth}{\begingroup\Cinzel\itshape%
+        \parbox[t][][r]{.25\paperwidth}{\begingroup\cinzel\itshape%
             \includegraphics[width=.25\paperwidth]{../Pics/087.png}\par\vspace*{2em}
             We add two words of caution. First, if two different syntactical variables
             occur in the same context, they do not necessarily 
@@ -78,7 +78,7 @@
         conclude that the sum of the angles is always 180°. However, he will accept this
         as a law of mathematics only when it has been proved.}
     };
-    \node[inner sep=0pt, font=\Large\Cinzel] at ($(C)+(.5\paperwidth, -6em)$){%
+    \node[inner sep=0pt, font=\Large\cinzel] at ($(C)+(.5\paperwidth, -6em)$){%
         \parbox[t][][r]{.75\paperwidth}{
             Mathematical logic has always been closely connected 
             with the philosophy of mathematics\par

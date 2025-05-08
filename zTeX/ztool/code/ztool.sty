@@ -1,6 +1,6 @@
 \NeedsTeXFormat{LaTeX2e}
 \RequirePackage{expl3}
-\ProvidesExplPackage{ztool}{2025/01/20}{1.0.1}{A~pre-release~tool~package~for~LaTeX}
+\ProvidesExplPackage{ztool}{2025/04/29}{1.0.1}{A~pre-release~tool~package~for~LaTeX}
 
 
 % ==> Shell escape tool 
@@ -251,6 +251,8 @@
 \cs_generate_variant:Nn \ztool_insert_to_file:nn { ne, nf, ee }
 
 % ==> box manipulation tool
+\cs_set:Nn \__ztool_leave_vmode:
+  { \ifvmode \leavevmode \fi }
 % catch box dimension
 \box_new:N \l_ztool_measure_box
 \cs_new:Npn \ztool_box_set_to:NNn #1#2#3 {
@@ -265,6 +267,8 @@
 }
 \cs_new:Npn \ztool_get_ht:Nn 
   { \ztool_box_set_to:NNn \box_ht:N }
+\cs_new:Npn \ztool_get_ht_plus_dp:Nn 
+  { \ztool_box_set_to:NNn \box_ht_plus_dp:N }
 \cs_new:Npn \ztool_get_wd:Nn  
   { \ztool_box_set_to:NNn \box_wd:N }
 \cs_new:Npn \ztool_get_dp:Nn  
@@ -276,21 +280,114 @@
 \cs_new:Npn \ztool_gget_dp:Nn  
   { \ztool_box_gset_to:NNn \box_dp:N }
 \cs_generate_variant:Nn \ztool_get_ht:Nn  { Ne, ce }
+\cs_generate_variant:Nn \ztool_get_ht_plus_dp:Nn  { Ne, ce }
 \cs_generate_variant:Nn \ztool_get_wd:Nn  { Ne, ce }
 \cs_generate_variant:Nn \ztool_gget_ht:Nn { Ne, ce }
 \cs_generate_variant:Nn \ztool_gget_wd:Nn { Ne, ce }
-% resize box content
+
+
+% ==> modify box content
+% 1. auto scale and rotate (smaller of two)
+\cs_new_protected:Npn \ztool_autoset_to_wd_and_ht:nnn #1#2#3
+  {% #1:width; #2:height; #3:object 
+    \hbox_set:Nn \l_tmpa_box {#3}
+    \box_autosize_to_wd_and_ht:Nnn \l_tmpa_box {#1}{#2}
+    \__ztool_leave_vmode:
+    \box_use:N \l_tmpa_box
+  }
+\cs_new_protected:Npn \ztool_rotate:nn #1#2
+  {% #1:angle; #2:object
+    \hbox_set:Nn \l_tmpa_box {#2}
+    \box_rotate:Nn \l_tmpa_box {#1}
+    \__ztool_leave_vmode:
+    \box_use:N \l_tmpa_box
+  }
+\cs_generate_variant:Nn \ztool_rotate:nn { e, ne, ee }
+\cs_generate_variant:Nn \ztool_autoset_to_wd_and_ht:nnn { nne, een, eee }
+
+% 2. width/height scale to same time
 \cs_new_protected:Npn \ztool_set_to_wd:nn #1#2
-  {% #1: object; #2: width
+  {% #1:width; #2:object
     \hbox_set:Nn \l_tmpa_box {#2}
     \box_resize_to_wd:Nn \l_tmpa_box {#1}
+    \__ztool_leave_vmode:
     \box_use:N \l_tmpa_box
   }
 \cs_new_protected:Npn \ztool_set_to_ht:nn #1#2
-  {% #1: object; #2: width
+  {% #1:height; #2:object
     \hbox_set:Nn \l_tmpa_box {#2}
     \box_resize_to_ht:Nn \l_tmpa_box {#1}
+    \__ztool_leave_vmode:
     \box_use:N \l_tmpa_box
   }
 \cs_generate_variant:Nn \ztool_set_to_wd:nn { e, ne, ee }
 \cs_generate_variant:Nn \ztool_set_to_ht:nn { e, ne, ee }
+
+% 3. only scale one dimension
+% NOTE: if \box_wd{content} <= given dim, no manipulation
+\cs_new_protected:Npn \ztool_scale_to_wd:nn #1#2
+  {
+    \hbox_set:Nn \l_tmpa_box {#2}
+    \dim_set:Nn \l_tmpa_dim { \box_wd:N \l_tmpa_box }
+    \fp_set:Nn \l_tmpa_fp  
+      { 
+        \fp_eval:n { min(1, \dim_ratio:nn {#1}{\l_tmpa_dim}) }
+      }
+    \box_scale:Nnn \l_tmpa_box {\l_tmpa_fp}{1}
+    \__ztool_leave_vmode:
+    \box_use:N \l_tmpa_box
+  }
+\cs_new_protected:Npn \ztool_scale_to_ht:nn #1#2
+  {% take depth into consideration
+    \hbox_set:Nn \l_tmpa_box {#2}
+    \dim_set:Nn \l_tmpa_dim { \box_ht_plus_dp:N \l_tmpa_box }
+    \fp_set:Nn \l_tmpa_fp  
+      { 
+        \fp_eval:n { min(1, \dim_ratio:nn {#1}{\l_tmpa_dim}) }
+      }
+    \box_scale:Nnn \l_tmpa_box {1}{\l_tmpa_fp}
+    \__ztool_leave_vmode:
+    \box_use:N \l_tmpa_box
+  }
+\cs_new_protected:Npn \ztool_scale_to_wd_and_ht:nnn #1#2#3
+  {% take depth into consideration
+    \hbox_set:Nn \l_tmpa_box {#3}
+    \dim_set:Nn \l_tmpa_dim { \box_wd:N \l_tmpa_box }
+    \dim_set:Nn \l_tmpb_dim { \box_ht_plus_dp:N \l_tmpa_box }
+    \fp_set:Nn \l_tmpa_fp  
+      { 
+        \fp_eval:n { min(1, \dim_ratio:nn {#1}{\l_tmpa_dim}) }
+      }
+    \fp_set:Nn \l_tmpb_fp  
+      { 
+        \fp_eval:n { min(1, \dim_ratio:nn {#2}{\l_tmpb_dim}) }
+      }
+    \box_scale:Nnn \l_tmpa_box {\l_tmpa_fp}{\l_tmpb_fp}
+    \__ztool_leave_vmode:
+    \box_use:N \l_tmpa_box
+  }
+\cs_generate_variant:Nn \ztool_scale_to_wd:nn { e, ne, ee }
+\cs_generate_variant:Nn \ztool_scale_to_ht:nn { e, ne, ee }
+\cs_generate_variant:Nn \ztool_scale_to_wd_and_ht:nnn { nne, nno, eee }
+
+
+% ==> box content align
+\seq_new:N \l__ztool_boxitem_seq
+\cs_set_protected:Npn \ztool_box_item_align:nnnn #1#2#3#4
+  {% #1:cmd, #2:width, #3:object, #4:align format(left, right, scatter, center)
+    \hb@xt@#2{
+      \tl_map_inline:nn {#3} 
+        {
+          \seq_put_right:No \l__ztool_boxitem_seq {\exp_not:N #1{##1}}
+        } 
+      \str_case:nnF { #4 }
+        {
+          {  left  }{ \seq_use:Nn \l__ztool_boxitem_seq {}\hfill }
+          {  right }{ \hfill\seq_use:Nn \l__ztool_boxitem_seq {} }
+          { scatter}{ \seq_use:Nn \l__ztool_boxitem_seq {\hfill} }
+          { center }{ \hfill\seq_use:Nn \l__ztool_boxitem_seq {}\hfill }
+        }{\relax}
+    }
+    \seq_clear:N \l__ztool_boxitem_seq
+  }
+\cs_generate_variant:Nn \ztool_box_item_align:nnnn { o, onno, nne, nnee }

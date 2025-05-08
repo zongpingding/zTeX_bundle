@@ -1,0 +1,4107 @@
+% ==> l3doc key-value add/ '|' test
+\documentclass{l3doc}
+\let\oldmeta\meta
+\RenewDocumentCommand{\meta}{m}{}
+
+\begin{document}
+Hello world.
+
+\begin{function}[added=2024-04-27]{\test}
+  \begin{syntax}
+    \cs{test}\oarg{arg1}\meta{\upshape{AAA\string|BBB}}
+  \end{syntax}
+  A simple test for thuis ajlf hajk.
+\end{function}
+\end{document}
+
+
+
+
+% ==> ztex font module test
+\InputIfFileExists{zlatex-cfg.tex}{}{}
+\documentclass[lang=cn]{../code/ztex}
+\usepackage{lipsum}
+\usepackage{zhlipsum}
+% \setmainfont{Times New Roman}
+\ztexset{mathSpec={font=mathpazo}}
+\zfontset{
+  sysfont,
+  % doc = lmm,
+  % text=times,
+  math = euler
+}
+\zfontfamilynew[CJK]{
+  cmd = YaHei, 
+  name = msyh.ttc,
+  path = ./Fonts/, 
+  feat = { bd=*bd } 
+}
+\zfontfamilynew{
+  cmd = Arial,
+  name = arial.ttf,
+  path = ./Fonts/,
+  feat = {it=*i}
+}
+% do NOT 'file name' and  'font name' in one decalre.
+\zfontfamilynew{
+  cmd = SourceCodePro,
+  name = Source Code Pro,
+  feat = { bd=Source Code Pro Bold }
+}
+% \newfontfamily\TEST{Times New Roman}
+%   [
+%     BoldFont = Times New Roman,
+%     ItalicFont = Times New Roman
+%   ]
+
+
+
+
+
+
+\begin{document}
+\ExplSyntaxOn
+\tl_set:Ne \l_tmpa_tl {*-YYY}
+\tl_replace_all:Nnn \l_tmpa_tl {*}{XXX}
+
+\tl_set:Ne \l_tmpb_tl {\exp_not:N \l_tmpa_tl}
+% \tl_show:N \l_tmpb_tl
+% \tl_use:N \l_tmpa_tl
+\ExplSyntaxOff
+
+\lipsum[1][1-5]
+\begin{align}
+  \sum_{i=1}^\infty \frac{1}{i^2} = \int_a^b x\:\mathrm{d}x.
+\end{align}
+
+\zhlipsum[1]
+
+{\YaHei 你好世界,\bfseries 你好世界.}
+
+
+{\Arial Hello world,\itshape Hello world.}
+
+
+{Hello world,\SourceCodePro Hello world,\bfseries Hello world.}
+\end{document}
+
+
+
+
+% ==> ztex normal commands test
+\InputIfFileExists{zlatex-cfg.tex}{}{}
+% \documentclass{article}
+% \usepackage[T1]{fontenc}
+% \usepackage{garamondx}
+\documentclass[class=l3doc]{../code/ztex}
+% \ztexset{mathSpec={font=ptmx}}
+\zthmstyle{leftbar}
+% \zfontset{math=euler} % works
+% \zfontset{text=times} % works 
+% \zfontset{doc=lmm} % works
+% \zthmhook*[theorem]{before=, begin=YYY}
+
+
+\begin{document}
+\section{Introduction to manifolds}
+We assume that $n\ge 2$ and leave it to the reader to make the necessary
+changes for the case $n = 1$.
+
+
+\vspace*{42em}
+It is clear that $i^*(\omega)$ has compact support. We can choose $f\in\Omega^0_c(M)$ with value
+constantly equal to 1 on $N\cap\operatorname{supp}_M(\omega)$. Since $f\omega$ coincides with $\omega$ on $N$, 
+both integrals are unchanged when $\omega$ is replaced by $f(\omega)$, so we may assume that $\omega$
+has compact support.
+
+\begin{theorem}[Local Chart]
+  Choose a smooth atlas on $M$ consisting of charts of the type of Definition 10-5
+  and a subordinate smooth partition of unity $(\rho\alpha)_{\alpha\in A}$. The formulas
+  \begin{align*}
+    \int_{\partial N}\omega = \sum_{\alpha} \int_{\partial N} 
+    &&
+    \int_N \:\mathrm{d}\omega = \sum_{\alpha} \int_N \:\mathrm{d}(\rho_\alpha\omega)
+  \end{align*}
+  and a subordinate smooth partition of unity $(\rho\alpha)_{\alpha\in A}$. The formulas
+\end{theorem}
+
+It is clear that $i^*(\omega)$ has compact support. We can choose $f\in\Omega^0_c(M)$ with value
+constantly equal to 1 on $N\cap\operatorname{supp}_M(\omega)$. Since $f\omega$ coincides with $\omega$ on $N$, 
+both integrals are unchanged when $\omega$ is replaced by $f(\omega)$, so we may assume that $\omega$
+has compact support.
+
+% \newgeometry{hmargin=1cm, vmargin=1cm}
+% \thispagestyle{empty}
+% \begin{center}
+%   \mbox{}\vfill
+%   \includegraphics[width=.9\paperheight, angle=90]{ztex_options.pdf}
+%   \vfill\mbox{}
+% \end{center}
+% \restoregeometry
+\end{document}
+
+
+
+
+% ==> zlatex commands rename
+% 1. Search Setup:
+% include:*.tex, *.sty, *.cls
+% exclude:zlatex_manual.tex, .git/*, build/*
+
+% 2. Rename Pattern:
+% Setup --> setup (all of them are lowercaes)
+% zlatex + thm + <*>   --> \zthm<*>
+% zlatex + page + <*>  --> \zpage<*>
+% set/setup --> set ###
+% create 	--> new
+% add --> add
+% temp --> tmp
+% symbol --> sym
+% noteempty --> notempty
+% remove --> rm
+% clear --> rm
+% counter --> cnt
+% module --> mod
+% library --> lib
+% index --> ind
+% Navigate --> nav
+% Internal commands:
+% \__zlatex_color_set:n --> \__ztex_color_setup:n (\__ztex_<module>_setup:)
+
+% 3. TODO
+% add scatterr align command:use the 's' option in \makebox
+% implement \appmatter and \backmatter
+\InputIfFileExists{zlatex-cfg.tex}{}{}
+\documentclass[class=l3doc]{../code/zlatex}
+% \usepackage{newtxtext}
+
+
+\title{Math PTMX font}
+\author{Eureka}
+\date{\today}
+\begin{document}
+\maketitle
+% \chapter{Cauchy-Riemann Equations}
+\meaning\PrintIndex
+
+
+\section{Introduction}
+We assume that $n\ge 2$ and leave it to the reader to make the necessary
+changes for the case $n = 1$.
+
+It is clear that $i^*(\omega)$ has compact support. We can choose $f\in\Omega^0_c(M)$ with value
+constantly equal to 1 on $N\cap\operatorname{supp}_M(\omega)$. Since $f\omega$ coincides with $\omega$ on $N$, 
+both integrals are unchanged when $\omega$ is replaced by $f(\omega)$, so we may assume that $\omega$
+has compact support.
+
+Choose a smooth atlas on $M$ consisting of charts of the type of Definition 10-5
+and a subordinate smooth partition of unity $(\rho\alpha)_{\alpha\in A}$. The formulas
+\begin{align*}
+  \int_{\partial N}\omega = \sum_{\alpha} \int_{\partial N} 
+  &&
+  \int_N \:\mathrm{d}\omega = \sum_{\alpha} \int_N \:\mathrm{d}(\rho_\alpha\omega)
+\end{align*}
+\end{document}
+
+
+% ==> ptmx math font
+\InputIfFileExists{zlatex-cfg.tex}{}{}
+\documentclass[
+  % hyper,
+  layout={slide, aspect=16|9, theme=AnnArborSpruce}
+]{../code/zlatex}
+\ztexloadlib{alias}
+\ztexset{
+  mathSpec={font=ptmx, envStyle=fancy},
+}
+% \zslideset{
+%   UR = {text=\zslidenavsym}
+% }
+\zslidethemeuse[
+  UL={bg=white, text=}, 
+  UR={bg=white, text=},
+  BL={bg=white, text=},
+  BC={bg=white, text=},
+  BR={bg=white, text=\zslideframeind/\zslideframeall{\Roman{section}}},  
+]{AnnArborSpruce}
+\ExplSyntaxOn
+\dim_gset:Nn \g_zslide_status_bar_sec_H_dim {2.2em}
+\dim_gset:Nn \g_zslide_status_bar_sec_B_dim {-2.2em}
+\dim_gset:Nn \g_zslide_status_info_sec_B_dim {-1.55em}
+\dim_gset:Nn \g_zslide_status_info_head_B_dim {-2.5em}
+% navigator
+\AddToHook{shipout/foreground}{
+  \zslide_status_info:nnnn {head}{0}{1}{
+    \zslidenavsym[
+      \RPITEM[red]
+    ][
+      \RPITEM
+      % \textcolor{gray}{\rule{1em}{1em}}
+    ]
+  }
+}
+\def\SecRation{\zslideframeind/\zslideframeall{\Roman{section}}}
+\newcommand\ITEM[1][gray]{\hspace*{0pt}\pgfornamenthan[color=#1, scale=0.06]{39}}
+\newcommand\RPITEM[1][gray]{\prg_replicate:nn {\int_eval:n {36*\SecRation}}{\ITEM[#1]}}
+\ExplSyntaxOff
+\usepackage{pgfornament-han}
+
+
+\title{Math PTMX font}
+\author{Eureka}
+\date{\today}
+\begin{document}
+\maketitle
+\zlatexaliasOn
+\section{Stokes' Theorem}
+\subsection{Introduction}
+We assume that $n\ge 2$ and leave it to the reader to make the necessary
+changes for the case $n = 1$.
+
+It is clear that $i^*(\omega)$ has compact support. We can choose $f\in\Omega^0_c(M)$ with value
+constantly equal to 1 on $N\cap\supp_M(\omega)$. Since $f\omega$ coincides with $\omega$ on $N$, 
+both integrals are unchanged when $\omega$ is replaced by $f(\omega)$, so we may assume that $\omega$
+has compact support.
+
+Choose a smooth atlas on $M$ consisting of charts of the type of Definition 10-5
+and a subordinate smooth partition of unity $(\rho\alpha)_{\alpha\in A}$. The formulas
+\begin{align*}
+  \int_{\partial N}\omega = \sum_{\alpha} \int_{\partial N} 
+  &&
+  \int_N \dd\omega = \sum_{\alpha} \int_N \dd(\rho_\alpha\omega)
+\end{align*}
+
+reduce the problem to the case where $\omega\in\Omega^n_c(M)$. $\supp_M(\omega)\subseteq U$
+and $(U, h)$ is a smooth chart $h(U\cap N) = h(U)\cap\RR^n_-$. Furthermore the chart $(U, h)$
+is assumed to be positively oriented.
+
+\begin{theorem}
+  Let $\kappa\in\Omega^{n-1}_c(\RR^n)$ be the $(n-1)$-form that is $(h^{-1})^*(\omega)$ on 
+  $h(U)$ and 0 on the rest of $\RR^n$. By diffeomorphism invariance we then have that 
+  \begin{align*}
+    \int_{\partial N}\omega 
+      = \int_{h(U)\cap \partial\RR^n_-} (h^{-1})^*(\omega) 
+      = \int_{\RR^n_-} \kappa
+  \end{align*}
+  and 
+  \begin{align*}
+    \int_N \dd\omega
+      = \int_{h(U)\cap \RR^n_-} (h^{-1})^* \dd(\omega) 
+      = \int_{\RR^n_-} \dd\kappa.
+  \end{align*}
+\end{theorem}
+
+
+Hence the proof reduces to the special case where $M=\RR^n, N=\RR^n_-$ and 
+$\omega\in\Omega_c^{n-1}(\RR^n)$. This case treated by direct calculation. We define 
+\begin{align*}
+  \omega = \sum_{i=1}^{n }{f_i(x)\dd x_1\wedge\ldots\wedge\widehat{\dd x_i}\wedge\ldots\wedge\dd x_n},
+\end{align*}
+and choose $b>0$ such that $\supp_{\RR^n}f_i \subseteq [-b, b]^n, 1\le i\le n$. Using Theorem 3-12,
+\begin{align*}
+  \omega_{|\partial\RR^n_-}
+  = f_1(0, x_2, \ldots, x_n)\dd x_2\wedge\ldots\wedge\dd x_n.
+\end{align*}
+
+\section{Final Proof}
+Hence 
+\begin{align}\label{eq:10-3}
+  \int_{\partial\RR^n_-}\omega 
+  = \int f_1(0, x_2, \ldots, x_n)\dd\mu_{n-1}.
+\end{align}
+By Theorem 3-7 we have 
+\begin{align*}
+  \dd\omega 
+  = \sum_{i=1}^{n}{(-1)^{i-1}\frac{\partial f_i}{\partial x_i}\dd x_1\wedge\ldots\wedge\dd x_n}.
+\end{align*}
+Hence 
+\begin{align}\label{eq:10-4}
+  \int_{\RR^n_-}
+  = \sum_{i=1}^{n}{(-1)^{i-1}\int_{\RR^n_-}\frac{\partial f_i}{\partial x_i}\dd\mu_n}.
+\end{align}
+For $2\le i\le n$ we get 
+\begin{align*}
+  & \int_{-\infty}^\infty \frac{\partial f_i}{\partial x_i}(x_1, \ldots, x_{i-1}, t, x_{i+1}, \ldots, x_n)\dd t \\
+  =\;\; & f_i(x_1, \ldots, x_{i-1}, b, x_{i+1}, \ldots, x_n) 
+    - f_i(x_1, \ldots, x_{i-1}, -b, x_{i+1}, \ldots, x_n).\\
+  =\;\; & 0
+\end{align*}
+and then by Fubini's theorem
+\begin{align}\label{eq:10-5}
+  \int_{\RR^n_-}\frac{\partial f_i}{\partial x_i}\dd\mu_n = 0\qquad (2\le i\le n).
+\end{align}
+When $i=1$, one gets 
+\begin{align*}
+  \int_{-\infty}^0 \frac{\partial f_1}{\partial x_1}(t, x_2, \ldots, x_n)\dd t
+  & = f_1(0, x_2, \ldots, x_n) - f_1(-b, x_2, \ldots, x_n)\\
+  & = f_1(0, x_2, \ldots, x_n),
+\end{align*}
+and by Fubini's theorem 
+\begin{align}\label{eq:10-6}
+  \int_{\RR^n_-} \frac{\partial f_1}{\partial x_1}\dd\mu_n
+    = f_1(0, x_2, \ldots, x_n)\dd\mu_{n-1}.
+\end{align}
+By combining Equations (6), (10) the desired formula follows.
+\zlatexaliasOff
+\end{document}
+
+
+
+
+
+% ==> test math font
+% 1. LATEX font encodings
+% 2. TeX by Topic
+\InputIfFileExists{zlatex-cfg.tex}{}{}
+\documentclass{article}
+\usepackage{amsmath}
+\usepackage{amssymb}%for \mathbb 
+\usepackage{mathptmx}
+\usepackage{newtxtext}
+\DeclareSymbolFont{letters}{OML}{ntxmi}{m}{it}
+\DeclareMathAlphabet{\mathbf}{OT1}{ntxtlf}{b}{it}
+% symbols patch
+\DeclareSymbolFont{CMMletters}{OML}{cmm}{m}{it}
+\DeclareMathSymbol{\pi}{0}{CMMletters}{"19}
+
+
+
+\begin{document}
+Let $1< p\le 2$. A Banach space $X$ is said to have \textbf{Haar type} $p$ if there exists
+a constant $c\ge 1$ such that
+
+\begin{align}
+  \bigg(\int_0^1 \Big\|\sum_{k=0}^n \mathbf{d}_k(t)\Big\|^p\bigg)^{1/p} 
+  \le 
+  2\pi\alpha\cdot\gamma\bigg(\prod_{i=1}^\infty\sum_{k=0}^n \int_0^1 \|d_k(t)\|^p\bigg)^{1/p} 
+\end{align}
+for every $X$-valued Walsh–Paley martingale of arbitrary length $n$.
+
+Let $X_\mathbb{R}$ be a real linear lattice. Then an absolute value is obtained on the complex-
+ification $X_\mathbb{C} = X_\mathbb{R}+iX_\mathbb{R}$ by letting
+\begin{align}
+  |x+iy| := \sup_{0\le s\le 2\pi} |x\cos s + y\sin s|.
+\end{align}
+
+
+%%%%%%% Use \box_show:N to see the font details:
+\ExplSyntaxOn
+% \hbox_set:Nn \l_tmpa_box {\textit{\bfseries d}}
+\hbox_set:Nn \l_tmpa_box {$\pi$} %\pi=\OML/cmm/m/it/10
+% \box_show:N \l_tmpa_box
+% > \box13=
+% \hbox(7.01+0.14)x5.17
+% .\OT1/ntxtlf/b/it/10 d
+% .\kern 0.17
+\ExplSyntaxOff
+\end{document}
+
+
+
+% ==> zlatex thm icon interface test
+\InputIfFileExists{zlatex-cfg.tex}{}{}
+\documentclass{../code/zlatex}
+\zthmstyle{paris}
+\ztexloadlib{theme}
+\usepackage{lipsum}
+% \geometry{a1paper, margin=20em}
+
+\begin{document}
+\section{FIRST}
+\lipsum[1]
+
+\begin{remark}[REMARK]
+  \lipsum[2][1-5]
+  \begin{align}
+    a^2 + b^2 = c^2
+  \end{align}
+  \lipsum[2][6-8]
+  \begin{align*}
+    a^2 + b^2 = c^2
+  \end{align*}
+\end{remark}
+
+\lipsum[2-3]
+\begin{proposition}[PROP]
+  \lipsum[2][1-5]
+  \begin{align}
+    a^2 + b^2 = c^2
+  \end{align}
+  \lipsum[2][6-8]
+  \begin{align*}
+    a^2 + b^2 = c^2
+  \end{align*}
+\end{proposition}
+\end{document}
+
+
+% ==> fixed:wrong bookmark target for contents
+\InputIfFileExists{zlatex-cfg.tex}{}{}
+% \DocumentMetadata{} % this line + lualatex ==> cause this bug.
+% \documentclass{l3doc} % works
+\documentclass[hyper, class=l3doc]{../code/zlatex}
+
+
+\begin{document}
+\tableofcontents
+\newpage
+
+\section{A}
+\subsection{A-1}
+\subsection{A-2}
+
+\newpage
+\section{B}
+\subsection{B-1}
+\subsection{B-2}
+\end{document}
+
+
+% ==> add CUS struct module to zlatex
+% ==> THANKS TO:https://github.com/Sophanatprime/cus
+\InputIfFileExists{zlatex-cfg.tex}{}{}
+% \documentclass{ctexart}
+% % \usepackage{cus}
+% % \usepackage{ctex}
+% \def\text{Lorem ipsum dolor sit amet, consectetuer adipiscing elit. Ut purus elit, vestibulum
+% ut, placerat ac, adipiscing vitae, felis. Curabitur dictum gravida mauris. Nam arcu
+% libero, nonummy eget, consectetuer id, vulputate a, magna. Donec vehicula augue
+% eu neque.}
+% % \setuptitle[section]{
+% %   runin=true,
+% % }
+% \ctexset{
+%   section/runin = true,
+%   section/aftertitle={}, % important
+% }
+% \usepackage{xtemplate}
+
+% \begin{document}
+% \section{FIRST}
+% \text
+% \end{document}
+
+\documentclass[
+  cus,
+  lang=cn,
+  class=book,
+  hyper
+]{../code/zlatex}
+\usepackage{newtxtext}
+\CUSLoadLibrary{box}
+\usepackage{lipsum}
+\usepackage{tabto}
+\usepackage[hshift=0mm,vshift=0mm]{fgruler}
+\setuptitle[section]{
+  runin=true,
+  aftertitle={},
+  % name={XX, YY},
+  % format+=\raggedright,
+}
+% \setuptitle[chapter]{numbering=false, pagestyle=}     % default latex style toc
+\setuptitle[chapter]{numbering=true, pagestyle=plain} % custom style toc
+\def\text{Lorem ipsum dolor sit amet, consectetuer adipiscing elit. Ut purus elit, vestibulum
+ut, placerat ac, adipiscing vitae, felis. Curabitur dictum gravida mauris. Nam arcu
+libero, nonummy eget, consectetuer id, vulputate a, magna. Donec vehicula augue
+eu neque.}
+
+
+\enablecombinedlist
+\begin{document}
+\frontmatter
+\def\contentsname{\textsc{Contents}}
+% \tableofcontents 
+% \multicolplaincombinedlist[ragged,outer-sep=0pt]{\contentsname}{toc}
+
+
+%%%%%% STYLE I
+\makeatletter
+\templatetoc[
+  * = { ignore=true }, show = {chapter,section},
+  section = {
+    code.before=\S\sbox{\@tempboxa}{\tmcblthetitle}\needhspace{\wd\@tempboxa},
+    code.after=\quad,
+    code.leader=---, code.page=\tmcblthepage,
+    space.left=0pt, space.right=0pt, space.hang=0pt
+  },
+  chapter = { 
+    code.before=\par, space.before=1pt plus 1pt,
+    code.leader=\tabto{5cm}, % 使得页码移动到距页面左侧 5 厘米处
+    code.after=\hfill\zkern\par, % 加上 \hfill\kern0pt 使得不会出现 underfull 警告
+    code.name=\ifx\tmcblthename\empty
+      \makebox[1em]{\rule{1ex}{1ex}}\quad
+    \else
+      \tmcbl@name@
+    \fi
+  },
+]
+\makeatother
+
+
+%%%%%% STYLE II
+% \centerline{\huge\textbf{\contentsname}}
+% \vskip2em
+% \startmulticolumns[ragged,outer-sep=0pt,column-sep=2em]
+% \colorlet{tocgreen}{green!65!black}
+% \hypersetup{hidelinks}
+% \newcommand{\tochyperpage}{\toclink{\tocthepage}}
+% \makeatletter
+% \tocsetstyle {chapter}
+%   {}
+%   {\noindent}
+%   {\fparbox{\linewidth}[padding={0pt,\fboxsep},
+%       border-color=tocgreen, background-color=tocgreen]
+%     {\bfseries\large \raggedright \color{white}%
+%       \hangindent4\ccwd \hangafter1 % 更推荐使用 list 环境或 description 环境 
+%       \strut \tocifnamed{\tocthename\unskip\quad}{}\tocthetitle
+%       \breakablefiller[space]\tochyperpage \strut\par }\par }
+%   {\smallskip}
+%   {}
+% \tocsetstyle {section}
+%   {\smallskip
+%     \begin{list}{}{\leftmargin3\ccwd \labelsep\z@ \rightmargin 2em 
+%       \itemindent-\ccwd \listparindent\itemindent
+%       \topsep\z@ \partopsep\z@ \itemsep\z@ \parsep\z@ \parskip\z@}}
+%   {\item \begingroup\color{tocgreen}\bfseries}
+%   {\tocifnamed{\tocthename\unskip\quad}{}\tocthetitle \breakablefiller[space]%
+%     \rlap{\makebox[2em][r]{\tochyperpage\;}}\par }
+%   {\endgroup}
+%   {\end{list}}
+% \tocsetstyle {subsection}
+%   {}
+%   {\begingroup\color{black}\bfseries}
+%   {\tocifnamed{\tocthename\unskip\quad}{}\tocthetitle \breakablefiller[dotted]%
+%     \rlap{\makebox[2em][r]{\tochyperpage\;}}\par }
+%   {\endgroup}
+%   {}
+% \makeatother 
+% \specifiedtoc
+% \stopmulticolumns
+
+
+%%%%%% STYLE III
+% \makeatletter
+% \ekeysdeclarecmd\fixedwidthtext{smm}{\leavevmode@ifvmode
+%   \setbox\z@\hbox{{#3}}%
+%   \ifdim\dimeval{#2}>\wd\z@ 
+%     \hbox to\dimeval{#2}{\IfBooleanTF{#1}{\spreadtext*{#2}{#3}}{#3\hfill}}%
+%   \else
+%     \resizebox{\dimeval{#2}}{\height}{#3}%
+%   \fi}
+% \definecolor{toccol1}{HTML}{006DAA}
+% \definecolor{toccol2}{HTML}{C4D4E3}
+% \newcommand*{\zhphantom}{\vphantom{好hig}}
+
+% \tocsetstyle{chapter}{}
+%   {}
+%   {\begingroup\noindent \bfseries\large \fboxrule\z@ 
+%     \fcolorbox{toccol1}{toccol1}{\zhphantom\color{white}%
+%       \tocifnamed{\fixedwidthtext*{4\ccwd}{\tocthename\unskip}}
+%         {\fixedwidthtext*{4\ccwd}{\tocthetitle}}}%
+%     \toclinkbox{\fcolorbox{toccol2}{toccol2}{\zhphantom
+%       \fixedwidthtext{\linewidth-4\ccwd-4\fboxsep-\@pnumwidth}
+%         {\tocifnamed{\tocthetitle}{}}%
+%       \makebox[\@pnumwidth][r]{\tocthepage}}}
+%     \endgroup\par \medskip}
+%   {\bigskip}{}
+% \tocsetstyle{section}{}{}
+%   {\@dottedtocline{\tocthelevel}{1.5em}{2.3em}{\tocthename\enskip\tocthetitle}
+%     {\hss\toclink{\tocthepage}\hspace{\fboxsep}}}
+%   {}{}
+% \tocsetstyle{subsection}{}{}
+%   {\@dottedtocline{\tocthelevel}{3.8em}{3.2em}{\tocthename\enskip\tocthetitle}
+%     {\hss\toclink{\tocthepage}\hspace{\fboxsep}}}
+%   {}{}
+% \renewcommand*{\@pnumwidth}{1.3em}
+% \makeatother
+% \startmulticolumns[ragged,outer-sep=0pt,column-sep=1.5em]
+% \specifiedtoc 
+% \stopmulticolumns
+\newpage% ----------> START NEW PAGE
+\mainmatter
+\pagestyle{fancy}
+
+
+\zpagemask{\rule{3em}{3em}}
+\chapter{CHAPTER FIRST}
+\section{FIRST}% \thispagestyle{empty}
+\CusTeX{} \text
+
+\subsection{sss-1}
+\begin{align}
+  a^2 + b^2 = c^2
+\end{align}
+\lipsum[1][6-10]
+
+\subsection{sss-2}
+\noindent\llap{|}\dashfiller [.5ex]\par
+\lipsum[2]
+
+\section{SECOND}
+\text
+\subsection{sss-3}
+\text
+\subsection{sss-4} 
+
+\section{THIRD}
+\text
+\subsection{sss-5}
+\text
+\subsection{sss-6} 
+
+\section{FOURTH}
+\text
+\subsection{sss-7}
+\text
+\subsection{sss-8} 
+
+\chapter{CHAPTER SECON}
+\section{FIFTH}
+\text
+\fvarbox[c]{3cm}[border-color={}]{可以分段的\par \verb|\lfbox|}
+
+\subsection{sss-9}
+\text
+\subsection{sss-10} 
+
+\section{SIXTH}
+\text
+\subsection{sss-11}
+\text
+\subsection{sss-12} 
+
+\chapter{CHAPTER THIRD}
+\section{SEVENTH}
+\text
+\subsection{sss-13}
+\text
+\subsection{sss-14} 
+
+\section{EIGHTH}
+\text
+\subsection{sss-15}
+\text
+\subsection{sss-16} 
+
+\end{document}
+
+
+% ==> Test zref-clever and cleveref
+\InputIfFileExists{zlatex-cfg.tex}{}{}
+\documentclass[hyper, lang=cn]{../code/zlatex}
+% \creflabelformat{lemma}{#2(#1)#3}
+% \documentclass{article}
+% \usepackage{hyperref}
+% \usepackage[nameinlink]{cleveref}
+% \creflabelformat{lemma}{#2[#1)#3}
+% \crefname{lemma}{lemmaXX}{lemmas}
+% \newtheorem{lemma}{Lemma}[section]
+% \newcounter{lemma}
+% \newenvironment{lemma}{\par\refstepcounter{lemma}\textbf{\thelemma}:}{}
+% NOTE: without '\refstepcounter', cleveref labelformat will be lost.
+% \zthmcnt{share}
+
+
+\begin{document}
+\section{First}
+Reference a single lemma: \cref{definition:cc}, \cref{axiom:aa}; Or 
+multi-labels, two labels: \zcref{lemma:bb,lemma:cc}, Three labels: \cref{axiom:aa,lemma:cc,theorem:dd}.
+
+\begin{axiom}\label{axiom:aa}
+  This a axiom:
+  \[a^2 + b^2 = c^2\]
+\end{axiom}
+
+\begin{lemma}\label{lemma:bb}
+  This a lemma:
+  \[a^2 + b^2 = c^2\]
+\end{lemma}
+
+Can NOT Reference a section using \verb|\cref{sec:test}| in cleveref package after loading \verb|\usepackage[headings]{ctex}|, 
+for that the patches for headings in C\TeX{} are conflict to cleveref.
+
+But you can ref a section item using zref-clever: \cref{sec:test}.
+
+\begin{lemma}\label{lemma:cc}
+  This a lemma II:
+  \[a^2 + b^2 = c^2\]
+\end{lemma}
+
+\begin{definition}\label{definition:cc}
+  This a definition III:
+  \[a^2 + b^2 = c^2\]
+\end{definition}
+
+\section{SECOND}\label{sec:test}
+\begin{theorem}\label{theorem:dd}
+  This a theorem IV:
+  \[a^2 + b^2 = c^2\]
+\end{theorem}
+\end{document}
+
+
+
+% ==> cleverref bug: see:https://github.com/CTeX-org/ctex-kit/issues/725
+% I shall move to 'zref-clever' instead !!!
+\documentclass{article}
+\usepackage{zref-clever}
+\zcsetup{nameinlink, lang=EEE}
+\usepackage[colorlinks,linkcolor=blue]{hyperref}
+\zcLanguageSetup{english}{
+  type = part,
+    name-sg = XXXX,
+  type = chapter,
+    name-sg = chapterXXX,
+  type = section,
+    Name-sg = Section,
+    name-sg = sectionXXXX,
+    Name-pl = Sections,
+    name-pl = sections,
+  type = figure,
+    Name-sg = FigureXXX,
+}
+% \zcsetup{
+
+% }
+\zcDeclareLanguageAlias{EEE}{english}
+\newtheorem{lemma}{Lemma}[section]
+
+\begin{document}
+% \chapter{XXX}\label{chap:aaa}
+\section{Section 1}\label{sec:section-1}
+A Test figure as follows:
+\begin{figure}[!htb]
+\centerline{\rule{5em}{5em}}
+\caption{Figure 1}
+\label{fig:figure-1}
+\end{figure}
+
+
+% Chapter \zcref{chap:aaa} 
+A reference to \zcref[S]{sec:section-1} \zcref{sec:section-1}. \zcref[S]{fig:figure-1} shows some
+interesting information.
+A page reference can be done with either \zcpageref{sec:section-1} or with
+\zcref[page]{sec:section-1}.
+A reference can also be made to multiple labels, as in \zcref{sec:section-1,fig:figure-1}.
+
+
+\section{Second}
+\begin{lemma}\label{lemma:aa}
+  This is a lemma:
+  \[a^2 + b^2 = c^2\]
+\end{lemma}
+
+Reference a lemma: \zcref{lemma:aa}.
+\end{document}
+
+
+
+% \InputIfFileExists{zlatex-cfg.tex}{}{}
+% \documentclass[lang=cn]{../code/zlatex}
+
+% \documentclass{article}
+% \usepackage{ctex}
+% ! Extra \endcsname.
+% <recently read> \endcsname                          
+% l.12 Hello world:\cref{sec:second}
+\documentclass{ctexart}
+\usepackage{hyperref}
+\usepackage{cleveref}
+
+
+\begin{document}
+\section{First}
+Hello world:\cref{sec:second}
+
+\section{Second}\label{sec:second}
+It me. 
+\end{document}
+
+
+% ==> make alias command only valid in a group.
+\InputIfFileExists{zlatex-cfg.tex}{}{}
+\documentclass[]{../code/zlatex}
+% \usepackage{ascii}
+\ztexloadlib{alias}
+\zlatexaliasOpSet{rot=Rot}
+\makeatletter
+% \let\asciiFF\FF
+% \let\FF\z@FF
+% \newcommand\internal@cmda[1]{CMD-A:#1}
+% \def\aliasOn{\let\cmdA\internal@cmda}
+% \def\aliasOff{\def\cmdA{UNDEFINED}}
+
+\begin{document}
+\meaning\B
+
+% The FF is:\FF
+
+% Hello world: $\B{R}$
+
+\zlatexaliasOn
+Hello world I: $\B{R}, \S{A}, \FF{B}$.
+
+\begin{align}
+  f:A\ra B \mid x\ma y\in \RR \\
+  g:\im(f)\xra[\ZZ](\NN) \rot(h)
+\end{align}
+
+\meaning\FF\par
+\meaning\xra
+\zlatexaliasOff
+
+% then the FF is:\FF
+
+\begin{zlatexalias}
+  Hello world II: $\B{R}, \K{A}$
+  \begin{align}
+    f:A\ra B \mid x\ma y\in \RR \\
+    g:\im(f)\xra[\ZZ](\NN) \rot(h)
+  \end{align}
+\end{zlatexalias}
+
+\ExplSyntaxOn
+\clist_map_inline:Nn \g__zlatex_alias_user_clist {\string #1\par}
+\vskip3em
+\hrule
+
+\clist_map_inline:Nn \g__zlatex_alias_internal_clist {\string #1\par}
+\ExplSyntaxOff
+
+
+
+%%%%% EXP3 seq TEST %%%%%
+% \ExplSyntaxOn
+% \let\B\mathbb 
+% \prop_gput_from_keyval:Nn \l_tmpa_prop {\B=\mathbb}
+% \prop_map_inline:Nn \l_tmpa_prop
+%   {
+%     \typeout{--->#1:#2}
+%     % \exp_after:wN \cs_set:Npn \cs:w #1\cs_end: {#2} %B=\mathbb, it works !
+%     % \exp_after:wN \cs_set:Npn \exp_after:wN \exp_not:N #1 {#2} % error:\inaccessible
+%     % \cs_set:Npn #1 {#2} %error: \inaccessible 
+%     % \exp_after:wN \xdef #1 {\exp_not:N #2}
+%     % Analysis: Maybe this is the limitation of '\prop_map_inline:Nn', 
+%     %           the 'key' can not be a macro ?
+%   }
+
+% use 2 seqs instead:
+% \seq_set_from_clist:Nn \l_tmpa_seq {\B, \F}
+% \seq_set_from_clist:Nn \l_tmpb_seq {\mathbb, \mathbf}
+% \seq_map_indexed_inline:Nn \l_tmpa_seq {
+%   \cs_set:Npe #2 {\seq_item:Nn \l_tmpb_seq {#1}}
+% }
+% \cs_set:Npn \set_alias:nn #1#2 {
+%   \cs_set:Npn #1 {#2}
+% }
+% \seq_map_pairwise_function:NNN 
+%   \l_tmpa_seq \l_tmpb_seq 
+%   \set_alias:nn
+% \meaning\B\par
+% \meaning\F
+% \ExplSyntaxOff
+%%%%% EXP3 seq TEST %%%%%
+\end{document}
+
+
+
+
+
+% ==> Test proof interface
+\InputIfFileExists{zlatex-cfg.tex}{}{}
+\documentclass[]{../code/zlatex}
+
+\author{Our own fastidiousness requires us to point out that the familiar adjective}
+\title{Eureka}
+\date{\today}
+\begin{document}
+\maketitle
+
+Hello world
+
+\end{document}
+
+
+
+
+% ==> Test proof interface
+\InputIfFileExists{zlatex-cfg.tex}{}{}
+\documentclass[
+  lang=cn,
+  % fancy,
+  class=book,
+  % mathSpec={font=euler},
+  % layout={slide, aspect=16|9},
+]{../code/zlatex}
+\makeatletter
+\zthmtitleformat*{\color{\thm@tmp@color}\bfseries【\zthmname\;\zthmnumber】\ }
+\zthmtitleformat*[proof]{\color{\thmproof@tmp@color}\kaishu\underline{\zthmname}.\;\,}
+\makeatother
+\zthmcnt{share=true}
+
+
+\title{TEST}
+\author{Eureka}
+\date{\today}
+\begin{document}
+\maketitle
+\chapter{集合与映射}
+\section{集合}
+\begin{definition}
+  设 $A, B$ 是两个集合, 如果 $A$ 中的每一个元素都是 $B$ 中的元素, 则称 $A$ 是 $B$ 的\textbf{子集}, 记作 $A \subseteq B$.
+  此时也称 $B$ 包含 $A$, 记作 $B \supseteq A$. 若 $A \subseteq B$ 且 $B \subseteq A$, 则称 $A$ 与 $B$ \textbf{相等}, 记作 $A = B$.
+\end{definition}
+
+\begin{theorem}
+\end{theorem}
+
+\begin{lemma}
+  $(a, b) = (c, d)$ 当且仅当 $a = c$ 且 $b = d$.
+\end{lemma}
+\begin{proof}
+  充分性是显然的. 下证必要性. 如果 $(a, b) = (c, d)$, 那么:
+  \begin{align}
+    \{\{a\}, \{a, b\}\} =\{\{c\}, \{c, d\}\}
+  \end{align} 
+  \begin{enumerate}
+    \item 若 $a = b$, 那么 $\{a\} = \{a, b\}$, 从而 $\{a\} = \{c\}$, 也就是 $a = c$.
+    \item 若 $a \neq b$, 那么 $\{a\} \neq \{a, b\}$, 从而 $\{a\} = \{c, d\}$, 也就是 $a = c$.
+  \end{enumerate}
+\end{proof}
+\end{document}
+
+
+
+
+
+% ==> spaces in the very beginning of a thm/proof env
+\InputIfFileExists{zlatex-cfg.tex}{}{}
+\documentclass{../code/zlatex}
+
+
+
+\begin{document}
+Hello world 
+
+\begin{theorem}[THM-1]
+                      A theorem 1.
+\end{theorem}
+
+\begin{theorem}[THM-2]%
+  A theorem 2.
+\end{theorem}
+
+\begin{proof}
+  AA This is a proof 1.
+\end{proof}
+
+\begin{proof}%
+              A This is a proof 2.
+\end{proof}
+\end{document}
+
+
+
+
+% ==> bug of \zthmtitlebefore
+\InputIfFileExists{zlatex-cfg.tex}{}{}
+\documentclass{../code/zlatex}
+\zthmtitlebefore[proof]{|PRF-LIKE|}
+
+
+\begin{document}
+Hello world
+
+\begin{solution}
+  This is solution I.
+\end{solution}
+\end{document}
+
+
+% ==> thm detailed hooks
+% if there is no indicate to a zlatex thm command or variable, 
+%    then this command is related to theorem-like env NOT proof-like env.
+\InputIfFileExists{zlatex-cfg.tex}{}{}
+\documentclass[lang=cn]{../code/zlatex}
+\zthmproofhook*[solution]{
+  before=\noindent\textbf{\color{red}BEFORE},
+  begin=\textbf{\color{red}BEGIN},
+  end=\textbf{\color{red}END},
+  after=\textbf{\color{red}AFTER},
+}
+\zthmcolorset{proof=blue!50, solution=green!50}
+% \zthmtitlebefore{THM}
+% \zthmtitlebefore[proof]{PRF}
+% \zthmtitlebefore[proof]{|PRF-LIKE|}
+% \zthmbefore{}
+% \zthmbefore[proof]{\par}
+\makeatletter
+\zthmtitleformat*{\bfseries\color{\thm@tmp@color}\zthmname|\zthmnote{\{}{\}}|\zthmnumber\ }
+\zthmtitleformat*[proof]{\color{\thmproof@tmp@color}\bfseries|:\scshape\zthmname:|\ }
+\makeatother
+
+\zthmnameset{cn}{
+  theorem=新定理,
+  proof=证
+}
+\zthmlang{cn}
+
+\zthmnew{Zaxiom, Ztheorem=Thm|{HTML}{a0d911}, Zproposition=Prop|blue}
+\zthmnew[proof]{Zproof, Zexample=EXAMPLE|red, Zsolution=Solution|}
+\let\Ozthmnew\zthmnew
+\let\Ozthmtitlebefore\zthmtitlebefore
+
+\begin{document}
+\let\zthmnew\Ozthmnew
+\let\zthmtitlebefore\Ozthmtitlebefore
+Hello world
+
+\section{new thm}
+\begin{Zproof}[zthmnew-1]
+This is an Zproof zthmnew-1.
+\end{Zproof}
+
+\begin{Zexample}[zthmnew-2]
+This is an Zexample zthmnew-2.
+\end{Zexample}
+
+\begin{Ztheorem}[zthmnew-3]
+This is a Ztheorem zthmnew-3
+\end{Ztheorem}
+
+
+\section{theorem like}
+Inline item:
+\begin{theorem}
+A is a theorem.%
+\end{theorem}%
+\begin{proposition}
+  This is proposition I.
+\end{proposition}
+\begin{proposition}[PROP]
+  A is proposition II.
+\end{proposition}
+
+\begin{remark}
+  this is a remark.
+\end{remark}
+
+
+\section{proof like}
+\begin{proof}
+  This is a proof.
+\end{proof}
+
+\begin{solution}
+  This is solution I.
+\end{solution}
+
+\zthmtitlebefore[proof]{|PRF-LIKE|}
+\begin{solution}
+  This is solution II.
+\end{solution}
+\zthmtitlebefore[proof]{\noindent}
+
+\begin{problem}
+  This is a problem.
+\end{problem}
+
+\section{peek problem}
+\ExplSyntaxOn
+\peek_remove_spaces:n {~|A~is~B~|}
+\tl_trim_spaces:n {~|A~is~B~|}
+\ExplSyntaxOff
+\end{document}
+
+
+
+
+
+
+
+% ==> thm hooks re-define
+\InputIfFileExists{zlatex-cfg.tex}{}{}
+\documentclass{../code/zlatex}
+% \usepackage{lipsum}
+% \newif\ifShowSolution
+% \ShowSolutiontrue     %显示答案
+% \ShowSolutionfalse  %隐藏答案
+% \newenvironment{showsolu}{\ifShowSolution}{\fi} % does NOT work
+% \NewDocumentEnvironment{ShowSolu}{+b}{\ifShowSolution#1\fi}{} % works
+% \newcommand{\ShowSolu}[1]{\ifShowSolution#1\fi}   % works
+% \AddToHook{env/solution/before}{\ifShowSolution}
+% \AddToHook{env/solution/after}{\fi}
+% \zthmproofhook*{
+%   before=BEFORE,
+%   begin=BEGIN,
+%   end=END,
+%   after=AFTER,
+%   before=\ifShowSolution,
+%   after=\fi
+% }
+% \usepackage{version} % does NOT work
+% \excludeversion{solution}
+\usepackage{environ}
+\AtBeginDocument{\RenewEnviron{solution}{}} % works
+
+
+
+\begin{document}
+Hello world\vskip5em
+
+\begin{solution}
+  This is a solution:
+  \begin{align}
+    a^2 + b^2 = c^2
+  \end{align}
+\end{solution}
+
+% \begin{showsolu}
+%   \textbf{This is a solution}
+% \end{showsolu}\vskip3em                % do NOT work
+% \ShowSolu{This is a solution}\vskip3em % works
+% \begin{ShowSolu}
+%   This is a solution
+%   \begin{align}
+%     a^2 + b^2 = c^2
+%   \end{align}
+% \end{ShowSolu}\vskip3em                % works
+
+
+% \ifShowSolution
+% \lipsum[1-2]
+% \fi                                    % works                 
+\end{document}
+
+
+
+% ==> tcolorbox icon add
+\documentclass{article}
+\usepackage[many]{tcolorbox}
+\usepackage{pifont}
+\usepackage{lipsum}
+\usepackage{graphicx}
+\newcounter{test}
+
+
+\begin{document}
+Hello world.
+
+\begin{tcolorbox}[
+  enhanced,
+  overlay unbroken and first = {
+    \node[anchor = north east, outer sep=0pt, text=red] 
+      at (frame.north east) { \stepcounter{test}\thetest:\ding{73} };
+  }
+]
+\lipsum[1-2]
+\end{tcolorbox}
+
+Hello world. \ding{73}
+
+% \vskip5em
+\begin{tcolorbox}[
+  enhanced,breakable,
+  overlay unbroken and first = {
+    \node[anchor = north east, outer sep=0pt, text=red] 
+      at (frame.north east) { \stepcounter{test}\thetest:Example 7.12 };
+  }
+]
+\lipsum[1-2]
+\end{tcolorbox}
+\end{document}
+
+
+
+% ==> bug of thm toc add function: \__zlatex_thm_toc_add:eeoe
+\InputIfFileExists{zlatex-cfg.tex}{}{}
+\documentclass{../code/zlatex}
+\usepackage{pifont}
+\let\Ozthmlang\zthmlang
+\zthmtitleformat{\bfseries\color{red}\zthmnumber|\ :|\zthmnote{[}{]}:(\zthmname)}
+
+
+\begin{document}
+\let\zthmlang\Ozthmlang
+\zthmtoc[1.25]
+
+% \begin{DocExample}*
+\begin{theorem}[AAA-1-$\alpha + \beta$]
+  This is a theorem AAA-1.
+\end{theorem}
+\zthmlang{fr}
+\begin{theorem}[BBB-1-\ding{56}]
+  This is a france theorem BBB-1.
+\end{theorem}
+\zthmlang{en}
+\begin{theorem}[CCC-1]
+  This is a english theorem CCC-1.
+\end{theorem}
+% \end{DocExample}
+
+
+% ==> BUG: \bfseries can NOT be used in 'e'-type
+% \ExplSyntaxOn
+% \tl_set:Ne \l_tmpa_tl {\bfseries AA} % log:! Incomplete \iffalse; all text was ignored after line 29.
+% \tl_use:N \l_tmpa_tl
+% \ExplSyntaxOff
+\end{document}
+
+
+
+
+
+% ==> bug of \zthmtoc and \ztexptoc bug in 'slide' mode
+\documentclass{article}
+\usepackage{lipsum, titletoc}
+\usepackage{pifont}
+\titlecontents{subsection}
+  [3.8em] % ie, 1.5em (chapter) + 2.3em
+  {}
+  {\contentslabel{2.3em}}
+  {\hspace*{-2.3em}}
+  {\titlerule*[1pc]{.}\contentspage}
+
+
+\begin{document}
+\input{TOC.txt}
+
+% \contentsline {subsection}{\numberline {2.1}\ding {74}\;2.1:[DEFINITION]:({Définition})}{6}{definition.2.1}%
+% \contentsline {subsection}{\numberline {2.1}\ding {98}\;2.1:[REMARK]:({Remarque})}{9}{remark.2.1}%
+
+
+% \section{First Chapter}
+% \lipsum[1]
+% akhdsghkjk dshk  gasjhdg gajfg:
+% \startcontents[sections]
+% \printcontents[sections]{p}{2}{}
+
+
+% \subsection{AAA}
+
+% \stopcontents[sections]
+% \section{Second Chapter}
+% \subsection{First subsection}
+% \section{Third Chapter}
+% \subsection{Second subsection}
+% \subsubsection{First subsubsection}
+\end{document}
+
+\InputIfFileExists{zlatex-cfg.tex}{}{}
+\documentclass[
+    lang=cn,
+    fancy,
+    toc={stretch=1.5},
+    class=book,
+    % font={config=true},
+    layout={slide, aspect=16|9}
+]{../code/zlatex}
+\usepackage{pifont}
+\usepackage{lipsum, zhlipsum}
+
+%%%%%% zlatex config %%%%%%%
+\zthmstyle{lapsis} % must bofore the loading of 'theme' library
+\ztexloadlib{alias, theme}
+\zthmcolorset{remark=red!75, definition=orange!75}
+\newcounter{PRB}
+\zthmnew{proof}{problem={PRB\ \thePRB}|red}
+\zpagemask[anchor=tl, position={(0pt, \zph)}]{\parbox{\paperwidth}{\color{gray}\itshape\huge\lipsum[1-4]}}
+% \zthmtocsym{
+% definition=\ding{74}\;,
+% remark=\ding{98}\;,
+% }
+\zcolorset{
+definition=blue,
+}
+\zthmlang{fr}
+\zthmtitleformat*{\color{green}\zthmnumber|\ :|\zthmnote{[}{]}:(\zthmname)}
+%%%% slide setup
+\zslideset[doc]{
+bg-color=yellow!20,
+text-color=red
+}
+\zslideset[toc/leftmargin]{
+  chapter=2em,
+  section=8em,
+}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%    
+
+
+\title{\zLaTeX{} Online}
+\author{Eureka}
+\date{\today}
+\begin{document}
+\maketitle
+\frontmatter
+\tableofcontents
+\newpage
+\mainmatter
+
+\part{这是一个 Part}
+\chapter{欢迎使用 \zLaTeX{}}
+\section{定理列表}
+\subsection{AAA}
+\noindent 本章节涉及到的所有定理如下所示：
+\zthmtoc[1.25]
+% \input{TOC.txt}
+
+% \contentsline {subsection}{\numberline {2.1}\ding {74}\;2.1:[DEFINITION]:({Définition})}{6}{definition.2.1}%
+% \contentsline {subsection}{\numberline {2.1}\ding {98}\;2.1:[REMARK]:({Remarque})}{9}{remark.2.1}%
+
+
+% \vskip5em
+% \contentsline {subsection}{\numberline {2.1}\ding {74}\;2.1:[DEFINITION]:({Définition})}{6}{definition.2.1}%
+% \contentsline {subsection}{\numberline {2.1}\ding {98}\;2.1:[REMARK]:({Remarque})}{9}{remark.2.1}%
+
+% \contentsline {subsection}{\ding {74}\;{Définition}\ 2.1\ (DEFINITION)}{6}{definition.2.1}%
+% \contentsline {subsection}{\ding {98}\;{Remarque}\ 2.1\ (REMARK)}{9}{remark.2.1}%
+% \contentsfinish 
+
+% BUG: uncomment the following 2 lines will cause error:
+% log: ! LaTeX Error: Something's wrong--perhaps a missing \item.
+% \lipsum[1][1-4]
+% \ztexptoc
+
+
+\section{FIRST}
+\lipsum[1] 
+\begin{definition}[DEFINITION]
+As any dedicated reader can clearly see, the Ideal of practical
+reason is a representation of, as far as I know, the things in themselves;
+\begin{align}
+\underset{}{\mathbf{v} \bigotimes \mathbf{w}}
+& = \sum_{i=1}^3\left(a_{i1}u^iv^1+a_{i2}u^iv^2+a_{i3}u^iv^3\right) \\
+& = \int x \dd x = \frac12 x^2 + \R{C}
+\end{align}
+As any dedicated reader can clearly see, the Ideal of practical
+reason is a representation of, as far as I know, the things in themselves;%
+\end{definition}
+\lipsum[2]
+
+下面是一个测试所用的 problem 环境:
+
+\begin{problem}
+这是一个问题环境, 一些含无意义的废话:
+\begin{align}
+  \int x \dd x = \frac12 x^2 + \R{C}
+\end{align}
+\end{problem}
+
+\begin{proof}
+这是一个问题环境, 一些含无意义的废话:
+\begin{align}
+    \int x \dd x = \frac12 x^2 + \R{C}
+\end{align}
+这是一个问题环境, 一些含无意义的废话.
+\end{proof}
+
+% BUG: uncomment the following 2 lines will cause error:
+% log: ! LaTeX Error: Something's wrong--perhaps a missing \item.
+% \subsection{BUG-SUBSECTION} 
+% 你好, \zLaTeX{} 
+
+\lipsum[1][1-5]\footnote{这是一个脚注-1}\footnote{这是一个脚注-2}\par
+\zhlipsum[1]
+\begin{remark}[REMARK]
+As any dedicated reader can clearly see, the Ideal of practical
+reason is a representation of, as far as I know, the things in themselves;
+\begin{align}
+\underset{}{\mathbf{v} \bigotimes \mathbf{w}}
+& = \sum_{i=1}^3\left(a_{i1}u^iv^1+a_{i2}u^iv^2+a_{i3}u^iv^3\right) \\
+& = \int x \dd x = \frac12 x^2 + \R{C}
+\end{align}
+As any dedicated reader can clearly see, the Ideal of practical
+reason is a representation of, as far as I know, the things in themselves;%
+\end{remark}
+\zhlipsum[2]
+\end{document}
+
+
+\InputIfFileExists{zlatex-cfg.tex}{}{}
+\documentclass[lang=cn,layout={slide}]{../code/zlatex}
+
+
+\begin{document}
+Hello world
+\end{document}
+
+
+
+
+
+
+% ==> Test zLaTeX TeXPage Online
+\InputIfFileExists{zlatex-cfg.tex}{}{}
+\documentclass[lang=cn]{../code/zlatex}
+\zthmstyle{lapsis}
+\ztexloadlib{alias, theme}
+\zthmcolorset{remark=orange!75, definition=green!75}
+\newcounter{PRB}
+\zthmnew{proof}{problem={PRB\ \thePRB}|red}
+\usepackage{lipsum}
+\usepackage{zhlipsum}
+
+\usepackage{adjustbox}
+% \makeatletter
+% \newcommand{\zlatex@llapnote}[1]{
+%   \mbox{}\llap{
+%   \adjustbox{set height=0pt, set depth=0pt}{
+%     \parbox[t]{2.85cm}{\raggedleft #1}}\hspace*{.75em}}
+% }
+% \makeatother
+
+\title{\zLaTeX{} Online}
+\author{Eureka}
+\date{\today}
+\begin{document}
+\maketitle
+
+
+\AAA
+\section{定理列表}
+\noindent 本章节涉及到的所有定理如下所示：
+\zthmtoc[1.25]
+
+\section{FIRST}
+\lipsum[1] 
+\begin{definition}[DEFINITION]
+As any dedicated reader can clearly see, the Ideal of practical
+reason is a representation of, as far as I know, the things in themselves;
+\begin{align}
+\underset{}{\mathbf{v} \bigotimes \mathbf{w}}
+& = \sum_{i=1}^3\left(a_{i1}u^iv^1+a_{i2}u^iv^2+a_{i3}u^iv^3\right) \\
+& = \int x \dd x = \frac12 x^2 + \R{C}
+\end{align}
+As any dedicated reader can clearly see, the Ideal of practical
+reason is a representation of, as far as I know, the things in themselves;%
+\end{definition}
+\lipsum[2]
+
+下面是一个测试所用的 problem 环境:
+
+\begin{problem}
+这是一个问题环境, 一些含无意义的废话:
+\begin{align}
+    \int x \dd x = \frac12 x^2 + \R{C}
+\end{align}
+\end{problem}
+
+\subsection{FIRST-I}
+你好, \zLaTeX{} 
+
+\zhlipsum[1]
+\begin{remark}[REMARK]
+As any dedicated reader can clearly see, the Ideal of practical
+reason is a representation of, as far as I know, the things in themselves;
+\begin{align}
+\underset{}{\mathbf{v} \bigotimes \mathbf{w}}
+& = \sum_{i=1}^3\left(a_{i1}u^iv^1+a_{i2}u^iv^2+a_{i3}u^iv^3\right) \\
+& = \int x \dd x = \frac12 x^2 + \R{C}
+\end{align}
+As any dedicated reader can clearly see, the Ideal of practical
+reason is a representation of, as far as I know, the things in themselves;%
+\end{remark}
+\zhlipsum[2]
+\end{document}
+
+
+
+
+% ==> Test thm style warning msg
+\InputIfFileExists{zlatex-cfg.tex}{}{}
+\documentclass[
+  % hyper,
+]{../code/zlatex}
+\ztexloadlib{alias}
+% \zlatexaliasOpSet{alt=ALT, im=IM}
+
+\zthmstyle{background}
+\zthmnew{theorem}{Ztheorem=NEW-THM|orange}
+% \zthmcolorset{theorem=blue!50} % EXPETC: works ---> pass
+\zthmcolorset{Ztheorem=blue!50}  % EXPETC: works ---> pass
+% \zthmcolorset{link=blue!50}    % EXPETC: error ---> pass
+\begin{document}
+
+\zthmtoc[1.25]
+\vskip4em
+
+HELLO 
+
+\begin{Ztheorem}[AAA]
+  This is a theorem AAA.
+\end{Ztheorem}
+
+
+\ExplSyntaxOn
+\keys_define:nn {colorTest}{
+  keyA    .tl_set:N     =  \l__zlatex_keyA_color_tl,
+  keyA    .code:n       =  { \ztex_color_set:n {#1} },
+}
+\keys_set:nn {colorTest}{keyA={RGB}{55, 183, 98}}
+\textcolor{zlatex@color@keyA}{This~is~a~test.}
+\ExplSyntaxOff
+
+
+\begin{lemma}[LEMMA]
+  This is a lemma.
+
+  \begin{align}
+    \alt, \im
+  \end{align}
+
+  % \zlatexaliasOpSet{alt=ALT, im=IM}
+  \begin{align}
+    \alt, \im
+  \end{align}
+\end{lemma}
+
+\newpage
+\zthmtocadd[section]{name=NEW-SEC}
+\zthmtocstop
+\begin{proposition}[PROP]
+  This is a proposition.
+\end{proposition}
+
+
+\ExplSyntaxOn
+% \ztool_read_file_as_seq:nnN {\c_true_bool}{aaa.txt}\l_tmpa_seq
+% \seq_show:N \l_tmpa_seq
+
+% \ztool_gread_file_as_seq:nnN {\c_true_bool}{texput.log}\g_tmpa_seq
+% \seq_show:N \g_tmpa_seq
+
+% \ztool_file_new:nn {\c_false_bool}{bbb.txt}
+% \ztool_file_new:nn {\c_true_bool}{bbb.txt}
+% \ztool_append_to_file:nn {bbb.txt}{BBB2-content}
+% \ztool_replace_file_line:nnn {bbxxb.txt}{2}{BBB1-content}
+\ztool_insert_to_file:nnn {bbb.txt}{2}{NEW-content}
+\ExplSyntaxOff
+
+\end{document}
+
+
+
+
+% ==> Make Metropolis slide theme
+\InputIfFileExists{zlatex-cfg.tex}{}{}
+\documentclass[
+  hyper,
+  layout={slide, aspect=16|9, theme=AnnArborSpruce},
+]{../code/zlatex}
+\zslidethemeuse[
+  UL={bg=white, text=}, 
+  UR={bg=white, text=},
+  BL={bg=white, text=},
+  BC={bg=white, text=},
+  BR={bg=white, text=},  
+]{AnnArborSpruce}
+\ExplSyntaxOn
+\dim_gset:Nn \g_zslide_status_bar_sec_H_dim {2.2em}
+\dim_gset:Nn \g_zslide_status_bar_sec_B_dim {-2.2em}
+\dim_gset:Nn \g_zslide_status_info_sec_B_dim {-1.55em}
+\dim_gset:Nn \g_zslide_status_info_head_B_dim {-2.5em}
+% navigator
+\AddToHook{shipout/foreground}{
+  \zslide_status_info:nnnn {head}{0}{1}{
+    \zslidenavsym[
+      \RPITEM[red]
+    ][
+      \RPITEM
+    ]
+  }
+}
+\newcommand\ITEM[1][gray]{\hspace*{-4pt}\pgfornamenthan[color=#1, scale=0.06]{39}}
+\newcommand\RPITEM[1][gray]{\prg_replicate:nn {10}{\ITEM[#1]}}
+\ExplSyntaxOff
+\usepackage{pgfornament-han}
+
+
+\title{zSlide Metropolis Theme}
+\author{Eureka}
+\date{\today}
+\begin{document}
+\maketitle
+
+
+\section{SECTION AAA}
+AAA
+
+\zslidenavsym[\ITEM[red]][\ITEM]
+
+\newpage
+% \section{SECTION BBB}
+BBB 
+\newpage
+% \section{SECTION CCC}
+CCC 
+\newpage
+% \section{SECTION DDD}
+DDD 
+
+\end{document}
+
+
+
+
+% ==> Test zlatex working condition
+\InputIfFileExists{zlatex-cfg.tex}{}{}
+\documentclass[
+  % hyper,
+  layout={slide, aspect=16|9, theme=AnnArborSpruce},
+]{../code/zlatex}
+\zslidethemeuse[
+  UR={text=\zLaTeX{} Slide:\ \zslidenavsym},
+]{AnnArborSpruce}
+\zslidelogo[width=4em, exclude={0, 2, 4}]{example-image-duck}
+
+% BEGIN TEST INTERFACE
+\ExplSyntaxOn
+\AddToHook{shipout/background}{
+  \zslide_status_bar:nnnn {BC}{(.5\paperwidth, -.5\paperheight)}{.2}{80pt}
+}
+\AddToHook{shipout/foreground}{
+  \zslide_status_info:nnnn {foot}{.66}{.75}{AAA\zslidenavsym[\textcolor{red}{XX}][\textcolor{gray}{XX}]}
+}
+\ExplSyntaxOff
+% END TEST INTERFACE
+
+\title{TEST}  
+\author{Eureka}
+\date{\today}
+\begin{document}
+\maketitle
+
+
+\section{FIRST SEC}
+Hello world, 
+
+\newpage
+
+aaa 
+
+\newpage
+
+bbb
+
+\section{SECOND SEC}
+this is me.
+
+\section{THIRD SEC}
+HAHA.
+
+\end{document}
+
+
+
+% ==> l3doc function env
+\keys_define:nn { l3doc/function }
+{
+  TF .value_forbidden:n = true ,
+  TF .code:n =
+    {
+      \bool_set_true:N \l__codedoc_macro_TF_bool
+    } ,
+  EXP .value_forbidden:n = true ,
+  EXP .code:n =
+    {
+      \bool_set_true:N \l__codedoc_macro_EXP_bool
+      \bool_set_false:N \l__codedoc_macro_rEXP_bool
+    } ,
+  rEXP .value_forbidden:n = true ,
+  rEXP .code:n =
+    {
+      \bool_set_false:N \l__codedoc_macro_EXP_bool
+      \bool_set_true:N \l__codedoc_macro_rEXP_bool
+    } ,
+  pTF .value_forbidden:n = true ,
+  pTF .code:n =
+    {
+      \bool_set_true:N \l__codedoc_macro_pTF_bool
+      \bool_set_true:N \l__codedoc_macro_TF_bool
+      \bool_set_true:N \l__codedoc_macro_EXP_bool
+      \bool_set_false:N \l__codedoc_macro_rEXP_bool
+    } ,
+  noTF .value_forbidden:n = true ,
+  noTF .code:n =
+    {
+      \bool_set_true:N \l__codedoc_macro_noTF_bool
+      \bool_set_true:N \l__codedoc_macro_TF_bool
+    } ,
+  added .code:n = { \__codedoc_date_set_past:Nn \l__codedoc_date_added_tl {#1} },
+  updated .code:n = { \__codedoc_date_set_past:Nn \l__codedoc_date_updated_tl {#1} } ,
+  deprecated .bool_set:N = \l__codedoc_macro_deprecated_bool ,
+  no-user-doc .bool_set:N = \l__codedoc_macro_nodoc_bool ,
+  tested .code:n = { } ,
+  label .code:n =
+    {
+      \clist_set:Nn \l__codedoc_function_label_clist {#1}
+      \bool_set_true:N \l__codedoc_no_label_bool
+    } ,
+  verb .value_forbidden:n = true ,
+  verb .bool_set:N = \l__codedoc_names_verb_bool ,
+  module .tl_set:N = \l__codedoc_override_module_tl ,
+}
+
+
+\documentclass{l3doc}
+\usepackage{lipsum} % to generate some text
+
+
+
+\begin{document}
+\lipsum
+
+
+\begin{function}{\macro}
+this is a macro.
+\end{function}
+
+\begin{environment}{env}
+this is an env.
+\end{environment}
+
+\begin{function}{opt}
+\begin{syntax}
+    opt = \meta{a}
+\end{syntax}
+this is an opt.
+\end{function}
+
+\PrintIndex
+\end{document}
+
+
+
+% ==> transparent bug
+\InputIfFileExists{zlatex-cfg.tex}{}{}
+\documentclass{../code/zlatex}
+% \usepackage{tikz}
+% \usepackage{transparent}
+
+\begin{document}
+% \zpagemask[anchor=tr, position={(\zpw, \zph)}]{
+%   \begin{tikzpicture}
+%     \node[opacity=0.5, inner sep=0pt] at (current page.center) 
+%       {\includegraphics{Epmmy.jpg}};
+%   \end{tikzpicture}
+% }
+
+% \zpagemask{\transparent{.1}\includegraphics{Epmmy.jpg}}
+% Hello world
+
+\begin{theorem}[AAA]
+  This is a theorem AAA.
+\end{theorem}
+
+\zthmstylenew{
+  aaa={begin=, end=, option=\zthmtitleswitch},
+}
+% \zthmtitleswitch
+\zthmstyle{aaa}
+
+\begin{theorem}[BBB]
+  This is a theorem BBB.
+\end{theorem}
+
+\end{document}
+
+
+% \DocumentMetadata{}
+% \documentclass{article}
+\documentclass{l3doc}
+
+\usepackage{eso-pic,graphicx,transparent,lipsum}
+
+\begin{document}
+\lipsum[1-3]
+
+\AddToShipoutPictureFG*{%
+  \AtPageLowerLeft{%
+    \transparent{.6}\includegraphics[width=\paperwidth,height=\paperheight]{back.jpeg}%
+  }%
+}
+
+\lipsum[4-6]
+
+\end{document}
+
+
+
+
+% ==> cleverref bug: fixed after updating
+\documentclass{book}
+\usepackage[UTF8, heading]{ctex}
+\usepackage{cleveref}
+% \InputIfFileExists{zlatex-cfg.tex}{}{}
+% \documentclass[class=book, lang=cn]{../code/zlatex}
+
+\begin{document}
+\section{A}
+Hello world\label{aaa}
+
+Hello \cref{aaa}
+\end{document}
+
+
+
+% ==> l3doc cover
+\InputIfFileExists{zlatex-cfg.tex}{}{}
+\documentclass[lang=cn]{../code/zlatex}
+
+
+\title{z\LaTeX{} 用户手册}
+\author{Eureka}
+\date{\today}
+\begin{document}
+\maketitle
+\end{document}
+
+
+
+
+% ==> custom thm style
+\InputIfFileExists{zlatex-cfg.tex}{}{}
+\documentclass{../code/zlatex}
+\usepackage{lipsum}
+
+
+\begin{document}
+\ExplSyntaxOn
+\zthmstylenew {
+  test = {
+    begin  = \noindent\hspace*{1em}{\zthmtitle}, 
+    end    = , 
+    option = \__zlatex_thm_title_inline:n {F}
+  }
+}
+\ExplSyntaxOff
+\zthmstyle{test}
+
+\section{First}
+This is a simple theorem style in z\LaTeX{}:
+\begin{theorem}[AAA]
+  This is a simple definition. \lipsum[1][1-2]
+  \begin{align}
+    a^2 + b^2 = c^2
+  \end{align}
+  \lipsum[1][6-8]
+\end{theorem}
+
+\end{document}
+
+
+
+\InputIfFileExists{zlatex-cfg.tex}{}{}
+\documentclass[
+  fancy, 
+  % hyper,
+  mathSpec={envStyle=elegant}, 
+  % layout={slide, aspect=16|9}
+]{../code/zlatex}
+\usepackage{lipsum}
+% \zthmstyle{lapsis}
+% \ztexset{mathSpec={envStyle=shadow}}
+\ztexloadlib{theme}
+\zthmnew{theorem}{Ztheorem=NEW-THM|{HTML}{8e22ad}, Zproposition} 
+% \zthmtitleformat{\bfseries\zthmname\ \zthmnumber\zthmnote{(}{)}}
+% \zthmbefore{\quad}
+
+\def\boomen{As any dedicated reader can clearly see, the Ideal of practical
+reason is a representation of, as far as I know, the things in themselves; 
+\begin{align}
+\underset{}{\mathbf{v} \bigotimes \mathbf{w}} 
+  & = \underset{}{\mathbf{v} \otimes \mathbf{w}}
+      = \sum_{i=1}^3\sum_{j=1}^3a_{ij}u^iv^j \\[-.75em]
+  & = \sum_{i=1}^3\left(a_{i1}u^iv^1+a_{i2}u^iv^2+a_{i3}u^iv^3\right) 
+  \end{align}  
+As any dedicated reader can clearly see, the Ideal of practical
+reason is a representation of, as far as I know, the things in themselves;%
+}
+% \zthmlang{fr}
+\zthmcnt{share, parent=section}
+\zthmtocprefix{\ding{118}\;}
+\zcolorset{
+  remark=red!50,
+  axiom = gray!40,
+  definition  = {RGB}{219,48,122},
+  theorem = teal!20
+} % OK
+\ExplSyntaxOn
+\newcommand{\Example}{
+\clist_map_inline:nn 
+  {axiom, definition, theorem, lemma, corollary, proposition, remark}{
+    \lipsum[1][1-2]
+    \begin{##1}[\MakeUppercase{##1}]
+      \boomen
+      % folowing contents for 'lapsis' style
+      % \tcblower
+      % \boomen
+    \end{##1}
+    \lipsum[2][1-3]
+  }
+}
+\newcommand{\ExampleII}{
+\clist_map_inline:nn 
+  {plain, leftbar, background, fancy, shadow, paris, elegant, obsidian}{
+    \zthmstyle{##1}
+    % \Example  % NOTE: --> lapsis faild for slide note
+    % \lipsum[1][1-2]
+    \begin{remark}[STYLE:##1]
+      \boomen
+    \end{remark}
+    \begin{proposition}[STYLE:##1]
+      \boomen
+    \end{proposition}
+    \lipsum[2][1-2]
+  }
+}
+\ExplSyntaxOff
+
+
+\title{DEBUG}
+\author{Eureka}
+\date{\today}
+\begin{document}
+% \section{List of Theorems}
+% \zthmtoc
+
+\section{Example Env}
+% \Example
+
+\ExampleII
+\end{document}
+
+
+
+
+
+% new thm them 'lapsis'
+\InputIfFileExists{zlatex-cfg.tex}{}{}
+\documentclass{../code/zlatex}
+\ztexloadlib{theme}
+\zthmstyle{lapsis}
+\usepackage{lipsum}
+\def\AAA{\lipsum[1][1-3]
+\begin{align}
+  \int u\;\mathrm{d}v = uv - \int v \;\mathrm{d}u
+\end{align}
+\lipsum[1][1-3]}
+\def\BBB{\lipsum[1][3-5]
+\begin{align}
+  {\frac {\mathrm{d}}{\mathrm{d}x}}{\Big (}u(x)v(x){\Big )}=v(x){\frac {\mathrm{d}}{\mathrm{d}x}}
+    \left(u(x)\right)+u(x){\frac {\mathrm{d}}{\mathrm{d}x}}\left(v(x)\right)
+\end{align}
+\lipsum[1][1-3] }
+
+\begin{document}
+\section{Lapsis thm Theme}
+\lipsum[1-2]
+\begin{theorem}[TEST THM]
+  \AAA 
+  \tcblower
+  \BBB
+\end{theorem}
+
+\lipsum[3]
+\begin{definition}
+\AAA
+\end{definition}
+\lipsum[4-7]
+
+\begin{proposition}[PROP NEW]
+  \tcblower
+  \BBB
+\end{proposition}
+\end{document}
+
+
+
+% ==> thm backgroud to paperwidth
+\InputIfFileExists{zlatex-cfg.tex}{}{}
+\documentclass{../code/zlatex}
+\usepackage[many]{tcolorbox}
+\tcbuselibrary{skins}
+\usepackage{lipsum}
+\usepackage{xcolor}
+\usepackage{tikz}
+\usepackage{adjustbox}
+\DeclareMathSymbol{\blacktriangleleft}{\mathrel}{AMSa}{"4A}
+\usetikzlibrary{fadings, calc}
+\parindent0pt
+\definecolor{shadecolor}{HTML}{bfbfbf}
+\newenvironment{back}{
+  \def\FrameCommand{\colorbox{shadecolor}}
+  \MakeFramed{\advance\hsize-\width \FrameRestore}
+}{\endMakeFramed }
+\newcommand{\llapnote}[1]{
+  \mbox{}\llap{%
+  \adjustbox{set height=0pt, set depth=0pt}{%
+    \parbox[t]{2.85cm}{\raggedleft #1}}\hspace*{.75em}}%
+}
+
+
+\begin{document}
+% \begin{tcolorbox}[width=\textwidth, arc=0pt]
+\lipsum[1]
+% \end{tcolorbox}
+
+\zpagemask[
+  anchor=tl,
+  % layer=foreground,
+  position={(0pt, .669\zph)}
+]{\tikz\fill[color=gray!50, path fading=east] (0, 0) rectangle +(\zpw, 20em);}
+% \begin{tcolorbox}[
+%   standard jigsaw,
+%   width=\paperwidth, 
+%   arc=0pt, opacityback=0,
+% ]
+%   \lipsum[1]
+% \end{tcolorbox}
+
+\begin{back}%
+% \adjustbox{set height=0pt, set depth=0pt}{%
+%   \tikz[remember picture, overlay, baseline]%baseline=(current bounding box.north), 
+%     \fill[color=red!50, path fading=east] (-3.5cm, 0pt) rectangle +(\zpw, -20em);
+% }
+\llapnote{\sffamily\textbf{Example} 1.1\\Integrate by Part}%
+% \llapnote{\sffamily\textbf{Example}\\ 1.1|Integrate by Part\\HELLO WORLD}%
+\lipsum[1][1-3]
+\begin{align}
+  \int u\;\mathrm{d}v = uv - \int v \;\mathrm{d}u
+\end{align}
+\lipsum[1][1-3]
+\end{back}
+\lipsum[1][3-5]
+\begin{align}
+  {\frac {\mathrm{d}}{\mathrm{d}x}}{\Big (}u(x)v(x){\Big )}=v(x){\frac {\mathrm{d}}{\mathrm{d}x}}
+    \left(u(x)\right)+u(x){\frac {\mathrm{d}}{\mathrm{d}x}}\left(v(x)\right)
+\end{align}
+\lipsum[1][1-3]\hfill$\mathcolor{gray}{\blacktriangleleft}$
+
+
+\newpage
+\section{Tcolor box}
+Hello world 
+\vspace*{6em}
+
+\begin{tcolorbox}[
+  enhanced,  breakable,
+  top=1.5pt, bottom=1.5pt,
+  left=2pt,  leftlower=-3pt,
+  right=3pt, arc=0pt, frame hidden,
+  bicolor, colback=shadecolor,
+  opacitybacklower=0,
+  frame code app={
+    \draw[color=gray, thick] 
+      (frame.north west)++(-5cm, -1pt)--($(frame.north east)+(5cm, 0pt)$);
+    \draw[color=gray, thick] 
+      (frame.south west)++(-5cm, -1pt)--($(frame.south east)+(5cm, 0pt)$);
+    \fill[color=gray!50, path fading=east] 
+      (frame.north west)++(-5cm, -1pt) rectangle ($(frame.south east)+(5cm, 0pt)$);
+  },
+]\llapnote{\sffamily\textbf{Example} 1.1\\Integrate by Part}%
+\lipsum[1][1-3]
+\begin{align}
+  \int u\;\mathrm{d}v = uv - \int v \;\mathrm{d}u
+\end{align}
+\lipsum[1][1-3]
+\tcblower
+\lipsum[1][3-5]
+\begin{align}
+  {\frac {\mathrm{d}}{\mathrm{d}x}}{\Big (}u(x)v(x){\Big )}=v(x){\frac {\mathrm{d}}{\mathrm{d}x}}
+    \left(u(x)\right)+u(x){\frac {\mathrm{d}}{\mathrm{d}x}}\left(v(x)\right)
+\end{align}
+\lipsum[1][1-3]\hfill$\mathcolor{gray}{\blacktriangleleft}$
+\end{tcolorbox}
+
+
+\newpage
+\section{NEWSEC}
+\subsection{parbox}
+Hello world\parbox[t]{6em}{aaaaaa bbbbb cccc}
+
+
+% Hello world \tikz[anchor=north, baseline=(A.base)]\fill[color=red!50, path fading=east] (0, 0)++(-3cm, 0pt) rectangle +(5em, 8em);
+
+\subsection{tikz object}
+before text 
+\tikz[baseline={([yshift={-\ht\strutbox}]a.north)},outer sep=0pt,inner sep=0pt] \node[align=center] (a) {\strut line1\\line2\\line3\\line4};
+text between
+\tikz[baseline=(a.south),outer sep=0pt,inner sep=0pt] \node[align=center] (a) {\strut line1\\line2\\line3\\line4};
+text after
+
+
+\subsection{tcb upper/lower}
+\newtcolorbox{BBB}{breakable,
+enhanced,  breakable,
+  bicolor,
+  colback=red!10!white,
+  colbacklower=blue!5!white,
+  title={Example}}
+\begin{BBB}
+  \lipsum[1]
+  \tcblower
+  \lipsum[2]
+\end{BBB}
+\end{document}
+
+
+
+
+% ==> test obsidian thm style 
+\InputIfFileExists{zlatex-cfg.tex}{}{}
+\documentclass[layout={slide, aspect=16|9}]{../code/zlatex}
+\usepackage[many]{tcolorbox}
+\ztexloadlib{theme}
+\zthmstyle{obsidian}
+\usepackage{lipsum}
+
+\title{test OBSIDIAN THM}
+\author{Eureka}
+\date{\today}
+\begin{document}
+\maketitle
+\section{FISRT}
+\lipsum[1] 
+\begin{theorem}[THM]
+  \lipsum[1][1-5] 
+  \[
+    \sum_{i=1}^{+\infty}{\int_{0}^{i}-\frac{1}{t}\mathrm{d}t} = \frac{\pi^2}{6}
+  \]
+\end{theorem}
+
+\lipsum[2] 
+\begin{proposition}[PROP]
+  \lipsum[1][1-5] 
+  \[
+    \sum_{i=1}^{+\infty}{\int_{0}^{i}-\frac{1}{t}\mathrm{d}t} = \frac{\pi^2}{6}
+  \]
+\end{proposition}
+
+\lipsum[3] 
+\begin{definition}
+  \lipsum[1][1-5] 
+  \[
+    \sum_{i=1}^{+\infty}{\int_{0}^{i}-\frac{1}{t}\mathrm{d}t} = \frac{\pi^2}{6}
+  \]
+\end{definition}
+\end{document}
+
+
+% ==> '+=' keys feature
+\InputIfFileExists{zlatex-cfg.tex}{}{}
+\documentclass{../code/zlatex}
+\parindent=0pt
+
+\begin{document}
+\ExplSyntaxOn
+\keys_define:ne {test}{
+  % simple key
+  keyA    .tl_set:N = \exp_not:c {l__test_keyA_tl},
+  keyA+   .code:n   = \tl_put_right:Nn \exp_not:c {l__test_keyA_tl} {#1},
+  keyA~+  .code:n   = \tl_put_right:Nn \exp_not:c {l__test_keyA_tl} {#1},
+  % zlatex internal
+  keyB    .meta:nn  = { text / keyB }{#1},
+  \__zlatex_plus_key_aux:nnn {l__test_keyB_tl}{keyB}{keyB-x},
+  \__zlatex_plus_key_aux:nnn {l__test_keyB_tl}{keyB}{keyB-y},
+}
+\NewDocumentCommand{\testPlusKeyA}{m}{
+  \keys_set:nn {test}{#1}
+  \tl_use:N \l__test_keyA_tl\par
+}
+\NewDocumentCommand{\testPlusKeyB}{m}{
+  \keys_set:nn {test}{#1}
+  \tl_use:N \l__test_keyB_tl\par
+}
+
+\ExplSyntaxOff
+\section{Simple}
+\testPlusKeyA{keyA = AA}
+\testPlusKeyA{keyA+ = aa} 
+\testPlusKeyA{keyA += xx} 
+\testPlusKeyA{keyA=zz}
+
+\section{Internal}
+\testPlusKeyB{keyB/keyB-x = BB}
+\testPlusKeyB{keyB/keyB-x+ = bb}
+\testPlusKeyB{keyB/keyB-x += xx}
+\testPlusKeyB{keyB/keyB-x = zz}
+
+\dotfill\par
+\testPlusKeyB{keyB/keyB-y = BBYY}
+\testPlusKeyB{keyB/keyB-y+ = bbyy}
+\end{document}
+
+
+
+
+
+% ==> alias library/pagemask test
+\InputIfFileExists{zlatex-cfg.tex}{}{}
+\documentclass{../code/zlatex}
+\ztexloadlib{alias}
+\zthmstyle{fancy}
+\usepackage{tikz}
+\usetikzlibrary{fadings}
+\usepackage{lipsum}
+
+
+\begin{document}
+\zpagemask[
+  anchor=bl,
+  position={(0pt, -14em+\zph)}
+]{\includegraphics[width=\zpw]{back.jpeg}}
+\zpagemask[
+  % label=FIRST, % EXPECT: Class zlatex Warning: Only star version of \zpagemask is label-allowed.
+  anchor=bl,
+  position={(0pt, -14em+\zph)}
+]{%
+  \tikz\fill[color=gray, path fading=north] (0, 0) rectangle +(\zpw, 5em);
+}
+\thispagestyle{empty}
+{
+  \def\thesection{\textcolor{white}{\arabic{section}}}
+  \section{\textcolor{white}{Symbols}}
+}\vspace*{3em}
+\subsection{simple}
+\lipsum[1]
+\begin{align}
+  & \la \\
+  & \rra \\
+  & \Nra \\
+  & \dda \\
+  & \xra*[Up](down)\\
+  & \xla(\beta) \\
+  & \xxla[2](1)
+\end{align}
+
+\subsection{Complex}
+Some Examples: $H^1(\Omega)\hra L^p(\Omega)$, And further more: 
+\begin{align}
+  H^1(\Omega)\hra[E:t-1 = \gamma] L^p(\Omega)
+\end{align}
+
+Some symbols: \CC, \RR, \ZZ, \NN
+
+\begin{align}
+  & \zab \alpha + \beta \text{ V.S. } \alpha + \beta \\
+  & \zab(\frac12) \text{ V.S. } (\frac12) \\
+  & \zab[\frac12] \text{ V.S. } [\frac12] \\
+  & \zab\{\frac12\} \text{ V.S. } \{\frac12\}
+\end{align}
+
+\newpage
+\zpagemask*[anchor=tc,label=TEST,layer=foreground]{%
+  % \tikz\fill[color=blue, path fading=north] (0, 0) rectangle +(\zpw, 5em);
+  \tikz\fill[semitransparent, teal] (-10em,-10em) rectangle +(10em,10em); 
+}
+\section{Text}
+\lipsum[1]
+
+\begin{definition}[Test THM]
+  A smooth vector field \(\mathbf{v}\) is defined in a domain \(M\) if to each point \(x\) there is 
+  assigned a vector \(\mathbf{v}\left( x\right)  \in  {T}_{x}M\) attached at that point and depending 
+  smoothly on the point \(x\) (if a system of \(m\) coordinates is chosen, the field is defined by 
+  its \(m\) components, which are smooth functions of \(m\) variables). The vector \(\mathbf{v}\left( x\right)\) 
+  is called the value of the field \(\mathbf{v}\) at the point \(x\) .
+\end{definition}
+
+\lipsum[1]
+
+\begin{definition}[Continuous Mapping]
+  A smooth vector field \(\mathbf{v}\) is defined in a domain \(M\) if to each point \(x\) there is 
+  assigned a vector \(\mathbf{v}\left( x\right)  \in  {T}_{x}M\) attached at that point and depending 
+  smoothly on the point \(x\) (if a system of \(m\) coordinates is chosen, the field is defined by 
+  its \(m\) components, which are smooth functions of \(m\) variables). The vector \(\mathbf{v}\left( x\right)\) 
+  is called the value of the field \(\mathbf{v}\) at the point \(x\) .
+\end{definition}
+
+\lipsum[3]
+
+\begin{lemma}[Test THM]
+  A smooth vector field \(\mathbf{v}\) is defined in a domain \(M\) if to each point \(x\) there is 
+  assigned a vector \(\mathbf{v}\left( x\right)  \in  {T}_{x}M\) attached at that point and depending 
+  smoothly on the point \(x\) (if a system of \(m\) coordinates is chosen, the field is defined by 
+  its \(m\) components, which are smooth functions of \(m\) variables). The vector \(\mathbf{v}\left( x\right)\) 
+  is called the value of the field \(\mathbf{v}\) at the point \(x\) .
+\end{lemma}
+
+\lipsum[4]
+\zpagemaskrm{foreground}{TEST}
+\end{document}
+
+
+% ==> Fixed Bugs: 
+% 1. THM note expansion bug; 
+% 2. hyper init faild; 
+% 3. toc line stretch 
+%    --> fixed bug: line-stretch failed when no \tableofcontents before
+\InputIfFileExists{zlatex-cfg.tex}{}{}
+\documentclass[hyper]{../code/zlatex}
+\ztexloadlib{alias}
+\zcolorset{link=teal}
+\ztexset{
+  toc={
+    stretch=2, 
+    title-vspace=-5em, 
+    title=\centerline{\bfseries\Large \textsc{Contents}}
+  }
+}
+\usepackage{lipsum}
+\zthmbefore{\par\noindent\dotfill\par}
+\zthmtocprefix{\P\;}
+% \zthmtocsymrm
+\zthmtocsym{
+  lemma=$\star$\;,
+  definition=$\diamond$\;,
+  theorem=$\clubsuit$\;,
+}
+\ExplSyntaxOn
+\newcommand{\addthmsec}[4]{
+  \__zlatex_thm_toc_add:nnnn {#1}{#2}{#3}{#4}
+}
+\ExplSyntaxOff
+
+
+\begin{document}
+\thispagestyle{empty}
+\tableofcontents
+\vskip5em
+
+\lipsum[1]
+\section{List of Theorems}
+Lorem ipsum dolor sit amet, consectetuer adipiscing elit. Ut purus elit, vestibulum
+ut, placerat ac, adipiscing vitae, felis.
+
+\zthmtoc[3]
+
+\section{Accent}
+\addthmsec{section}{BLANK}{\thepage}{section.1}
+\lipsum[2]
+\begin{lemma}[N\"ormal Text]
+  This is a simple lemma.
+  \begin{align}
+    a^2 + b^2 = c^2
+  \end{align}
+\end{lemma}
+
+\lipsum[2]
+\begin{proposition}[Normal Text]
+  This is a simple lemma.
+  \begin{align}
+    a^2 + b^2 = c^2
+  \end{align}
+\end{proposition}
+
+
+\section{Macros/Equation}
+\zthmtocadd[name=NEW-SEC]{section}
+\begin{theorem}[$\mathbb{Z}[\sqrt{2}]$]%
+  This is a simple theorem.
+  \begin{align}
+    a^2 + b^2 = c^2
+  \end{align}
+\end{theorem}
+
+
+\begin{definition}
+  This is a simple definition.
+  \begin{align}
+    a^2 + b^2 = c^2
+  \end{align}
+\end{definition}
+
+\ExplSyntaxOn
+% \cs_show:N \sqrt
+
+\cs_set:Npn \__test_sqrt:n #1 
+  { #1--$Z[\sqrt {2}]$ }
+
+\__test_sqrt:n {AA}
+
+\the\baselineskip
+\ExplSyntaxOff
+
+
+\section{AAA}
+\subsection{AAA-1}
+\subsection{AAA-2}
+\subsection{AAA-3}
+
+\section{BBB}
+\subsection{BBB-1}
+\subsection{BBB-2}
+\subsection{BBB-3}
+\end{document}
+
+
+% ==> thmnote update
+\InputIfFileExists{zlatex-cfg.tex}{}{}
+\documentclass{../code/zlatex}
+
+
+\begin{document}
+\section{First}
+This is a simple definition style in z\LaTeX{}:
+
+\begin{definition}
+  This is a simple definition. 
+  \begin{align}
+    a^2 + b^2 = c^2
+  \end{align}
+\end{definition}
+
+A simple theorem environment follows the above definition as below:
+\begin{theorem}[THM-NOTE]
+  This is a simple theorem.
+  \begin{align}
+    a^2 + b^2 = c^2
+  \end{align}
+\end{theorem}
+
+
+\section{SET to HEIGHT}
+\ExplSyntaxOn
+\ztool_set_to_ht:nn {2.5pt}{XXX}
+\ExplSyntaxOff
+
+
+\section{THM LIST}
+Test List of Theorems:
+
+\zthmtoc
+\end{document}
+
+
+
+
+
+% ==> slide mode test
+\InputIfFileExists{zlatex-cfg.tex}{}{}
+\documentclass[
+  hyper,
+  % class=book,
+  % lang=cn,
+  layout={slide, aspect=16|9, theme=AnnArborSpruce},
+]{../code/zlatex}
+\zslidethemeuse[
+  UR={text=\zslidepageTF{=1}{}{\zslideUR:\ \zslidenavsym}},
+]{AnnArborSpruce}
+\makeatletter
+\def\seeTargets{%
+  \par\noindent\dotfill\\
+  \string\@currentHref\ = \meaning\@currentHref\par
+  \string\@currentHpage\ = \meaning\@currentHpage\par
+  \string\Hy@currentbookmarklevel\ = \meaning\Hy@currentbookmarklevel\par\vskip3em
+}
+\makeatother
+\zpagemask*[layer=foreground]{AAA}
+\zpagemask[layer=foreground]{BBB}
+% \zslidelogo[position={(40pt, 10pt)}, exclude={0, 2}]{Epmmy.jpg}
+\zslidelogo[width=3em, exclude={0, 1}]{Epmmy.jpg}
+
+
+\title{Debug}
+\author{Eureka}
+\date{\today}
+\begin{document}
+\maketitle
+\tableofcontents
+
+\section{First Section}
+\subsection{Test}
+BULLET TEST: \textbullet
+
+\ExplSyntaxOn
+m\ztool_set_to_wd:nn {1em}{mmmm}\par 
+
+\rule{1em}{3pt}
+\ExplSyntaxOff
+
+\zslidepageTF{<2}{PAGE-II}{NOT PAGE-II}
+
+\newpage
+\subsection[Short First Subsection Name]{First Subsection Name}
+  \begin{itemize}
+    \item
+    An item
+    \item
+    Another item
+    \begin{itemize}
+      \item Something
+      \begin{itemize}
+        \item Something else
+      \end{itemize}
+    \end{itemize}
+    \begin{enumerate}
+      \item Thing A
+      \item Thing B
+      \item Thing C
+    \end{enumerate}
+  \end{itemize}
+\end{document}
+
+
+
+
+% ===> Re-write titlesec package
+\InputIfFileExists{zlatex-cfg.tex}{}{}
+\documentclass[
+  % hyper,
+  class=book,
+]{../code/zlatex}
+\makeatletter
+% --> LaTeX 2e interface
+\newcounter{sector}
+\newcommand{\sectormark}[1]{\markright{#1}}
+\newcommand{\sector}{\@startsection{sector}{1}{0pt}%
+  {-3.5ex plus -1ex minus -.2ex}
+  {2.3ex plus.2ex}
+  {\large\sffamily}% start normal sec syntax: "*[]{}"
+}
+\makeatother
+
+% --> zlatex interface
+% \ztextitleNew{page}{part}
+
+
+
+% \ztextitleStyle{section}
+% {
+%   shape=display,
+%   % align=left,
+%   label=X-\thesection-Y.,
+%   sep=10pt,
+%   format=\color{blue},
+%   labelformat=\bfseries,
+%   titleformat=\sffamily\color{red},
+%   titlecmd=\testcmd,
+%   before=\raggedleft\titlerule[1pt]\vskip2em|,
+%   after=\vskip3em,
+% }
+% \ExplSyntaxOn
+% \group_begin:
+% \__zlatex_title_format_copy:nnnnnnn 
+%   {\section}{hang}{\sffamily}{\thesection~ XX}{0pt}{}{}
+% \group_end:
+% \ExplSyntaxOff
+
+
+\begin{document}
+% \part{PART}
+\chapter{CHAPTER}
+\section{AAA}
+The prior examples redefined existing sectional unit title 
+commands. This defines a new one, illustrating the needed 
+counter and macros to display that counter.
+
+
+\sector{BBB}
+The prior examples redefined existing sectional unit title 
+commands. This defines a new one, illustrating the needed 
+counter and macros to display that counter.
+
+
+
+\begin{align}
+  \substack{\smash{A^T}\\\scriptscriptstyle n\text{by}m}
+  \substack{\smash{C}\\\scriptscriptstyle m\text{by}m}
+  \substack{\smash{A}\\\scriptscriptstyle m\text{by}n}
+  = 1
+\end{align}
+\end{document}
+
+
+
+
+
+% ==> learn titlesec
+\documentclass{article}
+\usepackage[hmargin=2in]{geometry}
+\usepackage[raggedleft, sf]{titlesec}
+\titlelabel{\thetitle.\;}
+\usepackage{xcolor}
+
+% \newcounter{part}
+\titleclass{\part}{straight}
+\titleformat{\part}{\bfseries}{\thepart.}{10pt}{}
+
+% 1. \part is usually implemented in a non-standard way, it 
+%    remains untouched by the simple settings and should be 
+%    changed with the help of the “Advanced Interface.”
+
+
+\begin{document}
+\part{First Part}
+\section{FIRST}
+The prior examples redefined existing sectional unit title 
+commands. This defines a new one, illustrating the needed 
+counter and macros to display that counter.
+
+
+\section{SECOND}
+The prior examples {redefined existing} sectional unit title.
+commands. This defines a new one, illustrating the needed 
+counter and macros to display that counter. commands This 
+defines a new one, illustrating the needed counter and macros 
+to display that counter illustrating the needed defines a new one, 
+illustrating the needed counter and macros to display that counter.
+
+\ExplSyntaxOn
+\cs_new:Nn \_test:nn {
+  #1 == #2
+}
+\_test:nn {AA}{BB}
+\ExplSyntaxOff
+
+\end{document}
+
+
+
+
+% ===> page info
+\InputIfFileExists{zlatex-cfg.tex}{}{}
+\documentclass[
+  hyper
+]{../code/zlatex}
+\usepackage[many]{tcolorbox}
+\makeatletter
+\zpagemask[
+  anchor=tr, 
+  position={(\zpw, \zph)}
+]{\color{orange}\rule{\zpw}{10pt}}
+\colorlet{colexam}{red!75!black}
+\zthmcnt{share, parent=subsection}
+
+\begin{document}
+HELLO WORLD \rule{10pt}{10pt}
+
+\section{TEXT}
+\zpagemask{AAA}
+\zpagemask{\includegraphics{Epmmy.jpg}}
+\zpagemask[layer=foreground, position={(10em, 10em)}]{\parbox{3em}{BBB-1\\BBB-2}}
+\zpagemask*[position={(.25\zpw, .25\zph)}]{\ifnum\thepage=2 CCC2\else CCC1\fi}
+\zpagemask*[position={(0pt, 0pt)}, anchor=lb]{XXX-\thepage}
+\zpagemask[position={(\zpw, \zph)}, anchor=tr]{YYY}
+
+\newpage
+\zpagemask[
+  anchor=br, 
+  position={(\zpw, 0pt)}
+]{\color{purple}\rule{15pt}{\zph}}
+
+
+\section{GRAPH}
+\subsection{AAA}
+% ==> style definitions
+\tcbset{
+  styleA/.style={
+    arc=0mm, 
+    bottomtitle=0.5mm,
+    boxrule=0mm,
+    colbacktitle=black!10!white, 
+    coltitle=black, 
+    fonttitle=\bfseries, 
+    left=2.5mm,
+    leftrule=1mm,
+    right=3.5mm,
+    title={\zthmtitle},
+    toptitle=0.75mm, 
+  },
+  styleB/.style={
+    empty,
+    frame engine=path,
+    colframe=yellow!10,
+    sharp corners,
+    title={\zthmtitle},
+    attach boxed title to top left={yshift*=-\tcboxedtitleheight},
+    boxed title style={size=minimal, top=4pt, left=4pt},
+    coltitle=colexam,fonttitle=\large\bfseries\sffamily,
+    drop fuzzy shadow,
+    coltitle=black,
+    borderline west={3pt}{-3pt}{teal!50},
+    attach boxed title to top left={xshift=-3mm, yshift*=-\tcboxedtitleheight/2},
+    boxed title style={right=3pt, bottom=3pt, overlay={
+      \draw[draw=teal!70, fill=teal!70, line join=round]
+        (frame.south west) -- (frame.north west) -- (frame.north east) --
+        (frame.south east) -- ++(-2pt, 0) -- ++(-2pt, -4pt) --
+        ++(-2pt, 4pt) -- cycle;
+    }},
+    overlay unbroken={
+      \scoped \shade[left color=teal!10!black, right color=teal]
+        ([yshift=-0.2pt]title.south west) -- ([xshift=-1.5pt, yshift=-0.2pt]%
+        title.south-|frame.west)-- ++(0, -6pt) -- cycle;
+    },
+  },
+  styleC/.style={
+    enhanced, 
+    breakable,
+    colback=white,
+    colframe=blue!30!black,
+    attach boxed title to top left={yshift*=-\tcboxedtitleheight}, 
+    title={\zthmtitle},
+    boxed title size=title,
+    boxed title style={%
+        sharp corners, 
+        rounded corners=northwest, 
+        colback=tcbcolframe, 
+        boxrule=0pt,
+    },
+    underlay boxed title={%
+        \path[fill=tcbcolframe] (title.south west)--(title.south east) 
+            to[out=0, in=180] ([xshift=5mm]title.east)--
+            (title.center-|frame.east)
+            [rounded corners=\kvtcb@arc] |- 
+            (frame.north) -| cycle; 
+    },
+  }
+}
+\zthmstylenew{
+  % ---->
+  styleA={
+    begin={\begin{tcolorbox}[styleA]},
+    end={\end{tcolorbox}}
+  },
+  % ---->
+  styleB={
+    begin={\begin{tcolorbox}[styleB]},
+    end={\end{tcolorbox}}
+  },
+  % ---->
+  styleC={
+    begin={\begin{tcolorbox}[styleC]},
+    end={\end{tcolorbox}}
+  }
+}
+% ===> test text
+\def\bench{Mathematics is a field of study that discovers and organizes methods, 
+theories and theorems that are developed and proved for the needs of empirical 
+sciences and mathematics itself. There are many areas of mathematics, 
+\begin{align}
+  \mathrm{d}^2x + \mathrm{d}^y2 = \mathrm{d}^2z
+\end{align}
+which include number theory (the study of numbers), algebra (the study of formulas and related
+structures), geometry (the study of shapes and spaces that contain them), analysis 
+(the study of continuous changes), and set theory (presently used as a 
+foundation for all mathematics).}
+
+% \zthmstyle{styleA}
+\zthmtitleformat*{%
+  \bfseries\color{orange}%
+  \zthmnote\ \zthmnumber\ \zthmname
+}
+\begin{definition}[DEF]
+\bench
+\end{definition}
+
+
+% \zthmstyle{styleB}
+\vskip8em
+\begin{theorem}[THM]
+\bench
+\end{theorem}
+
+
+\newpage
+% \zthmstyle{styleC}
+\begin{axiom}[AXIOM]
+\bench
+\end{axiom}
+
+
+\newpage
+\zthmtoc
+\end{document}
+
+
+
+
+
+
+% ===> keytheorems ref
+\InputIfFileExists{zlatex-cfg.tex}{}{}
+\documentclass{article}
+\usepackage{keytheorems}
+\newkeytheorem{definition}
+\usepackage[colorlinks]{hyperref}
+
+\begin{document}
+\stepcounter{page}
+\begin{definition}[DEF]\label{def:a}
+Hello world, this is a definition. $a^2 + b^2 = \mathrm{d}^2z$
+\end{definition}
+
+
+\listofkeytheorems
+
+
+\newpage
+\listofkeytheorems
+
+\@writefile{thlist}{\KeyThmsSavedTheorem{definition}{1}{definition.1}{2}{}{note={DEF}}{}}
+\KeyThmsSavedTheorem {definition}{1}{}{1}{}{note={DEF}}{}
+
+\cs_new_protected:Npn \__keythms_thm_addcontentsdata:nnnn #1#2#3#4
+  { % #1 = theorem name, #2 = stored counters, #3 = keys, #4 = body
+    \keythms_listof_chaptervspacehack:
+    \iow_shipout:Ne \@auxout
+      {
+        \token_to_str:N \@writefile { thlist }
+          {
+            \token_to_str:N \KeyThmsSavedTheorem{ #1 }
+              { \@currentlabel }
+              { \@currentHref }
+              { \thepage }
+              { #2 }
+              { \exp_not:n { #3 } } % do we want any expansion here, perhaps
+              { \exp_not:n { #4 } } % with \text_expand:n ?
+          }
+      }
+  }
+\end{document}
+
+
+
+
+% ==> add list of theorem interface
+\InputIfFileExists{zlatex-cfg.tex}{}{}
+\documentclass[hyper]{../code/zlatex}
+\makeatletter
+\usepackage[many]{tcolorbox}
+
+\zthmtoclevel{subsection}
+\zthmstyle{shadow}
+\begin{document}
+\zthmtoc
+
+\vskip6em
+\subsection{AAA}
+\begin{definition}[DEF]\label{def:aaa}
+  Hello world, this is a definition. $a^2 + b^2 = \mathrm{d}^2z$
+\end{definition}
+
+
+\newpage
+\subsection{BBB}
+\begin{theorem}[THM]
+  Hello world, this is a theorem. $a^2 + b^2 = \mathrm{d}^2z$
+\end{theorem}
+
+
+\newpage
+\zthmtoc[vspace=15pt, title=THM LIST]
+\end{document}
+
+
+\InputIfFileExists{zlatex-cfg.tex}{}{}
+\documentclass[hyper]{../code/zlatex}
+\parindent=0pt \makeatletter
+\ExplSyntaxOn
+% \NewHook{zlatex/thm/thlist}
+\def\@starttoc#1{%
+  \begingroup
+  \@input{\jobname.#1}
+  % \@fileswfalse
+  % \UseHook{zlatex/thm/thlist}
+  % \legacy_if_set_false:n { @filesw }
+  \typeout{------->\checksave}
+  \if@filesw
+    \typeout{----->enter~stream}
+    \expandafter\newwrite\csname tf@#1\endcsname
+    \immediate\openout \csname tf@#1\endcsname \jobname.#1\relax
+  \fi
+  \@nobreakfalse
+  \endgroup
+}
+
+
+% optional commands
+\def\seeTargets{%
+  \par\noindent\dotfill\\
+  \string\@currentHref\ = \meaning\@currentHref\par
+  \string\@currentHpage\ = \meaning\@currentHpage\par
+  \string\Hy@currentbookmarklevel\ = \meaning\Hy@currentbookmarklevel\par\vskip3em
+}
+\def\checksave{
+  \if@filesw SAVED \else NOT SAVED \fi
+}
+\ExplSyntaxOff
+
+\begin{document}
+\checksave
+\vskip3em
+
+\@starttoc{thlist}
+% \@@input debug.thlist
+\newpage
+
+\section{FIRST}
+\seeTargets
+
+\begin{definition}[DEF]\label{def:aa}
+Hello world, this is a definition. $a^2 + b^2 = \mathrm{d}^2z$
+\end{definition}
+\addcontentsline{thlist}{subsection}{DEF-ITEM}
+\seeTargets
+
+\section{THM-LIST}
+\meaning\@@input
+
+% \checksave
+\begingroup
+\@fileswfalse
+\@starttoc{thlist}
+% \input{\jobname.thlist}
+\@@input debug.thlist
+\endgroup
+% \contentsline {subsection}{DEF-ITEM}{2}{definition.1.1}%
+
+
+\end{document}
+
+
+
+
+
+
+
+% ==> New thm style interface
+\InputIfFileExists{zlatex-cfg.tex}{}{}
+\documentclass[
+  fancy, 
+  hyper, 
+  % layout={slide, aspect=16|9}
+]{../code/zlatex}
+\usepackage{pifont}
+\ztexset{mathSpec={envStyle=shadow}}
+\zthmnew{theorem}{Ztheorem=NEW-THM|{HTML}{8e22ad}, Zproposition} 
+
+
+\def\boomen{As any dedicated reader can clearly see, the Ideal of practical
+reason is a representation of, as far as I know, the things in themselves; 
+\begin{align}
+\underset{}{\mathbf{v} \bigotimes \mathbf{w}} 
+  & = \underset{}{\mathbf{v} \otimes \mathbf{w}}
+      = \sum_{i=1}^3\sum_{j=1}^3a_{ij}u^iv^j \\[-.75em]
+  & = \sum_{i=1}^3\left(a_{i1}u^iv^1+a_{i2}u^iv^2+a_{i3}u^iv^3\right) 
+  \end{align}  
+}
+\zthmlang{fr}
+\zthmcnt{share, parent=section}
+\zthmtocprefix{\ding{118}\;}
+\zcolorset{
+  definition  = {RGB}{219,48,122},
+  theorem = teal!20
+} % OK
+
+\title{DEBUG}
+\author{Eureka}
+\date{\today}
+\begin{document}
+% BUG: stretch not working in thm toc.
+% \maketitle
+% \zthmtoc[stretch=20]
+% \zthmtoc[
+%   title={\textsc{List of Theorems}},
+%   stretch=1.5, 
+%   title-vspace=-10pt, 
+%   after-vspace=20pt
+% ]
+
+
+\section{NEWLY}
+\begin{Ztheorem}[ZTHM]
+\boomen
+\end{Ztheorem}
+
+\zthmcolorset{
+  Zproposition={HTML}{c0eb75},
+}
+\zthmstyle{leftbar}
+\begin{Zproposition}[ZPROP]
+\boomen
+\end{Zproposition}
+
+
+\section{DEBUG}
+\subsection{AAA}
+% \zcolorset{
+%   definition  = {RGB}{219,48,122},
+% } % NO effect
+\zthmstyle{fancy}
+\begin{definition}[DEF]\label{def:1}
+\boomen
+\end{definition}
+\zthmstylenew{
+  aaa={begin=\par\begin{center}, end=\end{center}, option=\zthmtitleswitch},
+  bbb={begin=BBB\begin{center}, end=\end{center}\kaaklfg\ahjksdh\par},
+}
+% \ExplSyntaxOn
+% \cs_meaning:N \g__zlatex_thm_style_aaa_begin_tl
+% \cs_meaning:N \g__zlatex_thm_style_aaa_end_tl
+
+% \cs_meaning:N \g__zlatex_thm_style_bbb_begin_tl
+% \cs_meaning:N \g__zlatex_thm_style_bbb_end_tl
+% \ExplSyntaxOff
+
+
+\zthmstyle{background}
+% \ShowHook{zlatex/thm/titleformat}
+\zthmtitleformat{\bfseries\zthmnumber\ \zthmname}
+% \ShowHook{zlatex/thm/titleformat}
+\begin{theorem}[THM]\label{thm:2}
+  \boomen
+\end{theorem}
+% \ShowHook{zlatex/thm/titleformat}
+
+\subsection{CCC}
+\zthmstyle{elegant}
+% \ShowHook{zlatex/thm/titleformat}
+\begin{proposition}[PROP]\label{prop:5}
+  \boomen
+\end{proposition}
+% \ShowHook{zlatex/thm/titleformat}
+
+\zthmstyle{aaa}
+\section{BBB}
+\zthmcolorset{
+  definition={HTML}{22b8cf},
+  proof=orange
+}
+\zthmhook{before=\color{blue}\begin{framed}, after=\end{framed}}
+\begin{definition}[DEF-II]\label{def:3}
+\boomen
+\end{definition}
+
+\zthmstyle{paris}
+\begin{definition}[DEF-III]\label{def:4}
+  \boomen
+\end{definition}
+
+
+\zthmstyle{leftbar}
+\begin{theorem}[REMARK]\label{rem:1}
+  As any dedicated reader can clearly see, the Ideal of practical
+  reason is a representation of, as far as I know, the things in themselves;
+\boomen
+As any dedicated reader can clearly see, the Ideal of practical
+reason is a representation of, as far as I know, the things in themselves;
+\end{theorem}
+
+
+\section{PROOF-LIKE}
+\begin{proof}
+Hello this is a simple proof env test.
+\end{proof}
+
+
+\cref{def:1,prop:5} | \Cref{thm:2} | \cref{def:3,rem:1}
+\begin{axiom}[AXIOM]
+  \boomen
+\end{axiom}
+\end{document}
+
+
+
+
+
+
+
+
+
+
+
+% Marker in zslide bug fixed
+\InputIfFileExists{zlatex-cfg.tex}{}{}
+\documentclass[
+  hyper,
+  fancy,
+  layout={slide, aspect=16|9, theme=AnnArborBeaver}
+]{../code/zlatex}
+\ztexset{mathSpec={envStyle=fancy}}
+\zthmnew{theorem}{Ztheorem=THM|{HTML}{8e44ad}, Zproposition} 
+% \zslidethemeuse[
+%   UR={text=\zslidenavsym},
+% ]{AnnArborBeaver}
+\NewMarkClass{test}
+\usepackage{lipsum}
+% \usepackage{minted}
+\def\boomen{As any dedicated reader can clearly see, the Ideal of practical
+reason is a representation of, as far as I know, the things in themselves; 
+\begin{align}
+\underset{}{\mathbf{v} \bigotimes \mathbf{w}} 
+  & = \underset{}{\mathbf{v} \otimes \mathbf{w}}
+      = \sum_{i=1}^3\sum_{j=1}^3a_{ij}u^iv^j \\[-.75em]
+  & = \sum_{i=1}^3\left(a_{i1}u^iv^1+a_{i2}u^iv^2+a_{i3}u^iv^3\right) 
+  \end{align}  
+}
+
+
+\ExplSyntaxOn\makeatletter
+\makeatother\ExplSyntaxOff
+
+\title{ltMarks Test}
+\author{Eureka}
+\date{\today}
+\begin{document}
+\maketitle
+
+% blank page
+% \newpage
+
+\section{HELLO}
+\InsertMark{test}{AAA-1}
+\subsection{WORLD}
+\lipsum[1][1-5]
+\InsertMark{test}{AAA-2}
+\vspace*{8em}
+
+\subsection{SPACE}
+\lipsum[1][6-15]
+
+\subsection{ROOM}
+\lipsum[1][13-17]
+\vspace*{6em}
+
+\subsection{OCEAN}
+\lipsum[2][1-6]
+\vspace*{10em}
+
+\subsection{HEAVEN}
+\lipsum[2][1-16]
+
+% \newpage
+% aa
+
+
+\section{DEBUG}
+\subsection{AAA}
+\lipsum[1][1-5]
+\InsertMark{test}{AAA-2}
+\vspace*{8em}
+
+\subsection{BBB}
+\lipsum[1][6-15]
+
+
+\section{FIRST}
+\begin{definition}[DEF]
+  Hello world: $a^2+b^2=c^2$.
+\end{definition}
+
+\zthmstyle{elegant}
+\begin{theorem}[theorem Test]
+  Hello world: $a^2+b^2=c^2$.
+\end{theorem}
+
+
+\section{SECOND}
+% \zcolorset{
+%   % Ztheorem={HTML}{8e44ad},
+%   Ztheorem=red 
+% }
+\begin{Ztheorem}[Ztheorem Test]
+  Hello world: $a^2+b^2=c^2$.
+\end{Ztheorem}
+
+\begin{Zproposition}
+  Hello world: $a^2+b^2=c^2$.
+\end{Zproposition}
+
+
+\newpage
+% \zcolorset{theorem=teal}
+\section{Elegant Style Math Env}
+\begin{axiom}[prime number]
+  \boomen
+\end{axiom}
+
+\zthmstyle{elegant}
+\begin{definition}[prime number]
+  \boomen
+\end{definition}
+
+\zthmstyle{leftbar}
+\begin{theorem}[prime number]
+  \boomen
+\end{theorem}
+
+\zthmtitleformat{\textcolor{red}{\thmname{#1}:\thmnote{[#3]-}\thmnumber{#2}}}
+\begin{lemma}[prime number]
+  \boomen
+\end{lemma}
+
+\zthmstyle{plain}
+\begin{corollary}[prime number]
+  \boomen
+\end{corollary}
+
+\newpage
+\zthmstyle{fancy}
+\zthmhook{begin=BEGIN, end=END, after=AFTER}
+% \zthmhook{begin=\begin{center}, end=\end{center}}
+% \zthmhook{before=\begin{framed}, after=\end{framed}}
+\begin{proposition}
+  \boomen
+\end{proposition}
+
+
+\zthmstylenew{before=\color{blue}\begin{framed}, after=\end{framed}}
+\begin{definition}
+  \boomen
+\end{definition}
+
+% \section{Final}
+% Other trial as below:
+% \begin{minted}{latex}
+% \zslidethemeuse[
+%     % UR={text=\FirstMark{2e-right-nonempty}} % failed
+%     % UR={text=\FirstMark{test}}              % successed
+%     % UR={text=\FirstMark{zslide-right}}      % successed
+%     UR={text=\FirstMark{zslide-right}\, --\, \LastMark{zslide-right}} % successed
+% ]{AnnArborDefault}
+% % hyper link test
+% \ExplSyntaxOn\makeatletter
+% \int_step_inline:nnn {1}{4}{
+%   % \hyper@link{link}{page.#1}{(#1)~|~}
+%   \hyper@link{link}{zslide@HELLO.#1}{(HELLO.#1)~|~}
+% }
+% \makeatother\ExplSyntaxOff
+% % navigate test
+% \ExplSyntaxOn\makeatletter
+% \cs_set:Npn \zslide@hyper@navigate:nn #1#2 {
+%   % #1: total frame
+%   % #2: current frame
+%   \int_step_inline:nnn {1}{#1}{
+%     \int_compare:nNnTF {#2} = {##1}
+%       {\hyper@link{link}{zslide@HELLO.##1}{\textbullet}}
+%       {\hyper@link{link}{zslide@HELLO.##1}{$\circ$}}
+%   }
+% }
+% \zslide@hyper@navigate:nn {4}{2}
+% \makeatother\ExplSyntaxOff
+% \end{minted}
+
+% \section{graphics}
+% Auto scale graphics:
+
+% \includegraphics[width=.2\linewidth]{Epmmy.jpg}
+\end{document}
+
+
+
+
+
+
+
+
+
+% ".color_set:nn" in l3keys
+\documentclass{article}
+\usepackage{xcolor}
+
+
+\begin{document}
+\ExplSyntaxOn\makeatletter
+\cs_set:Npn \__temp__:nn #1#2 {\typeout{#1:#2}}
+\cs_set:Npn \__temp__:n #1 {\typeout{#1}}
+\keyval_parse:nnn 
+  {\__temp__:n}
+  {\__temp__:nn }
+  {begin=AAA, end=BBB}
+
+
+\def\ctext#1{\par\noindent\textcolor{\tl_use:c {l_test_#1_tl}}{Sample-TEXT}}
+
+
+\cs_new:Npn \__zlatex_color_name_selector:w #1#2#3#4\q_stop 
+  {#2}
+\cs_new:Npn \__zlatex_color_init:nn #1#2 {
+  \definecolor{zlatex@color@#1}{#1}{#2}\q_stop
+  zlatex@color@#1
+}
+
+\tl_new:N \zlatex@color@keyC
+\tl_set:Nn \zlatex@color@keyC {blue}
+\keys_define:nn {test}{
+  keyA  .tl_set:N   = \l_test_keyA_tl,
+  keyA  .initial:n  = {red},
+  keyB  .tl_set:N   = \l_test_keyB_tl,
+  % keyB  .initial:n  = {blue},
+  keyB  .initial:e  = {\__zlatex_color_name_selector:w \definecolor{orange}{HTML}{5f3dc4}\q_stop},
+}
+\ctext{keyA}
+\ctext{keyB}
+% \keys_set:nn {test}{keyA=black}
+% \tl_show:N \l_test_keyB_tl
+
+\par\noindent
+\__zlatex_color_name_selector:w \definecolor{zlatex@color@keyC}{HTML}{5f3dc4}\q_stop
+
+\makeatother\ExplSyntaxOff
+\end{document}
+
+
+
+
+
+
+\InputIfFileExists{zlatex-cfg.tex}{}{}
+\documentclass[fancy, ]{../code/zlatex}
+\ztexset{mathSpec={envStyle=shadow}}
+\zthmnew{theorem}{Ztheorem=THM|{HTML}{8e44ad}, Zproposition} 
+% \zcolorset{
+%   definition=blue,
+%   theorem={HTML}{007175},
+%   Ztheorem={RGB}{219,48,122}
+% }
+% \newsavebox{\zlatexBox}
+% \zthmstylenew*{begin=\color{red}\begin{framed}, end=\end{framed}}
+
+\def\boomen{As any dedicated reader can clearly see, the Ideal of practical
+reason is a representation of, as far as I know, the things in themselves; 
+\begin{align}
+\underset{}{\mathbf{v} \bigotimes \mathbf{w}} 
+  & = \underset{}{\mathbf{v} \otimes \mathbf{w}}
+      = \sum_{i=1}^3\sum_{j=1}^3a_{ij}u^iv^j \\[-.75em]
+  & = \sum_{i=1}^3\left(a_{i1}u^iv^1+a_{i2}u^iv^2+a_{i3}u^iv^3\right) 
+  \end{align}  
+}
+
+
+\begin{document}
+\section{FIRST}
+\begin{definition}[DEF]
+  Hello world: $a^2+b^2=c^2$.
+\end{definition}
+
+\zthmstyle{elegant}
+\begin{theorem}[theorem Test]
+  Hello world: $a^2+b^2=c^2$.
+\end{theorem}
+
+
+\section{SECOND}
+% \zcolorset{
+%   % Ztheorem={HTML}{8e44ad},
+%   Ztheorem=red 
+% }
+\begin{Ztheorem}[Ztheorem Test]
+  Hello world: $a^2+b^2=c^2$.
+\end{Ztheorem}
+
+\begin{Zproposition}
+  Hello world: $a^2+b^2=c^2$.
+\end{Zproposition}
+
+
+\newpage
+% \zcolorset{theorem=teal}
+\section{Elegant Style Math Env}
+\begin{axiom}[prime number]
+  \boomen
+\end{axiom}
+
+% \zthmstyle{HOOK}
+\begin{definition}[prime number]
+  \boomen
+\end{definition}
+
+\zthmstyle{leftbar}
+\begin{theorem}[prime number]
+  \boomen
+\end{theorem}
+
+\zthmtitleformat{\textcolor{red}{\thmname{#1}:\thmnote{[#3]-}\thmnumber{#2}}}
+\begin{lemma}[prime number]
+  \boomen
+\end{lemma}
+
+\zthmstyle{plain}
+\begin{corollary}[prime number]
+  \boomen
+\end{corollary}
+
+\newpage
+\zthmstyle{fancy}
+\zthmhook{begin=BEGIN, end=END, after=AFTER}
+% \zthmhook{begin=\begin{center}, end=\end{center}}
+% \zthmhook{before=\begin{framed}, after=\end{framed}}
+\begin{proposition}
+  \boomen
+\end{proposition}
+
+
+\zthmstylenew{before=\color{blue}\begin{framed}, after=\end{framed}}
+\begin{definition}
+  \boomen
+\end{definition}
+\end{document}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+\documentclass{article}
+\usepackage{xcolor}
+
+\begin{document}
+\ExplSyntaxOn\makeatletter
+\regex_new:N \l__color_mode_regex
+\regex_set:Nn \l__color_mode_regex {(\cB..{1,}\cE.){2}}
+\cs_new:Npn \test__color_set:n #1 {
+  \regex_match:NnTF \l__color_mode_regex {#1}{
+    \definecolor{Test@\l_keys_key_str}#1
+    \tl_set:ce {l_test_\l_keys_key_str _tl}{Test@\l_keys_key_str}
+  }{
+    \@ifundefined{\string\color@#1}{
+      \msg_new:nnn {color} {undefined} {--->~Color~`#1'~undefined}
+      \msg_error:nn {color} {undefined}
+    }{
+      \tl_set:ce {l_test_\l_keys_key_str _tl}{#1}
+    }
+  }
+}
+\keys_define:nn {test}{
+  keyA  .tl_set:N  = \l_test_keyA_tl,
+  keyA  .initial:n = {green},
+  keyA  .code:n    = {\test__color_set:n {#1}},
+  keyB  .tl_set:N  = \l_test_keyB_tl,
+  keyB  .initial:n = {black},
+  keyB  .code:n    = {\test__color_set:n {#1}},
+}
+
+% EXAMPLES
+\textcolor{\l_test_keyA_tl}{TEXT-keyA}\par
+\textcolor{\l_test_keyB_tl}{TEXT-keyB}\par
+
+\keys_set:nn {test}{keyA={HTML}{0f45f3}}
+\textcolor{\l_test_keyA_tl}{TEXT-keyA}\par
+
+\keys_set:nn {test}{keyA={HTML}{8975f3}}
+\textcolor{\l_test_keyA_tl}{TEXT-keyA}\par
+
+\keys_set:nn {test}{keyB=orange}
+\textcolor{\l_test_keyB_tl}{TEXT-keyB}\par
+
+\keys_set:nn {test}{keyB=orangee}
+\textcolor{\l_test_keyB_tl}{TEXT-keyA}\par
+\makeatother\ExplSyntaxOff
+\end{document}
+
+
+
+
+
+
+% hyperref test
+\documentclass{article}
+\usepackage[T1]{fontenc}
+\usepackage{amsthm}
+\newcounter{theorem}
+\newenvironment{theorem}{\begin{flushleft}\textbf{Theorem}\;\refstepcounter{theorem}\thetheorem\enspace}{\end{flushleft}}
+\newtheorem{definition}{Definition}
+\makeatletter
+\setlength{\parindent}{0pt}
+\def\hyper@nopatch@thm{}
+\usepackage{lipsum}
+\usepackage{xcolor}
+\usepackage{hyperref}
+% \let\Hy@theorem@refstepcounter\stepcounter
+\hypersetup{
+  bookmarksnumbered,
+  colorlinks = true,
+  linkcolor = red,
+  urlcolor = blue,
+}
+\def\seeTargets{%
+  \par\noindent\dotfill\\
+  \string\@currentHref\ = \meaning\@currentHref\par
+  \string\@currentHpage\ = \meaning\@currentHpage\par
+  \string\Hy@currentbookmarklevel\ = \meaning\Hy@currentbookmarklevel\par\vskip3em
+}
+
+\begin{document}
+\tableofcontents
+
+% \@ifundefined{hyper@nopatch@thm}{UN-DEF}{DEF}
+% \meaning\@thm
+
+
+\newpage
+\section{Test 1}\label{test1}
+\subsection{sss b}
+Hello world I. 
+
+AAAA=BBBB
+% \MakeLinkTarget{ztargetA}
+\hyper@anchor{ztargetB}
+\seeTargets
+
+\newpage
+\section{thm link}
+\begin{theorem}\label{thm1}
+This is a theorem: $a^2+b^2=c^2$.
+\end{theorem}
+
+\begin{definition}\label{def1}
+This is a definition: $a^2+b^2=c^2$.
+\end{definition}
+
+\seeTargets
+
+
+\newpage
+\section*{Test 2}
+Hello world II, the star version section target is:\par
+\seeTargets
+
+\MakeLinkTarget[newType]{}
+\seeTargets
+
+
+\section{see targets}
+\subsection{sss aaa}
+\subsection{sss bbb}
+\seeTargets
+
+
+\section{Manually change target}
+\subsection{theHCOUNTER}
+Original current target is:\par
+\seeTargets
+
+Then i change current target manually:\par 
+\def\theHsection{1000}
+\seeTargets
+
+\textbf{Can NOT change the target manually by \string\theHCOUNTER.}
+
+\subsection{MakeLinkTarget-star}
+The command \string\MakeLinkTarget* can change \string\@currentHref{} manually:\par
+\MakeLinkTarget*{newManualType} \label{checkTarget}
+\seeTargets
+
+% \vskip3em
+% \meaning\ref
+
+% \vskip2em
+% \ExplSyntaxOn
+% \cs_meaning:N \__cmd_start:nNNnnn
+% \cs_meaning:N \__cmd_start_aux:NNnnnn
+% \cs_meaning:N \__cmd_run_code:
+% \ExplSyntaxOff
+
+
+\newpage
+\section{book mark}
+% \meaning\pdfbookmark\par
+% \meaning\new@pdflink\par
+
+AAA:\pdfbookmark[1]{ManuallyBookMark-I}{targetA}
+\seeTargets
+
+BBB: \currentpdfbookmark{ManuallyBookMark-II}{targetB}
+\seeTargets
+
+CCC: \subpdfbookmark{ManuallyBookMark-III}{targetC}
+\seeTargets
+
+DDD:(Even bookmark level not step, the number in dstination show step) \belowpdfbookmark{ManuallyBookMark-IV}{targetD}
+\seeTargets
+
+EEE: \hyper@anchorstart{target.X}\hyper@anchorend
+\seeTargets
+
+
+\newpage
+1. \string\ref{} commad Test:
+\begin{itemize}
+  \item Hello world III:\ref{test1}
+  \item Hello THM: \ref{thm1}
+  \item Hello DEF: \ref{def1}
+\end{itemize}
+
+\vskip3em
+2. \string\hyperlink{} commad Test:
+\begin{itemize}
+  \item Link Target Manually: % \LinkTargetOn ztargetA \LinkTargetOff
+  \item \hyper@link {url}{ztargetB}{link text}; 
+        \hyper@linkstart{link}{ztargetB} long long link text \hyper@linkend
+\end{itemize}
+
+\vskip3em
+3. \string\MakeLinkTarget{} commad Test:
+\begin{itemize}
+  \item \hyper@link {link}{section*.2}{link text};
+  \item \hyper@link {link}{newType*.3}{link text};
+\end{itemize} 
+
+\vskip3em
+4. bookmark related target link:
+\begin{itemize}
+  \item AAA: \hyper@link {link}{targetA.1}{link text 1};
+  \item BBB: \hyper@link {link}{targetB.1}{link text 2};
+  \item CCC: \hyper@link {link}{targetC.2}{link text 3};
+  \item DDD: \hyper@link {link}{targetD.3}{link text 4};
+  \item EEE: \hyper@link {link}{target.X}{link text 5};
+\end{itemize} 
+\end{document}
+
+
+
+
+
+\InputIfFileExists{zlatex-cfg.tex}{}{}
+\documentclass[
+  fancy,
+  % hyper,
+  % lang=cn,
+  % class=book,
+  % font={config},
+  % layout={margin},
+  % layout={slide, theme=AnnArborSeahorse, aspect=16|9},
+  % classOption={12pt}
+]{../code/zlatex}
+\zthmlang{fr}
+\ztexloadlib{alias}
+\ztexset{mathSpec={envStyle=fancy}}
+% \zcolorset{theorem=teal}
+\zthmcnt{share, parent=section}
+\zthmnew{theorem}{Zaxiom, Ztheorem=Thm|green, Zproposition=Prop|orange} %Ztheorem=Thm|{HTML}{0f45f3}
+\zthmnew{proof}{Zproof, Zexample=Example|red, Zsolution=Solution|}
+
+
+\def\boomen{As any dedicated reader can clearly see, the Ideal of practical
+reason is a representation of, as far as I know, the things in themselves; 
+\begin{align}
+\underset{}{\mathbf{v} \bigotimes \mathbf{w}} 
+  & = \underset{}{\mathbf{v} \otimes \mathbf{w}}
+      = \sum_{i=1}^3\sum_{j=1}^3a_{ij}u^iv^j \\[-.75em]
+  & = \sum_{i=1}^3\left(a_{i1}u^iv^1+a_{i2}u^iv^2+a_{i3}u^iv^3\right) 
+  \end{align}  
+}
+
+% \setlength{\fboxsep}{0pt}
+\title{z\LaTeX{} Benchmark Test}
+\author{Eureka}
+\date{\today}
+\begin{document}
+\maketitle
+% \chapter{Hello}
+% \section{Py Fijw}
+\section{FIRST}
+Hello world; \meaning\FF
+
+
+\begin{theorem}[Pythagorean theorem]\label{Pythagorean theorem}
+This is a theorem:
+  \begin{align}
+    \R{d}^2x + \R{d}^2y = \R{d}^2z\\
+    dx = 2
+  \end{align}  
+\end{theorem}
+
+\begin{proof}\label{proof-1}
+This is a proof: $a^2 + b^2 = c^2$
+\end{proof}
+
+
+\section{Internal Math Env}
+\begin{zlatexZtheorem}[internal Env]
+  Hello Internal Ztheorem
+\end{zlatexZtheorem}
+
+
+\section{New Math Env}
+\begin{Zaxiom}
+Hello Zaxiom
+\end{Zaxiom}
+
+\begin{Ztheorem}[New Thm Users' ENV] % ---> inside thm source
+\boomen
+
+\boomen
+\end{Ztheorem}
+
+\zthmstyle{elegant}
+\begin{Zproposition}[New Prop Users' ENV]\label{zprop-1}
+\boomen
+
+\boomen
+\end{Zproposition}
+
+
+
+\newpage\zcolorset{theorem=teal}
+\section{Elegant Style Math Env}
+\begin{axiom}[prime number]
+  \boomen
+\end{axiom}
+
+\begin{definition}[prime number]
+  \boomen
+\end{definition}
+
+\begin{theorem}[prime number]
+  \boomen
+\end{theorem}
+
+\zthmtitleformat{\thmname{#1}:\thmnote{[#3]-}\thmnumber{#2}}
+\begin{lemma}[prime number]
+  \boomen
+\end{lemma}
+
+\zthmstyle{plain}
+\begin{corollary}[prime number]
+  \boomen
+\end{corollary}
+
+\begin{proposition}
+  \boomen
+\end{proposition}
+
+
+\section{New Proof Env}
+\begin{Zproof}
+Hello Zproof
+\end{Zproof}
+
+\begin{Zexample}
+Hello Zexample
+\end{Zexample}
+
+\begin{Zsolution}\label{zsolu-1}
+Hello Zsolution
+\end{Zsolution}
+
+
+
+% \href{http://www.google.com}{Google}
+
+% \newlength{\myl}
+% \settowidth\myl{\hbox{\Large\bfseries Eureka-Eureka-Eureka-Eureka-Eureka-}}
+% \the\myl % 289.98325pt
+
+
+% \ExplSyntaxOn
+% \__zlatex_math_env_color_set:w thm|red\q_stop
+% <==>
+% \exp_last_unbraced:Ne \__zlatex_math_env_color_set:w {thm|red}\q_stop
+% \tl_use:c {l__zlatex_thm_color_tl}
+% \ExplSyntaxOff
+
+\newpage
+Hello world:
+
+\begin{itemize}
+  \item \cref{Pythagorean theorem}
+  \item \cref{proof-1}
+  \item \cref{zprop-1}
+  \item \cref{zsolu-1}
+\end{itemize}
+
+
+% \includegraphics[width=.5\paperwidth]{example-image-a}
+\end{document}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+\documentclass[
+  % fancy,
+  % hyper,
+  % lang=cn,
+  % class=book,
+  % classOption={12pt}
+  % font={config},
+  % layout={margin},
+  % layout={slide, theme=AnnArborSeahorse, aspect=16|9},
+]{../code/zlatex}
+\ztexloadlib{alias}
+% \zthmcnt{share, parent=section}
+
+
+\begin{document}
+Hello world: $\int x \dd x$.
+\begin{align}
+  & \int x \dd x = \frac{1}{2}x^2 + \CC \\
+  & e^{\int x \dd x} = e^{\frac{1}{2}x^2 + \CC} \\
+  & \K{A} = \S{A} = \C{A} = \B{A} \\
+  & A\pi+\sum = \F{A\pi+\sum} 
+\end{align}
+
+
+\begin{align}
+  & \grad \cdot F = \div F \\
+  & \grad F = \div F \\
+  & \olddiv F \sim \oldhom F \\
+  & \cong = \backsimeq
+\end{align}
+
+
+\begin{align}
+  & \A a \xl b \xl[\alpha]((\psi)) c \\
+  & a \ma b \xxl(\alpha) c \\
+  & \E a \xr(\Theta = \Gamma + \zeta) b \xr[\alpha] c \\
+  & a \da b \xxr{[}{[}\alpha{]}{]}(\beta - \gamma = \xi) c 
+\end{align}
+\end{document}
+
+
+
+
+
+
+
+\documentclass{article}
+\usepackage{amsmath, amsthm}
+
+
+% preamble
+\ExplSyntaxOn
+\NewHook{zlatex/thm/titleformat}
+\newtheoremstyle{zlatexMathEnv}
+  {2pt}{2pt}{}
+  {0pt}{\bfseries}{}
+  {.25em}
+  {
+    \cs_set:Npn \ThmName { \thmname{#1} }
+    \cs_set:Npn \ThmNumber { \thmnumber{#2} }
+    \cs_set:Npn \ThmNote { \thmnote{#3} }
+    % \tl_if_empty:nTF {#3}
+    %   { \ThmName \ThmNumber }
+    %   {  }
+    \UseHook{zlatex/thm/titleformat}
+  }
+\theoremstyle{zlatexMathEnv}
+
+\newcommand{\zthmtitleformat}[1]{
+  \IfHookEmptyTF{zlatex/thm/titleformat}{}
+    {\RemoveFromHook{zlatex/thm/titleformat}[once]}
+  \AddToHook{zlatex/thm/titleformat}[once]{#1}
+}
+\ExplSyntaxOff
+
+
+% main document
+\begin{document}
+\newtheorem{aaa}{AAA}
+\zthmtitleformat{\ThmName. \ThmNumber [\ThmNote)}
+\begin{aaa}[SECOND]
+  ENV-CONTENT-SECOND
+\end{aaa}
+\end{document}
+
+
+
+
+
+
+
+
+
+\documentclass{article}
+\usepackage{amsmath, amsthm}
+
+
+\begin{document}
+\ExplSyntaxOn
+\NewHookWithArguments{zlatex/thm/titleformat}{3}
+\newtheoremstyle{zlatexMathEnv}
+  {2pt}{2pt}{}
+  {0pt}{\bfseries}{}
+  {.25em}
+  {
+    \cs_set:Npn \ThmName { \thmname{#1} }
+    \cs_set:Npn \ThmNumber { \thmnumber{#2} }
+    \cs_set:Npn \ThmNote { \thmnote{#3} }
+    % { \ThmName \ThmNumber \ThmNote }
+    \UseHookWithArguments{zlatex/thm/titleformat}{3}{#1}{#2}{#3}
+  }
+\theoremstyle{zlatexMathEnv}
+
+% \tl_put_right:Nn \l_text_expand_exclude_tl {\thmnote \thmnumber \thmname}
+% \cs_generate_variant:Nn \text_expand:n {e}
+% \newcommand{\foo}[1]{
+%   \tl_set:Nn \l_tmpa_tl {\text_expand:n {#1}}
+%   \tl_show:N \l_tmpa_tl
+% }
+% \foo{\thmname{##1} \thmnumber{#2} \thmnote{[#3]}}
+
+
+% ===>
+% \cs_new_protected:Nn \keythms_thmstyle_thmname:n { \thmname{#1} }
+% \cs_new_protected:Nn \keythms_thmstyle_thmnumber:n { \thmnumber{#1} }
+% \cs_new_protected:Nn \keythms_thmstyle_thmnote:n { \thmnote{#1} }
+
+% \tl_put_right:Nn \l_text_expand_exclude_tl { \thmnote \thmnumber \thmname }
+% % ^ allows \thmnote, etc. to work in headstyle; hope no bad side effects!
+% % user is in charge of spacing with \NAME and \NUMBER (thmtools compat...)
+% \cs_set:Npn \NAME { \keythms_thmstyle_thmname:n { ##1 } }
+% \cs_set:Npn \NUMBER
+%   {
+%     \keythms_thmstyle_thmnumber:n
+%       {
+%         \group_begin:
+%         ##2
+%         \group_end:
+%       }
+%   }
+% \cs_set:Npn \NOTE
+%   {
+%     \keythms_thmstyle_thmnote:n {##3}
+%   }
+
+% \text_expand:n { \keythms_thmstyle_headcmd:nnn{##1}{##2}{##3} }
+% \cs_set:Nn \keythms_thmstyle_headcmd:nnn
+% {
+%   \makebox[0pt][r]{
+%     \keythms_thmstyle_thmnumber:n {
+%         ##2
+%       }
+%     }
+%   \NAME\NOTE
+% }
+% \foo{\NAME \NUMBER \NOTE}
+% \foo{\thmname{##1} \thmnumber{##2} \thmnote{[##3]}}
+
+
+
+\newcommand{\zthmtitleformat}[1]{
+  \IfHookEmptyTF{zlatex/thm/titleformat}{}
+    {\RemoveFromHook{zlatex/thm/titleformat}[once]}
+  \AddToHookWithArguments{zlatex/thm/titleformat}[once]{#1}
+}
+\ExplSyntaxOff
+\newtheorem{aaa}{AAA}
+
+% \zthmtitleformat{\thmname{#1}: \thmnumber{#2} \thmnote{[#3]}}
+\begin{aaa}[FIRST]
+  ENV-CONTENT-FIRST
+\end{aaa}
+
+% \zthmtitleformat{\thmname{#1}. \thmnumber{#2} \thmnote{(#3)}}
+\zthmtitleformat{\ThmName. \ThmNumber [\ThmNote)}
+\begin{aaa}[SECOND]
+  ENV-CONTENT-SECOND
+\end{aaa}
+
+\begin{aaa}
+  ENV-CONTENT-THIRD
+\end{aaa}
+\end{document}
+
+
+
+
+
+
+
+
+\documentclass[
+  layout={
+    slide, 
+    aspect=16|9, 
+    % theme=AnnArborAlbatross
+  },
+  % mathSpec={
+  %   font=hello,
+  %   world=haha
+  % },
+  % lang=cn,
+  packageOption={
+    % geometry={margin=3in},
+    % fontspec={quiet},
+    % fontenc={T1}
+  }
+]{../code/zlatex}
+% \geometry{margin=3in}%{geometry}
+% \documentclass[
+%   fancy,
+%   hyper,
+%   % class=hello,
+%   classOption={12pt},
+%   layout={margin, slide, aspect=16|9, theme=AnnArborAlbatrosss},
+%   % font=config,
+%   toc={titlee=CONTENTS},
+%   mathSpec={
+%     font=eulerr, 
+%     counter=world
+%   },
+%   font=lm,
+%   layout=openAll,
+%   bib_index={Notload},
+%   % lang=cn,
+%   hello=world,
+% ]{../code/zlatex}
+% \usepackage{pifont}
+% \usepackage{anyfontsize}
+\ztexset{mathSpec={envStyle=fancy, font=mathpazo}}
+% \zslideset{
+%   world=haha,
+%   toc={hello=hi}
+% }
+
+
+
+% \documentclass{article}
+
+
+\title{Debug}
+\author{Eureka}
+\date{\today}
+\begin{document}
+\maketitle
+% \tableofcontents
+% \newpage
+
+
+Hello world
+\begin{theorem}
+This is Hello world:
+
+\begin{align}
+  \sum_{i=1}^{+\infty}{\int_{0}^{i}-\frac{1}{t}\mathrm{d}t} = \frac{\pi^2}{6}
+\end{align}
+\end{theorem}
+
+
+% \newpage 
+% \section{Page 2}
+% \subsection{sss}
+% world
+
+% \newpage
+% \section{Math Formula}
+% \begin{align}
+%   \sum_{i=1}^{+\infty}{\int_{0}^{i}-\frac{1}{t}\mathrm{d}t} = \frac{\pi^2}{6}
+% \end{align}
+
+
+\ExplSyntaxOn
+\ExplSyntaxOff
+
+\end{document}

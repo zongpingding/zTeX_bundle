@@ -23,10 +23,14 @@
       [.\node[boolKey] {hyper}; \deft{false} ]
       [.\node[boolKey] {fancy}; \deft{false} ]
       [.\node[boolKey] {cus}; \deft{false} ]
-      [.\node[normalKey] {lang}; 
+      [[[.\node[boolKey] {cref-backend}; 
+        [.\node[normalKey, fill=Blue] {zref-clever}; ]
+        [.\node[normalKey] {cleveref}; ]
+      ]]]
+      [[.\node[normalKey] {lang}; 
         [.\node[normalKey, fill=Blue] {en}; ]
         [.\node[normalKey] {cn}; ]
-      ]
+      ]]
       [.\node[normalKey] {cref-backend}; 
         [.\node[normalKey, fill=Blue] {zref-clever}; ]
         [.\node[normalKey] {cleveref}; ]
@@ -64,12 +68,12 @@
             [.\node[normalKey] {lapsis};     ]
             [.\node[normalKey] {obsdian};    ]
         ]
-        [[.\node[normalKey] {font}; 
-          [.\node[normalKey] {newtx}; ]
-          [.\node[normalKey] {mtpro2}; ]
-          [.\node[normalKey] {euler}; ]
-          [.\node[normalKey] {mathpazo}; ]
-          [.\node[normalKey, fill=Blue] {Computer Modern}; ]
+        [[.\node[normalKey] (mathfontC) {font}; 
+          % [.\node[normalKey] {newtx}; ]
+          % [.\node[normalKey] {mtpro2}; ]
+          % [.\node[normalKey] {euler}; ]
+          % [.\node[normalKey] {mathpazo}; ]
+          % [.\node[normalKey, fill=Blue] {cmm}; ]
         ]]
         [.\node[boolKey] {alias}; \deft{false} ]
       ]
@@ -79,13 +83,30 @@
         [.\node[normalKey] {source}; ]
       ]]
       [.\node[metaKey] {font}; 
-        [.\node[boolKey] {config}; \deft{false} ]
+        [.\node[boolKey] {sysfont}; \deft{false} ]
+        [.\node[normalKey] {doc}; 
+          [.\node[normalKey] {ptmx}; ]
+          [.\node[normalKey] {lmm}; ]
+          [.\node[normalKey] {newtx}; ]
+        ]
+        [.\node[normalKey] (fontmathC) {math}; 
+          [.\node[normalKey] {euler}; ]
+          [.\node[normalKey] {newtx}; ]
+          [.\node[normalKey] {mtpro2}; ]
+          [.\node[normalKey] {mathpazo}; ]
+          [.\node[normalKey, fill=Blue] {cmm}; ]
+        ]
+        [.\node[normalKey] {text}; 
+          [.\node[normalKey] {times}; ]
+          [.\node[normalKey, fill=Blue] {cmr}; ]
+        ]
       ]
     ]
   % lines
   \draw (articleL.south) |- ++(0, -1.5em) -| (ctexbookR.south);
   \draw ($(articleL.south)+(5em, -2.5em)$)node[draw, rectangle, below] {Valid Options} -- ++(0, 1em);
   \draw[->, dashed] ($(articleL.south)+(8.4em, -3.3em)$) -| (classOptionC);
+  \draw[->, dashed] (mathfontC) -- ($(mathfontC)+(0pt, -5em)$) -| (fontmathC);
   % annotatations
   \node[text=Blue, rectangle, draw] at ($(annotateC)+(0, -8em)$)  {\texttt{default Value}};
   \node[boolKey] at ($(annotateC)+(0, -10em)$)  {Bool Value};

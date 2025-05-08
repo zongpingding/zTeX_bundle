@@ -1,42 +1,43 @@
-\ProvidesExplFile{zlatex.module.indexref.tex}{2025/04/21}{1.0.1}{indexref~module~for~zlatex}
+\ProvidesExplFile{ztex.module.ref.tex}{2025/04/29}{1.0.1}{ref~module~for~ztex}
 
 
-%%%%%     index/ref for zlatex     %%%%%
+%%%%%     ref module for ztex     %%%%%
 % ==> package loading
-\bool_if:NT \g__zlatex_bib_index_load_bool {            
+\bool_if:NT \g__ztex_bib_index_load_bool {            
   \RequirePackage{indextools}
-  \str_case:Vn \g__zlatex_bib_backend_str {
+  \str_case:Vn \g__ztex_bib_backend_str {
     {bibtex}{\RequirePackage[backend=bibtex]{biblatex}}
     {biber}{\RequirePackage[backend=biber]{biblatex}}
   }
-  \exp_args:Nx \addbibresource{\str_use:N \g__zlatex_bib_source_str}
+  \exp_args:Nx \addbibresource{\str_use:N \g__ztex_bib_source_str}
 }
-\bool_if:NT \g__zlatex_hyperref_bool {
+\bool_if:NT \g__ztex_hyperref_bool {
   \RequirePackage{hyperref}
-  \SetLinkTargetFilter{zlatex-\jobname-#1}
+  \SetLinkTargetFilter{ztex-\jobname-#1}
 }
 
 
 % ==> provide hyper command
 \ProvideDocumentCommand\hyper@anchor{m}{}
 \ProvideDocumentCommand\hyper@link{mmm}{}
-\ProvideDocumentCommand{\hyper@linkstart}{mmm}{}
-\ProvideDocumentCommand{\hyper@linkend}{}{}
-\ProvideDocumentCommand{\hyper@linkfile}{mmm}{}
+\ProvideDocumentCommand\hyper@linkstart{mmm}{}
+\ProvideDocumentCommand\hyper@linkend{}{}
+\ProvideDocumentCommand\hyper@linkfile{mmm}{}
 \ProvideDocumentCommand\MakeLinkTarget{sO{}m}{}
 \ProvideDocumentCommand\LinkTargetOn{}{}
 \ProvideDocumentCommand\LinkTargetOff{}{}
 \ProvideDocumentCommand\NextLinkTarget{m}{}
 \ProvideDocumentCommand\SetLinkTargetFilter{m}{}
+\ProvideDocumentCommand\texorpdfstring{mm}{#1}
 
 
 % ==> clever reference for sections, figure and table
-\cs_set:Npn \cref@pl@suffix {\str_if_eq:VnF \g__zlatex_lang_str {cn}{s}}
-\str_case:VnF \g__zlatex_cref_backend_str 
+\cs_set:Npn \cref@pl@suffix {\str_if_eq:VnF \g__ztex_lang_str {cn}{s}}
+\str_case:VnF \g__ztex_cref_backend_str 
   {
     {cleveref}{
       \RequirePackage[nameinlink]{cleveref}
-      \str_case:VnF \g__zlatex_lang_str {
+      \str_case:VnF \g__ztex_lang_str {
         {en}{
           \IfClassLoadedTF{book}{
             \crefname{part}{part}{parts}
@@ -47,7 +48,7 @@
           \crefname{figure}{figure}{figures}
           \crefname{table}{table}{tables}
           \crefname{equation}{equation}{equations}
-          \crefname{zlatex@thm@sharecnt}{Result}{Results}
+          \crefname{ztex@thm@sharecnt}{Result}{Results}
         }
         {cn}{
           \IfClassLoadedTF{book}{
@@ -59,14 +60,14 @@
           \crefname{figure}{图}{图}
           \crefname{table}{表}{表}
           \crefname{equation}{方程}{方程}
-          \crefname{zlatex@thm@sharecnt}{结果}{结果}
+          \crefname{ztex@thm@sharecnt}{结果}{结果}
         }
-      }{\zlatex_msg_error:n {option-language}}
-      \creflabelformat{zlatex@thm@sharecnt}{#2(#1)#3}
-      \cs_new:Npn \__zlatex_cref_math_env:n #1 {
+      }{\ztex_msg_error:n {option-language}}
+      \creflabelformat{ztex@thm@sharecnt}{#2(#1)#3}
+      \cs_new:Npn \__ztex_cref_math_env:n #1 {
         \exp_args:Nnff \crefname{#1}
-          {\prop_item:cn {g__zlatex_thm_name_prop}{#1}}
-          {\prop_item:cn {g__zlatex_thm_name_prop}{#1}\cref@pl@suffix}
+          {\prop_item:cn {g__ztex_thm_name_prop}{#1}}
+          {\prop_item:cn {g__ztex_thm_name_prop}{#1}\cref@pl@suffix}
         \creflabelformat{#1}{##2(##1)##3} 
         % arg-spec of command \creflabelformat:
         % ##1: the counter, like '2.1';
@@ -77,7 +78,7 @@
       \RequirePackage{zref-clever}
       \exp_args:Ne \zcsetup{
         nameinlink, 
-        lang = \g__zlatex_lang_str,
+        lang = \g__ztex_lang_str,
         typeset = both, 
         refbounds = { ,( ,), },
       }
@@ -85,7 +86,7 @@
       %   English, German, French, Portuguese, and Spanish
       \zcDeclareLanguageAlias{en}{english}
       \zcLanguageSetup{english}{
-        type = zlatex@thm@sharecnt,
+        type = ztex@thm@sharecnt,
           name-sg = Result,
           Name-sg = Result,
           name-pl = Results,
@@ -129,29 +130,29 @@
           Name-sg = 方程,
           name-pl = 方程,
           Name-pl = 方程,
-        type = zlatex@thm@sharecnt,
+        type = ztex@thm@sharecnt,
           name-sg = 结果,
           Name-sg = 结果,
           name-pl = 结果,
           Name-pl = 结果,
       }
-      \cs_new:Npn \__zlatex_cref_math_env:n #1
+      \cs_new:Npn \__ztex_cref_math_env:n #1
         {
           \zcRefTypeSetup {#1}
             {
-              name-sg = \prop_item:cn {g__zlatex_thm_name_prop}{#1},
-              Name-sg = \prop_item:cn {g__zlatex_thm_name_prop}{#1},
-              name-pl = \prop_item:cn {g__zlatex_thm_name_prop}{#1}\cref@pl@suffix,
-              Name-pl = \prop_item:cn {g__zlatex_thm_name_prop}{#1}\cref@pl@suffix,
+              name-sg = \prop_item:cn {g__ztex_thm_name_prop}{#1},
+              Name-sg = \prop_item:cn {g__ztex_thm_name_prop}{#1},
+              name-pl = \prop_item:cn {g__ztex_thm_name_prop}{#1}\cref@pl@suffix,
+              Name-pl = \prop_item:cn {g__ztex_thm_name_prop}{#1}\cref@pl@suffix,
             }
         }
       % uniform cleveref commands
       \let\cref\zcref
     }
   }{
-    \zlatex_msg_set:nn {option-backend}{
-      option-backend~invalid,~zlatex~currently~only~support~'cleveref'
+    \ztex_msg_set:nn {option-backend}{
+      option-backend~invalid,~ztex~currently~only~support~'cleveref'
       ~or~'zref-clever'~for~option-backend.
     }
-    \zlatex_msg_error:n {option-backend}
+    \ztex_msg_error:n {option-backend}
   }

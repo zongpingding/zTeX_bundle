@@ -1,0 +1,319 @@
+\usepackage{ztool}
+\ztexloadlib{alias, thm}
+\ztexset{
+  toc={
+    column  = 2,
+    title   = 总目录,
+    stretch = 1.3
+  }
+}
+\zcolorset{ link=purple } 
+\geometry{left=2in, right=1in}
+\usepackage{zhnumber}
+\usepackage{tikzlings}
+\usepackage{comment}
+\usepackage{tabularray}
+\UseTblrLibrary{diagbox}
+\usepackage{pifont}
+\usepackage{minted}
+\usepackage{pdfpages}
+\usepackage{multicol}
+\usepackage{hologo}
+\usepackage[bottom]{footmisc}
+\usepackage{transparent}
+
+
+% ==> l3doc patches
+\AtBeginDocument{
+  % \DeleteShortVerb \"
+  \DeleteShortVerb \|
+}
+% key-value env for typesetting key-value options
+\ExplSyntaxOn
+\cs_new_protected:Npn \__codedoc_function_ztex:nnw #1#2
+  {
+    \__codedoc_function_typeset_start:
+    \__codedoc_function_init:
+    \tl_set:Nn \l__codedoc_macro_argument_tl {#2}
+    \keys_set:nn { l3doc/function } {#1}
+    \__codedoc_names_get_seq_ztex:nN {#2} \l__codedoc_names_seq
+    \__codedoc_names_parse:
+    \__codedoc_function_typeset:
+    \__codedoc_function_reset:
+    \__codedoc_function_descr_start:w
+  }
+\cs_new_protected:Npn \__codedoc_names_get_seq_ztex:nN #1#2
+  {
+    \bool_if:NTF \l__codedoc_names_verb_bool
+      {
+        \seq_clear:N #2
+        \seq_put_right:No #2 { {#1} }
+      }
+      {
+        \tl_set:Nn \l__codedoc_tmpa_tl {#1}
+        \tl_remove_all:Ne \l__codedoc_tmpa_tl
+          { \exp_not:N \obeyedline \c_percent_str }
+        \tl_remove_all:Ne \l__codedoc_tmpa_tl
+          { \exp_not:N \obeyedline }
+        \__kernel_tl_set:Nx \l__codedoc_tmpa_tl { \l__codedoc_tmpa_tl }
+        \tl_remove_all:Ne \l__codedoc_tmpa_tl
+          { \iow_char:N \^^M \c_percent_str }
+        \tl_remove_all:Ne \l__codedoc_tmpa_tl { \tl_to_str:n { ^ ^ A } }
+        \tl_remove_all:Ne \l__codedoc_tmpa_tl { \iow_char:N \^^I }
+        \tl_remove_all:Ne \l__codedoc_tmpa_tl { \iow_char:N \^^M }
+        \__codedoc_detect_internals:N \l__codedoc_tmpa_tl
+        \__codedoc_replace_at_at:N \l__codedoc_tmpa_tl
+        \tl_set:Ne \l__codedoc_tmpa_tl 
+          { 
+            \clist_map_function:NN \l__codedoc_tmpa_tl 
+              \__ztex_add_parent_key:n
+          }
+        \exp_args:NNe \seq_set_from_clist:Nn #2
+          { \l__codedoc_tmpa_tl }
+      }
+  }
+\cs_set:Npn \__ztex_add_parent_key:n #1 
+  {
+    \textcolor{gray}{\l__codedoc_parent_key_ztex_tl/}
+    \tl_trim_spaces:n {#1},
+  }
+\DeclareDocumentEnvironment { keyval } { O{} +m }
+  {
+    \__codedoc_function_ztex:nnw {#1} {#2}
+  }{ 
+    \__codedoc_function_end: 
+  }
+%% catcode hack ref: https://tex.stackexchange.com/a/392770/294585
+\cctab_const:Nn \g__ztex_keyval_cctab 
+  {
+    \cctab_select:N \c_document_cctab
+    \char_set_catcode_active:n {124} % '|'
+    \char_set_catcode_active:n {62}  % '>'
+    \char_set_catcode_letter:n {95}  % '_'
+  }
+\group_begin:
+  \catcode`|=\active
+  \catcode`>=\active
+  \cs_gset:Nn \__ztex_bar_active: 
+    { \def|{\textup{\string|}} }
+  \cs_gset:Nn \__ztex_underscore_active: 
+    { \def>{\dotfill} }
+\group_end:
+\DeclareDocumentEnvironment { syntax } { }
+  { 
+    \cctab_begin:N \g__ztex_keyval_cctab
+    \__ztex_bar_active:
+    \__ztex_underscore_active:
+    \__codedoc_syntax:w 
+  }{
+    \__codedoc_syntax_end:
+    \cctab_end: 
+    \ignorespacesafterend
+  }
+% default value
+\gdef\nval{不可设置值}
+\newlength{\dvalWidth}
+\newlength{\dvalwidth}
+\setlength{\dvalWidth}{2.25em}
+\setlength{\dvalwidth}{2em}
+\gdef\dval{\@ifstar\@@dval\@dval}
+\def\@dval#1{初始值:\hb@xt@\dvalWidth{\hfill\textcolor{blue}{\ztool_scale_to_wd:nn {\dvalwidth}{#1}}}}
+\def\@@dval#1{初始值:\textcolor{blue}{#1}}
+\gdef\vsp{\usefont{OT1}{cmtt}{m}{n}\asciispace}
+\ExplSyntaxOff
+
+
+% ==> source example env
+\fvset{gobble=0}
+\setmonofont{Latin Modern Mono}
+  [
+    BoldFont=*,
+    ItalicFont=* Slanted,
+    BoldItalicFont=* Slanted,
+    BoldFeatures={FakeBold=2},
+    BoldItalicFeatures={FakeBold=2},
+  ]
+\definecolor{bg}{rgb}{0.95,0.95,0.95}
+\setminted{
+  bgcolor=bg,
+  breaklines=true, 
+  tabsize=2,
+  breakanywhere=true,
+  breaksymbolright=$\swarrow$,
+  breakanywheresymbolpre=,
+  breaksymbolleft=,
+}
+% \usepackage[most]{tcolorbox}
+% \tcbuselibrary{listings, minted, breakable, skins}
+\newcounter{DocExample}
+\tcbuselibrary{minted}
+\tcbset{listing engine=minted}
+\DeclareTCBListing{DocExample}{!s!O{//}}{
+  enhanced, 
+  breakable,
+  % frame hidden, arc=2pt,
+  enhanced jigsaw,
+  opacityback=0, 
+  sharp corners, 
+  colframe=black, boxrule=.4pt,
+  left=.5mm, right=1mm,
+  top=0mm, bottom=0mm, 
+  \IfBooleanTF{#1} 
+    {listing and text}
+    {listing only},
+  minted language=tex, 
+  minted options = {  
+    autogobble,
+    escapeinside=#2,
+    bgcolor=,
+    fontsize=\small,
+  },
+  overlay unbroken and first = {
+    \node[anchor=north east, outer sep=0pt, text=red] 
+      at (frame.north east) { \stepcounter{DocExample}\textbf{例\ \theDocExample}};
+  }
+}
+
+
+% ==> lipsum text
+\usepackage{comment}
+\def\blindText{As any dedicated reader can clearly see, the Ideal of practical
+reason is a representation of, as far as I know, the things in themselves; 
+\begin{align}
+\underset{}{\mathbf{v} \bigotimes \mathbf{w}} 
+    & = \sum_{i=1}^3\left(a_{i1}u^iv^1+a_{i2}u^iv^2+a_{i3}u^iv^3\right) \\
+    & = \int x \dd x = \frac12 x^2 + \R{C} 
+  \end{align}  
+As any dedicated reader can clearly see, the Ideal of practical reason is a 
+representation of, as far as I know, the things in themselves;}
+\def\zchcmd{(\textcolor{gray}{此命令仅能在文档的导言区使用, 但为了说明此命令的使用方法，在本手册中，此命令的定义被临时改变了})}
+
+
+% ==> ztex internal commands/states copy
+\ExplSyntaxOn\makeatletter
+\definecolor{slideRed}{HTML}{a30000}
+\definecolor{slideGray}{HTML}{e0e0e0}
+\definecolor{slideWhite}{HTML}{f0f0f0}
+\definecolor{zchapColor}{HTML}{7f8184}
+\definecolor{Ann-default-I}{HTML}{0000a3}
+\definecolor{zslide@title@color}{HTML}{d9d9d9}
+\colorlet{RoyalRed}{ztex@color@royalred}
+\prop_new:N \g_arabix_suffix_prop
+\prop_set_from_keyval:Nn \g_arabix_suffix_prop {
+  1=st, 2=nd, 3=rd, 11=th, 12=th, 13=th, 0=th, _=th
+} 
+\NewDocumentCommand\zfancynumsuffix{m}{
+  \int_compare:nTF {11 <= #1 <= 13}
+    {\prop_item:Ne \g_arabix_suffix_prop {#1}}
+    {\int_compare:nTF {\int_mod:nn {#1}{10} > 3}
+      {\prop_item:Ne \g_arabix_suffix_prop {_}}
+      {\prop_item:Ne \g_arabix_suffix_prop {\int_mod:nn {#1}{10}}}
+    }
+}
+\newcommand{\ztex@llapnote}[1]{
+  \mbox{}\llap{
+  \adjustbox{set~height=0pt, set~depth=0pt}{
+    \parbox[t]{2.85cm}{\raggedleft #1}}\hspace*{.75em}}
+}
+\zthmnew{Zaxiom, Ztheorem=Thm|{HTML}{a0d911}, Zproposition=Prop|blue}
+\zthmnew[proof]{Zproof, Zexample=EXAMPLE|red, Zsolution=Solution|}
+\bool_gset_true:N \g__ztex_math_alias_switch_bool
+\makeatother\ExplSyntaxOff
+
+
+
+% ==> print ztex source
+\ExplSyntaxOn
+\clist_new:N \l__ztex_doc_source_clist
+\clist_clear:N \l__ztex_doc_source_clist
+\cs_set:Npn \__ztex_doc_source:nn #1#2 
+  {
+    \clist_map_inline:nn {#2}
+      {
+        \clist_put_right:Nn \l__ztex_doc_source_clist 
+          {
+            \subsubsection{##1}
+            \inputminted{latex}{../code/#1/ztex.#1.##1.tex}
+          }
+      }
+  }
+\newcommand{\inputZTeXSource}[2][module]
+  {
+    \__ztex_doc_source:nn {#1}{#2}
+    \clist_use:Nn \l__ztex_doc_source_clist   
+      { \newpage }
+    \clist_clear:N \l__ztex_doc_source_clist
+  }
+\ExplSyntaxOff
+\newcommand{\ztexDocPrintSource}{%
+  \ztexslideTF{}{
+    \section{\texorpdfstring{\zTeX{}}{zTeX} 源码}
+    \pagestyle{empty}
+    \zpagemask*[anchor=mr, position={(\zpw, .5\zph)}]{{\sffamily\color{gray}\scalebox{5}{\thepage}}}
+    \renewcommand{\theFancyVerbLine}{\sffamily
+      \textcolor{gray}{\small\oldstylenums{\arabic{FancyVerbLine}}}}
+    \setminted{ bgcolor=, linenos=true, numbers=both }
+
+    \subsection{ztex.cls}
+    \inputminted{latex}{../code/ztex.cls}
+
+    \newpage
+    \subsection{Module}
+    \inputZTeXSource{box, font, ref, page, color, thm, sect}
+
+    \newpage
+    \subsection{Library}
+    \inputZTeXSource[library]{fancy, alias, slide, thm}
+  }
+}
+
+
+
+% ==> CUS logo
+\makeatletter
+\def\CusTeX{\hologo{CusTeX}}
+\def\HoLogo@CusTeX#1{C\kern-.12em \raise.0466ex\hbox{u}\kern-.1em\lower .4ex\hbox{S}\kern-.15em\hologo{TeX}}
+\def\HoLogoBkm@CusTeX#1{Cus\hologo{TeX}}
+\def\CusLaTeX{\hologo{CusLaTeX}}
+\def\HoLogo@CusLaTeX#1{C\kern-.12em \raise.0466ex\hbox{u}\kern-.1em\lower .4ex\hbox{S}\kern-.1em\LaTeX}
+\def\HoLogoBkm@CusLaTeX#1{Cus\hologo{LaTeX}}
+\def\CUS@LOGO#1{\hologo{\NoCaseChange{#1}}}
+\def\CusTeX{\CUS@LOGO{CusTeX}}
+\makeatother
+
+
+% ==> only-preamble commands copy
+\let\Ozthmlang\zthmlang
+\let\Ozthmnameset\zthmnameset
+\let\Ozthmnew\zthmnew
+\let\Ozthmstyle\zthmstyle
+\let\Ozaliasopset\zaliasopset
+\let\Ozthmtitleformat\zthmtitleformat
+\let\Ozthmtitlebefore\zthmtitlebefore
+\let\Ozthmbefore\zthmbefore
+\let\Ozthmcolorset\zthmcolorset
+\let\Ozthmiconset\zthmiconset
+
+
+% ==> aux commands
+\newcommand{\zclassArg}{\textcolor{red}{\ding{73}}}
+\newcommand{\zcmdArg}{\textcolor{red}{\(\star\)}}
+\newcommand{\zFullExp}{\textcolor{red}{\(\star\)}}
+\newcommand{\zResExp}{\textcolor{red}{\ding{73}}}
+\newcommand{\block}[1]{{\color{#1}\rule{1em}{1em}}}
+\newcommand{\Footnote}[1]{\stepcounter{footnote}\footnote[\thefootnote]{#1}}
+\NewDocumentCommand{\zdefault}{sm}{%
+  \IfBooleanTF{#1}%
+    {\textcolor{red}{\textbf{#2}}}%
+    {\textcolor{red}{:\textbf{#2}}}%
+}
+\ExplSyntaxOn
+\newcommand{\zarg}[1]{\texttt{\{}\cmd{#1}\texttt{\}}}
+\newcommand{\zkey}[1]{
+  \clist_clear:N \l_tmpa_clist
+  \clist_map_inline:nn {#1}{
+    \clist_put_right:Nn \l_tmpa_clist {\meta{##1}}
+  }
+  \clist_use:Nn \l_tmpa_clist {,~}
+}
+\ExplSyntaxOff

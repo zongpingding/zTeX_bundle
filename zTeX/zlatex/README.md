@@ -716,7 +716,7 @@ Set an user-friendly interface to handle the exception of these class meta key:
   \zlatex_msg_warn:n {option-meta-key}
 }
 \zlatex_define:nn { option / font }{
-  config              .bool_gset:N  = \g__zlatex_font_config_bool,
+  config              .bool_gset:N  = \g__ztex_font_cfg_bool,
   config              .initial:n    = { false }, 
   unknown             .code:n       = { \zlatex_metakey_warning_msg:nn {font}{config(⟨bool⟩:false)} }
 }
@@ -845,7 +845,7 @@ on[⟨tl⟩:thesection;hbox:1em],subsection[⟨tl⟩:thesubsection;hbox:2em]),
 Change meta-key level in class option interface, now theese meta key is:
 ```latex
 \zlatex_define:nn { option / font }{
-config              .bool_gset:N  = \g__zlatex_font_config_bool,
+config              .bool_gset:N  = \g__ztex_font_cfg_bool,
 config              .initial:n    = { false }, 
 unknown             .code:n       = { \zlatex_metakey_warning_msg:nn {font}{config(⟨bool⟩:false)} }
 }
@@ -913,7 +913,7 @@ Now, only some simple configurations have been added to this module, total conte
   }
 % cinel font
 \zlatex_hook_preamble_last:n {
-  \bool_if:NTF \g__zlatex_font_config_bool {
+  \bool_if:NTF \g__ztex_font_cfg_bool {
     \RequirePackage{fontspec}
     \newfontfamily{\Cinzel}{CinzelRegular.ttf}[
       BoldFont=CinzelBold.ttf,
@@ -1020,9 +1020,9 @@ Hyperref is support now, such anchors are available:
 * `page.⟨page num⟩`: link to abusolute page index `⟨page num⟩`
 * `zslide@\FirstMark{zslide-left}.⟨frame index⟩`: link to frame indexd at `⟨frame index⟩` in section `\FirstMark{zslide-left}` (roughly equals to current section).
 
-A users' interface `\_zslide_navigate:nnnn` have been created, syntax as follows:
+A users' interface `\_zslide_navigate_symbol:nnnn` have been created, syntax as follows:
 ```latex
-\_zslide_navigate:nnnn 
+\_zslide_navigate_symbol:nnnn 
     {⟨total frame num⟩}
     {⟨current frame index⟩}
     {⟨current frame symbol⟩}
@@ -1062,9 +1062,9 @@ Update the Navigate ball color to the `UR Foreground` color,
 i.e., `\l__zlatex_slide_UR_fg_tl`. See current definition below:
 
 ```latex
-\NewDocumentCommand{\zslideNavigateBall}{O{\(\bullet\)}O{\(\circ\)}}{
+\NewDocumentCommand{\zslideNavigateSymbol}{O{\(\bullet\)}O{\(\circ\)}}{
   \cs_if_exist:cTF {zsec@\Roman{section}@cnt}
-    {\_zslide_navigate:nnnn 
+    {\_zslide_navigate_symbol:nnnn 
       {\zslideFrame{\Roman{section}}}
       {\zslideFrameIndex}
       {\textcolor{\l__zlatex_slide_UR_fg_tl}{#1}}

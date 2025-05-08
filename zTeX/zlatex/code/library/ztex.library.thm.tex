@@ -1,8 +1,8 @@
-\ProvidesExplFile{zlatex.library.theme.tex}{2025/04/22}{1.0.1}{theme~library~for~zlatex}
+\ProvidesExplFile{ztex.library.thm.tex}{2025/04/26}{1.0.1}{thm~library~for~ztex}
 
 
-%%%%%     theme library for zlatex thm and structure    %%%%%
-\bool_gset_true:N \g__zlatex_theme_lib_load_bool
+%%%%%     thm library for ztex     %%%%%
+\bool_gset_true:N \g__ztex_theme_lib_load_bool
 %% ==> preamble
 \RequirePackage[many]{tcolorbox}
 \RequirePackage{adjustbox}
@@ -20,35 +20,35 @@
 
 
 %% ==> thm icon interface
-\prop_new:N \g__zlatex_thm_icon_prop
-\prop_gclear:N \g__zlatex_thm_icon_prop
-\cs_new_protected:Npn \__zlatex_thm_icon_set:n #1 
+\prop_new:N \g__ztex_thm_icon_prop
+\prop_gclear:N \g__ztex_thm_icon_prop
+\cs_new_protected:Npn \__ztex_thm_icon_set:n #1 
   {
-    \prop_gput_from_keyval:cn {g__zlatex_thm_icon_prop}{#1}  
+    \prop_gput_from_keyval:cn {g__ztex_thm_icon_prop}{#1}  
   }
-\cs_new_protected:Npn \__zlatex_thm_icon_use:n #1
+\cs_new_protected:Npn \__ztex_thm_icon_use:n #1
   {% #1: thm env type name
-    \prop_item:cn {g__zlatex_thm_icon_prop}{#1}
+    \prop_item:cn {g__ztex_thm_icon_prop}{#1}
   }
-\cs_generate_variant:Nn \__zlatex_thm_icon_use:n {o, e}
-\NewDocumentCommand{\zlatexThmIconSetup}{m}
+\cs_generate_variant:Nn \__ztex_thm_icon_use:n {o, e}
+\NewDocumentCommand{\zthmiconset}{m}
   {
-    \__zlatex_thm_icon_set:n {#1}
+    \__ztex_thm_icon_set:n {#1}
   }
-\NewDocumentCommand{\zlatexThmIconUse}{m}
+\NewDocumentCommand{\zthmiconuse}{m}
   {
-    \__zlatex_thm_icon_use:n {#1}
+    \__ztex_thm_icon_use:n {#1}
   }
-\NewDocumentCommand{\zlatexThmIconClear}{}
+\NewDocumentCommand{\zthmiconrm}{}
   {
-    \prop_gclear:N \g__zlatex_thm_icon_prop
+    \prop_gclear:N \g__ztex_thm_icon_prop
   }
-\@onlypreamble\zlatexThmIconSetup
+\@onlypreamble\zthmiconset
 
 
 
 %% ==> thm additional theme
-\zlatexThmStyleNew{
+\zthmstylenew {
   % theme shadow: copy from an old book
   shadow = {
     begin = {
@@ -58,14 +58,14 @@
         left=3pt,   right=3pt,
         boxrule=0pt, sharp~corners,
         drop~fuzzy~shadow,
-        colback={\thm@temp@color!10}, 
-        borderline~west={3pt}{0pt}{\thm@temp@color}
+        colback={\thm@tmp@color!10}, 
+        borderline~west={3pt}{0pt}{\thm@tmp@color}
       ]
     },
     end = {\end{tcolorbox}},
     option = {
-      \__zlatex_thm_title_inline:n {T}
-      \__zlatex_thm_tcolorbox_warning:
+      \__ztex_thm_title_inline:n {T}
+      \__ztex_thm_tcolorbox_warning:
     }
   },
   % theme paris from: An internet sketch book
@@ -78,28 +78,28 @@
         boxrule=0pt,    sharp~corners,
         colback=gray!5, drop~fuzzy~shadow,
         overlay~unbroken={
-          \draw[\thm@temp@color, line~width=0.2pt] (frame.north~west)--(frame.north~east);
-          \draw[\thm@temp@color, line~width=3pt] ([yshift=1.5pt]frame.north~west) -- +(2.5cm, 0);
-          \node[anchor=south~east, outer~sep=0pt, text=\thm@temp@color] 
-            at (\linewidth-width, 1.5pt) { \__zlatex_thm_icon_use:o {\thm@temp@name} };
+          \draw[\thm@tmp@color, line~width=0.2pt] (frame.north~west)--(frame.north~east);
+          \draw[\thm@tmp@color, line~width=3pt] ([yshift=1.5pt]frame.north~west) -- +(2.5cm, 0);
+          \node[anchor=south~east, outer~sep=0pt, text=\thm@tmp@color] 
+            at (\linewidth-width, 1.5pt) { \__ztex_thm_icon_use:o {\thm@tmp@name} };
         },
         overlay~first={
-          \draw[\thm@temp@color, line~width=0.2pt] (frame.north~west)--(frame.north~east);
-          \draw[\thm@temp@color, line~width=3pt] ([yshift=1.5pt]frame.north~west) -- +(2.5cm, 0);
+          \draw[\thm@tmp@color, line~width=0.2pt] (frame.north~west)--(frame.north~east);
+          \draw[\thm@tmp@color, line~width=3pt] ([yshift=1.5pt]frame.north~west) -- +(2.5cm, 0);
         },
         overlay~last={
-          \node[anchor=south~east, outer~sep=0pt, text=\thm@temp@color] 
-            at (\linewidth-width, 1.5pt) { \__zlatex_thm_icon_use:o {\thm@temp@name} };
+          \node[anchor=south~east, outer~sep=0pt, text=\thm@tmp@color] 
+            at (\linewidth-width, 1.5pt) { \__ztex_thm_icon_use:o {\thm@tmp@name} };
         },
       ]  
     },
     end = {\end{tcolorbox}},
     option = {
-      \__zlatex_thm_title_inline:n {T}
-      \__zlatex_thm_tcolorbox_warning:
+      \__ztex_thm_title_inline:n {T}
+      \__ztex_thm_tcolorbox_warning:
     },
     preamble = {
-      \__zlatex_thm_icon_set:n 
+      \__ztex_thm_icon_set:n 
         {
           axiom       = \ding{118},
           definition  = \ding{168}, 
@@ -129,23 +129,23 @@
         lower~separated=false, separator~sign={.},
         attach~boxed~title~to~top~left={yshift=-0.11in, xshift=0.15in},
         boxed~title~style={boxrule=0pt, colframe=white, arc=0pt, outer~arc=0pt},
-        title=\zlatexThmTitle*,
-        coltitle = white,           colbacktitle = \thm@temp@color,
-        colframe = \thm@temp@color, colback  = \thm@temp@color!5,
+        title=\zthmtitle*,
+        coltitle = white,           colbacktitle = \thm@tmp@color,
+        colframe = \thm@tmp@color, colback  = \thm@tmp@color!5,
         overlay~unbroken~and~last = {
-          \node[anchor=south~east, outer~sep=0pt, text=\thm@temp@color] 
-            at (\linewidth-width, 1.5pt) { \__zlatex_thm_icon_use:o {\thm@temp@name} };
+          \node[anchor=south~east, outer~sep=0pt, text=\thm@tmp@color] 
+            at (\linewidth-width, 1.5pt) { \__ztex_thm_icon_use:o {\thm@tmp@name} };
         },
       ]
     },
     end = {\end{tcolorbox}},
     option = {
-      \__zlatex_thm_title_inline:n {F}
-      \__zlatex_thm_tcolorbox_warning:
+      \__ztex_thm_title_inline:n {F}
+      \__ztex_thm_tcolorbox_warning:
     },
     preamble = {
       % color
-      \zlatex_keys_set:nn {color}{
+      \ztex_keys_set:nn {color}{
         axiom       = {HTML}{2c3e50},
         definition  = {RGB}{0, 166, 82},
         theorem     = {RGB}{255, 134, 23},
@@ -154,7 +154,7 @@
         proposition = {RGB}{0, 173, 247},
       }
       % icon
-      \__zlatex_thm_icon_set:n 
+      \__ztex_thm_icon_set:n 
         {
           axiom       = \ding{118},
           definition  = \ding{168}, 
@@ -179,21 +179,21 @@
         top=5pt,    bottom=8pt,
         left=10pt,  right=10pt,
         arc=3pt,    frame~hidden, 
-        colback = \thm@temp@color!20,
-      ] { \zlatexThmTitle* }\par
+        colback = \thm@tmp@color!20,
+      ] { \zthmtitle* }\par
     },
     end = {\end{tcolorbox}},
     preamble = {
       % title format
-      \zlatexThmTitleFormat*{
-        \noindent\sffamily\bfseries\textcolor{\thm@temp@color}{
-          \__zlatex_thm_icon_use:o {\thm@temp@name}\ \zlatexThmName :\zlatexThmNumber
-          \zlatexThmNoteEmptyTF{}{\ }
-          \zlatexThmNote{}{}\ \raise7pt\hbox{\rotatebox{-90}{\(\triangleright\)}}
+      \zthmtitleformat*{
+        \noindent\sffamily\bfseries\textcolor{\thm@tmp@color}{
+          \__ztex_thm_icon_use:o {\thm@tmp@name}\ \zthmname :\zthmnumber
+          \zthmnotemptyTF{}{\ }
+          \zthmnote{}{}\ \raise7pt\hbox{\rotatebox{-90}{\(\triangleright\)}}
         }
       }
       % icon
-      \__zlatex_thm_icon_set:n 
+      \__ztex_thm_icon_set:n 
         {
           axiom       = \ding{111},
           definition  = \ding{118}, 
@@ -210,8 +210,8 @@
         }
     },
     option = {
-      \__zlatex_thm_title_inline:n {F}
-      \__zlatex_thm_tcolorbox_warning:
+      \__ztex_thm_title_inline:n {F}
+      \__ztex_thm_tcolorbox_warning:
     }
   },
   % lapsis theme from: book 'Foundation Mathematics for the Physical Sciences'
@@ -223,68 +223,68 @@
         top=1.5pt, bottom=1.5pt,
         left=2pt,  leftlower=-3pt,
         right=3pt, arc=0pt, frame~hidden,
-        bicolor,   colback=\thm@temp@color!60,
+        bicolor,   colback=\thm@tmp@color!60,
         opacitybacklower=0,
         overlay~first = {
-          \fill[color=\thm@temp@color!50, path~fading=east] 
+          \fill[color=\thm@tmp@color!50, path~fading=east] 
             (frame.north~west)++(-\linewidth/2+width/2, 0pt) 
               rectangle 
             ($(frame.south~east)+(\linewidth/2-width/2, 0pt)$);
-          \draw[color=\thm@temp@color, thick] 
+          \draw[color=\thm@tmp@color, thick] 
             (frame.north~west)++(-\linewidth/2+width/2, 0pt)
               -- 
             ($(frame.north~east)+(\linewidth/2-width/2, 0pt)$);
         },
         overlay~last={
-          \draw[color=\thm@temp@color, thick] 
+          \draw[color=\thm@tmp@color, thick] 
             (frame.south~west)++(-\linewidth/2+width/2, 0pt)
               --  
             ($(frame.south~east)+(\linewidth/2-width/2, 0pt)$);
-          \fill[color=\thm@temp@color!50, path~fading=east] 
+          \fill[color=\thm@tmp@color!50, path~fading=east] 
             (frame.north~west)++(-\linewidth/2+width/2, 0pt) 
               rectangle 
             ($(frame.south~east)+(\linewidth/2-width/2, 0pt)$);
-          \node[anchor=south~east, outer~sep=0pt, text=\thm@temp@color] 
-            at (\linewidth-width, 0) { \__zlatex_thm_icon_use:o {\thm@temp@name} };
+          \node[anchor=south~east, outer~sep=0pt, text=\thm@tmp@color] 
+            at (\linewidth-width, 0) { \__ztex_thm_icon_use:o {\thm@tmp@name} };
         },
         overlay~unbroken={
-          \fill[color=\thm@temp@color!50, path~fading=east] 
+          \fill[color=\thm@tmp@color!50, path~fading=east] 
             (frame.north~west)++(-\linewidth/2+width/2, 0pt) 
               rectangle 
             ($(frame.south~east)+(\linewidth/2-width/2, 0pt)$);
-          \draw[color=\thm@temp@color, thick] 
+          \draw[color=\thm@tmp@color, thick] 
             (frame.north~west)++(-\linewidth/2+width/2, 0pt) 
               --  
             ($(frame.north~east)+(\linewidth/2-width/2, 0pt)$);
-          \draw[color=\thm@temp@color, thick] 
+          \draw[color=\thm@tmp@color, thick] 
             (frame.south~west)++(-\linewidth/2+width/2, 0pt)
               --  
             ($(frame.south~east)+(\linewidth/2-width/2, 0pt)$);
-          \node[anchor=south~east, outer~sep=0pt, text=\thm@temp@color] 
-            at (\linewidth-width, 1.5pt) { \__zlatex_thm_icon_use:o {\thm@temp@name} };
+          \node[anchor=south~east, outer~sep=0pt, text=\thm@tmp@color] 
+            at (\linewidth-width, 1.5pt) { \__ztex_thm_icon_use:o {\thm@tmp@name} };
         },
-      ]\zlatex@llapnote{\zlatexThmTitle*}
+      ]\ztex@llapnote{\zthmtitle*}
     },
     end = {\end{tcolorbox}},
     option = {
-      \__zlatex_thm_title_inline:n {F}
-      \__zlatex_thm_tcolorbox_warning:
+      \__ztex_thm_title_inline:n {F}
+      \__ztex_thm_tcolorbox_warning:
     },
     preamble = {
       % title foramt
       \DeclareMathSymbol{\blacktriangleleft}{\mathrel}{AMSa}{"4A}
-      \zlatexThmTitleFormat*{\bfseries
-        \zlatexThmName\ \zlatexThmNumber
-        \zlatexThmNoteEmptyTF{}{\\}
-        \zlatexThmNote{}{}
+      \zthmtitleformat*{\bfseries
+        \zthmname\ \zthmnumber
+        \zthmnotemptyTF{}{\\}
+        \zthmnote{}{}
       }
-      \newcommand{\zlatex@llapnote}[1]{
+      \newcommand{\ztex@llapnote}[1]{
         \mbox{}\llap{
         \adjustbox{set~height=0pt, set~depth=0pt}{
           \parbox[t]{2.85cm}{\raggedleft #1}}\hspace*{.75em}}
       }
       % icon
-      \__zlatex_thm_icon_set:n 
+      \__ztex_thm_icon_set:n 
         {
           axiom       = \ding{111},
           definition  = \ding{118}, 
