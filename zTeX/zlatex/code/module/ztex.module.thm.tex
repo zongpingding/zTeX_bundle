@@ -1,4 +1,4 @@
-\ProvidesExplFile{ztex.module.thm.tex}{2025/05/05}{1.0.1}{thm~module~for~ztex}
+\ProvidesExplFile{ztex.module.thm.tex}{2025/05/12}{1.0.1}{thm~module~for~ztex}
 
 
 %%%%%     thm module for ztex     %%%%%
@@ -187,11 +187,8 @@
       % 1. thm preamble can be only set by one style
       % 2. '\g__ztex_thm_style_tl' need to be set 
       %       before '\ztexloadlib{theme}'
-      \tl_if_eq:cnT {g__ztex_thm_style_tl}{#1}{
-        % \hook_gremove_code:nn {env/document/before}{ztex-thm-preamble}
-        \ztex_label_hook_preamble_last:nn 
-          {ztex-thm-preamble}{##1} 
-      }
+      \tl_if_eq:cnT {g__ztex_thm_style_tl}
+        { #1 }{ ##1 }
     },
   }
   \ztex_keys_set:nn { thm/style }{ #1={#2} }
@@ -311,7 +308,7 @@
         \g__ztex_thm_theorem_title_tl 
       }
       {\ztexhyperTF{\exp_not:N \hyperlink{page.\thepage}{\thepage}}{\thepage}}
-      {#1.\zthmnumber}
+      {zthm@#1.\zthmnumber}
   }
 
 % thm theorem title interface
@@ -441,13 +438,18 @@
     name      .tl_set:N  = \l__ztex_add_thm_toc_name_tl,
     name      .initial:n = { ?? },
   }
+% subsection.0.0
+\int_new:N \g_zthm_added_toc_target_int 
 \NewDocumentCommand{\zthmtocadd}{O{section}m}{
+  \int_incr:N \g_zthm_added_toc_target_int
+  \edef\zthmtoc@tmp@target{zthm@toc-add.\int_use:N \g_zthm_added_toc_target_int}
+  \MakeLinkTarget*{\zthmtoc@tmp@target}
   \group_begin:
   \ztex_keys_set:nn {thm/add}{#2}
   \__ztex_thm_toc_add:nnoe {#1}
     {\l__ztex_add_thm_toc_name_tl}
     {\ztexhyperTF{\exp_not:N \hyperlink{page.\thepage}{\thepage}}{\thepage}}
-    {#1.\cs:w the#1\cs_end:}
+    {\zthmtoc@tmp@target}
   \group_end:
 }
 \tl_new:N \g__ztex_thm_toc_level_tl
@@ -507,7 +509,7 @@
           {
             \UseHook{ztex/thm-theorem/before} \UseHook{ztex/thm-theorem-#1/before}
             \__ztex_thm_warp_start:nnn {#1}{##1}{\ }
-            \MakeLinkTarget*{#1.\zthmnumber}
+            \MakeLinkTarget*{zthm@#1.\zthmnumber}
             \bool_if:NT \g__ztex_thm_title_inline_bool { 
               \group_begin: 
               \ztex@title@before{theorem}\__ztex_thm_theorem_title:

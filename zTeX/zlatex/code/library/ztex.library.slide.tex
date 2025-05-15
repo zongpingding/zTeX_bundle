@@ -1,4 +1,4 @@
-\ProvidesExplFile{ztex.library.slide.tex}{2025/05/05}{1.0.1}{slide~library~for~ztex}
+\ProvidesExplFile{ztex.library.slide.tex}{2025/05/09}{1.0.1}{slide~library~for~ztex}
 
 
 %%%%%     slide library for ztex     %%%%%
@@ -51,23 +51,82 @@
     [\thispagestyle{empty}]
   }
 }{\relax}
-\dim_new:N \g_zslide_status_info_sec_B_dim
+\dim_new:N \g_zslide_status_info_sec_C_dim % vertical axis of symmetry
 \dim_new:N \g_zslide_status_info_sec_L_dim
-\dim_gset:Nn \g_zslide_status_info_sec_B_dim {-2.25em}
+\dim_gset:Nn \g_zslide_status_info_sec_C_dim {-1.7em}
 \dim_gset:Nn \g_zslide_status_info_sec_L_dim {1cm}
 \renewcommand\sectionmark[1]{\mark_insert:nn {zslide-left}{#1}}
 \renewcommand\subsectionmark[1]{\mark_insert:nn {zslide-right}{\thesubsection\ #1}}
+\coffin_new:N \g__zslide_status_info_sec_text_coffin
+\cs_new:Npn \__zslide_status_info_sec_coffin_typeset:n #1 
+  {
+    \hcoffin_gset:Nn \g__zslide_status_info_sec_text_coffin 
+      { \Large\textcolor{\tl_use:N \l__ztex_slide_sec_fg_tl}{#1} }
+    \__zslide_frame_title_info:n 
+      {
+        \tl_use:N \l__ztex_slide_sec_prefix_tl
+        \coffin_typeset:Nnnnn \g__zslide_status_info_sec_text_coffin
+          { l }{ vc }
+          { 0pt }{ 0pt }
+        \tl_use:N \l__ztex_slide_sec_suffix_tl
+      }
+  }
+\cs_new:Npn \__zslide_frame_title_info:n #1 
+  {
+    \AddToHookNext{ shipout / foreground }
+      {
+        \put(
+          \dim_use:c {g_zslide_status_info_sec_L_dim}, 
+          \dim_use:c {g_zslide_status_info_sec_C_dim}
+        ){ #1 }
+      }
+  }
+% REF: https://tex.stackexchange.com/q/156792/294585
+\cs_new:Npn \__zslide_chr_if_chinese:n #1#2#3
+  {
+    \ifnum`#1>19968
+      #2
+    \else
+      #3 
+    \fi
+  }
+\cs_generate_variant:Nn \__zslide_status_info_sec_coffin_typeset:n {o}
+\bool_new:N \g_new_manual_sec_bool 
+\bool_gset_false:N \g_new_manual_sec_bool
+\NewDocumentCommand{\zslideframetitle}{m}
+  {
+    \newpage
+    % backgroud status bar
+    \bool_gset_true:N \g_new_manual_sec_bool
+    \AddToHook{shipout/background}
+      {
+        \bool_if:NT \g_new_manual_sec_bool 
+          {
+            \zslide_status_bar:nnnn {sec}
+              {(0, \dim_use:c {g_zslide_status_bar_sec_B_dim})}
+              {1}
+              {\dim_use:c {g_zslide_status_bar_sec_H_dim}}
+          }
+      }
+    % foreground status info
+    \hcoffin_gset:Nn \g__zslide_status_info_sec_text_coffin 
+      { \Large\textcolor{\tl_use:N \l__ztex_slide_sec_fg_tl}{#1} }
+    \__zslide_frame_title_info:n 
+      { 
+        \tl_use:N \l__ztex_slide_sec_prefix_tl
+        \coffin_typeset:Nnnnn \g__zslide_status_info_sec_text_coffin
+          { l }{ vc }
+          { 0pt }{ 0pt }
+        \tl_use:N \l__ztex_slide_sec_suffix_tl
+      }
+    % after vspace
+    \vspace*{.5em}
+  }
 \titlespacing*{\section}{0pt}{*0}{0pt}
 \titleformat{\section}
   {\Large}{}{0pt}
   {
-    \AddToHookNext{shipout/foreground}{
-      \put(\dim_use:c {g_zslide_status_info_sec_L_dim}, \dim_use:c {g_zslide_status_info_sec_B_dim}){\Large
-        \textcolor{\tl_use:N \l__ztex_slide_sec_fg_tl}{
-          \tl_use:N \l__ztex_slide_sec_prefix_tl #1
-          \tl_use:N \l__ztex_slide_sec_suffix_tl
-      }}
-    }
+    \__zslide_status_info_sec_coffin_typeset:o {#1}
   }[
     \bool_gset_true:N \g_new_sec_bool
     \int_gset:Nn \g__ztex_slide_framecnt_int {1}
@@ -114,6 +173,7 @@
 }
 \AddToHook{shipout/after}{
   \bool_gset_false:N \g_new_sec_bool
+  \bool_gset_false:N \g_new_manual_sec_bool
   \int_gincr:N \g__ztex_slide_framecnt_int
 }
 \hook_gput_code:nnn {shipout/background}{zslide-background}
@@ -128,9 +188,9 @@
 \dim_new:N \g_zslide_status_bar_foot_H_dim
 \dim_new:N \g_zslide_status_bar_sec_H_dim
 \dim_new:N \g_zslide_status_bar_sec_B_dim
-\dim_gset:Nn \g_zslide_status_bar_head_H_dim {.9em}
-\dim_gset:Nn \g_zslide_status_bar_foot_H_dim {.9em}
-\dim_gset:Nn \g_zslide_status_bar_sec_H_dim  {1.8em}
+\dim_gset:Nn \g_zslide_status_bar_head_H_dim {.7em}
+\dim_gset:Nn \g_zslide_status_bar_foot_H_dim {.7em}
+\dim_gset:Nn \g_zslide_status_bar_sec_H_dim  {2em}
 \dim_gset:Nn \g_zslide_status_bar_sec_B_dim  {-2.7em}
 \AddToHook{shipout/background}{
   \zslide_status_bar:nnnn {UL}{(0,              -\dim_use:c {g_zslide_status_bar_head_H_dim})}{.5}{\dim_use:c {g_zslide_status_bar_head_H_dim}}
@@ -158,16 +218,24 @@
     \put#2 {\textcolor{\tl_use:c {l__ztex_slide_#1_bg_tl}}{\rule{#3\paperwidth}{#4}}}
   \fi
 }
-\dim_new:N \g_zslide_status_info_head_B_dim
-\dim_new:N \g_zslide_status_info_foot_B_dim
-\dim_gset:Nn \g_zslide_status_info_head_B_dim {-.9em+2.5pt}
-\dim_gset:Nn \g_zslide_status_info_foot_B_dim {-\paperheight+2.5pt}
-\cs_new_protected:Npn \zslide_status_info:nnnn #1#2#3#4 {
-  \ifnum\thepage=0\else
-    \put(#2\paperwidth, \dim_use:c {g_zslide_status_info_#1_B_dim}) 
-      {\hbox~ to~ #3\paperwidth {#4}}
-  \fi
-}
+\dim_new:N \g_zslide_status_info_head_C_dim % vertical axis of symmetry
+\dim_new:N \g_zslide_status_info_foot_C_dim
+\dim_gset:Nn \g_zslide_status_info_head_C_dim {-0.35em} % 0.3483ex=1.5pt
+\dim_gset:Nn \g_zslide_status_info_foot_C_dim {-\paperheight+0.35em} % 1.5pt
+\coffin_new:N \g__zslide_status_info_coffin
+\cs_new_protected:Npn \zslide_status_info:nnnn #1#2#3#4
+  {% #1:head/foot; #2:start-x; #3:width; #4:content;
+    \hcoffin_gset:Nn \g__zslide_status_info_coffin 
+      { \hbox~ to~ #3\paperwidth {#4} }
+    \ifnum\thepage=0\else
+      \put(#2\paperwidth, \dim_use:c {g_zslide_status_info_#1_C_dim}) 
+        {
+          \coffin_typeset:Nnnnn \g__zslide_status_info_coffin
+            { l }{ vc }
+            { 0pt }{ 0pt }
+        }
+    \fi
+  }
 \cs_set:Npn \zslide_nav_sym:nnnn #1#2#3#4 {
   \int_step_inline:nnn {1}{#1}{
     \int_compare:nNnTF {#2} = {##1}
@@ -259,10 +327,10 @@
   }
 }
 \cs_new_protected:Npn \zslide_meta:n #1 {
-  \bool_if:NT \g__ztex_hyperref_bool
-    {\hyper@link{link}{zslide@titlepage}}
-    {\scriptsize\textcolor{\tl_use:c {l__ztex_slide_#1_fg_tl}}
-      {\tl_use:c {l__ztex_slide_#1_text_tl}}}
+  \tl_if_eq:nnT {#1}{BC}{ \bool_if:NT \g__ztex_hyperref_bool
+    { \hyper@link{link}{zslide@titlepage} }}
+    { \scriptsize\textcolor{\tl_use:c {l__ztex_slide_#1_fg_tl} }
+      { \tl_use:c {l__ztex_slide_#1_text_tl}} }
 }
 
 

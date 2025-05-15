@@ -1,4 +1,4 @@
-\ProvidesExplFile{ztex.library.thm.tex}{2025/04/26}{1.0.1}{thm~library~for~ztex}
+\ProvidesExplFile{ztex.library.thm.tex}{2025/05/12}{1.0.1}{thm~library~for~ztex}
 
 
 %%%%%     thm library for ztex     %%%%%
@@ -187,9 +187,8 @@
       % title format
       \zthmtitleformat*{
         \noindent\sffamily\bfseries\textcolor{\thm@tmp@color}{
-          \__ztex_thm_icon_use:o {\thm@tmp@name}\ \zthmname :\zthmnumber
-          \zthmnotemptyTF{}{\ }
-          \zthmnote{}{}\ \raise7pt\hbox{\rotatebox{-90}{\(\triangleright\)}}
+          \__ztex_thm_icon_use:o {\thm@tmp@name}
+          \ \zthmname{\,:\,}\zthmnumber
         }
       }
       % icon

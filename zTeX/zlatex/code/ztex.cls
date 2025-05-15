@@ -31,7 +31,7 @@
 \clist_const:Nn \c__ztex_lang_support_clist    {en, cn}
 \tl_const:Nn \c__ztex_class_name_tl            {ztex}
 \tl_const:Nn \c__ztex_class_version_tl         {1.0.1}
-\tl_const:Nn \c__ztex_class_date_tl            {2025/05/05}
+\tl_const:Nn \c__ztex_class_date_tl            {2025/05/12}
 \tl_const:Nn \c__ztex_class_description_tl     {A~pre-release~latex3~document~class~for~article,~book,~or~slides;
                                                 Support~languages:\clist_use:Nn \c__ztex_lang_support_clist{,~}}
 
@@ -233,12 +233,13 @@
     \DeclareMathSymbol{\new@jmath}{0}{CMMletters}{"7C}
     \DeclareMathSymbol{\new@amalg}{0}{CMMsymbols}{"71}
     \DeclareMathSymbol{\new@coprod}{1}{CMMlargesymbols}{"61}
-    \AddToHook{begindocument}{
-      \let\pi\new@pi
-      \let\jmath\new@jmath
-      \let\amalg\new@amalg
-      \let\coprod\new@coprod
-    }
+    \AddToHook{begindocument}
+      {
+        \let\pi\new@pi
+        \let\jmath\new@jmath
+        \let\amalg\new@amalg
+        \let\coprod\new@coprod
+      }
   },
   doc / newtx    .code:n       = {
     \RequirePackage{newtxtext}
@@ -268,6 +269,20 @@
   },
   math / euler    .code:n       = { 
     \ztex_hook_preamble_last:n { \RequirePackage[OT1, euler-digits]{eulervm} } 
+  },
+  math / var-euler .code:n       = {
+    \usepackage[OT1]{eulervm}
+    \DeclareSymbolFont{cmmlargesymbols}{OMX}{cmex}{m}{n}
+    \DeclareSymbolFont{greekletters}{OML}{cmm}{m}{it}
+    \DeclareMathDelimiter{\new@int}{\mathop}{cmmlargesymbols}{"52}{cmmlargesymbols}{"5A}
+    \DeclareMathDelimiter{\new@sum}{\mathop}{cmmlargesymbols}{"50}{cmmlargesymbols}{"58}
+    \AddToHook{begindocument}
+      {
+        \renewcommand{\int}{\new@int\nolimits}
+        \DeclareMathSymbol{\kappa}{\mathord}{greekletters}{"14}  
+        \DeclareMathSymbol{\tau}{\mathord}{greekletters}{"1C}
+        \DeclareMathSymbol{\omega}{\mathord}{greekletters}{"21}
+      }
   },
   math / ptmx     .code:n       = { 
     \ztex_msg_set:nn {option-font-math}

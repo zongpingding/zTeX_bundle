@@ -61,14 +61,14 @@
 
 \ztex{} 的制作初衷:让使用者可以方便进行书籍和笔记的撰写以及日常汇报 slide 的无缝切换. \ztex{} 全部由 \LaTeX3 进行编写，
 采用 \meta{key-value} 的方式进行选项和命令的配置，对于作者来说:方便后续的模板拓展和维护；对于用户来说:使用键值对可以减轻用户记忆命令
-参数这一负担, 方便用户使用命令. 如果使用者熟悉\LaTeX{}，那么花费不到10min的时间，你便可以轻松使用本文档类完成如上任务，
+参数这一负担, 方便用户使用模板内置命令. 如果用户熟悉\LaTeX{}，那么花费不到10min的时间，用户便可以轻松使用本文档类完成如上任务，
 减少不必要的工作.
 
-\ztex{} 文档类会根据用户指定的选项自动处理和加载对应的宏包，所以\ztex{} 文档类在不同的导言区选项声明下
+\ztex{} 文档类会根据用户指定的选项自动处理和加载对应的宏包，所以 \ztex{} 文档类在不同的导言区选项声明下
 加载的宏包和命令是不同的. 后文详细地介绍了不同导言区配置以及不同编译引擎下的宏包加载情况. 
 
 \ztex{} 始终秉持着最少依赖的原则，能够自己实现的功能，尽量不引入宏包. 如部分用户会用到的 \pkg{lastpage} 宏包提供
-\texttt{LastPage} 这一 label, 在 \zTeX{} 中已经实现为:\texttt{ztex:lastpage} (在页码正确的情况下，
+\texttt{LastPage} 这一 label, 在 \zTeX{} 中已经实现为: ``\texttt{ztex:lastpage}'' (在页码正确的情况下，
 超链接跳转可能并不正确，这种情况下可以使用 \texttt{ztex@lastpage} 这一 anchor).
 
 \ztex{} 会加载一系列的基本宏包\index{basic packages}，意味着无论用户的导言区如何配置，这部分宏包均会被加载. 
@@ -90,12 +90,13 @@
 
 \ztex{} 默认只加载很少的一部分基础宏包，用户如果想要实现更加个性化的功能还请自行引入相关宏包；
 在默认情况下本模板即可呈现一个比较好的效果，不熟悉\LaTeX{}的用户不用担心本模板配置选项过于复杂. 想要
-马上开始体验? 请参见``\cref{mwe}''的最小写作示例.
+马上开始使用本模板? 请参见``\cref{mwe}''的最小写作示例.
 
 
+\newpage
 \section{安装使用}
 \subsection{在线模板}
-为了让部分用户可以直接体验到 \ztex{}，免去``繁杂''的环境配置.我已将本模板部署在 \TeX{}Page 上，
+为了让部分用户可以直接使用到 \ztex{}，免去``繁杂''的环境配置.我已将本模板部署在 \TeX{}Page 上，
 地址为: \href{https://www.texpage.com/share/e420ac8364a640b78231d65c9d5d7090}{TeXPgae \ztex{}  Project}，
 直接打开此地址即可体验. Github 上的项目地址为:
 
@@ -103,13 +104,14 @@
   \fbox{https://github.com/zongpingding/zTeX\_bundle}
 \end{center}
 
-仓库中包含本手册以及 zTikZ 文档的源码与文档. 由于部分的技术原因，zTikZ 请在本地体验.
+仓库中包含本手册以及 zTikZ 宏集的源码与文档. (由于部分的技术原因，zTikZ 请在本地体验). 当前仓库的稳定版本于半年之前
+发布, 最新的开发版请切换到 ``dev'' 分支; 本手册适用于当前最新的开发版.
 
 
 \subsection{本地安装}
-目前本文档类 \ztex{}  还没有登陆CTAN，未来可能也没有这个打算，本模板还没有完全开发完成.由于本文档类使用的部分
-\LaTeX3 命令在老版本下并不存在，所以如果你的 \TeX{}Live 过于老旧，则可能出现无法编译的情况.目前已知
-\ztex{} 文档类在各平台的兼容情况为:
+目前本文档类 \ztex{}  还没有登陆CTAN，未来可能也没有这个打算，本模板还没有完全开发完成. 本文档类使用的部分
+\LaTeX3 命令在老版本下并不存在，所以如果你的 \TeX{}Live 版本过于落后，那么可能就会出现无法编译的情况. 
+目前已知 \ztex{} 文档类在各平台的兼容情况为:
 
 \hspace*{10em}\parbox{8cm}{
 \begin{itemize}
@@ -118,12 +120,12 @@
   \item[MacOS]: 兼容Mac{}\TeX{}2024(老版也应兼容) 
 \end{itemize}}
 
-由于\ztex{} 还没有传入CTAN(未来可能会考虑)，所以想要使用此文档类，可以有如下的两种方法:
+由于 \ztex{} 还没有传入CTAN(未来可能会考虑)，所以想要使用此文档类，可以有如下的两种方法:
 \begin{itemize}
-    \item 把此文档类 -- \file{ztex} 目录中的所有内容放入当前项目文件夹下
+    \item 把此宏集 -- \file{ztex} 目录中的所有内容放入当前项目文件夹下
     \item 在命令行运行命令: \file{kpsewhich -var-value=TEXMFHOME}, 在 Windows 上这个路径一般是: \texttt{C:/Users/\meta{name}/texmf/}, 
-      在Linux下一般是: \file{~/texmf/}; 具体路径以自己的实际情况为准. 在此路径下新建文件夹 \file{tex/latex/ztex}, 此文件夹对应的路径记为 \meta{z\TeX}; 
-      然后把 \file{ztex} 目录中的所有内容放入 \meta{z\TeX} 下.
+      在Linux下一般是: \file{~/texmf/}; 具体路径以自己的实际情况为准. 在此路径下新建文件夹 \file{tex/latex/ztex}; 此文件夹对应的路径
+      我们记为 \meta{z\TeX}, 随后把 \file{ztex} 目录中的所有内容放入 \meta{z\TeX} 下即可.
 \end{itemize}
 
 在本手册后续，我们使用 \meta{z\TeX} 表示本宏集的根目录.
@@ -131,8 +133,8 @@
 
 \subsection{快速开始}\label{mwe}
 \ztex{} 的最小工作示例如下\Footnote{导言区的配置可能需要根据自己的实际情况加以调整，详细配置请参见后文}.
-首先是中文写作示例，默认加载 \cls{article} 文档类,如果喜欢使用 \cls{book} 文档类，可以在加载文档类时
-指定\texttt{class=book}.
+首先是中文写作示例，默认加载 \cls{article} 文档类, 如果用户偏好使用 \cls{book} 文档类，可以在加载文档类时
+指定文档类选项: \texttt{class = book}.
 
 \begin{DocExample}
 % !TeX program = XeLaTeX
@@ -146,7 +148,7 @@
 \end{document}
 \end{DocExample}
   
-其次是英文写作示例, 然后更改此时的基本文档类为 \cls{book}, 你需要修改的地方只有两处:首先就是把语言选项改为\ztexverb{lang=en}(此为默认选项)，
+其次是英文写作示例, 此时更改基文档类为 \cls{book}, 用户需要修改的地方有两处: 首先就是把语言选项改为\ztexverb{lang=en}(此为默认选项)，
 其次便是把编译引擎改为 \hologo{pdfTeX}.
 
 \begin{DocExample}
@@ -185,13 +187,13 @@
 
 
 \section{文档类选项}
-\ztex{} 的配置选项可以在文档类加载时指定，也可以通过命令 \cmd{\ztexset} 进行指定. \ztex{} 的 \meta{key-value} 被划分为
+\ztex{} 的配置选项可以在文档类加载时指定，也可以通过命令 \cmd{\ztexset} 进行设置. \ztex{} 的 \meta{key-value} 被划分为
 两个层级; 第一层中的 \zkey{layout, mathSpec, toc, packageOption, classOption, toc, font} 均具有自己的独立子键(\texttt{sub-key}), 
 其余的键可以直接指定. 关于各层 \meta{key-value} 的关系请参见节首的图示.
 
-总体而言, \ztex{} 的文档类选项是比较复杂的，对于刚接触本文档类的用户，不必知晓所有的选项配置，因为在默认的
-选项配置下, \ztex{} 已经能够得到一个效果较佳的文档了. 下面我们将详细介绍各个 \meta{key} 的指定方式及其具体含义.
-在阅读后续命令前, 我们对 \zTeX{} 文档类选项做如下约定:
+总体而言, \ztex{} 的文档类选项是比较复杂的，对于刚接触本文档类的用户，不必知晓所有的选项配置，在默认的
+选项配置下, \ztex{} 便能够得到一个观感较佳的文档. 下面我们将详细介绍各个 \meta{key} 的指定方式及其具体含义.
+在阅读后续手册内容之前, 针对 \zTeX{} 的文档类选项, 我们做出如下约定:
 
 \begin{itemize}
   \item 名字后带有 \zclassArg{} 号的选项，只能作为宏包/文档类选项，需要在引入宏包/文档类的时候指定；
@@ -250,8 +252,8 @@
   \begin{syntax}
     lang = \meta{\textbf{en}|cn}>\dval{en}
   \end{syntax}
-  \ztex{} 目前仅对中英文做了适配，对于法语仅有部分支持. 根据不同的文档类语言，\ztex{}会加载不同的和语言相关的
-  宏包\index{language packages}，不同\meta{lang}设置下, 宏包的加载情况为:
+  \ztex{} 目前仅对中英文做了适配，对于法语有部分的支持. 根据不同的文档类语言设置, \ztex{} 会加载不同的(和语言相关的)
+  宏包\index{language packages}; 在不同的 \meta{lang} 设置下, 语言类宏包的详细加载情况如下:
   \begin{itemize}
     \item \texttt{lang = en}: \pkg{inputenc}(若使用\hologo{pdfTeX}), \pkg{fontenc}, \pkg{babel}, \pkg{microtype};
     \item \texttt{lang = cn}: \pkg{fontspec}, \pkg{ctex};
@@ -278,14 +280,14 @@
   \begin{syntax}
     class = \meta{\textbf{article}|bool|ctexbook}>\dval{article}
   \end{syntax}
-  此选项用于指定加载的基文档类，默认为 \cls{article}. 在加载 \cls{ctexbook}文档类后可以使用此文档类
-  提供的 \cmd{\ctexset} 命令进行相关选项的配置. 
+  此选项用于指定加载的基文档类，默认为 \cls{article}. 加载不同的文档类, 用户可以使用的命令是不同的; 
+  比如 \cls{ctexbook} 提供了 \cmd{\ctexset} 命令进行文档的相关配置. 
 \end{keyval}
 
 
 \begin{keyval}[rEXP, updated=2024-11-05]{classOption}
   \begin{syntax}
-    classOption >\dval{oneside, 12pt}
+    classOption >\dval*{oneside, 12pt}
   \end{syntax}
   此选项接受一个逗号分隔的列表, 用于传递基文档类选项，针对默认的 \cls{article} 文档类，此项为\texttt{oneside, 12pt}.
 \end{keyval}
@@ -295,7 +297,7 @@
   \begin{syntax}
     packageOption=\meta{key-value} 
   \end{syntax}
-  此选项接受一个键值对, 用于给不同宏包传递选项, 使用样例:
+  此选项接受一个键值对, 用于向目标宏包传递选项, 一个基本的使用样例如下:
 \end{keyval}
 \begin{DocExample}
   \documentclass[
@@ -314,9 +316,9 @@
     stretch = \meta{浮点数}>\dval{1}
     title-vspace = \meta{长度}>\dval{-2em}
   \end{syntax}
-  此选项用于设置目录的样式. 若上述的 $\meta{column} \ge 2$, 那么 \ztex{} 会自动加载\pkg{multicol}宏包. 注意: 由于在 \LaTeX{} 中，
-  文档类选项不能含有控制序列，所以如果上述的 \meta{toc} 的某一个子项中含有控制序列，那么务必通过命令 \cmd{\ztexset} 进行设置, 
-  一个简单的示例为: \ztexverb{title=\hfill\large\normalfont CONTENTS {\sffamily\small NEW}\hfill}.
+  此选项用于设置目录的样式. 若上述的 $\meta{column} \ge 2$, 那么 \ztex{} 会自动加载\pkg{multicol}宏包. \textbf{注意}: 
+  因在 l3keys 中，当键为控制序列时，其不会自动展开; 故如果上述 \meta{toc} 的某一个子项内含有控制序列，那么务必通过
+  命令 \cmd{\ztexset} 进行设置, 一个简单的示例为: \ztexverb{title=\large CONTENTS{\sffamily\small NEW}}.
 \end{keyval}
 
 
@@ -324,7 +326,7 @@
   \begin{syntax}
     sysfont = \meta{true|\textbf{false}}>\dval{false}
     doc     = \meta{lmm|ptmx|newtx}>\dval{cm}
-    math    = \meta{euler|newtx|mtpro2|mathpazo}>\dval{cmm}
+    math    = \meta{euler|var-euler|newtx|mtpro2|mathpazo}>\dval{cmm}
     text    = \meta{times}>\dval{cmr}
   \end{syntax}
   此选项主要用于文档的字体配置, 用户可以通过此键来分别定义文档中的正文或数学字体. 
@@ -340,7 +342,8 @@
     aspect = \meta{浮点数|浮点数}>\dval{12|9}
     theme  = \meta{主题名}>\dval*{AnnArborDefault}
   \end{syntax}
-  设置文档布局，在加载 \file{slide} library 后, 如果设置\meta{slide}\texttt{=true}, 那么此时即可把文档转为 slide 模式。
+  设置文档布局，如果设置 \meta{slide}\texttt{=true}, 那么此时 \ztex{} 会自动加载 \file{slide} 库, 
+  最终的文档将转为 slide.
 \end{keyval}
 
 
@@ -351,7 +354,7 @@
     backend = \meta{biber|bibtex}>\dval{biber}
   \end{syntax}
   此选项用于控制文档是否生成索引和参考文献. \meta{load} 用于控制是否加载 \pkg{biblatex} 宏包, 默认为 \texttt{false}; 
-  \meta{source} 用于指定参考文献源文件, 默认文件名为:\file{ref.bib}; \meta{backend} 用于指定参考文献的后端，
+  \meta{source} 用于指定参考文献源文件, 默认文件名为: \file{ref.bib}; \meta{backend} 用于指定参考文献的后端，
   默认为\texttt{biber}.
 \end{keyval}
 
@@ -363,10 +366,10 @@
     font     = \meta{euler|newtx|mtpro2|mathpazo}>\dval{cmm}
   \end{syntax}
   此键用于配置数学排版相关选项. \meta{alias} 默认为\texttt{false}, 当置为\texttt{true} 时，\ztex{} 会加载\file{alias}库, 
-  其中包含一系列命令的简写声明, 如 \cmd{\ZZ} 代替 \cmd{\mathbb{Z}}; \meta{envStyle} 用于指定数学环境的样式, 默认为 \texttt{plain}.
+  此库中包含一系列命令的简写声明, 如 \cmd{\ZZ} 代替 \cmd{\mathbb{Z}}; \meta{envStyle} 用于指定数学环境的样式, 默认为 \texttt{plain}.
 \end{keyval}
-为了编译速度考虑，尽管 \ztex{} 预定义了一系列的环境样式，但并不会预加载全部的样式, 而是把部分的样式移入了 \file{theme} 库中. 详细的
-预定义样式列表如下:
+为了编译速度考虑，尽管 \ztex{} 已经预定义这系列的样式，但其并不会全部加载; \ztex{} 把部分样式移入了 \file{thm} 库; \ztex{} 
+中预定义的定理类环境样式列表如下:
 
 \noindent\parbox[t]{.5\linewidth}{
 \noindent \textbf{\pkg{thm} module 定义样式}:
@@ -377,7 +380,7 @@
   \item fancy 
 \end{itemize}}%
 \parbox[t]{.5\linewidth}{
-\noindent \textbf{\pkg{theme} library 定义样式}:
+\noindent \textbf{\pkg{thm} library 定义样式}:
 \begin{itemize}
   \item shadow
   \item paris 
@@ -386,7 +389,7 @@
   \item lapsis
 \end{itemize}}
 
-\meta{font} 用于指定数学公式字体，预定义的字体有:\texttt{newtx, euler, mtpro2, mathpazo, ptmx}. 
+\meta{font} 用于指定数学公式字体，预定义的字体有:\texttt{newtx, euler, var-euler, mtpro2, mathpazo, ptmx}. 
 其中 \texttt{mtpro2} 为付费字体，需用户手动安装.
 
 
@@ -399,7 +402,7 @@
     \cs{ztexverb}\oarg{format}\marg{item}
   \end{syntax}
   此命令和 \hologo{LaTeX2e} 中的 \cmd{\verb} 类似，用于输出控制序列名称. 和后者类似，此命令也不能作为
-  任何控制序列的参数. \meta{format} 用于指定控制序列的打印格式, 默认为 \cmd{\texttt}. 一个使用
+  任何控制序列的参数. \meta{format} 用于指定控制序列的打印格式, 默认为 \cmd{\texttt}. 一个基本的使用
   样例如下:
 \end{function}
 \begin{DocExample}*
@@ -415,7 +418,7 @@
   此命令用于指定图片的搜索路径, 此命令来自 \pkg{graphicx} 宏包, 默认搜索的路径包括:%
   \texttt{./figure/}, \texttt{./figures/}, \texttt{./image/}, \texttt{./images/}, 
   \texttt{./Pictures/}, \texttt{./picture/}, \texttt{./Pics/}, \texttt{./pics/}, \texttt{./graphics/}, 
-  \texttt{./graphic/}. 若用户需要增加额外的路径, 一个基本的案例如下:
+  \texttt{./graphic/}. 若用户需要增加额外的路径, 一个基本的使用方法如下:
 \end{function}
 \begin{DocExample}[@@]
   \graphicspath{
@@ -429,7 +432,7 @@
     \cs{ztexcntwith}\marg{child}\marg{parent}
     \cs{counterwithin}\marg{child}\marg{parent}
   \end{syntax}
-  这个两个命令作用相同, 均用于给指定 \meta{child} 计数器添加一个父计数器 \meta{parent}. 
+  这个两个命令作用相同, 均用于给指定的 \meta{child} 计数器添加一个父计数器 \meta{parent}. 
   当 \meta{parent} 计数器增加时，\meta{child} 计数器会自动重置, 二者均为原始命令 \cmd{\@addtoreset} 的封装.
 \end{function}
 
@@ -446,6 +449,16 @@
   \begin{ref}This is a simple ref env.\end{ref}
   \begin{ref}[green]This is a simple ref env.\end{ref}
 \end{DocExample}
+
+
+\begin{function}[added=2025-05-15]{Framed}
+  \begin{syntax}
+  \string\begin\{Framed\}\oarg{key-value}
+    ...
+  \string\end\{Framed\}
+  \end{syntax}
+  此环境来自 \CusTeX{} 宏集, 当 \meta{cus}\texttt{=true} 时可用; 详细的使用方法请参见其手册.
+\end{function}
 
 
 \begin{function}{\c_ztex_quad_dim}
@@ -503,7 +516,8 @@
   \begin{syntax}
     \cs{ztexhyperTF}\marg{true code}\marg{false code}
   \end{syntax}
-  此命令用于检测当前文档中是否开启了超链接功能，如果开启了，那么执行 \meta{true code}, 否则执行 \meta{false code}, 其余命令的使用方法同理. 各个检测命令的基本使用样例如下:
+  此命令用于检测当前文档中是否开启了超链接功能，如果开启了，那么执行 \meta{true code}, 否则执行 \meta{false code}; 
+  其余命令的使用方法同理; 各个检测命令的基本使用样例如下:
 \end{function}
 \begin{DocExample}*
 \ztexhyperTF{Hyperref enable.}{Hyperref does NOT enable.}\par
@@ -519,11 +533,10 @@
 
 \clearpage
 \section{\texorpdfstring{\zTeX{}}{zTeX} 模块}
-本节对应的所有 module 默认自动加载，用户也可以通过命令 \cmd{\ztexloadmod} 调用自己编写的 module. 
-目前已有的 module 和 library 列表如下:
+本节对应的所有 module 默认自动加载, 除此之外, 用户还可以通过命令 \cmd{\ztexloadmod} 调用自己编写
+的 module. 目前已有的 module 列表如下:
 
-\noindent\parbox[t]{.5\linewidth}{
-  \noindent \textbf{\textsf{module} 列表:}
+\begin{multicols}{2}
   \begin{itemize}
     \item \file{ztex.module.font.tex}
     \item \file{ztex.module.ref.tex}
@@ -532,29 +545,12 @@
     \item \file{ztex.module.thm.tex}
     \item \file{ztex.module.sect.tex}
     \item \file{ztex.module.box.tex}
-  \end{itemize}}%
-\parbox[t]{.5\linewidth}{
-  \noindent \textbf{\textsf{library} 列表:}
-  \begin{itemize}
-    \item \file{ztex.library.fancy.tex}
-    \item \file{ztex.library.alias.tex}
-    \item \file{ztex.library.slide.tex}
-    \item \file{ztex.library.thm.tex}
-  \end{itemize}}
+  \end{itemize}
+\end{multicols}
 
-
-各个 module 和 library 的加载方式请参见如下示例:
-\begin{DocExample}
-% \documentclass{ztex}
-\ztexloadlib/\zarg{fancy}/
-\ztexloadlib/\zarg{alias}/
-\ztexloadlib/\zarg{slide}/
-\ztexloadlib/\zarg{thm}/
-\end{DocExample}
-
-用户也可以编写一个你自己的 module, 不妨假设其名称为 \meta{moduleA}; 将此文件命名为 \texttt{ztex.module.\meta{moduleA}.tex}, 
-然后将其放入路径 \meta{z\TeX}\file{/module/} 下，使用 \cs{ztexloadmod}\texttt{\marg{moduleA}} 加载此 module. \meta{moduleA} 中
-的基本程序框架如下:
+用户也可以编写你自己的 module, 不妨假设其名称为 \meta{moduleA}; 将此文件命名为 \texttt{ztex.module.\meta{moduleA}.tex}, 
+然后将其放入路径 \meta{z\TeX}\file{/module/} 下，最后使用 \cs{ztexloadmod}\texttt{\marg{moduleA}} 即可加载此 module. 
+\meta{moduleA} 中程序的基本框架如下:
 \begin{DocExample}[@@]
 \ProvidesExplFile{ztex.module.@\meta{moduleA}@.tex}{2025/04/26}{1.0.0}{@\meta{moduleA}@~module~for~ztex}
 
@@ -572,7 +568,7 @@
 \subsubsection{字体选择简介}
 我到底是应该使用 font name 还是 file name ? 在 \pkg{fontspec} 中有着详细的说明:
 \begin{itemize}
-  \item 当通过 font name(字体名) 调用系统字体时: 诸如 \verb|~/Library/Fonts|(MacOS), \\ \verb|C:\Windows\Fonts|(Windows)
+  \item 当通过 font name(字体名) 调用系统字体时: 诸如 \verb|~/Library/Fonts|(MacOS), \verb|C:\Windows\Fonts|(Windows)
     这样的默认搜索路径(search path)下的字体都是可以直接使用 \hologo{XeTeX} 或 \hologo{LuaTeX} 通过字体名调用的.
     但是需要注意的是: 任何系统中, 在 \textsc{texmf} 下的字体在 \hologo{LuaTeX} 中都可以直接调用; 但是对于 \hologo{XeTeX} 来说, 
     只有在 Windows 或 Linux 下的\textsc{texmf} 下的字体才能直接通过字体名调用. 通过字体名调用字体用一个好处:
@@ -584,6 +580,7 @@
     % 如果字体格式为 \texttt{.otf}, 那么此时可仅给出文件名(但还是请尽量写上), 例如 \texttt{lmroman10-regular},
     % 其余情况下请给出对应的字体格式(通过 \texttt{Extension} 参数进行指定). 
 \end{itemize}
+
 
 怎么查看 font name ? \TeX{}Live 提供了 \texttt{otfinfo} 这一命令行工具, 比如我们想要查看 Latin Modern Roman 字体, 其对应的
 命令为: \texttt{otfinfo -i `kpsewhich lmroman10-regular.otf`}. 命令的运行结果如下(Linux 下):
@@ -619,6 +616,7 @@ Permissions:         Unknown (12)
 选择适合自己的方式.
 
 
+\newpage
 \subsubsection{默认字体族}
 \begin{function}[added=2025-04-26]{\rmdefault, \sfdefault, \ttdefault}
   \begin{syntax}
@@ -678,10 +676,10 @@ Permissions:         Unknown (12)
 \subsubsection{新建字体族}
 \begin{function}[added=2025-04-26]{\newfontfamily, \setfontfamily, \renewfontfamily, \providefontfamily}
   \begin{syntax}
-    \cs{newfontfamily}\cs{\meta{cmd}}\marg{font}\oarg{font features}
-    \cs{setfontfamily}\cs{\meta{cmd}}\marg{font}\oarg{font features}
-    \cs{renewfontfamily}\cs{\meta{cmd}}\marg{font}\oarg{font features}
-    \cs{providefontfamily}\cs{\meta{cmd}}\marg{font}\oarg{font features}
+    \cs{newfontfamily}\meta{cmd}\marg{font}\oarg{font features}
+    \cs{setfontfamily}\meta{cmd}\marg{font}\oarg{font features}
+    \cs{renewfontfamily}\meta{cmd}\marg{font}\oarg{font features}
+    \cs{providefontfamily}\meta{cmd}\marg{font}\oarg{font features}
   \end{syntax}
   这系列命令来自 \pkg{fontspec} 宏包, \cs{newfontfamily} 会检查字体族是否存在，如果不存在则创建一个新的字体族,
   如果存在则抛出错误; \cs{setfontfamily} 无论字体族存在与否，都会创建一个新的字体族, 如果存在则覆盖原字体族;
@@ -692,7 +690,7 @@ Permissions:         Unknown (12)
 
 \begin{function}[added=2025-04-26]{\newCJKfontfamily, \setCJKfamilyfont}
   \begin{syntax}
-    \cs{newCJKfontfamily}\marg{family}\cs{\meta{cmd}}\marg{font}\oarg{font features}
+    \cs{newCJKfontfamily}\marg{family}\meta{cmd}\marg{font}\oarg{font features}
     \cs{setCJKfamilyfont}\marg{family}\marg{font}\oarg{font features}
   \end{syntax}
   这两个命令来自 \pkg{xeCJK} 宏包, 用于创建一个新的 CJK 字体族, 作用和上述的 \cs{newfontfamily} 和 \cs{setfontfamily} 类似.
@@ -758,7 +756,7 @@ Permissions:         Unknown (12)
     \cs{zfontfamilynew}\oarg{lang}\marg{key-value}
   \end{syntax}
   当 \meta{sysfont}\texttt{=true} 时可用(此时需更换 \hologo{XeTeX} 或 \hologo{LuaTeX} 引擎). 此命令用于创建一个新的字体族, 其整合了西文
-  字体族和中日韩字体族设置的接口; \textcolor{red}{如果对应的字体族已存在, 则会覆盖原有的字体族}. \meta{lang} 用于指定
+  字体族和中日韩字体族设置的接口; \textcolor{red}{\sffamily 如果对应的字体族已存在, 则它会被覆盖掉}. \meta{lang} 用于指定
   生成的字体族对应的语言, 默认为 \texttt{en}, 另有可选值 \texttt{CJK}. \meta{key-value} 用于指定新字体族的一系列属性, 
   目前支持的属性有请参见后续说明. \textbf{注意}: 由此命令生成的字体族无法由 \texttt{AutoFakeBold, AutoFakeSlant} 等选项来设置伪粗和伪斜属性,
   因为此命令生成的字体族中已经默认设置了 \texttt{BoldFont, ItalicFont, SlantedFont} 等为原始的 Regular 字体.
@@ -846,7 +844,7 @@ Permissions:         Unknown (12)
   %   也就是说:此时 \meta{name} 必须指定为 \file{times.ttf} 而不是 \file{times}.
   \item 在 \pkg{fontspec} 中, \meta{BoldFont} 和 \meta{ItalicFont} 也是必要参数, 但 \zTeX{} 已经帮用户默认配置了这两个选项, 
     默认为当前 UprightFont 对应的字体.
-  \item \textcolor{red}{不能在声明一个字体族时混用 font name 和 file name, 否则 \pkg{fontspec} 会因字体无法找到而报错}.
+  \item \textcolor{red}{\sffamily 不能在声明一个字体族时混用 font name 和 file name, 否则 \pkg{fontspec} 会因字体无法找到而报错}.
 \end{itemize}
 
 
@@ -988,8 +986,8 @@ Permissions:         Unknown (12)
     \cs{LinkTargetOn}
     \cs{LinkTargetOff}
   \end{syntax}
-  此命令常在一个局部中用于取消由 \cs{MakeLinkTarget} 或 \cs{refstepcounter} 创建的 Target. 在使用 
-  \cs{LinkTargetOff} 后，你仍然可以在一个局部里重新启用超链接然后创建对应的 Target, 示例如下:
+  此命令常在一个局部中用于取消由 \cs{MakeLinkTarget} 或 \cs{refstepcounter} 创建的 Target. 在
+  使用 \cs{LinkTargetOff} 后，你仍然可以在一个局部里重新启用超链接然后创建对应的 Target, 示例如下:
 \end{function}
 \begin{DocExample}
 \LinkTargetOff  % suppress anchor in internal refstepcounter
@@ -1006,8 +1004,8 @@ Permissions:         Unknown (12)
   \begin{syntax}
     \cs{NextLinkTarget}\marg{target}
   \end{syntax}
-  此命令设置下一个由 \cs{MakeLinkTarget} 或 \cs{refstepcounter} 创建的 target. 此命令的作用和 
-  \cs{hypersetup} 中的 \cmd{next-anchor} 类似.
+  此命令设置下一个由 \cs{MakeLinkTarget} 或 \cs{refstepcounter} 创建的 target. 此命令的作用
+  和 \cs{hypersetup} 中的 \cmd{next-anchor} 类似.
 \end{function}
 % \makeatother
 
@@ -1017,6 +1015,15 @@ Permissions:         Unknown (12)
     \cs{SetLinkTargetFilter}\marg{filter}
   \end{syntax}
   此命令用于给当前文档中所有的 Link Target 添加一个前缀，此命令在合并多个不同的 PDF 时是十分有用的. 
+\end{function}
+
+
+\begin{function}[added=2025-05-15]{\zsetHcnt}
+  \begin{syntax}
+    \cs{zsetHcnt}\marg{counter}\marg{content}
+  \end{syntax}
+  此命令用于设置 \texttt{theH\meta{counter}} 的值为 \meta{content}, 其在制作一些附录相关的
+  内容时是十分有用的.
 \end{function}
 
 
@@ -1103,7 +1110,7 @@ Permissions:         Unknown (12)
 
 \begin{function}[updated=2025-04-25]{\zpagemaskrm}
   \begin{syntax}
-    \cs{zpagemaskrm}\meta{foreground|backgroud}\marg{label}
+    \cs{zpagemaskrm}\marg{foreground|backgroud}\marg{label}
   \end{syntax}
   此命令用于移除由 \cmd{\zpagemask} 命令添加的页面水印, \meta{label} 即为 \cmd{\zpagemask} 键值参数
   中 \meta{label} 对应的 \meta{标签}. 如果 \meta{label} 对应的水印并不存在, \ztex{} 会抛出警告.
@@ -1121,7 +1128,7 @@ Permissions:         Unknown (12)
 
 
 \vskip3em
-\noindent\textcolor{red}{\sffamily 目前可以使用 \CusTeX{} 提供的接口进行水印定制, 请参见其 \pkg{bgfg} 模块.}
+\noindent\textcolor{red}{\sffamily NOTE:目前可以使用 \CusTeX{} 提供的接口进行水印定制, 请参见其 \pkg{bgfg} 模块.}
 
 
 \subsubsection{杂项}
@@ -1201,7 +1208,7 @@ Permissions:         Unknown (12)
     chapter-rule  = \meta{color spec}>\dval{black}
     chapter       = \meta{color spec}>\dval{ztex@color@royalred}
   \end{syntax}
-  其中 \meta{color spec} 为一个合法的\ztex{} 色彩格式.
+  其中 \meta{color spec} 为一个合法的 \ztex{} 色彩格式.
 \end{keyval}
 
 
@@ -1211,7 +1218,7 @@ Permissions:         Unknown (12)
     cite = \meta{color spec}>\dval{blue}
     url  = \meta{color spec}>\dval{ztex@color@royalred}
   \end{syntax}
-  其中 \meta{color spec} 为一个合法的\ztex{} 色彩格式.
+  其中 \meta{color spec} 为一个合法的 \ztex{} 色彩格式.
 \end{keyval}
 
 
@@ -1225,7 +1232,7 @@ Permissions:         Unknown (12)
     proposition = \meta{color spec}>\dval{ztex@color@proposition}
     remark      = \meta{color spec}>\dval{ztex@color@remark}
   \end{syntax}
-  其中 \meta{color spec} 为一个合法的\ztex{} 色彩格式. 定理类环境的色彩保存于变量 \cmd{ztex@color@\meta{name}} 中, 
+  其中 \meta{color spec} 为一个合法的 \ztex{} 色彩格式. 定理类环境的色彩保存于变量 \cmd{ztex@color@\meta{name}} 中, 
   其中 \meta{name} 为对应环境的名称. 不推荐用户使用命令 \cmd{\definecolor}, \cmd{\colorlet} 直接对这类色彩变量进行
   重定义, \ztex{} 鼓励用户通过 \cmd{\zcolorset} 命令进行色彩的重定义.\par
   \textbf{注意}: 后续的 \cmd{\zthmcolorset} 仅能用于数学类环境的色彩自定义, 所以如果出现 \zkey{link, chapter} 等键,
@@ -1241,7 +1248,7 @@ Permissions:         Unknown (12)
     solution  = \meta{color spec}>\dval{ztex@color@solution}
     problem   = \meta{color spec}>\dval{ztex@color@problem}
   \end{syntax}
-  其中 \meta{color spec} 为一个合法的\ztex{} 色彩格式. \ztex{} 对证明类环境的颜色处理与定理类环境相同,
+  其中 \meta{color spec} 为一个合法的 \ztex{} 色彩格式. \ztex{} 对证明类环境的颜色处理与定理类环境相同,
   这里不再说明.
 \end{keyval}
 
@@ -1282,8 +1289,8 @@ Hook, 方便用户直接对环境进行操作.
 \end{itemize}
 
 所以请区分 ``定理类'' 和 ``证明类'' 两类环境, 以便于正确地使用 \pkg{thm} 提供的各个命令. \ztex{} 的 \pkg{thm} module 
-中的部分命令或变量也许没有显式地含有 \textcolor{red}{theorem} 字样, 但是这些命令或变量仍然是属于 ``定理类'' 的; 应用于
-``证明类'' 环境的命令或变量均显式地含有 \textcolor{red}{proof} 字样.
+中的部分命令或变量也许没有显式地含有 \textcolor{red}{\sffamily theorem} 字样, 但是这些命令或变量仍然是属于 ``定理类'' 的; 应用于
+``证明类'' 环境的命令或变量均显式地含有 \textcolor{red}{\sffamily proof} 字样.
 
 
 \clearpage
@@ -1498,7 +1505,7 @@ Hook, 方便用户直接对环境进行操作.
     proposition = \meta{color spec}>\dval{ztex@color@proposition}
     remark      = \meta{color spec}>\dval{ztex@color@remark}
   \end{syntax}
-  \meta{color spec} 为一个合法的\ztex{} 色彩格式. 
+  \meta{color spec} 为一个合法的 \ztex{} 色彩格式. 
 \end{keyval}
 
 
@@ -1898,10 +1905,10 @@ Inline item:%
 
 \clearpage
 \subsection{box 模块}
-本模块主要封装了部分与盒子缩放以及盒子内容对齐相关的命令.
+本模块主要封装的命令主要包含两部分:盒子线性变换, 盒子内容对齐.
 
 
-\begin{function}[added=2025-04-29]{\zboxitemalign}
+\begin{function}[updated=2025-05-12]{\zboxitemalign}
   \begin{syntax}
     \cs{zboxitemalign}\oarg{key-value}\marg{width}\marg{content}
   \end{syntax}
@@ -1911,14 +1918,25 @@ Inline item:%
 \end{function}
 
 
-\begin{keyval}[parent=ztex/box/align]{cmd, type}
+\begin{keyval}[parent=ztex/box/align]{cmd, type, custom}
   \begin{syntax}
-    cmd   =  \cs{\meta{cmd}}>\dval{\cs{use:n}}
-    type  =  \meta{left|\textbf{center}|right|scatter}>\dval{center}
+    cmd    =  \meta{cmd}>\dval{空}
+    type   =  \meta{left|\textbf{center}|right|scatter|tower}>\dval{center}
+    custom =  \meta{cmd}>\dval{空}
   \end{syntax}
-  \cs{\meta{cmd}} 为一个命令, 其接受一个参数的, 改函数会应用于 \meta{content} 中的每一个 token.
-  \meta{type} 用于设置对齐方式, 可选值有: \texttt{left}, \texttt{center}, \texttt{right}, \texttt{scatter}.
-  默认对齐方式为 ``\texttt{center}(居中对齐)'',  \texttt{scatter} 为分散对齐(此时两端没有空格).
+  \meta{cmd} 和 \meta{custom} 均为一个命令; 前者可以接受一个参数, 其会应用于 \meta{content} 中的每一个 token;
+  后者须为一个无参数的命令. \meta{type} 用于设置对齐方式, 可选值有: \texttt{left}, \texttt{center}, 
+  \texttt{right}, \texttt{scatter}. 默认对齐方式为 ``\texttt{center}(居中对齐)'',  \texttt{scatter} 为分散对
+  齐(此时两端没有空格), \texttt{tower} 对齐方式: \texttt{content} 中每一个 \texttt{item(token)} 对应的对齐参考点为 
+  \texttt{hc/b}, 其横坐标计算方法如下: 
+  \[
+    \text{\ttfamily\meta{width}}\times
+    \frac{\text{\ttfamily\meta{item index}}}
+      {\text{\ttfamily\meta{item total}} + 1}.
+  \]
+  在 \texttt{custom} 对应的命令中可以使用 \cs{total@width} 来获取 \meta{width} 的值, \cs{align@cmd} 来获取
+  \meta{cmd} 的内容, \cs{align@object} 来获取 \meta{content} 的内容, \cs{align@format} 来获取 \meta{format} 的值.
+  变量 \cs{l__ztool_boxitem_seq} 中保存了 \meta{content} 中的所有 token, 其索引从 1 开始.
 \end{keyval}
 
 一个基本的使用案例如下:
@@ -1933,6 +1951,83 @@ Inline item:%
 \end{DocExample}
 
 
+
+关于 \texttt{custom} 和 \texttt{tower} 的一个基本案例如下:
+\begin{DocExample}*[!!]
+% 1. 'tower' style
+\zboxitemalign[type=tower]{\linewidth}{A}\par
+\zboxitemalign[type=tower]{\linewidth}{AA}\par
+\zboxitemalign[type=tower]{\linewidth}{AAA}\par
+
+% 2. use 'custom' to archieve 'tower' style
+\ExplSyntaxOn\makeatletter
+\def\customType{
+  \edef\seqCount{\seq_count:N \l__ztool_boxitem_seq}
+  \seq_map_inline:Nn \l__ztool_boxitem_seq
+    {
+      \edef\item@width{\dim_eval:n {\total@width/(\seqCount+1)}}
+      \hskip\item@width\clap{##1}
+    }\hskip\item@width\hss
+}
+\makeatother\ExplSyntaxOff
+\def\itemCmd#1{\textcolor{blue}{\sffamily(#1)}}
+\dotfill\par
+\zboxitemalign[
+  type=custom, 
+  cmd=\itemCmd, 
+  custom=\customType
+]{\linewidth}{AAAAAA}
+\end{DocExample}
+
+
+
+\begin{function}[added=2025-05-12]{\ztoolboxaffine}
+  \begin{syntax}
+    \cs{ztoolboxaffine}\oarg{key-value}\marg{content}\marg{matrix}
+  \end{syntax}
+  上述 \meta{content} 表示仿射变换作用的对象; \meta{matrix} 为一个 $2\times 2$ 的矩阵, 表示
+  对应的仿射变换矩阵. 若 \meta{matrix} $ = \{a, b, c, d\}$, 则其对应的仿射变换矩阵 $\Lambda$ 如下:
+  \[
+    \Lambda = \begin{bmatrix}
+      a & c \\
+      b & d
+    \end{bmatrix}.
+  \]
+  若 $\det\Lambda = 0$, 则此变换无意义, \ztex{} 会在终端输出一条警告, 最后将 \meta{content} 中的内容
+  原样输出到 PDF. 
+\end{function}
+
+
+\begin{keyval}[parent=ztool/affine]{debug, pole-1, pole-2, xoffset, yoffset}
+  \begin{syntax}
+    debug   = \meta{true|false}>\dval{false}
+    pole-1  = \meta{coffin's pole}>\dval{l}
+    pole-2  = \meta{coffin's pole}>\dval{b}
+    xoffset = \meta{number}>\dval{0pt}
+    yoffset = \meta{number}>\dval{0pt}
+  \end{syntax}
+  \meta{debug} 用于调试, 如果设置为 \texttt{true}, 则会在 PDF 中输出一些中间变量信息, 用于调试; 
+  其中 \meta{xoffset}, \meta{yoffset} 为水平和垂直方向的偏移量, 默认值均为 \texttt{0pt}; 
+  \meta{pole-1}, \meta{pole-2} 用于设置打印 coffin 时的参考点, 二者必须相交. 关于后面四个 \meta{kye} 的详细使用
+  方法可以参见 \pkg{l3coffins} 的说明.
+\end{keyval}
+
+
+命令 \cs{ztoolboxaffine} 的一些基本使用样例如下:
+\begin{DocExample}*
+Original Text: XXX\par
+$\det(A) = 0$: \ztoolboxaffine{XXX}{0, 0, 0, 2}\par % det(A) = 0
+Unit Matrix: \ztoolboxaffine{XXX}{1, 0, 0, 1}\par % unit matrix
+Scale Matrix: \ztoolboxaffine[pole-2=vc]{XXX}{2, 0, 0, 2}\par % scale
+$x$-scale Matrix: \ztoolboxaffine{XXX}{2, 0, 0, 1}\par % x-scale
+$y$-scale Matrix: \ztoolboxaffine{XXX}{1, 0, 0, 2}\par % y-scale
+$x$-shear Matrix: \ztoolboxaffine{XXX}{1, 0, 1, 1}\par % x-shear
+$y$-shear Matrix: \ztoolboxaffine{XXX}{1, 1, 0, 1}\par % y-shear
+Image Test: \rule{2em}{2em}~\ztoolboxaffine{\rule{2em}{2em}}{1, 0, .5, 1}
+\end{DocExample}
+
+
+
 \clearpage
 \subsection{sect 模块}
 由 \zLaTeX{} 提供的此模块主要用于自定义章节和目录格式, 目前基于 \pkg{titlesec} 与 \pkg{titletoc}. 下面我们
@@ -1941,20 +2036,23 @@ Inline item:%
   \begin{syntax}
     \cs{ztexptoc}\oarg{depth}
   \end{syntax}
-  此命令用于输出每一个章节对应的子目录, 此命令目前基于 \pkg{titletoc} 宏包. \meta{depth} 用于指定子目录最大深度，
-  默认为 2.
+  此命令用于输出每一个章节对应的子目录, 如果当前为 \cls{book} 文档类则父级目录为 chapter;
+  若文档类为 \cls{article}, 则父级目录为 section; \meta{depth} 用于指定子目录最大深度，默认为 2.
+  \textbf{注意:} 目前此命令基于 \pkg{titletoc} 宏包. 
 \end{function}
+
 
 \begin{function}[updated=2025-04-25]{\ztexstoptoc}
   \begin{syntax}
     \cs{ztexstoptoc}\marg{\textbf{chapters}|sections}\marg{index}
   \end{syntax}
-  此命令用于结束子目录的搜集, \meta{index} 为一个整数; 一般情况下，用户不应该使用此命令.
+  此命令用于结束子目录的搜集, \meta{index} 为一个整数;  \textbf{注意}: 一般情况下，用户不应该使用此命令.
 \end{function}
 
 
+
 \vskip3em
-\noindent\textcolor{red}{\sffamily 目前可以使用 \CusTeX{} 提供的接口进行定制, 请参见其 \pkg{struct} 模块.}
+\noindent\textcolor{red}{\sffamily NOTE:目前可以使用 \CusTeX{} 提供的接口进行定制, 请参见其 \pkg{struct} 模块.}
 
 
 \clearpage
@@ -1993,7 +2091,26 @@ Inline item:%
 library. 
 
 所有的 library 均不默认加载，用户需要使用 \cmd{\ztexloadlib}\texttt{\marg{library name}} 手动加载, 
-详细的 \meta{library name} 列表请参见命令 \cmd{\ztexloadlib} 的说明. 
+详细的 \meta{library name} 列表如下:
+
+\begin{multicols}{2}
+  \begin{itemize}
+    \item \file{ztex.library.fancy.tex}
+    \item \file{ztex.library.alias.tex}
+    \item \file{ztex.library.slide.tex}
+    \item \file{ztex.library.thm.tex}
+  \end{itemize}
+\end{multicols}
+
+Library 的加载方式如下:
+\begin{DocExample}
+% \documentclass{ztex}
+\ztexloadlib/\zarg{fancy}/
+\ztexloadlib/\zarg{alias}/
+\ztexloadlib/\zarg{slide}/
+\ztexloadlib/\zarg{thm}/
+\end{DocExample}
+
 
 
 \clearpage
@@ -2518,9 +2635,18 @@ zslide 中的坐标系统:在不另加说明的情况下, zslide 中的坐标系
 \end{keyval}
 
 
+\begin{function}[added=2025-05-09]{\zslideframetitle}
+  \begin{syntax}
+    \cs{zslideframetitle}\marg{title}
+  \end{syntax}
+  此命令用于在没有 \cs{section} 命令出现时手动创建 slide 页面对应的标题, 和 \cls{beamer} 中的 \cs{frametitle} 命令类似. \par
+  \textbf{注意}: 此命令会自动换页, 即自动插入 \cs{newpage} 命令.
+\end{function}
+
+
 \begin{function}[updated=2025-04-25]{\zslidetitle, \zslideauthor, \zslidedate}
   此三个命令用于分别保存导言区 \cmd{\@title}, \cmd{\@author}, \cmd{\@date} 三个变量的值, 
-  用户可以在正文部分使用此三个变量. \textbf{注意}: 如果在 slide 模式下未定义这三个变量, 那么
+  用户可以在正文部分使用此三个变量.\par \textbf{注意}: 如果在 slide 模式下未定义这三个变量, 那么
   \zLaTeX{} 会抛出错误.
 \end{function}
 
@@ -2530,7 +2656,7 @@ zslide 中的坐标系统:在不另加说明的情况下, zslide 中的坐标系
     \cs{zslidedocolor}\oarg{layer}\marg{color}
   \end{syntax}
   此命令用于覆盖原本的 slide 文本或背景色, \meta{layer} 可选值有: \texttt{fg, bg}; 
-  \meta{bg} 默认的 \meta{color} 为 \texttt{white}, \meta{fg} 默认的 \meta{color} 为 \texttt{black}. 
+  \meta{bg} 默认的 \meta{color} 为 \texttt{white}, \meta{fg} 默认的 \meta{color} 为 \texttt{black}. \par
   \textbf{注意}:一次只能设置一个 \meta{layer}, 且用户不应该滥用此命令.
 \end{function}
 
@@ -2692,30 +2818,39 @@ Subsection Icon: \rule[2pt]{3pt}{3pt}
 \end{function}
 
 
-\begin{function}[added=2025-01-14]{\g_zslide_status_info_head_B_dim, \g_zslide_status_info_foot_B_dim, \g_zslide_status_info_sec_L_dim, \g_zslide_status_info_sec_B_dim}
+\begin{function}[added=2025-01-14]{
+  \g_zslide_status_info_sec_L_dim, 
+  \g_zslide_status_info_sec_C_dim,
+  \g_zslide_status_info_head_C_dim, 
+  \g_zslide_status_info_foot_C_dim}
   \begin{syntax}
     \cs{g_zslide_status_info_sec_L_dim}>\dval{1cm}
-    \cs{g_zslide_status_info_sec_B_dim}>\dval{-2.25em}
-    \cs{g_zslide_status_info_head_B_dim}>\dval{-.9em+2.5pt}
-    \cs{g_zslide_status_info_foot_B_dim}>\dval*{-\string\paperheight+2.5pt}
+    \cs{g_zslide_status_info_sec_C_dim}>\dval{-1.7em}
+    \cs{g_zslide_status_info_head_C_dim}>\dval{-0.35em}
+    \cs{g_zslide_status_info_foot_C_dim}>\dval*{-\string\paperheight+0.35em}
   \end{syntax}
-  前两个寄存器存放了 head 和 foot 中文字基线的纵坐标, 前者的默认值为 \texttt{-.9em+2.5pt}, 后者的默认值
-  为 \ztexverb{-\paperheight+2.5pt}. \cs{g_zslide_status_info_sec_L_dim} 中存放了 section 文本距离页面左边界的距离, 
-  默认值为 \texttt{1cm}; \cs{g_zslide_status_info_sec_B_dim} 中存放了 section 文本基线的纵坐标, 默认值为 \texttt{-2.25em}.\par
+  \cs{g_zslide_status_info_sec_L_dim} 中存放了 section 文本距离页面左边界的距离, 默认值为 \texttt{1cm}; 
+  \cs{g_zslide_status_info_sec_C_dim} 中存放了 section 文本竖直方向对称轴的纵坐标, 默认值为 \texttt{-1.7em}.
+  最后两个寄存器存放了 head 和 foot 中文本竖直方向对称轴的纵坐标, 前者的默认值为 \texttt{-0.35em}, 后者的默认值
+  为 \ztexverb{-\paperheight+0.35em}. \par
   \textbf{注意}:普通用户不应该直接修改此系列寄存器, 此命令主要提供给模板的开发者.
 \end{function}
 
 
-\begin{function}[added=2025-01-14]{\g_zslide_status_bar_head_H_dim, \g_zslide_status_bar_foot_H_dim, \g_zslide_status_bar_sec_H_dim, \g_zslide_status_bar_sec_B_dim}
+\begin{function}[added=2025-01-14]{
+  \g_zslide_status_bar_head_H_dim, 
+  \g_zslide_status_bar_foot_H_dim, 
+  \g_zslide_status_bar_sec_H_dim, 
+  \g_zslide_status_bar_sec_B_dim}
   \begin{syntax}
-    \cs{g_zslide_status_bar_head_H_dim}>\dval{.9em}
-    \cs{g_zslide_status_bar_foot_H_dim}>\dval{.9em}
-    \cs{g_zslide_status_bar_sec_H_dim}>\dval{1.8em}
+    \cs{g_zslide_status_bar_head_H_dim}>\dval{.7em}
+    \cs{g_zslide_status_bar_foot_H_dim}>\dval{.7em}
+    \cs{g_zslide_status_bar_sec_H_dim}>\dval{2em}
     \cs{g_zslide_status_bar_sec_B_dim}>\dval{-2.7em}
   \end{syntax}
-  前两个寄存器存放了 slide 中 head 和 foot 对应背景色块的高度, 默认值均为 \texttt{.9em}; \cs{g_zslide_status_bar_sec_H_dim} 中存放了 section 的背景
-  色块的高度, 默认值为 \texttt{1.8em}; \cs{g_zslide_status_bar_sec_B_dim} 中存放了 section 的背景色块中文字的基线的纵坐标, 默认值为 \texttt{-2.7em};
-  当改变此此三个寄存器的值时, 对应色块的基线保持不变，其高度会做出相应的改变.\par
+  前两个寄存器存放了 slide 中 head 和 foot 对应背景色块的高度, 默认值均为 \texttt{.7em}, 其对应的背景矩形色块底边的纵坐标均为 \texttt{.7em}; 
+  \cs{g_zslide_status_bar_sec_H_dim} 中存放了 section 的背景色块的高度, 默认值为 \texttt{2em}; \cs{g_zslide_status_bar_sec_B_dim} 中存放了 section 
+  的背景矩形色块底边对应的纵坐标, 默认值为 \texttt{-2.7em}; 当改变此此三个寄存器的值时, 对应色块的基线保持不变，其高度会做出相应的改变.\par
   \textbf{注意}:普通用户不应该直接修改此系列寄存器，此命令主要提供给模板的开发者.
 \end{function}
 
@@ -2728,7 +2863,7 @@ Subsection Icon: \rule[2pt]{3pt}{3pt}
 library.
 
 \vskip2em
-\textcolor{red}{\sffamily 如用户在自定义定理类环境样式时需要更改 \ztex{} 的默认配色, 请将 \cs{ztex_keys_set:nn} 或其它基于 \cs{keys_set:nn} 的命令放置于%
+\noindent\textcolor{red}{\sffamily NOTE: 若用户在自定义定理类环境样式时需要更改 \ztex{} 的默认配色, 请将 \cs{ztex_keys_set:nn} 或其它基于 \cs{keys_set:nn} 的命令放置于%
 命令 \cs{zthmstylenew} 对应样式 \meta{preamble} 中而非 \meta{option} 中, 否则 \ztex{} 中的一系列与 \cs{zcolorset} 相关的函数将失去%
 对新定义数学类环境样式的色彩控制能力.}
 
@@ -2760,7 +2895,7 @@ library.
 
 
 一个基本的使用样例如下\zchcmd:
-\begin{DocExample}
+\begin{DocExample}*
 \zthmiconset        
   {
     axiom       = \ding{118},
@@ -2782,7 +2917,7 @@ library.
   此命令在自定义定理环境样式时比较有用, 不推荐用户于正文中使用. \par
   一个基本的使用样例如下\zchcmd:
 \end{function}
-\begin{DocExample}
+\begin{DocExample}*
 \zthmiconuse{theorem}
 \zthmiconuse{lemma}
 \end{DocExample}
@@ -2961,9 +3096,8 @@ reason is a representation of, as far as I know, the things in themselves;%
 \ExplSyntaxOn\makeatletter
 \zthmtitleformat*{
   \noindent\sffamily\bfseries\textcolor{\thm@tmp@color}{
-    \__ztex_thm_icon_use:o {\thm@tmp@name}\ \zthmname :\zthmnumber
-    \zthmnotemptyTF{}{\ }
-    \zthmnote{}{}\ \raise7pt\hbox{\rotatebox{-90}{\(\triangleright\)}}
+    \__ztex_thm_icon_use:o {\thm@tmp@name}
+    \ \zthmname{\,:\,}\zthmnumber
   }
 }
 \__ztex_thm_icon_set:n 
@@ -3004,8 +3138,8 @@ reason is a representation of, as far as I know, the things in themselves;%
 \clearpage
 \section{ztool 宏包}\label{pkg:ztool}
 本宏集已独立实现了一个 \pkg{ztool} 宏包, 此模块中包含原来已被废弃的 \pkg{l3sys-shell} 中的所有命令.
-\pkg{ztool} 实现了box 以及 文件 IO 操作相关的函数. 在 \pkg{ztool} 的协助下，\ztex{} 能够避免或减少
-\cmd{-shell-escape} 相关的调用. \pkg{ztool} 宏包手册请参见 \cref{pkg:ztool}.
+除此之外, \pkg{ztool} 提供了 box 操作, 文件 IO 以及基本图形绘制相关的函数. 在 \pkg{ztool} 的协助下，\ztex{} 能够
+避免或减少命令行 \cmd{-shell-escape} 参数或其它相关宏包的调用(如 \pkg{robust-externalize} 宏包).
 
 
 \subsection{l3sys-shell}
@@ -3013,7 +3147,7 @@ reason is a representation of, as far as I know, the things in themselves;%
 \LaTeX{} 文档时启用 \cmd{-shell-escape} 参数, 否则此系列命令将不会执行任何操作.
 
 \vskip2em
-\noindent\textcolor{red}{\sffamily WARNING: 请谨慎使用此部分的命令, 部分不当操作可能导致系统崩溃.}
+\noindent\textcolor{red}{\sffamily WARNING: 请谨慎使用此部分的命令, 部分不当操作可能会导致一些无法挽救的后果.}
 
 \begin{function}[updated=2024-12-05]{\ztool_shell_escape:n, \ztool_shell_escape:e}
   \begin{syntax}
@@ -3077,7 +3211,7 @@ reason is a representation of, as far as I know, the things in themselves;%
 
 \begin{function}[updated=2024-12-05]{\ztool_shell_split_ls:nN}
   \begin{syntax}
-    \cs{ztool_shell_split_ls:nN} \marg{dir}\marg{tl}
+    \cs{ztool_shell_split_ls:nN} \marg{dir}\meta{tl}
   \end{syntax}
   当 \cmd{-shell-escape} 参数启用时, 此命令将返回目录 \meta{dir} 下的所有文件名, 并将其存放在 \meta{tl} 中, 如果 \cmd{-shell-escape} 参数未启用,
   此命令将不会执行任何操作.
@@ -3098,27 +3232,27 @@ reason is a representation of, as far as I know, the things in themselves;%
   若文件已存在，那么当 \meta{boolean} 为 \cs{c_true_bool} 时，\textcolor{red}{\sffamily 会覆盖原文件}，否则不会进行任何操作.
 \end{function}
 
-\begin{function}[updated=2024-12-05]{\ztool_read_file_as_seq:nnN, \ztool_read_file_as_seq:neN, \ztool_read_file_as_seq:nnc, \ztool_read_file_as_seq:nec}
+\begin{function}[updated=2024-12-05]{
+  \ztool_read_file_as_seq:nnN, \ztool_read_file_as_seq:neN, 
+  \ztool_read_file_as_seq:nnc, \ztool_read_file_as_seq:nec}
   \begin{syntax}
-    \cs{ztool_read_file_as_seq:nnN} \marg{bool}\marg{file}\marg{seq}
+    \cs{ztool_read_file_as_seq:nnN} \marg{bool}\marg{file}\meta{seq}
   \end{syntax}
   此命令用于读取文件 \meta{file} 的内容, 并将其存放在 \meta{seq} 中, 如果 \meta{file} 不存在, 则 \meta{seq} 会被置为空.
   \meta{bool} 用于控制是否保留行尾的空格, 可选值有:\cs{c_true_bool}, \cs{c_false_bool}, 默认为 \cs{c_true_bool}; 如果 \meta{bool} 
-  为 \cs{c_true_bool}, 则保留行尾的空格, 否则不保留.
-
-  此命令仅在一个组内有效, 且不可嵌套.
+  为 \cs{c_true_bool}, 则保留行尾的空格, 否则不保留.\par
+  \textbf{注意}: 此命令仅在一个组内有效, 且不可嵌套.
 \end{function}
 
 
 \begin{function}[updated=2025-01-05]{\ztool_gread_file_as_seq:nnN, \ztool_gread_file_as_seq:neN, \ztool_gread_file_as_seq:nnc, \ztool_gread_file_as_seq:nec}
   \begin{syntax}
-    \cs{ztool_read_file_as_seq:nnN} \marg{bool}\marg{file}\marg{seq}
+    \cs{ztool_read_file_as_seq:nnN} \marg{bool}\marg{file}\meta{seq}
   \end{syntax}
   此命令用于读取文件 \meta{file} 的内容, 并将其存放在 \meta{seq} 中, 如果 \meta{file} 不存在, 则 \meta{seq} 会被置为空.
   \meta{bool} 用于控制是否保留行尾的空格, 可选值有:\cs{c_true_bool}, \cs{c_false_bool}, 默认为 \cs{c_true_bool}; 如果 \meta{bool} 
-  为 \cs{c_true_bool}, 则保留行尾的空格, 否则不保留.
-
-  此命令作用于全局, 不可嵌套.
+  为 \cs{c_true_bool}, 则保留行尾的空格, 否则不保留.\par
+  \textbf{注意}: 此命令作用于全局, 不可嵌套.
 \end{function}
 
 
@@ -3126,7 +3260,8 @@ reason is a representation of, as far as I know, the things in themselves;%
   \begin{syntax}
     \cs{ztool_append_to_file:nn} \marg{file}\marg{content}
   \end{syntax}
-  此命令用于将 \meta{content} 追加到文件 \meta{file} 中, 如果 \meta{file} 不存在, 则会创建一个名为 \meta{file} 的新文件, 并将 \meta{content} 写入其中.
+  此命令用于将 \meta{content} 追加到文件 \meta{file} 中, 如果 \meta{file} 不存在, 则会创建一个名为 \meta{file} 的
+  新文件, 并将 \meta{content} 写入其中.
 \end{function}
 
 
@@ -3286,16 +3421,117 @@ reason is a representation of, as far as I know, the things in themselves;%
 
 
 % #1:cmd, #2:width, #3:object, #4:align format(left, right, scatter, center)
-\begin{function}[added=2024-04-29]{
-  \ztool_box_item_align:nnnn, \ztool_box_item_align:onnn,
-  \ztool_box_item_align:onno, \ztool_box_item_align:nnee}
+\begin{function}[updated=2025-05-13]{
+  \ztool_box_item_align:Nnnn, \ztool_box_item_align:cnnn,
+  \ztool_box_item_align:Nnno, \ztool_box_item_align:cnno, 
+  \ztool_box_item_align:Nnen, \ztool_box_item_align:Nnee }
   \begin{syntax}
-    \cs{ztool_box_item_align:nnnn} \cs{\meta{cmd}}\marg{width}\marg{content}\marg{align}
+    \cs{ztool_box_item_align:Nnnn} \meta{cmd}\marg{width}\marg{content}\marg{align}
   \end{syntax}
   此命令用于将 \meta{content} 的宽度调整为 \meta{width}, 然后排版出来, \meta{align} 用于控制对齐方式, 可选值有:
-  \texttt{left, center, right, scatter}. \cs{\meta{cmd}} 为一个命令，其接受一个参数，它将应用到 \meta{content} 
+  \texttt{left, center, right, scatter}. \meta{cmd} 为一个命令，其接受一个参数，它将应用到 \meta{content} 
   的每一个 Token 上. \textbf{注意}:原 \meta{content} 中的空格会被删除.
 \end{function}
+
+
+\begin{function}[added=2025-05-12]{\ztool_fp_to_rad:n}
+  \begin{syntax}
+    \cs{ztool_fp_to_rad:n} \marg{angle}
+  \end{syntax}
+  此命令用于将 \meta{angle} 从弧度制转换为角度制.
+\end{function}
+
+
+
+\begin{function}[added=2025-05-12]{
+  \ztool_affine_transformation:Nnnnn,
+  \ztool_affine_transformation:Neeee,
+  \ztool_affine_transformation:cnnnn,
+  \ztool_affine_transformation:ceeee}
+  \begin{syntax}
+    \cs{ztool_affine_transformation:Nnnnn} \meta{box}\marg{a}\marg{b}\marg{c}\marg{d}
+  \end{syntax}
+  此命令用于对 \meta{box} 进行任意的仿射变换(线性变换), 具体的使用方法可以参见前述的 \cmd{ztoolboxaffine} 命令; 
+  上述参数对应的仿射变换矩阵 $\Lambda$ 为
+  \[\Lambda = \begin{bmatrix}
+    a & c \\
+    b & d
+  \end{bmatrix}.\]
+\end{function}
+
+
+
+{\sffamily\color{red} 关于上述函数 \cmd{\ztool_affine_transformation:Nnnnn} 的一些技术细节}: 给定任意一个仿射
+变换 $\Lambda$, 不妨设
+\[
+  \Lambda = \begin{bmatrix}
+    A_{11} & A_{12} \\
+    A_{21} & A_{22}
+  \end{bmatrix}.
+\]
+我们可以做如下的分解(与 SVD 分解类似), 令 $m=2x$, 则有:
+\begin{align}\label{eq:affine-matrix}
+  \Lambda 
+  & = \begin{bmatrix} A_{11} & A_{12} \ \\ A_{21} & A_{22} \end{bmatrix} 
+    = \begin{bmatrix} \cos \theta & -\sin \theta \\ \sin \theta & \cos \theta \end{bmatrix} 
+    \begin{bmatrix} 1 & m \\ 0 & 1 \end{bmatrix} 
+    \begin{bmatrix} s_x & 0 \\ 0 & s_y \end{bmatrix} \notag \\
+  & = \begin{bmatrix} \cos \theta & -\sin \theta \\ \sin \theta & \cos \theta \end{bmatrix}
+    \begin{bmatrix}\cos \phi&-\sin\phi\\\sin\phi&\cos\phi\end{bmatrix}
+    \begin{bmatrix}S_x&0\\0&S_y\end{bmatrix}
+    \begin{bmatrix}\cos \omega&-\sin\omega\\\sin\omega&\cos\omega\end{bmatrix}
+    \begin{bmatrix} s_x & 0 \\ 0 & s_y \end{bmatrix}.
+\end{align}
+
+我们给出如下的记号:
+\begin{itemize}
+  \item $\mathbf{T}_1(\theta)$: 旋转矩阵, 绕原点逆时针旋转 $\theta$ 角;
+  \item $\mathbf{T}_2(x)$: 缩放矩阵, 把 $x$ 轴方向的所有向量变为原来的 $x$ 倍;
+  \item $\mathbf{T}_3(y)$: 缩放矩阵, 把 $y$ 轴方向的所有向量变为原来的 $y$ 倍;
+\end{itemize}
+
+那么我们可以认为 $\{\mathbf{T}_1(\theta), \mathbf{T}_2(x), \mathbf{T}_3(y)\}$ 就是 $A_{2\times 2}$ 的基.
+所以我们可以把上面的 \cref{eq:affine-matrix} 写成如下表达式:
+\begin{align}\label{eq:affine-matrix-res}
+  \Lambda = \mathbf{T}_1(\theta) \cdot \mathbf{T}_1(\phi)
+  \cdot \mathbf{T}_2(S_x)\cdot \mathbf{T}_3(S_y)
+  \cdot \mathbf{T}_1(\omega)\cdot \mathbf{T}_2(s_x)\cdot \mathbf{T}_3(s_y).
+\end{align}
+
+根据矩阵乘法的结果, 我们可以知道上述的 $m, s_x, S_x, \phi$ 等参数如下:
+\begin{align*}
+  s_x = \sqrt{A_{11}^2 + A_{21}^2},\qquad \theta = \arctan\left( \frac{A_{21}}{A_{11}} \right).
+\end{align*}
+$s_y$ 和 $m$ 的求解结果如下:
+\begin{align*}
+  ms_y = A_{12}\cos\theta + A_{22}\sin\theta,\qquad
+  s_y = \left\{\begin{aligned}
+    & \frac{m s_y\cos\theta - A_{12}}{\sin\theta} && \text{ 如果 } \sin\theta \neq 0, \\
+    & \frac{A_{22} - m s_y\sin\theta}{\cos\theta} && \text{ 如果 } \sin\theta = 0;
+  \end{aligned}\right. 
+\end{align*}
+那么此时很容易知道 $m = ms_y / s_y$. 对 shear matrix 的分解结果如下:
+\begin{align*}
+  & S_x = \sqrt{\frac{m^2}4+1} - \frac{m}2, \qquad
+    S_y = \sqrt{\frac{m^2}4+1} + \frac{m}2, \\
+  & \phi = -\frac{\pi}{4} - \frac{1}{2}\arctan(\frac{m}2), \qquad
+    \omega = \frac{\pi}{4} - \frac{1}{2}\arctan(\frac{m}2).
+\end{align*}
+
+最后我们只需要从右到左将这一系列的变换应用到 \meta{box} 上即可. 从上面也可以看出, 命令 \cmd{\ztool_affine_transformation:Nnnnn} 
+仅依赖于 \LaTeX3 中的 \cs{coffin_scale:Nnn} 和 \cs{coffin_rotate:Nn} 两个函数. 命令 \cmd{\ztool_affine_transformation:Nnnnn} 实现
+过程中相关的参考链接如下:
+\begin{itemize}
+  \item \texttt{https://math.stackexchange.com/a/3521141/1235323};
+  \item \texttt{https://math.stackexchange.com/a/281087/1235323}.
+\end{itemize}
+
+\begin{leftbar}%
+\noindent 如果原 \TeX{} 引擎提供了 shear transformation 相关的 primitive, 那么上述
+对 shear matrix 的分解就是不必要的. 部分的引擎中原始提供了仿射变换矩阵这一 primitive, 
+比如 \hologo{pdfTeX} 中的 \cmd{\pdfsetmatrix} 命令.
+\end{leftbar}
+
 
 
 下面一个示例展示了如何使用 \pkg{ztool} 中的几个 Box 操作命令:
@@ -3308,9 +3544,9 @@ reason is a representation of, as far as I know, the things in themselves;%
 \ztool_get_wd:Nn \l_ztool_tmp_W_dim {Hello,~world!}
 \dim_use:N \l_ztool_tmp_H_dim \quad \dim_use:N \l_ztool_tmp_W_dim\\
 % set content to dim
-Hello,~world!|
-\ztool_set_to_ht:nn {.5cm} {Hello,~world!}|
-\ztool_set_to_wd:nn {25pt} {Hello,~world!}\par
+Hello,~world|
+\ztool_set_to_ht:nn {.5cm} {Hello,~world}|
+\ztool_set_to_wd:nn {40pt} {Hello,~world}\par
 % scale one dimension
 \ztool_scale_to_wd:nn {2em}{AA}\par
 \ztool_scale_to_wd:nn {2em}{AAAAAA}\par
@@ -3323,43 +3559,255 @@ Hello,~world!|
 
 
 \clearpage
+\subsection{zdraw}
+这部分主要包含一些图像绘制命令, 这系列的命令并不依赖于 \pkg{tikz} 宏包, 它们的主要依赖项如下: 
+\begin{itemize}
+  \item \hologo{LaTeX2e} 内置 \env{picture} 环境;
+  \item \pkg{pict2e} : \hologo{LaTeX2e} 内置 \env{picture} 环境的增强版, 提供了更好的绘图功能;
+  \item \pkg{bxeepic}: 可以用于提供 dash line 支持, 目前还未引入该宏包.
+\end{itemize}
+
+
+\begin{function}[added=2025-05-13]{zpic}
+  \begin{syntax}
+    \cs{begin}\{zpic\}\oarg{key-value} \meta{draw commands} \cs{end}\{zpic\}
+  \end{syntax}
+  此环境基于 \hologo{LaTeX2e} 内置 \env{picture} 环境定义, 
+\end{function}
+
+\begin{keyval}[parent=ztool/draw/picture]{unit, width, height, xoffset, yoffset, opacity-color}
+  \begin{syntax}
+    unit    = \meta{长度}>\dval{1cm}
+    width   = \meta{浮点数}>\dval{0}
+    height  = \meta{浮点数}>\dval{0}
+    xoffset = \meta{浮点数}>\dval{0}
+    yoffset = \meta{浮点数}>\dval{0}
+    opacity-color = \meta{颜色}>\dval{white}
+  \end{syntax}
+  上述的 \meta{opacity-color} 选项用于设置当前 \env{zpic} 环境中的``透明''色彩, 也就是和当前文档默认背景色相同的色彩; 
+  所以可能会出现 \meta{opacity-color} 覆盖到其它 object 上的情况.
+\end{keyval}
+
+
+\begin{function}[added=2025-05-13]{\put}
+  \begin{syntax}
+    \cs{put} \parg{x, y} \marg{content}
+  \end{syntax}
+  此命令即为 \hologo{LaTeX2e} 内置 \env{picture} 环境中的 \cs{put} 命令.
+  \textbf{注意}: 此命令需要在 \env{picture} 或 \env{zpic} 环境中使用.
+\end{function}
+
+
+\begin{function}[added=2025-05-13]{\zline}
+  \begin{syntax}
+    \cs{zline} \oarg{key-value}\parg{coor-1}\parg{coor-2}
+  \end{syntax}
+  此命令用于绘制一条从 \meta{coor-1} 到 \meta{coor-2} 的线段, \meta{key-value} 用于设置线条的属性,
+  可用选项请参见后续的 \meta{parent=ztool/draw/picture/line}.
+\end{function}
+
+
+\begin{keyval}[parent=ztool/../line]{draw, width, dash}
+  \begin{syntax}
+    draw  = \meta{颜色}>\dval{black}
+    width = \meta{长度}>\dval{.4pt}
+    dash  = \meta{true|\textbf{false}}>\dval{false}
+  \end{syntax}
+  上述 \meta{width} 用于设置线条的宽度, \meta{draw} 用于设置线条的颜色, \meta{dash} 用于设置线条是否为虚线.
+  \textbf{注意}: 目前 \meta{dash} 选项还未适配, 处于不可用的状态.
+\end{keyval}
+
+
+\begin{function}[added=2025-05-13]{\zvector}
+  \begin{syntax}
+    \cs{zvector} \oarg{key-value}\parg{coor-1}\parg{coor-2}
+  \end{syntax}
+  此命令用于绘制向量, 该向量的起点为 \meta{coor-1}, 终点为 \meta{coor-2};
+  \meta{key-value} 用于设置该向量的外观属性, 其继承自 \meta{parent=ztool/draw/picture/line}, 
+  其余的可用选项请参见后续 \meta{parent=ztool/draw/picture/line/vector}.  
+\end{function}
+
+
+\begin{keyval}[parent=ztool/../vector]{>}
+  \begin{syntax}
+    \texttt{\char62} = \meta{\textbf{latex}|pst}>\dval{latex}
+  \end{syntax}
+  此选项用于控制箭头的样式, 默认为 \LaTeX{} 样式, 即 \cs{ltxarrows}; 
+  \meta{pst}, 即 PsTricks, 对应于 \cs{pstarrows} 命令.
+\end{keyval}
+
+
+
+\begin{function}[added=2025-05-13]{\zdraw}
+  \begin{syntax}
+    \cs{zdraw} \oarg{key-value}\parg{coor-1}...\parg{coor-n};
+  \end{syntax}
+  此命令将绘制一条从点 \meta{coor-1} 到点 \meta{coor-n} 的折线段, \meta{key-value} 继承自 \meta{parent=ztool/draw/picture/line}, 
+  可以用于设置线条的属性, 额外可用的选项请参见后续的 \meta{parent=ztool/draw/picture/zdraw}.\par 
+  \textbf{注意}: 此命令末尾的 ``;'' 是不能省略的, 否则会报错. 
+\end{function}
+
+
+\begin{keyval}[parent=ztool/../zdraw]{vector, cycle, fill, shift}
+  \begin{syntax}
+    vector = \meta{\textbf{false}|true}>\dval{false}
+    cycle  = \meta{\textbf{false}|true}>\dval{false}
+    fill   = \meta{\textbf{false}|true|颜色}>\dval{false}
+    shift  = \marg{浮点数, 浮点数}>\dval{\{0, 0\}}
+  \end{syntax}
+  当 \meta{fill} 设置为 \texttt{true} 时, \meta{cycle} 会自动设置为 \texttt{true}; 
+  \meta{vector} 用于设置是否将每一个子线段替换为向量. \meta{shift} 分别表示 $x$ 和 $y$ 方向的偏移量. 
+  \textbf{注意}: \meta{shift} 选项中的 \texttt{\{\}} 不能省略.
+\end{keyval}
+
+
+\begin{function}[added=2025-05-13]{\zarc}
+  \begin{syntax}
+    \cs{zarc}\oarg{key-value}\parg{浮点数, 浮点数}
+  \end{syntax}
+  此命令用于绘制一个圆弧, \texttt{\parg{浮点数, 浮点数}} 为其圆心, 默认绘制 $\frac{1}{4}$ 圆弧; 
+  \meta{key-value} 继承自 \meta{parent=ztool/draw/picture/line}, 
+  可以用于设置线条的属性, 额外可用的选项请参见后续的 \meta{parent=ztool/draw/picture/zarc}.
+\end{function}
+
+
+\begin{keyval}[parent=ztool/../zarc]{radius, start, end, fill}
+  \begin{syntax}
+    radius = \meta{浮点数}>\dval{.5}
+    start  = \meta{浮点数}>\dval{0}
+    end    = \meta{浮点数}>\dval{90}
+    fill   = \meta{\textbf{false}|true|颜色}>\dval{false}
+  \end{syntax}
+  \meta{start} 按照逆时针旋转到角度 \meta{end} 结束; \meta{radius} 为圆弧的半径;
+  \meta{fill} 用于设置圆弧的填充颜色.
+\end{keyval}
+
+
+\begin{function}[added=2025-05-13]{\zcircle}
+  \begin{syntax}
+    \cs{zcircle}\oarg{key-value}\parg{浮点数, 浮点数}
+  \end{syntax}
+  此命令基于上述的 \cs{zarc} 命令, 默认情况下将以 \texttt{\parg{浮点数, 浮点数}} 为圆心绘制一个完整的圆;
+  \meta{key-value} 和上述的 \cs{zrac} 命令中的 \meta{key-value} 选项相同,
+\end{function}
+
+
+\begin{function}[added=2025-05-13]{\zrectangle}
+  \begin{syntax}
+    \cs{zrectangle}\oarg{key-value}\parg{coor-1}\parg{coor-2}
+  \end{syntax}
+  此命令用于绘制矩形, \texttt{\parg{coor-1}} 和 \texttt{\parg{coor-2}} 为矩形对角线的两个端点坐标;
+  \meta{key-value} 继承自 \meta{parent=ztool/draw/picture/line}, 其余的 \meta{key-value} 
+  请参见后续 \meta{parent=ztool/draw/picture/zrectangle}.
+\end{function}
+
+
+\begin{keyval}[parent=ztool/../zrectangle]{arc, fill}
+  \begin{syntax}
+    arc  = \meta{浮点数}>\dval{0}
+    fill = \meta{\textbf{false}|true|颜色}>\dval{false}
+  \end{syntax}
+  \meta{fill} 用于设置矩形的填充颜色, \meta{arc} 用于设置矩形圆角对应的半径.
+\end{keyval}
+
+
+\newpage
+下面给出一些绘图示例, 方便读者理解上述绘图命令的基本使用方法:
+\begin{DocExample}*
+\mbox{}\vskip2em
+\begin{zpic}[unit=2em]
+  \zdraw[fill, cycle] (0, 0)(1, 0)(1, 1)(0, 1);
+  \zdraw[cycle, shift={2, 0}] (0, 0)(1, 0)(1, 1)(0, 1);
+  \zdraw[fill, shift={4, 0}] (0, 0)(1, 0)(1, 1)(0, 1);
+  \zdraw[draw=red, width=1pt, shift={6, 0}] (0, 0)(1, 0)(1, 1)(0, 1);
+  \zdraw[vector, shift={8, 0}] (0, 0)(1, 0)(1, 1)(0, 1);
+  \zdraw[vector, cycle, shift={10, 0}] (0, 0)(1, 0)(1, 1)(0, 1);
+  \zdraw[vector, fill, shift={12, 0}] (0, 0)(1, 0)(1, 1)(0, 1);
+  \zdraw[vector, cycle, fill, shift={14, 0}] (0, 0)(1, 0)(1, 1)(0, 1);
+\end{zpic}
+
+\vskip2cm
+\begin{zpic}[unit=2cm, xoffset=2]
+  % 1. rectangle
+  \zrectangle[arc=.1, fill=gray!20](0, 0)(2, 1)
+  \zrectangle[draw=green, width=1pt](.5, .25)(1.5, .75)
+  % 2. line / vecter
+  \zline[width=3pt, draw=red](0, .5)(2, .5)
+  \zvector[>=pst](0, 0)(1, 1)
+  \zvector[draw=blue, width=2pt](1, 1)(2, 0)
+  % 3. arc / circle
+  \zarc[draw=blue, end=45](0, 0) % fill=<empty>
+  \zarc[draw=blue, width=2pt, end=15, fill=, draw=red](0, 0)
+  \zcircle[radius=.25, fill, draw=purple](1, .5)
+  \zcircle[radius=.25, fill=orange, draw=none](1.5, 1)
+  \zcircle[radius=.25, fill=red, draw=](2, .5)
+\end{zpic}
+\end{DocExample}
+
+
+\clearpage
 \section{TODO}
-\ztex{} 的开发还远远没有结束，还有很多功能需要完善，这里列出部分将来可能会完善的功能:
-\begin{enumerate}
-  \item 封装 \pkg{geometry} 宏包的相关接口，使得用户可以通过 \ztex{} 的接口来设置页面布局.
-  \item 在独立实现 \pkg{titlesec} 和 \pkg{titletoc} 之前，先暂时把这两个宏包的接口封装一下，放入 \ztex{} 中.
+\ztex{} 的开发还远远没有结束，还有很多功能需要完善，这里列出部分将来可能会完善的功能%
+(\undone{} -- 未完成; \done{} -- 已完成; \wontfix{} -- 不考虑该功能):
+
+
+\let\olditem\item
+\RenewDocumentCommand{\item}{so}
+  {
+    \IfValueTF{#2}
+      {\color{black}\def\checkmark{\IfBooleanTF{#1}{\wontfix}{\done}}% 
+        \olditem\IfBooleanTF{#1}{(#2)}{\IfValueT{#2}{#2-}已完成:}\color{gray}}
+      {\color{black}\def\checkmark{\IfBooleanTF{#1}{\wontfix}{\undone}}%
+        \olditem}
+  }
+\begin{todolist}
+  \item 封装 \pkg{geometry} 宏包的相关接口，使得用户可以通过 \ztex{} 的接口来设置页面布局和纸张大小等参数.
+  \item*[直接使用 \CusTeX{} 中的 \pkg{struct} 模块] 在独立实现 \pkg{titlesec} 和 \pkg{titletoc} 之前，先暂时把这两个宏包的接口封装一下，放入 \ztex{} 中.
   \item 使用 new marker mechanism 来实现 \pkg{fancyhdr} 的相关功能.
-  \item 2025-04-27-已完成:\textcolor{gray}{自定义 \env{syntax} 环境，用于排版代码. (比如给出相关命令的 \meta{key} 或 \meta{key} 的默认值)}.
-  \item 把自己修改的那个 Euler Math 变体配置进 \ztex{}, 命名为 vareuler, 然后把相关配置写入 \pkg{fontcfg} module.
+  \item [2025-04-27] 自定义 \env{syntax} 环境，用于排版代码. (比如给出相关命令的 \meta{key} 或 \meta{key} 的默认值).
+  \item [2025-05-12] 把自己修改的那个 Euler Math 变体配置进 \ztex{}, 命名为 \texttt{var-euler}, 然后把相关配置写入 \pkg{fontcfg} module.
   \item 给 \cs{zpagemask} 命令增加一个 \meta{transparent} key 以适配不同的对象(文本，图片)以及引擎.
-  \item 2025-02-04-已完成:\textcolor{gray}{添加一个证明类环境的 \cs{ztexThmProofTitileFormat} 接口, 用于设置证明类环境的标题格式.}
+  \item [2025-02-04] 添加一个证明类环境的 \verb|\zthmProofTitileFormat| 接口, 用于设置证明类环境的标题格式.
   \item 完善 Metropolis zslide 主题, 实现 zslide 中的 \cs{zslidethemeuse} 和 \cs{zslideColorUse} 接口, 包括二者的自由组合.
-  \item 添加一个真正的 \cs{zslideframeall} 命令, 并把现在的 \cs{zslideframeall} 命令重命名为 \cs{zslideFrameSecTotal}.
-  \item 2025-04-22-已完成:\textcolor{gray}{完善 \pkg{thm} module 的 icon 接口(类似 Elegant\LaTeX{} 系列), 但此接口仅在用户加载 \pkg{theme} library 时才可用.}
-  \item 2025-04-22-已完成:\textcolor{gray}{完善 \pkg{thm} module 中 \texttt{paris} 主题的分页样式.} 
-  \item 使用 \pkg{ztool} 缩放 \pkg{thm} module 中 \texttt{obsidian} 样式标题中的 icon.
+  \item*[使用 \cs{thepage} 命令足矣] 添加一个真正的 \cs{zslideframeall} 命令, 并把现在的 \cs{zslideframeall} 命令重命名为 \cs{zslideFrameSecTotal}.
+  \item [2025-04-22] 完善 \pkg{thm} module 的 icon 接口(类似 Elegant\LaTeX{} 系列), 但此接口仅在用户加载 \pkg{theme} library 时才可用.
+  \item [2025-04-22] 完善 \pkg{thm} module 中 \texttt{paris} 主题的分页样式. 
+  \item [2025-05-12] 使用 \pkg{ztool} 缩放 \pkg{thm} module 中 \texttt{obsidian} 样式标题中的 icon.
   \item 重新实现部分的 \pkg{xcoffins} 宏包中的命令, 目标为: 实现 \cs{parbox} 的功能，并且比之更加的易用.
   \item 封装 Plain\TeX{} 中的 \cs{parshape} 及其相关命令，使之更加的易用.
   \item 封装 \cmd{\lastbox} 相关命令, 实现段落的分割和盒子的跨页需求.
-  \item 在实现跨页盒子的基础上，手动实现 \pkg{framed} 宏包的功能，在替代该宏包原有功能的基础上, 提供更加易用的接口.
-  \item 增加一个基于任意变换矩阵的盒子(内容)操作命令, 也许是依赖 \pkg{l3draw} ?? 或许增加一个 \cs{ztool_set_to_wd_ht:nnn} 或 \cs{ztool_set_wd_ht_plus_dp:nnnn} 命令 ???
+  \item*[使用 \CusTeX{} 中的 \pkg{framedmulticol} 宏包] 在实现跨页盒子的基础上，手动实现 \pkg{framed} 宏包的功能, 在替代该宏包原有功能的基础上, 提供更加易用的接口.
+  \item [2025-05-12] 增加一个基于任意变换矩阵的盒子(内容)操作命令, 也许是依赖 \pkg{l3draw} ?? 或许增加一个 \cs{ztool_set_to_wd_ht:nnn} 或 \cs{ztool_set_wd_ht_plus_dp:nnnn} 命令 ???
   \item 提供列表设置的相关命令, 目标是成为宏包 \pkg{enumerate} 的一个可选替代. (直接从原始的 \env{list} 环境出发 ?? 未来会把这部分命令抽离到一个新的单独模块)
-  \item 在 \pkg{pageinfo} 中实现一个增强的 \cs{marginpar} 命令, 目的是成为 \pkg{sidenotes} 宏包的一个可选替代.
+  \item 在 \pkg{page} 模块中实现一个增强的 \cs{marginpar} 命令, 目的是成为 \pkg{sidenotes} 宏包的一个可选替代.
   \item 实现 \cs{hyper@icon} 接口, 用于设置文档中的超链接图标. (没有 icon 的超链接未免过于单调)
-  \item 2025-02-05-已完成:\textcolor{gray}{优化 module 和 library 的加载检测机制, 完善相关变量的检测设置, 如在 \pkg{alias} 这一 library 中将变量 
-        \cs{g__ztex_math_alias_bool} 显示的设置为 \texttt{true}.}
-  \item 2025-04-20-已完成:\textcolor{gray}{创建 \cs{zaliasOn}, \cs{zaliasOff} 两命令用于限制 \pkg{alias} library 中命令的使用范围.}
-  \item 在部分 \ztex{} 内置命令的实现中增加 \cs{__ztex_plus_key_aux:nnn} 命令，用于在保留原内容的基础上增加内容.
-  \item 修复 \cs{zthmtocadd} 增加的定理条目超链接跳转异常这一问题.
-  \item 2025-04-28-已完成:\textcolor{gray}{增加分散对齐命令 \cmd{\zboxitemalign}}.
-  \item 2025-04-28-已完成:\textcolor{gray}{重新制作 \ztex* 的 logo.}
-  \item 增加 \cs{appmatter} 和 \cs{backmatter} 的定义.
+  \item [2025-02-05] 优化 module 和 library 的加载检测机制, 完善相关变量的检测设置, 如在 \pkg{alias} 这一 library 中将变量 \cs{g__ztex_math_alias_bool} 显示的设置为 \texttt{true}.
+  \item [2025-04-20] 创建 \cs{zaliasOn}, \cs{zaliasOff} 两命令用于限制 \pkg{alias} library 中命令的使用范围.
+  \item [2025-05-12] 在部分 \ztex{} 内置命令的实现中增加 \cs{__ztex_plus_key_aux:nnn} 命令，用于在保留原内容的基础上增加内容.
+  \item [2025-05-12] 修复 \cs{zthmtocadd} 增加的定理条目超链接跳转异常这一问题.
+  \item [2025-04-28] 增加分散对齐命令 \cmd{\zboxitemalign}.
+  \item [2025-04-28] 重新制作 \ztex* 的 logo.
+  \item [2025-05-12] 增加 \cs{appmatter} 和 \cs{backmatter} 的定义.
   \item 增加默认的 CMR 和 CMM 字体的定义，用于切换回默认字体.
   \item 考虑西文字体的所有 Font Feature, 然后将其加入到 \pkg{font} 模块.
   \item 修复 \texttt{font/doc} 这个键内的配置在 \hologo{XeTeX} 下的适配问题.
-  \item 在 \pkg{slide} 库中增加和 \cls{beamer} 中类似的 \cmd{step} 命令; 更进一步, 在 \pkg{slide} 库中实现动画接口.
+  \item 在 \pkg{slide} 库中增加类似 \cs{step}, \cs{pause} 这样的 \cls{beamer} 命令; 
+  \item*[此需求不适合 \ztex{}] 更进一步, 在 \pkg{slide} 库中实现动画接口.
   \item 在 \pkg{font} 模块中配置 \pkg{unicode-math} 宏包的相关命令.
-\end{enumerate}
+  \item [2025-05-09] 修复 slide 下 section 标题文本基线在 \meta{lang}\texttt{=en/cn} 下无法同时垂直对齐的问题. 
+  \item*[此为中英文字体本身的问题] 修复 slide 模式下当 section 标题为中英混排时基线不一致的问题.
+  \item (\textbf{难})增加浮动体控制相关的接口.
+  \item (\textbf{难})增加 output routine 相关的操作接口.
+  \item 部分 \cs{ztex_label_hook_preamble_last} 或 \cs{ztex_hook_preamble_last} 存在滥用的情况, 需要清理.
+  \item 实现部分直接操作 PDF 的接口, 比如 OCG, 图层/蒙版, 亦或者是透明度之类的, 可以参考 PDF Reference Manual. 
+  \item [2025-05-12] 针对同一个仿射变换矩阵, 比如 $\Lambda=\{1\ 0\ .5\ 1\}$ 时, \cs{ztoolboxaffine} 和 \cs{pdfsetmatrix} 的输出不一致; 但是当 $\Lambda=\{1\ 0\ 1\ 1\}$ 时, 二者的结果是一致的; 什么原因呢 ? 似乎是基本单位不一致 ? 
+  \item [2025-05-15] \texttt{.initial:n} 在 \texttt{.inherit:n} 后会报错, 需要修复.
+  \item 部分引擎对应的 primitive 的封装, 比如 \hologo{pdfTeX} 中的 \cmd{\pdfsetmatrix}, \hologo{XeTeX} 中的 \cmd{\ifprimitive} 等.
+  \item \cmd{\special} 命令的介绍(或者是封装) ?
+  \item 能否定义一个完全可展的 token replace 命令, 在文件读写过程中可能会有用.
+  \item 实现类似 Python 中那样的自定义命令接口 -- 关键点为参数类型标注以及默认值标注, 似乎用 \pkg{xtemplate} 也能做 ?
+  \item 实现类似 \pkg{luacode} 或 \pkg{pythontex} 宏包所提供命令类似的接口, 统一管理这一系列的 shell escape. 
+\end{todolist}
 
 
 

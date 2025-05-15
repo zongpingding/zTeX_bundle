@@ -264,6 +264,10 @@ representation of, as far as I know, the things in themselves;}
     \newpage
     \subsection{Library}
     \inputZTeXSource[library]{fancy, alias, slide, thm}
+
+    \newpage
+    \subsection{ztool}
+    \inputminted{latex}{../../ztool/code/ztool.sty}
   }
 }
 
@@ -317,3 +321,18 @@ representation of, as far as I know, the things in themselves;}
   \clist_use:Nn \l_tmpa_clist {,~}
 }
 \ExplSyntaxOff
+
+
+% todo list
+% REF: https://tex.stackexchange.com/q/247681/294585
+% syntax:
+%     *: wont fix
+%     [<arg>]: done
+%     [<blank>]: undone
+\usepackage{enumitem}
+\newlist{todolist}{itemize}{2}
+\setlist[todolist]{label=\checkmark}
+\usepackage{amssymb}
+\newcommand{\done}{\rlap{\raisebox{0.3ex}{\hspace{0.4ex}\tiny \ding{52}}}$\square$}
+\newcommand{\undone}{$\square$}
+\newcommand{\wontfix}{\rlap{\raisebox{0.3ex}{\hspace{0.4ex}\scriptsize \ding{56}}}$\square$}

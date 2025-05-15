@@ -1,4 +1,4 @@
-\ProvidesExplFile{ztex.module.ref.tex}{2025/04/29}{1.0.1}{ref~module~for~ztex}
+\ProvidesExplFile{ztex.module.ref.tex}{2025/05/12}{1.0.1}{ref~module~for~ztex}
 
 
 %%%%%     ref module for ztex     %%%%%
@@ -13,7 +13,7 @@
 }
 \bool_if:NT \g__ztex_hyperref_bool {
   \RequirePackage{hyperref}
-  \SetLinkTargetFilter{ztex-\jobname-#1}
+  \SetLinkTargetFilter{ztex@\jobname @#1}
 }
 
 
@@ -29,6 +29,12 @@
 \ProvideDocumentCommand\NextLinkTarget{m}{}
 \ProvideDocumentCommand\SetLinkTargetFilter{m}{}
 \ProvideDocumentCommand\texorpdfstring{mm}{#1}
+
+% H-counter set
+\NewDocumentCommand{\zsetHcnt}{mm}
+  {
+    \exp_after:wN \def\cs:w theH #1\cs_end: {#2}
+  }
 
 
 % ==> clever reference for sections, figure and table
