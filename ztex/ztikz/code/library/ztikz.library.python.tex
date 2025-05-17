@@ -1,0 +1,104 @@
+\ProvidesExplFile{ztikz.library.python.tex}{2024/12/17}{1.0.0}{python~library~for~ztikz}
+
+
+
+% ==> writing scripts
+\RequirePackage{xsimverb}
+\__ztikz_load_library:n {pyscript}
+\ztool_shell_mkdir:n {ztikz_output/python_data/}
+\tl_const:Nn \g__ztikz_python_path_tl   {ztikz_output/python_data} 
+\ior_new:N \g__file_read_ior
+\tl_new:N \g__file_content_tl
+\int_new:N \g__sympy_index_int
+\int_new:N \g__python_picture_index_int
+\int_gadd:Nn \g__python_picture_index_int {1}
+
+
+% ==> core functions  
+\cs_new_protected:Npn \zlatex_Readlines_cs:nn #1#2 
+{
+  \ior_open:Nn \g__file_read_ior {#2}
+  \str_case:nnF {#1}{
+    {raw}{
+      \ior_get:NN \g__file_read_ior \g__file_content_tl
+    }
+    {str}{
+      \ior_str_get:NN \g__file_read_ior \g__file_content_tl
+    }
+  }{}
+  \tl_use:N \g__file_content_tl
+}
+\cs_generate_variant:Nn \zlatex_Readlines_cs:nn {ee}
+\cs_generate_variant:Nn \xsim_file_write_start:nn {ne}
+
+
+% ==> users' interface
+% python-matplotlib
+\NewDocumentEnvironment{pyfig}{ O{width=.75\linewidth}m }
+  {
+    \newcommand{\py@file}{#2}
+    \xsim_file_write_start:ne {\c_true_bool}{\g__ztikz_python_path_tl/\py@file}
+  }{ 
+    \xsim_file_write_stop:   
+    \ztikz_hash_if_change:neTF {\c_true_bool}{\g__ztikz_python_path_tl/\py@file}   
+      {
+        \ztool_append_to_file:nn {\g__ztikz_python_path_tl/\py@file} 
+          {
+            plt.savefig('\g__ztikz_python_path_tl/\py@file.pdf')
+          }
+        \ztool_shell_escape:e {python~ \g__ztikz_python_path_tl/\py@file} 
+        \includegraphics[#1]{\g__ztikz_python_path_tl/\py@file.pdf}
+        \ztikz_term_info:e {Writing~ 'pyfig'~environment~source~to~\g__ztikz_python_path_tl/\py@file}
+      }{
+        \includegraphics[#1]{\g__ztikz_python_path_tl/\py@file.pdf}
+        \ztikz_term_info:e {skip~recompile~by~python,~using~the~cache~picture~\int_use:N \g__python_picture_index_int}
+      }
+    \int_gadd:Nn \g__python_picture_index_int {1}
+  }
+% inline python command
+\NewDocumentCommand\py{O{raw}m}
+  {
+    \__ztikz_sed_script:nne {python_script.py}{6}{Float_res~=~\tl_to_str:n {#2}}
+    \ztikz_term_info:e {using~python~float~module~calculating...}
+    \ztool_shell_escape:e {python~ \g__ztikz_scripts_path_tl/python_script.py}
+    \zlatex_Readlines_cs:ee {#1}{\g__ztikz_python_path_tl/PyFloat.out}
+    % ---> cause bug that can't write ToC to file
+    % \cs{iow_close:N} \cs{g__file_read_ior} leads to bug ??
+  }
+% python-sympy
+\NewDocumentCommand\sympy{m}
+  {
+    \int_gadd:Nn \g__sympy_index_int {1}  
+    \tl_set:Ne \l__current_sympy_index_tl {\int_use:N \g__sympy_index_int}
+    \__ztikz_sed_script:nne {sympy_script.py}{8}{F_res~=~\tl_to_str:n {#1}}
+    \ztikz_hash_if_change:neTF {\c_true_bool}{\g__ztikz_scripts_path_tl/sympy_script.py}
+      {
+        \ztool_shell_escape:e {python~ \g__ztikz_scripts_path_tl/sympy_script.py}
+        \ztool_shell_mv:ee
+          {\g__ztikz_python_path_tl/sympy.out}
+          {\g__ztikz_python_path_tl/sympy_\int_use:N \g__sympy_index_int .out}
+        \ztikz_term_info:e {using~python~sympy~calculating~question~\l__current_sympy_index_tl ...}
+        \exp_args:Ne \input{\g__ztikz_python_path_tl/sympy_\l__current_sympy_index_tl.out}
+      }{
+        \exp_args:Ne \input{\g__ztikz_python_path_tl/sympy_\l__current_sympy_index_tl.out}
+        \ztikz_term_info:e {skip~recompile,~using~the~cache~sympy~result~\l__current_sympy_index_tl}
+      }
+  }
+% python-code-env
+\NewDocumentEnvironment{pycode}{ m }
+  {
+    \newcommand{\py@file}{#1}
+    \xsim_file_write_start:ne {\c_true_bool}{\g__ztikz_python_path_tl/#1}
+  }{ 
+    \xsim_file_write_stop: 
+    \ztikz_hash_if_change:neTF {\c_true_bool}{\g__ztikz_python_path_tl/\py@file}   
+      {
+        \ztool_shell_escape:e {python~ \g__ztikz_python_path_tl/\py@file} 
+        \input{\g__ztikz_python_path_tl/\py@file.out}
+        \ztikz_term_info:e {Writing~ 'pycode'~environment~source~to~\g__ztikz_python_path_tl/\py@file}
+      }{
+        \input{\g__ztikz_python_path_tl/\py@file.out}
+        \ztikz_term_info:e {skip~recompile~by~python,~using~the~cache~pycode~result~\int_use:N \g__python_picture_index_int}
+      }
+    \int_gadd:Nn \g__python_picture_index_int {1}  
+  }

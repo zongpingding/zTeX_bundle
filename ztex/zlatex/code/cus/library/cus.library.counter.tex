@@ -1,0 +1,196 @@
+\CUSDependency{ disable={perpage} }
+\CUSProvideExplLibrary{counter}{\cus@d@te}{\cus@versi@n}{counter misc}
+
+\cs_new_nopar:Npn \@fwarabic { \cus_int_to_fw_arabic:n }
+\cs_new_nopar:Npn \@fwalph { \cus_int_to_fw_alph:n }
+\cs_new_nopar:Npn \@fwAlph { \cus_int_to_fw_Alph:n }
+\cs_new_protected_nopar:Npn \fwarabic #1 { \@fwarabic { \csname c@#1\endcsname } }
+\cs_new_protected_nopar:Npn \fwalph #1 { \@fwalph { \csname c@#1\endcsname } }
+\cs_new_protected_nopar:Npn \fwAlph #1 { \@fwAlph { \csname c@#1\endcsname } }
+\cs_new_nopar:Npn \@twodigits #1
+  {
+    \__cus_expanded:w 
+      {
+        \if_int_compare:w \int_eval:w #1 < 10 \exp_stop_f: 0 \fi:
+        \int_eval:n {#1}
+      }
+  }
+\cs_new_nopar:Npn \ensuretwodigits #1 { \@twodigits { \csname c@#1\endcsname } }
+\cs_new_nopar:Npn \@threedigits #1
+  {
+    \__cus_expanded:w 
+      {
+        \if_int_compare:w \int_eval:w #1 < 100 \exp_stop_f: 0 \fi:
+        \if_int_compare:w \int_eval:w #1 < 10  \exp_stop_f: 0 \fi:
+        \int_eval:n {#1}
+      }
+  }
+\cs_new_nopar:Npn \ensurethreedigits #1 { \@threedigits { \csname c@#1\endcsname } }
+\cs_new_nopar:Npn \@fourdigits #1
+  {
+    \__cus_expanded:w 
+      {
+        \if_int_compare:w \int_eval:w #1 < 1000 \exp_stop_f: 0 \fi:
+        \if_int_compare:w \int_eval:w #1 < 100  \exp_stop_f: 0 \fi:
+        \if_int_compare:w \int_eval:w #1 < 10   \exp_stop_f: 0 \fi:
+        \int_eval:n {#1}
+      }
+  }
+\cs_new_nopar:Npn \ensurefourdigits #1 { \@fourdigits { \csname c@#1\endcsname } }
+
+\cus_pkg_code:nnn { enumitem } { }
+  {
+    \AddEnumerateCounter*{\fwarabic}{\@fwarabic}{1}
+    \AddEnumerateCounter*{\fwAlph}{\@fwAlph}{1}
+    \AddEnumerateCounter*{\fwalph}{\@fwalph}{1}
+    \AddEnumerateCounter*{\ensuretwodigits}{\@arabic}{99}
+  }
+
+
+\cs_new_protected_nopar:Npn \IfIsCounterTF #1#2#3
+  {
+    \cs_if_exist:cTF { c@ #1 } 
+      {
+        \group_begin:
+        \cs_gset:Npx \__cus_tmp_next:w { \exp_not:n {#3} }
+        \cs_set_eq:cN { c@ #1 } \IfIsCounterTF 
+        \cs_set:Npn \@elt ##1 
+          { 
+            \exp_after:wN \if_meaning:w \cs:w c@##1 \cs_end: \IfIsCounterTF 
+              \cs_gset:Npx \__cus_tmp_next:w { \exp_not:n { #2 } }
+              \exp_after:wN \use_none_delimit_by_s_stop:w
+            \fi:
+          }
+        \cl@@ckpt \s_stop 
+        \group_end:
+        \__cus_tmp_next:w 
+      }
+      {#3}
+  }
+
+
+%% package: xassoccnt??
+
+\tl_new:N \record@totalcounters 
+\cs_new_protected_nopar:Npn \RecordTotalCounters #1
+  {
+    \clist_map_inline:nn {#1}
+      {
+        \str_if_eq:eeF {#1} { page }
+          {
+            \int_if_exist:cF { c@@totalcounter@##1 }
+              {
+                \cs_gset_eq:cN { thetotal #1 s } \scan_stop:
+                \int_new:c { c@@totalcounter@##1 }
+                \tl_put_right:Nn \record@totalcounters { \@elt {##1} }
+              }
+          }
+      }
+  }
+\@onlypreamble\RecordTotalCounters
+\cs_new_protected:Npn \record@totalcounter@set #1
+  {
+    \cs_if_exist:cTF { thetotal #1 s }
+      { 
+        \cs_gset_nopar:cpx { thetotal #1 x } 
+          { \exp_not:c { thetotal #1 s } \exp_not:N \totalcount@xspace }
+      }
+      { 
+        \cs_gset_nopar:cpx { thetotal #1 x }
+          { 0 \exp_not:N \totalcount@xspace }
+      }
+  }
+\cus_hook_gput_ae:n 
+  {
+    \group_begin:
+    \cs_set_eq:NN \@elt \record@totalcounter@set 
+    \record@totalcounters 
+    \group_end:
+  }
+\cus_pkg_code:nnn { xspace } 
+  { \cs_new_eq:NN \totalcount@xspace \prg_do_nothing: }
+  { \cs_gset_nopar:Npn \totalcount@xspace { \xspace } }
+\cs_new_protected:Npn \totalcounter@step #1
+  { \int_if_exist:cT { c@@totalcounter@#1 } { \int_gadd:cn { c@@totalcounter@#1 } { \value{#1} } } }
+\cs_new_nopar:Npn \IfRecordTotalCounterTF #1#2#3
+  {
+    \int_if_exist:cTF { c@@totalcounter@#1 }
+      { \cs_if_exist:cTF { thetotal #1 s } {#2} {#3} }
+      {#3}
+  }
+\cs_set:Npn \__cus_tmp:w #1
+  {
+    \cus_hook_gput_ds:n
+      {
+        \ctex_preto_cmd:NnnTF \@stpelt { \ExplSyntaxOff \makeatletter }
+          { \totalcounter@step {#11} }
+          { } { \cus_patch_failure:N \@stpelt }
+      }
+  }
+\exp_after:wN \__cus_tmp:w \c_hash_str
+\cs_new:Npn \record@totalcounter@write #1
+  {
+    \iow_now:Nx \@auxout 
+      { 
+        \token_to_str:N \global \token_to_str:N \@namedef { thetotal #1 s } 
+          { \int_use:c { c@@ totalcounter @ #1 } } 
+      }
+  }
+\cus_hook_gput_de:n 
+  { 
+    \cus_hook_gput_lp:n 
+      { 
+        \group_begin:
+        \cs_set:Npn \@elt #1 { \totalcounter@step {#1} }
+        \record@totalcounters 
+        \cs_set_eq:NN \@elt \record@totalcounter@write 
+        \record@totalcounters 
+        \group_end:
+      } 
+  }
+
+
+\hook_gput_code:nnn { shipout/after } { cus/reset } 
+  { \cus_toks_use:N \g__cus_page_reset_int_toks }
+\cus_toks_new:N \g__cus_page_reset_int_toks
+\cs_new_protected_nopar:Npn \cus_gput_page_reset_int:nn #1#2 % int, init value 
+  {
+    \tl_map_inline:nn {#1}
+      {
+        \token_if_int_register:NTF ##1
+          {
+            \cus_toks_gput_right:Nn \g__cus_page_reset_int_toks
+              { \int_gset:Nn ##1 {#2} }
+          }
+          { \msg_warning:nnx { cus } { unknown-counter-count } { \token_to_str:N ##1 } }
+      }
+  }
+\cs_new_protected_nopar:Npn \cus_gput_page_reset_counter:nn #1#2 % int, init value 
+  {
+    \clist_map_inline:nn {#1}
+      {
+        \IfIsCounterTF {##1}
+          {
+            \cus_toks_gput_right:Ne \g__cus_page_reset_int_toks
+              { 
+                \exp_not:N \@stpelt {##1}
+                \int_gadd:Nn \exp_not:c { c@ ##1 } {#2} 
+              }
+          }
+          {
+            \exp_args:Nc \token_if_int_register:NTF { c@##1 }
+              { 
+                \cus_toks_gput_right:Ne \g__cus_page_reset_int_toks 
+                  { \int_gset:Nn \exp_not:c { c@ ##1 } {#2} }
+              }
+              { \msg_warning:nnn { cus } { unknown-counter-count } {##1} }
+          }
+      }
+  }
+\NewDocumentCommand \MakePerPage { s O{\c_zero_int} m }
+  { 
+    \IfBooleanTF {#1} 
+      { \cus_gput_page_reset_int:nn } 
+      { \cus_gput_page_reset_counter:nn } 
+        {#3} {#2} 
+  }

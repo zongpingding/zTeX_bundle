@@ -1,0 +1,32 @@
+\CUSDependency{package={amsmath}}
+\CUSProvideExplLibrary{math}{\cus@d@te}{\cus@versi@n}{typeset math}
+
+%% hacking everymath and everydisplay
+\cus_toks_new:N \cus@everyinlinemath
+\cus_toks_new:N \cus@everydisplaymath
+\cus_toks_gput_right:Nn \frozen@everymath { \the\cus@everyinlinemath }
+\cus_toks_gput_right:Nn \frozen@everydisplay { \the\cus@everydisplaymath }
+%%
+
+\cs_new_protected_nopar:Npn \cus_left: { \mathopen{}\mathclose\bgroup\left }
+\cs_new_protected_nopar:Npn \cus_right: { \aftergroup\egroup\right }
+\cs_new_protected_nopar:Npn \delsizel #1
+  { \__cus_bigsize:fNNn { (#1)/1.2 } \cus_left: \mathopen }
+\cs_new_protected_nopar:Npn \delsizer #1
+  { \__cus_bigsize:fNNn { (#1)/1.2 } \cus_right: \mathclose }
+\cs_new_protected_nopar:Npn \delsizem #1
+  { \__cus_bigsize:fNNn { (#1)/1.2 } \middle \mathrel }
+\cs_new_protected_nopar:Npn \bigsizel #1
+  { \__cus_bigsize:fNNn {#1} \cus_left: \mathopen }
+\cs_new_protected_nopar:Npn \bigsizer #1
+  { \__cus_bigsize:fNNn {#1} \cus_right: \mathclose }
+\cs_new_protected_nopar:Npn \bigsizem #1
+  { \__cus_bigsize:fNNn {#1} \middle \mathrel }
+\cs_new_nopar:Npn \__cus_bigsize:nNNn #1#2#3#4
+  {
+    \dim_compare:nNnTF { #1 pt } > { \c_zero_dim }
+      { #3 { \bBigg@ {#1} {#4} } }
+      { \dim_compare:nNnT { #1 pt } = { \c_zero_dim } {#2} #4 }
+  }
+\cs_new_protected:Npn \__cus_bigsize:fNNn #1
+  { \exp_args:Nf \__cus_bigsize:nNNn { \fp_eval:n {#1} } }

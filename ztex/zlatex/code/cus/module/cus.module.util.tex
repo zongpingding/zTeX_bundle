@@ -1,0 +1,2149 @@
+\CUSProvideExplModule{util}{\cus@d@te}{\cus@versi@n}{utilities}
+\cs_generate_variant:Nn \tl_count:n { e , f }
+\cs_generate_variant:Nn \tl_show:n { e , o }
+\cs_generate_variant:Nn \tl_head:n { e , f }
+\cs_generate_variant:Nn \tl_to_str:n { e , f }
+\cs_generate_variant:Nn \cs_argument_spec:N { c }
+\cs_generate_variant:Nn \keys_set:nn { ne }
+\cs_generate_variant:Nn \prop_item:Nn { Ne }
+\cs_generate_variant:Nn \tl_if_empty:nTF { e, f }
+\cs_generate_variant:Nn \seq_set_split:Nnn { c }
+\cs_generate_variant:Nn \keyval_parse:nnn { nno }
+
+\cs_new_eq:NN \g__cus_map_int \g_elkernel_prg_map_int
+\cs_new_eq:NN \__cus_do_nothing: \prg_do_nothing:
+
+\cs_new:Npn \cus_clist_item_first:n #1
+  { \__cus_clist_item_first_aux:w \__cus_do_nothing: #1 , { } , \s__cus_stop }
+\cs_new:Npn \__cus_clist_item_first_aux:w #1 ,
+  {
+    \exp_args:No \tl_if_empty:nTF {#1}
+      { \__cus_clist_item_first_aux:w \__cus_do_nothing: }
+      { \__cus_clist_item_end:n {#1} }
+  }
+\cs_new:Npn \__cus_clist_item_end:n #1 #2 \s__cus_stop
+  { \__cus_unexpanded:w \exp_after:wN {#1} }
+\cs_new:Npn \cus_clist_item_first:N #1
+  { \exp_after:wN \cus_clist_item_first:n \exp_after:wN {#1} }
+\cs_new:Npn \cus_seq_item_first:N #1
+  { \exp_after:wN \__cus_seq_item_first_aux:w #1 \__seq_item:n { } \s__cus_stop }
+\cs_new:Npn \__cus_seq_item_first_aux:w \s__seq \__seq_item:n #1 #2 \s__cus_stop
+  { \exp_not:n {#1} }
+
+
+\cs_new_eq:NN \cus@ignorespaces \tex_ignorespaces:D 
+\if_cs_exist:N \ignorepars
+  \cs_new_eq:NN \cus@ignorepars \ignorepars
+\else:
+  \int_new:N \l__cus_ignorepars_int 
+  \cs_undefine:N \l__cus_ignorepars_token 
+  \cs_new:Npn \__cus_ignorepars_reset: 
+    {
+      \cs_undefine:N \l__cus_ignorepars_token 
+      \int_zero:N \l__cus_ignorepars_int 
+    }
+  \cs_new_protected_nopar:Npn \cus_ignorepars:
+    { 
+      \peek_N_type:TF { \__cus_ignorepars:N } 
+        { 
+          \__cus_ignorepars_reset: 
+          \__cus_ignorepars_maybe_outer: 
+        }
+    }
+  \cs_new:Npn \__cus_ignorepars:N #1
+    {
+      \token_case_meaning:NnTF #1
+        {
+          \par { }
+          \@@par { } 
+          % \endgraf { }
+          \para_end: { }
+          \tex_par:D { } % \para_raw_end:
+          \cus_ignorepars: { }
+          % \tex_ignorespaces:D { }
+        }
+        { 
+          \__cus_ignorepars_reset: 
+          \cus_ignorepars:
+        } 
+        { 
+          \bool_lazy_or:nnTF 
+            { \token_if_cs_p:N #1 }
+            { \token_if_active_p:N #1 }
+            {
+              \token_if_eq_meaning:NNTF #1 \l__cus_ignorepars_token 
+                { 
+                  \int_incr:N \l__cus_ignorepars_int
+                  \int_compare:nNnTF \l__cus_ignorepars_int > { 4 }
+                    { \__cus_ignorepars_reset: #1 }
+                    { \exp_after:wN \cus_ignorepars: #1 } 
+                }
+                {
+                  \__cus_ignorepars_reset: 
+                  \cs_set_eq:NN \l__cus_ignorepars_token #1
+                  \cus_ignorepars: #1
+                }
+            }
+            { \__cus_ignorepars_reset: #1 }
+        } 
+    }
+  \cs_new:Npn \__cus_ignorepars_maybe_outer: { \__cus_ignorepars_aux: }
+  \cs_new:Npn \__cus_ignorepars_aux:
+    { \exp_after:wN \cus_ignorepars: \exp:w \exp_end_continue_f:w }
+  \cs_new_eq:NN \cus@ignorepars \cus_ignorepars:
+\fi:
+
+
+\cs_new:Npn \__cus_tl_odd_items:n #1 { \__cus_tl_even_items:n { ? #1 } }
+\cs_new:Npn \__cus_tl_even_items:n #1
+  {
+    \__cus_tl_even_items_loop:nn #1 \q__cus_nil \q__cus_nil
+    \prg_break_point:
+  }
+\cs_new:Npn \__cus_tl_even_items_loop:nn #1#2
+  {
+    \__cus_use_none_delimit_by_q_nil:w #2 \prg_break: \q__cus_nil
+    { \exp_not:n {#2} }
+    \__cus_tl_even_items_loop:nn
+  }
+
+
+\cs_new:Npn \__cus_exp_arg_unbraced:nnn #1#2#3 { #2 \::: { #3 #1 } }
+\cs_new:Npn \::n_un #1 \::: #2#3 { #1 \::: { #2 #3 } }
+\cs_new:Npn \::o_un #1 \::: #2#3
+  { \exp_after:wN \__cus_exp_arg_unbraced:nnn \exp_after:wN {#3} {#1} {#2} }
+\cs_new:Npn \::V_un #1 \::: #2#3
+  { 
+    \exp_after:wN \__cus_exp_arg_unbraced:nnn \exp_after:wN 
+      { \exp:w \__exp_eval_register:N #3 } {#1} {#2}
+  }
+\cs_new:Npn \::v_un #1 \::: #2#3
+  { 
+    \exp_after:wN \__cus_exp_arg_unbraced:nnn \exp_after:wN 
+      { \exp:w \__exp_eval_register:c {#3} } {#1} {#2}
+  }
+\cs_new:Npn \::e_un #1 \::: #2#3
+  { \tex_expanded:D { \exp_not:n { #1 \::: } { \exp_not:n {#2} #3 } } }
+\cs_new:Npn \::f_un #1 \::: #2#3
+  { 
+    \exp_after:wN \__cus_exp_arg_unbraced:nnn \exp_after:wN 
+      { \exp:w \exp_end_continue_f:w #3 } {#1} {#2}
+  }
+\cs_new:Npn \::x_un #1 \::: #2#3
+  {
+    \cs_set_nopar:Npx \l__exp_internal_tl 
+      { \exp_not:n { #1 \::: } { \exp_not:n {#2} #3 } }
+    \l__exp_internal_tl
+  }
+\cs_new:Npn \::d #1 \::: #2#3
+  { 
+    \exp_after:wN \exp_after:wN \exp_after:wN \__exp_arg_next:nnn 
+    \exp_after:wN \exp_after:wN \exp_after:wN {#3} {#1} {#2} 
+  }
+\cs_new:Npn \::d_un #1 \::: #2#3
+  { 
+    \exp_after:wN \exp_after:wN \exp_after:wN \__cus_exp_arg_unbraced:nnn 
+    \exp_after:wN \exp_after:wN \exp_after:wN {#3} {#1} {#2} 
+  }
+\cs_new:Npn \:: #1 \::: #2#3 { \__exp_arg_next:nnn { } {#1} {#2} }
+\cs_new:cpn { ::~ } #1 \::: #2 { \__exp_arg_next:nnn { ~ } {#1} {#2} }
+\cs_new:Npn \::_un #1 \::: #2#3 { \__cus_exp_arg_unbraced:nnn { } {#1} {#2} }
+\cs_new:cpn { ::~_un } #1 \::: #2 { \__cus_exp_arg_unbraced:nnn { ~ } {#1} {#2} }
+
+\cs_new_protected:Npn \__cus_exp_args:nw #1
+  { \__cus_exp_args_aux:Nn { } #1 { : \use_none:n } \exp_end: }
+\cs_new:Npn \__cus_exp_args_aux:Nn #1#2
+  { \exp_after:wN #1 \cs:w :: #2 \__cus_exp_args_aux:Nn \cs_end: }
+\cs_new:Npn \cus_exp_args:nw { \exp:w \__cus_exp_args:nw }
+\cs_new:Npn \cus_exp_args:ew { \exp:w \cus_exp_args:Ne \__cus_exp_args:nw }
+
+\cs_gset:Npn \ExpandArgs #1
+  { 
+    \cs_if_exist_use:cF { exp_args:N #1 } 
+      { \cs:w cus_exp_args:nw \__cus_expanded:w { \cs_end: { N #1 } } } 
+  }
+
+\cs_new:Npn \cus_serial_exp_arg:nnw #1 #2
+  { 
+    \exp:w \cus_use:e 
+      { \tl_map_tokens:nn {#2} { \__cus_serial_exp_arg:nnw { \exp_not:n { N #1 } } } }
+    \use:n \exp_end:
+  }
+\cs_new:Npn \cus_serial_exp_arg:eew #1 #2
+  { 
+    \exp:w \cus_use:e 
+      { \cus_exp_args:Ne \tl_map_tokens:nn {#2} { \__cus_serial_exp_arg:nnw { N #1 } } }
+    \use:n \exp_end:
+  }
+\cs_new_protected:Npn \__cus_serial_exp_arg:nnw #1#2 #3 \exp_end:
+  { 
+    \__cus_expanded:w { \exp_not:n {#3} \exp_after:wN } 
+    \exp:w \__cus_exp_args:nw { #1{#2} } \exp_end: 
+  }
+
+\cs_new:Npn \cus_use:e #1 { \cs:w use:n \__cus_expanded:w { \cs_end: {#1} } }
+\cs_new:Npn \cus_exp_args:Ne #1#2
+  { \exp:w \cs:w exp_end: \__cus_expanded:w { \cs_end: \exp_not:N #1 {#2} } }
+\cs_new:Npn \cus_exp_args:NNe #1#2#3
+  { \exp:w \cs:w exp_end: \__cus_expanded:w { \cs_end: \exp_not:n {#1#2} {#3} } }
+\cs_new:Npn \cus_exp_last_unbraced:Ne #1#2
+  { \exp:w \cs:w exp_end: \__cus_expanded:w { \cs_end: \exp_not:N #1 #2 } }
+\cs_new:Npn \cus_exp_last_unbraced:NNe #1#2#3
+  { \exp:w \cs:w exp_end: \__cus_expanded:w { \cs_end: \exp_not:n {#1#2} #3 } }
+
+\cs_new:Npn \cus_shift_i:nnn #1#2#3 { {#2} {#3} {#1} }
+\cs_new:Npn \cus_shift_ii:nnn #1#2#3 { {#3} {#1} {#2} }
+\cs_new:Npn \cus_shift_i_N:nnn #1#2#3 { #2 {#3} {#1} }
+\cs_new:Npn \cus_shift_ii_N:nnn #1#2#3 { #3 {#1} {#2} }
+\cs_new:Npn \cus_twiddle:nnn #1#2#3 { {#1} {#3} {#2} }
+\cs_new:Npn \cus_twiddle:eee { \exp_args:Neee \cus_twiddle:nnn }
+\cs_new:Npn \cus_twiddle:Nee #1#2#3 { \exp_args:Nee #1 {#3} {#2} }
+\cs_new:Npn \cus_twiddle_first_unbraced:nnn #1#2#3 { #1 {#3} {#2} }
+\cs_new_eq:NN \cus_twiddle_N:nnn \cus_twiddle_first_unbraced:nnn
+\cs_new:Npn \cus_compound:nnn #1#2#3 { #1 { #2 {#3} } }
+
+\cs_new_protected:Npn \cus_swap:NN #1#2
+  {
+    \cs_set_eq:NN \__cus_tmp_swap: #2
+    \cs_set_eq:NN #2 #1
+    \cs_set_eq:NN #1 \__cus_tmp_swap:
+  }
+\cs_new_protected:Npn \cus_gswap:NN #1#2
+  {
+    \cs_set_eq:NN \__cus_tmp_swap: #2
+    \cs_gset_eq:NN #2 #1
+    \cs_gset_eq:NN #1 \__cus_tmp_swap:
+  }
+
+%region exp_not string
+\cs_new:Npn \cus_exp_not:n 
+  {
+    \etl_act:nnnnn 
+      \__cus_exp_not_act_normal:nN 
+      \__cus_exp_not_act_space:n
+      \__cus_exp_not_act_group:nn 
+      { }
+  }
+\cs_new:Npn \__cus_exp_not_act_normal:nN #1#2
+  { \etl_act_output:n { \exp_not:n {#2} } }
+\cs_new:Npn \__cus_exp_not_act_space:n #1
+  { \etl_act_output:n { \exp_not:n { ~ } } }
+\cs_new:Npn \__cus_exp_not_act_group:nn #1#2
+  { 
+    \exp_args:Ne \etl_act_output:n 
+      { 
+        \exp_not:n { \use:n { \exp_after:wN { \if_false: } \fi: } }
+        \cus_exp_not:n {#2} 
+        \exp_not:n { \use:n { \if_int_compare:w `{ = \c_zero_int \fi: } } } 
+      } 
+  }
+\cs_generate_variant:Nn \cus_exp_not:n { o, e, V, v }
+\cs_new:Npn \cus_string:n 
+  {
+    \etl_act:nnnnn
+      \__cus_string_act_normal:nN 
+      \__cus_string_act_space:n 
+      \__cus_string_act_group:nn
+      { \c__cus_mone_int }
+  }
+\cs_new:Npn \__cus_string_act_normal:nN #1#2
+  { 
+    \if_int_compare:w #1 = \c__cus_zero_int 
+      \exp_after:wN \use_i:nn \else: \exp_after:wN \use_ii:nn \fi:
+      {
+        \token_if_control_word:NTF #2 
+          { \exp_after:wN \etl_act_output:n \exp_after:wN { \token_to_str:N #2 } }
+          { 
+            \exp_args:Ne \etl_act_output:n { ~ \token_to_str:N #2 }
+            \etl_act_status:n { \c__cus_mone_int }
+          }
+      }
+      {
+        \exp_after:wN \etl_act_output:n \exp_after:wN { \token_to_str:N #2 }
+        \token_if_control_word:NTF #2 
+          { \etl_act_status:n { \c__cus_zero_int } } 
+          { \etl_act_status:n { \c__cus_mone_int } }
+      }
+  }
+\cs_new:Npn \__cus_string_act_space:n #1
+  { 
+    \reverse_if:N \if_int_compare:w #1 = \c__cus_ten_int
+      \etl_act_output:n { ~ } \etl_act_status:n { \c__cus_ten_int } 
+    \fi:
+  }
+\cs_new:Npn \__cus_string_act_group:nn #1#2
+  { 
+    \exp_args:Ne \etl_act_output:n 
+      { \c_left_brace_str \cus_string:n {#2} \c_right_brace_str } 
+    \etl_act_status:n { \c__cus_mone_int }
+  }
+\cs_generate_variant:Nn \cus_string:n { o, e, V, v }
+%endregion
+
+%region token 
+\prg_new_conditional:Npnn \cus_token_if_eq_meaning:oN #1#2 { p, T, F, TF }
+  {
+    \exp_after:wN \if_meaning:w #1 #2
+      \prg_return_true: \else: \prg_return_false: \fi:
+  }
+\prg_new_conditional:Npnn \cus_token_if_eq_meaning:oo #1#2 { p, T, F, TF }
+  {
+    \@EAEAEA \if_meaning:w \tex_expanded:D { \exp_not:n {#1} \exp_after:wN } #2
+      \prg_return_true: \else: \prg_return_false: \fi:
+  }
+%endregion token 
+
+%region implicit character 
+\prg_new_conditional:Npnn \cus_token_if_implicit_char:N #1 { p, T, F, TF }
+  {
+    \if_catcode:w \exp_not:N #1 \scan_stop:
+      \exp_after:wN \use_i:nn 
+    \else: \exp_after:wN \use_ii:nn 
+    \fi:
+      \prg_return_false:
+      {
+        \exp_after:wN \__cus_token_if_implicit_char:Nw \token_to_str:N #1 \s__cus_stop
+      }
+  }
+% \tex_escapechar:D 不能为 -1 或 32
+\cs_new:Npn \__cus_token_if_implicit_char:Nw #1#2 \s__cus_stop
+  {
+    \if:w \scan_stop: #2 \scan_stop:
+      \prg_return_false: \else: \prg_return_true: \fi:
+  }
+\cs_new_protected:Npn \__cus_token_if_implicit_char:NTF #1#2#3
+  {
+    \group_begin:
+    \int_set:Nn \tex_escapechar:D { `\\ }
+    \cs_set:Npx \__cus_next:
+      { 
+        \group_end: 
+        \cus_token_if_implicit_char:NTF #1 
+          { \exp_not:n {#2} } { \exp_not:n {#3} }
+      }
+    \__cus_next:
+  }
+%endregion
+
+%region last item 
+% 保留空格
+\cs_new:Npn \cus_tl_last_item:n
+  {
+    \etl_act:nnnnnn 
+      \__cus_tl_last_item_normal:nN 
+      \__cus_tl_last_item_space:n 
+      \__cus_tl_last_item_group:nn 
+      \__cus_tl_last_item_final:nn 
+      { }
+  }
+\cs_new:Npn \__cus_tl_last_item_normal:nN #1#2 { \etl_act_status:n { #2 } }
+\cs_new:Npn \__cus_tl_last_item_space:n #1 { \etl_act_status:n { ~ } }
+\cs_new:Npn \__cus_tl_last_item_group:nn #1#2 { \etl_act_status:n { #2 } }
+\cs_new:Npn \__cus_tl_last_item_final:nn #1#2 { \exp_not:n {#1} }
+% 在约小于25项时比 \tl_item:nn {} {-1} 有更好的性能
+\cs_new:Npn \cus_tl_last_item_ignore_spaces:n 
+  {
+    \etl_act:nnnnnn 
+      \__cus_tl_last_item_normal:nN 
+      \__cus_tl_last_item_space_ignore:n 
+      \__cus_tl_last_item_group:nn 
+      \__cus_tl_last_item_final:nn 
+      { }
+  }
+\cs_new:Npn \__cus_tl_last_item_space_ignore:n #1 { }
+% str, \str_item:nn 有更好的性能表现
+%endregion
+
+%region map 
+\int_new:N \l__cus_map_tmp_int 
+\tl_new:N \l__cus_map_tmpa_tl
+\cs_new:Npn \MapClist #1 
+  {
+    \bool_lazy_and:nnTF { \tl_if_single_token_p:n {#1} } { \token_if_cs_p:N #1 }
+      { \clist_map_tokens:Nn #1 } { \clist_map_tokens:nn {#1} }
+  }
+\cs_new_protected:Npn \IterateClist #1
+  {
+    \bool_lazy_and:nnTF { \tl_if_single_token_p:n {#1} } { \token_if_cs_p:N #1 }
+      { \clist_map_inline:Nn #1 } { \clist_map_inline:nn {#1} }
+  }
+\NewExpandableDocumentCommand \MapInteger { O{1} O{1} m m }
+  { \int_step_function:nnnN {#1} {#2} {#3} #4 }
+\NewDocumentCommand \IterateInteger { O{1} O{1} m }
+  { \int_step_inline:nnnn {#1} {#2} {#3} }
+\cs_new:Npn \MapList #1
+  {
+    \bool_lazy_and:nnTF { \tl_if_single_token_p:n {#1} } { \token_if_cs_p:N #1 }
+      { \tl_map_tokens:Nn #1 } { \tl_map_tokens:nn {#1} }
+  }
+\cs_new_protected:Npn \IterateList #1
+  {
+    \bool_lazy_and:nnTF { \tl_if_single_token_p:n {#1} } { \token_if_cs_p:N #1 }
+      { \tl_map_inline:Nn #1 } { \tl_map_inline:nn {#1} }
+  }
+\NewDocumentCommand \IterateThread { s O{2} }
+  {
+    \IfBooleanTF {#1}
+      { \use:c { __cus_iterate_thread_ \int_eval:n { #2 + 0 } :nw } { \cus_twiddle_N:nnn \seq_set_split:cnn , } }
+      { \use:c { __cus_iterate_thread_ \int_eval:n { #2 + 0 } :nw } \seq_set_from_clist:cn }
+  }
+\cs_new_protected:cpn { __cus_iterate_thread_0:nw } #1#2
+  { 
+    \cs_set:Npn \__cus_map_tmp:w ##1 {#2}
+    \__cus_map_tmp:w { 0 }
+  }
+\cs_new_protected:Npn \__cus_iterate_thread_set_seq:nnn #1#2#3
+  {
+    \tl_if_single_token:nTF {#3}
+      { \exp_args:Nnno \use:n {#2} { l__cus_map_tmp_ #1 _seq } {#3} }
+      { #2 { l__cus_map_tmp_ #1 _seq } {#3} }
+  }
+\cs_new:Npn \__cus_iterate_thread_seq_item_o:n #1
+  { { \seq_item:cn { l__cus_map_tmp_ #1 _seq } { 1 } } }
+\cs_new:Npn \__cus_iterate_thread_seq_item_t:n #1
+  { { \seq_item:cn { l__cus_map_tmp_ #1 _seq } { 2 } } }
+\NewDocumentCommand \__cus_iterate_thread_code:nwn { m +O{} +O{#2} +m }
+  {
+    \cus_new_cs:NNnn \__cus_map_tmp:w \cs_set_protected:Npn {#1+1} {#4}
+    \if_case:w \l__cus_map_tmp_int \or:
+      \tl_set:Nx \l__cus_map_tmp_tl
+        { 
+          \__cus_map_tmp:w { 1 } 
+          \int_step_function:nN {#1} \__cus_iterate_thread_seq_item_o:n 
+        }
+    \or: 
+      \tl_set:Nx \l__cus_map_tmp_tl
+        {
+          \exp_not:N \__cus_map_tmp:w 
+          { 1 } \int_step_function:nN {#1} \__cus_iterate_thread_seq_item_o:n
+          \exp_not:n {#3}
+          \exp_not:N \__cus_map_tmp:w 
+          { 2 } \int_step_function:nN {#1} \__cus_iterate_thread_seq_item_t:n
+        }
+    \else:
+      \int_step_inline:nn { \l__cus_map_tmp_int - 2 }
+        { \tl_set:cn { l__cus_map_tmp_item_ ##1 _tl } {#2} }
+      \tl_set:cn { l__cus_map_tmp_item_ \int_eval:n { \l__cus_map_tmp_int - 1 } _tl } {#3}
+      \tl_set_eq:cN { l__cus_map_tmp_item_ \int_use:N \l__cus_map_tmp_int _tl } \c_empty_tl 
+      \cs_set:Npn \__cus_map_tmp_aux_aux:w ##1
+        {
+          \cs_set:Npn \__cus_iterate_thread_seq_item_s:n ####1
+            { { \seq_item:cn { l__cus_map_tmp_ ####1 _seq } {##1} } }
+          \tl_put_right:Nx \l__cus_map_tmp_tl
+            {
+              \exp_not:N \__cus_map_tmp:w 
+              {##1} \int_step_function:nN {#1} \__cus_iterate_thread_seq_item_s:n
+              \exp_not:v { l__cus_map_tmp_item_ ##1 _tl }
+            }
+        }
+      \int_step_function:nN { \l__cus_map_tmp_int } \__cus_map_tmp_aux_aux:w 
+    \fi:
+    \tl_use:N \l__cus_map_tmp_tl
+  }
+\cs_new_protected:cpn { __cus_iterate_thread_1:nw } #1#2#3
+  { 
+    \tl_set_eq:NN \l__cus_map_tmp_tl \c_empty_tl
+    \__cus_iterate_thread_set_seq:nnn { 1 } {#1} {#2}
+    \int_set:Nn \l__cus_map_tmp_int { \seq_count:c { l__cus_map_tmp_1_seq } }
+    \cs_set:Npn \__cus_map_tmp:w ##1##2 {#3}
+    \exp_args:Nc \seq_map_indexed_function:NN { l__cus_map_tmp_1_seq } \__cus_map_tmp:w 
+  }
+\cs_new_protected:cpn { __cus_iterate_thread_2:nw } #1#2#3
+  {
+    \tl_set_eq:NN \l__cus_map_tmp_tl \c_empty_tl
+    \int_zero:N \l__cus_map_tmp_int
+    \__cus_iterate_thread_set_seq:nnn { 1 } {#1} {#2}
+    \__cus_iterate_thread_set_seq:nnn { 2 } {#1} {#3}
+    \int_set:Nn \l__cus_map_tmp_int
+      {
+        \int_min:nn
+          { \seq_count:c { l__cus_map_tmp_1_seq } }
+          { \seq_count:c { l__cus_map_tmp_2_seq } }
+      }
+    \__cus_iterate_thread_code:nwn { 2 }
+  }
+\cs_new_protected:cpn { __cus_iterate_thread_3:nw } #1#2#3#4
+  {
+    \tl_set_eq:NN \l__cus_map_tmp_tl \c_empty_tl
+    \int_zero:N \l__cus_map_tmp_int
+    \__cus_iterate_thread_set_seq:nnn { 1 } {#1} {#2}
+    \__cus_iterate_thread_set_seq:nnn { 2 } {#1} {#3}
+    \__cus_iterate_thread_set_seq:nnn { 3 } {#1} {#4}
+    \int_set:Nn \l__cus_map_tmp_int
+      {
+        \int_min:nn
+          { \seq_count:c { l__cus_map_tmp_1_seq } }
+          { \seq_count:c { l__cus_map_tmp_2_seq } }
+      }
+    \int_set:Nn \l__cus_map_tmp_int
+      {
+        \int_min:nn { \seq_count:c { l__cus_map_tmp_3_seq } }
+          \l__cus_map_tmp_int
+      }
+    \__cus_iterate_thread_code:nwn { 3 }
+  }
+\cs_new_protected:cpn { __cus_iterate_thread_4:nw } #1#2#3#4#5
+  {
+    \tl_set_eq:NN \l__cus_map_tmp_tl \c_empty_tl
+    \int_zero:N \l__cus_map_tmp_int
+    \__cus_iterate_thread_set_seq:nnn { 1 } {#1} {#2}
+    \__cus_iterate_thread_set_seq:nnn { 2 } {#1} {#3}
+    \__cus_iterate_thread_set_seq:nnn { 3 } {#1} {#4}
+    \__cus_iterate_thread_set_seq:nnn { 4 } {#1} {#5}
+    \int_set:Nn \l__cus_map_tmp_int
+      {
+        \int_min:nn
+          { \seq_count:c { l__cus_map_tmp_1_seq } }
+          { \seq_count:c { l__cus_map_tmp_2_seq } }
+      }
+    \int_set:Nn \l__cus_map_tmp_int
+      {
+        \int_min:nn { \seq_count:c { l__cus_map_tmp_3_seq } }
+          \l__cus_map_tmp_int
+      }
+    \int_set:Nn \l__cus_map_tmp_int
+      {
+        \int_min:nn { \seq_count:c { l__cus_map_tmp_4_seq } }
+          \l__cus_map_tmp_int
+      }
+    \__cus_iterate_thread_code:nwn { 4 }
+  }
+\cs_new_protected:cpn { __cus_iterate_thread_5:nw } #1#2#3#4#5#6
+  {
+    \tl_set_eq:NN \l__cus_map_tmp_tl \c_empty_tl
+    \int_zero:N \l__cus_map_tmp_int
+    \__cus_iterate_thread_set_seq:nnn { 1 } {#1} {#2}
+    \__cus_iterate_thread_set_seq:nnn { 2 } {#1} {#3}
+    \__cus_iterate_thread_set_seq:nnn { 3 } {#1} {#4}
+    \__cus_iterate_thread_set_seq:nnn { 4 } {#1} {#5}
+    \__cus_iterate_thread_set_seq:nnn { 5 } {#1} {#6}
+    \int_set:Nn \l__cus_map_tmp_int
+      {
+        \int_min:nn
+          { \seq_count:c { l__cus_map_tmp_1_seq } }
+          { \seq_count:c { l__cus_map_tmp_2_seq } }
+      }
+    \int_set:Nn \l__cus_map_tmp_int
+      {
+        \int_min:nn { \seq_count:c { l__cus_map_tmp_3_seq } }
+          \l__cus_map_tmp_int
+      }
+    \int_set:Nn \l__cus_map_tmp_int
+      {
+        \int_min:nn { \seq_count:c { l__cus_map_tmp_4_seq } }
+          \l__cus_map_tmp_int
+      }
+    \int_set:Nn \l__cus_map_tmp_int
+      {
+        \int_min:nn { \seq_count:c { l__cus_map_tmp_5_seq } }
+          \l__cus_map_tmp_int
+      }
+    \__cus_iterate_thread_code:nwn { 5 }
+  }
+\cs_new_protected:cpn { __cus_iterate_thread_6:nw } #1#2#3#4#5#6#7
+  {
+    \tl_set_eq:NN \l__cus_map_tmp_tl \c_empty_tl
+    \int_zero:N \l__cus_map_tmp_int
+    \__cus_iterate_thread_set_seq:nnn { 1 } {#1} {#2}
+    \__cus_iterate_thread_set_seq:nnn { 2 } {#1} {#3}
+    \__cus_iterate_thread_set_seq:nnn { 3 } {#1} {#4}
+    \__cus_iterate_thread_set_seq:nnn { 4 } {#1} {#5}
+    \__cus_iterate_thread_set_seq:nnn { 5 } {#1} {#6}
+    \__cus_iterate_thread_set_seq:nnn { 6 } {#1} {#7}
+    \int_set:Nn \l__cus_map_tmp_int
+      {
+        \int_min:nn
+          { \seq_count:c { l__cus_map_tmp_1_seq } }
+          { \seq_count:c { l__cus_map_tmp_2_seq } }
+      }
+    \int_step_inline:nnnn { 3 } { 6 }
+      {
+        \int_set:Nn \l__cus_map_tmp_int
+          {
+            \int_min:nn { \seq_count:c { l__cus_map_tmp_ ##1 _seq } }
+              \l__cus_map_tmp_int
+          }
+      }
+    \__cus_iterate_thread_code:nwn { 6 }
+  }
+\cs_new_protected:cpn { __cus_iterate_thread_7:nw } #1#2#3#4#5#6#7#8
+  {
+    \tl_set_eq:NN \l__cus_map_tmp_tl \c_empty_tl
+    \int_zero:N \l__cus_map_tmp_int
+    \__cus_iterate_thread_set_seq:nnn { 1 } {#1} {#2}
+    \__cus_iterate_thread_set_seq:nnn { 2 } {#1} {#3}
+    \__cus_iterate_thread_set_seq:nnn { 3 } {#1} {#4}
+    \__cus_iterate_thread_set_seq:nnn { 4 } {#1} {#5}
+    \__cus_iterate_thread_set_seq:nnn { 5 } {#1} {#6}
+    \__cus_iterate_thread_set_seq:nnn { 6 } {#1} {#7}
+    \__cus_iterate_thread_set_seq:nnn { 7 } {#1} {#8}
+    \int_set:Nn \l__cus_map_tmp_int
+      {
+        \int_min:nn
+          { \seq_count:c { l__cus_map_tmp_1_seq } }
+          { \seq_count:c { l__cus_map_tmp_2_seq } }
+      }
+    \int_step_inline:nnnn { 3 } { 7 }
+      {
+        \int_set:Nn \l__cus_map_tmp_int
+          {
+            \int_min:nn { \seq_count:c { l__cus_map_tmp_ ##1 _seq } }
+              \l__cus_map_tmp_int
+          }
+      }
+    \__cus_iterate_thread_code:nwn { 7 }
+  }
+
+
+% map nest 
+\cs_new_protected:Npn \cus_map_nest_code:Nnnn #1#2#3#4
+  {
+    \int_compare:nNnT {#3} > { 0 }
+      {
+        \cs_set:cpn { __cus_map_nest_tmp_-1:n } ##1 {#4}
+        \int_step_inline:nn { #3 }
+          {
+            \cs_set:cpx { __cus_map_nest_tmp_##1:nn } ####1####2
+              { 
+                \exp_not:n { #1 {#2} }
+                  { \exp_not:c { __cus_map_nest_tmp_ \int_eval:n { ##1 - 1 } :nn } {####1####2} }
+              }
+          }
+        \cs_set:cpx { __cus_map_nest_tmp_0:nn } ##1##2 
+          { \exp_not:c { __cus_map_nest_tmp_-1:n } {##1##2} }
+        \use:c { __cus_map_nest_tmp_ \int_eval:n {#3} :nn } { } { }
+      }
+  }
+\cs_new_protected:Npn \cus_map_nest_variable:NnnNn #1#2#3#4#5
+  {
+    \int_compare:nNnT {#3} > { 0 }
+      {
+        \int_step_inline:nn { #3 }
+          {
+            \cs_set:cpx { __cus_map_nest_tmp_##1:nn } ####1####2
+              { 
+                \exp_not:n { #1 {#2} }
+                  { \exp_not:c { __cus_map_nest_tmp_ \int_eval:n { ##1 - 1 } :nn } {####1####2} }
+              }
+          }
+        \cs_set:cpn { __cus_map_nest_tmp_0:nn } ##1##2 { \tl_set:Nn #4 {##1##2} #5 }
+        \use:c { __cus_map_nest_tmp_ \int_eval:n {#3} :nn } { } { }
+      }
+  }
+%endregion
+
+
+% \NewDocumentCommand \cus_peek_verbatim:nw { +m +v } { #1 {#2} }
+\cs_new_protected:Npn \cus_peek_verbatim:nw #1
+  { 
+    \bool_set_true:N \l_elkernel_long_v_bool
+    \elkernel_collect_verb:Nnw \l__cus_tmpa_tl 
+      { \exp_args:Nno \use:n {#1} { \l__cus_tmpa_tl } }
+  }
+\cs_new_protected:Npn \cus_peek_verbatim:nn #1 #2
+  {
+    \tl_clear:N \l__cus_verbatimize_tl
+    \group_align_safe_begin:
+    \tl_analysis_map_inline:nn {#2}
+      {
+        \int_compare:nNnTF {##2} = { -1 }
+          {
+            \exp_args:NNo \tl_if_in:NnTF \c__cus_verbatimize_macros_tl {##1}
+              { \use_i:nn } { \use_ii:nn }
+          }
+          { \use_ii:nn }
+            {
+              \cs_set_nopar:Npx \l__cus_verbatimize_tl
+                { \l__cus_verbatimize_tl \exp_after:wN \cs_to_str:N ##1 }
+            }
+            { 
+              \cs_set_nopar:Npx \l__cus_verbatimize_tl 
+                { \l__cus_verbatimize_tl \exp_after:wN \token_to_str:N ##1 } 
+            }
+      }
+    \group_align_safe_end:
+    \exp_args:Nno \use:n {#1} \l__cus_verbatimize_tl
+  }
+\tl_new:N \l__cus_verbatimize_tl
+
+\tl_const:Nn \c__cus_verbatimize_macros_tl { \#\$\%\\\ \{\}\^ }
+\NewDocumentCommand \Verbatimize { s } 
+  { \bool_if:nTF {#1} \cus_verb_cmd:w \cus_verbatimize:n }
+\cs_new_protected:Npn \cus_verb_cmd:w 
+  { 
+    \bool_set_true:N \l_elkernel_long_v_bool 
+    \elkernel_collect_verb:Nnw \l__cus_verbatimize_tl { \l__cus_verbatimize_tl }
+  }
+\cs_new_protected:Npn \cus_verbatimize:n #1
+  {
+    \group_align_safe_begin:
+    \tl_analysis_map_inline:nn {#1}
+      { 
+        \int_compare:nNnTF {##2} = { -1 }
+          {
+            \exp_args:NNo \tl_if_in:NnTF \c__cus_verbatimize_macros_tl {##1} 
+              { \exp_after:wN \cs_to_str:N ##1 } { \exp_after:wN \token_to_str:N ##1 }
+          }
+          { \exp_after:wN \token_to_str:N ##1 }
+      }
+    \group_align_safe_end:
+  }
+
+
+\cs_new_eq:NN \__cus_arg_to_keyval:nn \__elkernel_arg_to_keyvalue:nn
+\cs_new_protected:Npn \cus_arg_to_keyval_apply:nnN #1#2#3 % key, maybe key=value, cmd 
+  {
+    \__cus_arg_to_keyval:nn {#1} {#2}
+    \exp_args:No #3 { \l__elkernel_keyvalue_tl }
+  }
+\cs_new_protected:Npn \cus_arg_to_keyval_apply:nnn #1#2#3 % key, maybe key=value, tokens 
+  {
+    \__cus_arg_to_keyval:nn {#1} {#2}
+    \exp_args:Nno \use:n {#3} { \l__elkernel_keyvalue_tl }
+  }
+\cs_new_protected:Npn \cus_if_keyval_apply:nNN #1#2#3 % arg, true apply, false apply 
+  {
+    \__cus_arg_to_keyval:nn { \q__cus_mark } {#1}
+    \cus_exp_args:Nd \tl_if_head_eq_meaning:nNTF { \l__elkernel_keyvalue_tl } \q__cus_mark
+      { #3 {#1} }
+      { \exp_args:No #2 { \l__elkernel_keyvalue_tl } }
+  }
+\cs_new_protected:Npn \cus_if_keyval_apply:nnn #1#2#3 % arg, true apply, false apply 
+  {
+    \__cus_arg_to_keyval:nn { \q__cus_mark } {#1}
+    \cus_exp_args:Nd \tl_if_head_eq_meaning:nNTF { \l__elkernel_keyvalue_tl } \q__cus_mark
+      { #3 {#1} }
+      { \exp_args:Nno \use:n {#2} { \l__elkernel_keyvalue_tl } }
+  }
+\cs_new_protected:Npn \cus_if_keyval_variable:nNnn #1#2#3#4 % arg, var, true, false 
+  {
+    \tl_set:Nn #2 {#1}
+    \__cus_arg_to_keyval:nn { \q__cus_mark } {#1}
+    \cus_exp_args:Nd \tl_if_head_eq_meaning:nNTF { \l__elkernel_keyvalue_tl } \q__cus_mark
+      { #4 }
+      { \tl_set_eq:NN #2 \l__elkernel_keyvalue_tl #3 }
+  }
+
+\cs_new:Npn \cus_unbracket:w [#1] {#1}
+\cs_new:Npn \cus_unbracket:n #1 { \cus_unbracket:w #1 }
+\cs_new:Npn \cus_unbracket:N { \exp_after:wN \cus_unbracket:w }
+\cs_new:Npn \cus_unbracket:f { \exp_last_unbraced:Nf \cus_unbracket:w }
+\cs_new:Npn \cus_unbracket:nw #1 [#2] { {#1} {#2} }
+
+\cs_new:Npn \cus_remove_brace_head:n #1 
+  { \__cus_remove_brace_head:w #1 \s__cus_stop }
+\cs_new:Npn \cus_remove_brace_head:N #1
+  { \exp_after:wN \__cus_remove_brace_head:w #1 \s__cus_stop }
+\cs_new:Npn \__cus_remove_brace_head:w (#1) #2 \s__cus_stop {#2}
+\cs_new:Npn \cus_remove_bracket_head:n #1 
+  { \__cus_remove_bracket_head:w #1 \s__cus_stop }
+\cs_new:Npn \cus_remove_bracket_head:N #1
+  { \exp_after:wN \__cus_remove_bracket_head:w #1 \s__cus_stop }
+\cs_new:Npn \__cus_remove_bracket_head:w [#1] #2 \s__cus_stop {#2}
+\cs_new:Npn \cus_remove_bracket_tail:n #1 
+  { \__cus_remove_bracket_head:w #1 \s__cus_stop }
+\cs_new:Npn \cus_remove_bracket_tail:N #1
+  { \exp_after:wN \__cus_remove_bracket_tail:w #1 \s__cus_stop }
+\cs_new:Npn \__cus_remove_bracket_tail:w #1 [#2] \s__cus_stop {#1}
+
+
+\prg_new_conditional:Npnn \__cus_if_keyval:n #1 { p, T, F, TF }
+  { \__cus_if_keyval_aux:w #1 = \q_cus_special }
+\cs_new:Npn \__cus_if_keyval_aux:w #1 = #2 \q_cus_special
+  { \tl_if_empty:nTF {#2} \prg_return_false: \prg_return_true: }
+\cs_new_nopar:Npn \cus_unstar:n #1 { \__cus_unstar:w #1 \q__cus_stop }
+\cs_new_nopar:Npn \cus_unstar:N #1 { \exp_after:wN \__cus_unstar:w #1 \q__cus_stop }
+\cs_new:Npn \__cus_unstar:w #1 * \q__cus_stop { \exp_not:n {#1} }
+\cs_new_nopar:Npn \cus_if_endstar:nTF #1
+  { \__cus_star_dispatch:w #1 \s__cus_mark * \s__cus_mark \s__cus_stop }
+\cs_new_nopar:Npn \cus_if_endstar:NTF { \exp_args:No \cus_if_endstar:nTF }
+\cs_new:Npn \__cus_star_dispatch:w #1 * \s__cus_mark #2 \s__cus_stop
+  {
+    \if:w #2 \s__cus_mark \s__cus_mark
+      \exp_after:wN \use_ii:nn
+    \else:
+      \exp_after:wN \use_i:nn
+    \fi:
+  }
+\cs_new_protected:Npn \__cus_str_if_startswith:nnTF #1#2
+  {
+    \cs_set:Npn \__cus_tmp:w ##1 \q_mark #2 ##2 \q_stop
+      { \tl_if_empty:nTF {##1} { \use_i:nn \if_true: } { } }
+    \__cus_tmp:w \q_mark #1 \q_mark #2 \q_stop
+    \if_false: \exp_after:wN \use_i:nn \else: \exp_after:wN \use_ii:nn \fi:
+  }
+\cs_generate_variant:Nn \__cus_str_if_startswith:nnTF { oo }
+\cs_new_protected:Npn \__cus_str_if_endswith:nnTF #1#2
+  {
+    \cs_set:Npn \__cus_tmp:w ##1 #2 \q_mark ##2 \q_stop
+      { \tl_if_empty:nTF {##2} { } { \use_i:nn \if_true: } }
+    \__cus_tmp:w #1 \q_mark #2 \q_mark \q_stop 
+    \if_false: \exp_after:wN \use_i:nn \else: \exp_after:wN \use_ii:nn \fi:
+  }
+\cs_generate_variant:Nn \__cus_str_if_endswith:nnTF { oo }
+
+\cs_new:Npn \cus_get_register_num:Nn #1#2 % register, register type 
+  { 
+    \int_value:w \cs:w __cus_get_register_num_ #2 :w \exp_after:wN \cs_end: 
+    \token_to_meaning:N #1 \scan_stop: 
+    \exp_stop_f:
+  }
+\cs_generate_variant:Nn \cus_get_register_num:Nn { c }
+\cs_set:Npn \__cus_tmp:w #1#2
+  {
+    \use:e 
+      {
+        \cs_new:Npn \exp_not:c { __cus_get_register_num_ #1:w } \token_to_str:N #2
+          ##1 \scan_stop: 
+          {##1}
+      }
+  }
+\__cus_tmp:w { count   } { \count  }
+\__cus_tmp:w { int     } { \count  }
+\__cus_tmp:w { dimen   } { \dimen  }
+\__cus_tmp:w { skip    } { \skip   }
+\__cus_tmp:w { muskip  } { \muskip }
+\__cus_tmp:w { toks    } { \toks   }
+\__cus_tmp:w { char    } { \char"  }
+
+\NewExpandableDocumentCommand \UseList { +O{} +m +O{#4} +m }
+  {
+    \tl_if_empty:nTF {#1}
+      { \cus_tl_use:nnnn {#2} {#3} {#4} {#3} }
+      {
+        \exp_args:Ne \cus_tl_use:nnnn
+          { \tl_map_tokens:nn {#2} { \__cusdoc_tl_use_aux:nn {#1} } } {#3} {#4} {#3}
+      }
+  }
+\NewExpandableDocumentCommand \UseClist { +O{} +m +O{#4} +m }
+  {
+    \tl_if_empty:nTF {#1}
+      { \clist_use:nnnn {#2} {#3} {#4} {#3} }
+      {
+        \exp_args:Ne \cus_tl_use:nnnn
+          { \clist_map_tokens:nn {#2} { \__cusdoc_tl_use_aux:nn {#1} } } {#3} {#4} {#3}
+      }
+  }
+\cs_new:Npn \__cusdoc_tl_use_aux:nn #1#2 { { \exp_not:n { #1{#2} } } }
+\cs_new:Npn \cus_tl_use:nnnn #1#2#3#4
+  { 
+    \__cus_unexpanded:w \__cus_expanded:w 
+      { {
+        \tl_if_blank:nF {#1}
+          {
+            \tl_if_blank:oTF { \use_none:n #1 }
+              { \__cus_tl_use_aux:nnn #1 { } { } }
+              {
+                \tl_if_blank:oTF { \use_none:nn #1 }
+                  { \__cus_tl_use_aux:nnn #1 {#2} }
+                  { \__cus_tl_use_aux:nnnn {#3} #1 \s__cus_mark \s__cus_stop {#4} }
+              }
+          }
+      } }
+  }
+\cs_new:Npn \__cus_tl_use_aux:nnn #1#2#3 { \exp_not:n { #1 #3 #2 } }
+\cs_new:Npn \__cus_tl_use_aux:nnnn #1#2#3#4
+  {
+    \__cus_use_none_delimit_by_s_mark:w #4 
+    \__cus_tl_use_aux:nwwn {#2} {#3} \s__cus_mark
+    \exp_not:n { #2 #1 } \__cus_tl_use_aux:nnnn {#1} {#3} {#4}
+  }
+\cs_new:Npn \__cus_tl_use_aux:nwwn #1#2 \s__cus_mark #3 \s__cus_stop #4
+  { \exp_not:n { #1 #4 #2 } }
+\cs_new:Npn \cus_tl_use:nn #1#2 { \cus_tl_use:nnnn {#1} {#2} {#2} {#2} }
+\cs_new:Npn \cus_tl_use:Nnnn { \exp_args:No \cus_tl_use:nnnn }
+\cs_new:Npn \cus_tl_use:Nn #1#2 { \cus_tl_use:Nnnn #1 {#2} {#2} {#2} }
+
+% target, test tokens, fallback tokens, args list 
+\cs_new:Npn \cus_act_case_true:nnnn #1#2#3#4
+  {
+    \__cus_act_case_true:nnnn {#1} {#4} #2 { \use_ii:nnn } {#3}
+    \prg_break_point:
+  }
+\cs_new_eq:NN \cus_act_case:nnnn \cus_act_case_true:nnnn
+\cs_new:Npn \__cus_act_case_true:nnnn #1#2#3#4
+  {
+    #3 {#1} 
+      { \prg_break:n { #4 #2 } }
+      { \__cus_act_case_true:nnnn {#1} {#2} }
+  }
+% target, test tokens, fallback tokens, args list 
+\cs_new:Npn \cus_act_case_false:nnnn #1#2#3#4
+  {
+    \__cus_act_case_false:nnnn {#1} {#4} #2 { \use_ii:nnn } {#3}
+    \prg_break_point:
+  }
+\cs_new:Npn \__cus_act_case_false:nnnn #1#2#3#4
+  {
+    #3 {#1} 
+      { \__cus_act_case_false:nnnn {#1} {#2} }
+      { \prg_break:n { #4 #2 } }
+  }
+% target, tests 
+\cs_new:Npn \cus_if_lazy_all:nnTF #1#2
+  { \__cus_if_lazy_all:nn {#1} #2 \q_recursion_tail \q_recursion_stop }
+\cs_new:Npn \__cus_if_lazy_all:nn #1#2
+  {
+    \quark_if_recursion_tail_stop_do:nn {#2} { \use_i:nn }
+    #2 {#1} { }
+      { \use_i_delimit_by_q_recursion_stop:nw { \use_ii:nn } }
+    \__cus_if_lazy_all:nn {#1}
+  }
+% target, tests 
+\cs_new:Npn \cus_if_lazy_any:nnTF #1#2
+  { \__cus_if_lazy_any:nn {#1} #2 \q_recursion_tail \q_recursion_stop }
+\cs_new:Npn \__cus_if_lazy_any:nn #1#2
+  {
+    \quark_if_recursion_tail_stop_do:nn {#2} { \use_ii:nn }
+    #2 {#1}
+      { \use_i_delimit_by_q_recursion_stop:nw { \use_i:nn } }
+      { }
+    \__cus_if_lazy_any:nn {#1}
+  }
+
+
+
+\cs_new:Npn \cus_tl_split_braced:nn #1#2
+  { 
+    \__cus_tl_split_braced:nwnwnn
+      #1 \s__cus_mark \s__cus_nil 
+      #2 \s__cus_mark \s__cus_nil { } { }
+  }
+\cs_new:Npn \__cus_tl_split_braced:nwnwnn #1#2 \s__cus_nil #3#4 \s__cus_nil
+  {
+    \__cus_use_none_delimit_by_s_mark:w #1 \__cus_tl_split_braced:wwnnw \s__cus_mark
+    \__cus_use_none_delimit_by_s_mark:w #3 \__cus_tl_split_braced:wnnnnw \s__cus_mark
+    \__cus_tl_split_braced:nnnwnn 
+      { } { {#1} } { {#3} } #2 \s__cus_nil #4 \s__cus_nil \s__cus_stop
+  }
+\cs_new:Npn \__cus_tl_split_braced:nnnwnn #1 #2#3 #4 \s__cus_stop #5#6
+  { \__cus_tl_split_braced:nwnwnn #4 { #5 #2 } { #6 #3 } }
+\cs_new:Npn \__cus_tl_split_braced:wwnnw 
+  \s__cus_mark #1 \__cus_tl_split_braced:nnnwnn #2 #3 #4 \s__cus_nil
+  { 
+    #1 \__cus_tl_split_braced:nnnwwnn {#4} { } { } \s__cus_mark \s__cus_nil 
+  }
+\cs_new:Npn \__cus_tl_split_braced:wnnnnw 
+  \s__cus_mark #1 #2 #3#4 #5 \s__cus_nil \s__cus_nil 
+  {
+    \__cus_tl_split_braced:nnnwwnn { } { } { } #3 #5 \s__cus_nil \s__cus_mark \s__cus_nil
+  }
+\cs_new:Npn \__cus_tl_split_braced:nnnwwnn 
+  #1#2#3 #4 \s__cus_nil #5 \s__cus_nil \s__cus_stop #6#7
+  {
+    { \__cus_unexpanded:w { #6 #2 } }
+    { \__cus_tl_split_braced:w \__cus_do_nothing: #4 }
+    { \__cus_unexpanded:w { #7 #3 } }
+    { \__cus_tl_split_braced:w \__cus_do_nothing: #1#5 }
+  }
+\cs_new:Npn \__cus_tl_split_braced:w #1 \s__cus_mark 
+  {
+    \__cus_unexpanded:w \__cus_expanded:w 
+      { { \exp_args:No \tl_map_function:nN {#1} \__cus_tl_braced_aux:n } }
+  }
+\cs_new:Npn \__cus_tl_braced_aux:n #1 { { \__cus_unexpanded:w {#1} } }
+\cs_generate_variant:Nn \cus_tl_split_braced:nn { oo, ee }
+\cs_new_protected:Npn \cus_tl_split_braced:NNNN #1#2#3#4
+  {
+    \cs_set_eq:NN \__cus_tl_split_braced_set_tmp:w \__cus_tl_split_braced:nnnwwnn
+    \cs_set:Npn \__cus_tl_split_braced:nnnwwnn
+      { \__cus_tl_split_braced_set:nnnnnwwnn {#1#3} {#2#4} }
+    \cus_tl_split_braced:oo #1 #2
+    \cs_set_eq:NN \__cus_tl_split_braced:nnnwwnn \__cus_tl_split_braced_set_tmp:w
+  }
+\cs_new_protected:Npn \__cus_tl_split_braced_set:nnnnnwwnn
+  #1#2 #3#4#5 #6 \s__cus_nil #7 \s__cus_nil \s__cus_stop #8#9
+  {
+    \exp_after:wN \tl_set:Nn \use_i:nn #1 { #8 #4 }
+    \exp_after:wN \__cus_tl_split_braced_set:Nw \use_ii:nn #1
+      \__cus_do_nothing: #6 
+    \exp_after:wN \tl_set:Nn \use_i:nn #2 { #9 #5 }
+    \exp_after:wN \__cus_tl_split_braced_set:Nw \use_ii:nn #2
+      \__cus_do_nothing: #3#7
+  }
+\cs_new:Npn \__cus_tl_split_braced_set:Nw #1 #2 \s__cus_mark
+  { \tl_set:Nx #1 { \exp_args:No \tl_map_function:nN {#2} \__cus_tl_braced_aux:n } }
+
+
+
+\quark_new:N \q_cus_special
+\cs_new:Npn \cus_use_none_delimit_by_q_special:w #1 \q_cus_special { }
+\cs_new:Npn \__cus_use_none_delimit_by_s_stop:w #1 \s__cus_stop { }
+\cs_new:Npn \__cus_use_none_delimit_by_s_mark:w #1 \s__cus_mark { }
+\cs_new:Npn \__cus_use_none_delimit_by_s_nil:w #1 \s__cus_nil { }
+\NewExpandableDocumentCommand \__cus_use_none_exp_om:w  { +o +m } { }
+\NewExpandableDocumentCommand \__cus_use_none_exp_oom:w { +o +o +m } { }
+\NewExpandableDocumentCommand \__cus_use_none_exp_omm:w { +o +m +m } { }
+\NewDocumentCommand \__cus_use_none_o:w { +o } { }
+\NewDocumentCommand \__cus_use_none_om:w  { +o +m } { }
+\NewDocumentCommand \__cus_use_none_oom:w { +o +o +m } { }
+\NewDocumentCommand \__cus_use_none_omm:w { +o +m +m } { }
+\cs_new_protected:Npn \__cus_peek_arg_m:nnw #1#2#3 { #2{#3} #1 }
+\cs_new_protected:Npn \__cus_peek_arg_l:nnw #1#2#3#{ #2{#3} #1 }
+\cs_new_protected:Npn \__cus_generate_peek_arg:nNN #1#2#3
+  {
+    \cs_gset_protected:cpn { __cus_peek_arg_#1_aux:nnw } ##1##2#2##3#3
+      { ##2{##3} ##1 }
+    \cs_gset_protected:cpn { __cus_peek_arg_#1:nnw } ##1##2
+      { 
+        \peek_meaning:NTF #2 % do not ignore space 
+          { \use:c { __cus_peek_arg_#1_aux:nnw } {##1} {##2} }
+          { \exp_args:Nno \use:n {##2} { \c_novalue_tl } ##1 }
+      }
+  }
+\cs_new_protected:Npn \__cus_generate_peek_arg:nN #1#2
+  {
+    \cs_gset_protected:cpn { __cus_peek_arg_#1:nnw } ##1##2
+      {
+        \peek_meaning_remove:NTF #2 % do not ignore space 
+          { ##2 { \c_true_bool } ##1 }
+          { ##2 { \c_false_bool } ##1 }
+      }
+  }
+\__cus_generate_peek_arg:nNN o [ ]
+\__cus_generate_peek_arg:nN  s  *
+% \cs_new_protected:Npn \__cus_generate_peek_arg:NNN #1#2#3
+%   { \NewDocumentCommand #1 { +m +m +d#2#3 } { ##2{##3} ##1 } }
+% \cs_new_protected:Npn \__cus_egenerate_peek_arg:NN #1#2
+%   { \NewDocumentCommand #1 { +m +m +t#2 } { ##2{##3} ##1 } }
+% \NewDocumentCommand \cus_peek_arg_m:nnw { +m +m +m } { #2{#3} #1 }
+% \NewDocumentCommand \cus_peek_arg_o:nnw { +m +m +o } { #2{#3} #1 }
+% \NewDocumentCommand \cus_peek_arg_v:nnw { +m +m +v } { #2{#3} #1 }
+% \NewDocumentCommand \cus_peek_arg_l:nnw { +m +m +l } { #2{#3} #1 }
+% \NewDocumentCommand \cus_peek_arg_g:nnw { +m +m +g } { #2{#3} #1 }
+% \cs_set_eq:NN       \cus_peek_arg_db:nnw \cus_peek_arg_o:nnw 
+% \cs_set_eq:NN       \cus_peek_arg_dg:nnw \cus_peek_arg_g:nnw 
+% \NewDocumentCommand \cus_peek_arg_dp:nnw { +m +m +d() } { #2{#3} #1 }
+% \NewDocumentCommand \cus_peek_arg_da:nnw { +m +m +d<> } { #2{#3} #1 }
+% \NewDocumentCommand \cus_peek_arg_s:nnw { +m +m s } { #2{#3} #1 }
+% \cs_set_eq:NN       \cus_peek_arg_ts:nnw \cus_peek_arg_s:nnw 
+% \NewDocumentCommand \cus_peek_arg_tp:nnw { +m +m t+ } { #2{#3} #1 }
+% \NewDocumentCommand \cus_peek_arg_tm:nnw { +m +m t- } { #2{#3} #1 }
+
+\cs_new:Npn \cus_exp_not_use_i:nnnnnnnnn    #1#2#3#4#5#6#7#8#9 { \exp_not:n {#1} }
+\cs_new:Npn \cus_exp_not_use_ii:nnnnnnnnn   #1#2#3#4#5#6#7#8#9 { \exp_not:n {#2} }
+\cs_new:Npn \cus_exp_not_use_iii:nnnnnnnnn  #1#2#3#4#5#6#7#8#9 { \exp_not:n {#3} }
+\cs_new:Npn \cus_exp_not_use_iv:nnnnnnnnn   #1#2#3#4#5#6#7#8#9 { \exp_not:n {#4} }
+\cs_new:Npn \cus_exp_not_use_v:nnnnnnnnn    #1#2#3#4#5#6#7#8#9 { \exp_not:n {#5} }
+\cs_new:Npn \cus_exp_not_use_vi:nnnnnnnnn   #1#2#3#4#5#6#7#8#9 { \exp_not:n {#6} }
+\cs_new:Npn \cus_exp_not_use_vii:nnnnnnnnn  #1#2#3#4#5#6#7#8#9 { \exp_not:n {#7} }
+\cs_new:Npn \cus_exp_not_use_viii:nnnnnnnnn #1#2#3#4#5#6#7#8#9 { \exp_not:n {#8} }
+\cs_new:Npn \cus_exp_not_use_ix:nnnnnnnnn   #1#2#3#4#5#6#7#8#9 { \exp_not:n {#9} }
+% copy from ltxcmds.sty, rewritten in LaTeX3, needs two expansion steps 
+\cs_new:Npn \cus_use_none_num:nw #1
+  {
+    \exp:w \cs:w exp_end:
+    \exp_after:wN \__cus_use_none_num_aux:n 
+    \tex_romannumeral:D \int_eval:n {#1} 000 { m \cs_end: }
+  }
+\cs_new:Npn \__cus_use_none_num_aux:n #1
+  { \cs:w __cus_use_none_aux_:_ #1 \__cus_use_none_num_aux:n }
+\cs_new:Npn \__cus_use_none_aux_:_m #1 { \cs_end: }
+% modified from multiexpand.sty
+\cs_new:Npn \cus_exp_num:nN { \exp:w \__cus_exp_num:nN }
+\cs_new:Npn \cus_exp_after_num:nwN { \exp:w \__cus_exp_after_num:nwN }
+\cs_new:Npn \__cus_exp_num:nN #1
+  { \exp_after:wN \__cus_exp_num_aux:w \int_use:N \tex_numexpr:D #1; }
+\cs_new:Npn \__cus_exp_after_num:nwN #1
+  { \exp_after:wN \__cus_exp_after_num_aux:w \int_use:N \tex_numexpr:D #1; }
+\cs_new:Npn \__cus_exp_num_aux:w #1;
+  {
+    \if_int_compare:w #1 < 2 ~
+      \if_int_compare:w #1 = \c_one_int
+        \__cus_exp_num_once:w \else: \__cus_exp_num_none:w \fi:
+    \fi:
+    \exp_after:wN \__cus_exp_num_aux:w 
+    \int_use:N \tex_numexpr:D #1 -1 \exp_after:wN ;
+  }
+\cs_new:Npn \__cus_exp_after_num_aux:w #1;
+  {
+    \if_int_compare:w #1 < 2 ~
+      \if_int_compare:w #1 = \c_one_int
+        \__cus_exp_num_once:w \else: \__cus_exp_after_num_none:w \fi:
+    \fi:
+    \exp_after:wN \__cus_exp_after_num_aux:w 
+    \int_use:N \tex_numexpr:D #1 -1 \exp_after:wN ; \exp_after:wN
+  }
+\cs_new:Npn \__cus_exp_num_once:w #1 \fi: #2#3#4; { \fi: #2 0 #3 ~ }
+\cs_new:Npn \__cus_exp_num_none:w #1; { \fi: \fi: 0 ~ }
+\cs_new:Npn \__cus_exp_after_num_none:w #1; #2 { \fi: \fi: 0 ~ }
+
+
+\cs_new_protected_nopar:Npn \cus_exception:Nn #1 #2
+  { #1 { cus } { Exception-#2 } }
+\cs_new_protected_nopar:Npn \cus_exception_new:nn #1
+  { \msg_new:nnn { cus } { Exception-#1 } }
+\cus_exception_new:nn { UnImplement } { The~Function~`#1'~is~unimplemented~currently. }
+
+
+% \seq_const_from_clist:Nn \c__cus_args_seq
+%   {
+%     #1, #1#2, #1#2#3, #1#2#3#4, #1#2#3#4#5, #1#2#3#4#5#6,
+%     #1#2#3#4#5#6#7, #1#2#3#4#5#6#7#8, #1#2#3#4#5#6#7#8#9,
+%   }
+% \cs_new_protected_nopar:Npn \cus_new_cs:NNnn #1#2#3 % function, creator, argnum, replace
+%   { \exp_last_unbraced:NNf #2 #1 { \seq_item:Nn \c__cus_args_seq {#3} } }
+\cs_new_eq:NN \cus_new_cs:NNnn \cs_generate_from_arg_count:NNnn
+\cs_generate_variant:Nn \cus_new_cs:NNnn { cN, Nc, cc }
+
+\prg_new_conditional:Npnn \cus_if_preamble_test: { p, T, F, TF }
+  {
+    \if_meaning:w \@onlypreamble \@notprerr
+      \prg_return_false:
+    \else:
+      \prg_return_true:
+    \fi:
+  }
+\prg_new_conditional:Npnn \cus_if_document_test: { p, T, F, TF }
+  {
+    \if_meaning:w \@onlypreamble \@notprerr
+      \prg_return_true:
+    \else:
+      \prg_return_false: 
+    \fi:
+  }
+\prg_new_conditional:Npnn \cus_if_after_documentclass: { p, T, F, TF }
+  {
+    \if_meaning:w \documentclass \@twoclasseserror
+      \prg_return_true:
+    \else:
+      \prg_return_false:
+    \fi:
+  }
+\cs_new:Npn \__cus_if_head_int_dec:nTF #1
+  {
+    \if_case:w 0 \if_case:w 1#1 \or:\or:\or:\or:\or:\or:\or:\or:\or:\else: 1\fi: \exp_stop_f:
+      \exp_after:wN \use_ii:nn
+    \else:
+      \exp_after:wN \use_i:nn
+    \fi:
+  }
+\cs_new_eq:NN \__cus_if_head_digit:nTF \__cus_if_head_int_dec:nTF 
+\cs_new:Npn \__cus_if_head_int_oct:nTF #1
+  {
+    \if_case:w 0 \if_case:w '1#1 \or:\or:\or:\or:\or:\or:\or:\or:\or:\else: 1\fi: \exp_stop_f:
+      \exp_after:wN \use_ii:nn
+    \else:
+      \exp_after:wN \use_i:nn
+    \fi:
+  }
+\cs_new:Npn \__cus_if_head_int_hex:nTF #1
+  {
+    \if_case:w 0 \if_case:w "1#1 \or:\or:\or:\or:\or:\or:\or:\or:\or:\else: 1\fi: \exp_stop_f:
+      \exp_after:wN \use_ii:nn
+    \else:
+      \exp_after:wN \use_i:nn
+    \fi:
+  }
+\prg_new_conditional:Npnn \cus_if_head_int:n #1 { p, T, F, TF }
+  { 
+    \tl_if_head_is_N_type:nTF {#1}
+      {
+        \exp_args:Nee \__cus_if_head_int_aux:nn 
+          { \tl_head:n {#1} } 
+          { \tl_tail:n {#1} } 
+      }
+      { \prg_return_false: }
+  }
+\cs_new:Npn \__cus_if_head_int_aux:nn #1#2
+  {
+    \token_if_macro:NTF #1
+      {
+        \tl_if_empty:eTF { \cs_argument_spec:N #1 }
+          { 
+            \exp_args:No \cus_if_head_int:nTF { #1#2 } 
+              \prg_return_true: \prg_return_false: 
+          }
+          { \prg_return_false: }
+      }
+      {
+        \token_case_meaning:NnF #1
+          {
+            +
+              {
+                \cus_if_head_int:nTF {#2} { \prg_return_true: } { \prg_return_false: }
+              }
+            -
+              {
+                \cus_if_head_int:nTF {#2} { \prg_return_true: } { \prg_return_false: }
+              }
+            "
+              {
+                \__cus_if_head_int_hex:nTF {#2}
+                  { \prg_return_true: } { \prg_return_false: }
+              }
+            '
+              {
+                \__cus_if_head_int_oct:nTF {#2}
+                  { \prg_return_true: } { \prg_return_false: }
+              }
+            \tex_the:D
+              { 
+                \exp_args:No \cus_if_head_int:nTF { #1#2 } 
+                  { \prg_return_true: } { \prg_return_false: }
+              }
+            \tex_number:D
+              { 
+                \exp_args:No \cus_if_head_int:nTF { #1#2 } 
+                  { \prg_return_true: } { \prg_return_false: }
+              }
+            \tex_romannumeral:D
+              { 
+                \exp_args:No \cus_if_head_int:nTF { #1#2 } 
+                  { \prg_return_true: } { \prg_return_false: }
+              }
+            \scan_stop:      { \prg_return_false: }
+            \tex_csname:D    { \prg_return_false: }
+            \tex_undefined:D { \prg_return_false: }
+          }
+          {
+            \token_if_cs:NTF #1
+              {
+                \token_if_primitive:NTF #1
+                  { \prg_return_false: }
+                  {
+                    \exp_args:No \cus_if_head_int:nTF { \int_value:w #1#2 }
+                      { \prg_return_true: } { \prg_return_false: }
+                  }
+              }
+              {
+                \__cus_if_head_int_dec:nTF {#1}
+                  { \prg_return_true: } { \prg_return_false: }
+              }
+          }
+      }
+  }
+\prg_generate_conditional_variant:Nnn \cus_if_head_int:n { e, f } { p, T, F, TF }
+
+\prg_new_conditional:Npnn \cus_psr_if_exist:n #1 { p, T, F, TF }
+  {
+    \cs_if_exist:cTF { cus/psr~#1 :w }
+      \prg_return_true: \prg_return_false:
+  }
+\prg_new_conditional:Npnn \cus_psrrule_if_exist:nn #1#2 { p, T, F, TF }
+  {
+    \cs_if_exist:cTF { cus/psr~#1 /rule~#2 :w }
+      \prg_return_true: \prg_return_false:
+  }
+\prg_new_conditional:Npnn \cus_psr_if_compatible:nn #1#2 { p, T, F, TF }
+  {
+    \int_compare:nNnTF 
+      { \cus_psr_argument_count:n {#1} }
+      =
+      { \cus_psr_argument_count:n {#2} }
+      \prg_return_true: \prg_return_false:
+  }
+\cs_new_protected_nopar:Npn \cus_new_psr:nnn #1#2 
+  { \cus_new_cs:cNnn { cus/psr~#1 :w } \cs_new:Npn {#2} }
+\cs_new_protected_nopar:Npn \cus_set_psr:nnn #1#2 
+  { \cus_new_cs:cNnn { cus/psr~#1 :w } \cs_set:Npn {#2} }
+\cs_new_protected_nopar:Npn \cus_gset_psr:nnn #1#2 
+  { \cus_new_cs:cNnn { cus/psr~#1 :w } \cs_gset:Npn {#2} }
+\cs_new_nopar:Npn \cus_use_psr:n #1 { \cs:w cus/psr~#1 :w \cs_end: }
+\cs_new_nopar:Npn \cus_obey_psrrule:nn #1#2
+  { \cs_set_eq:cc { cus/psr~#1 :w } { cus/psr~#1 /rule~#2 :w } }
+\cs_new_nopar:Npn \cus_gbey_psrrule:nn #1#2
+  { \cs_gset_eq:cc { cus/psr~#1 :w } { cus/psr~#1 /rule~#2 :w } }
+\cs_new_nopar:Npn \cus_psr_argument_count:n #1
+  { \int_eval:n { \tl_count:e { \cs_argument_spec:c { cus/psr~#1 :w } } / 2 } }
+\cs_new_protected_nopar:Npn \cus_new_psrrule:nnn #1#2
+  { 
+    \cus_new_cs:cNnn { cus/psr~#1 /rule~#2 :w } \cs_new:Npn 
+      { \cus_psr_argument_count:n {#1} } 
+  }
+\cs_new_protected_nopar:Npn \cus_set_psrrule:nnn #1#2
+  { 
+    \cus_new_cs:cNnn { cus/psr~#1 /rule~#2 :w } \cs_set:Npn 
+      { \cus_psr_argument_count:n {#1} } 
+  }
+\cs_new_protected_nopar:Npn \cus_gset_psrrule:nnn #1#2
+  { 
+    \cus_new_cs:cNnn { cus/psr~#1 /rule~#2 :w } \cs_gset:Npn 
+      { \cus_psr_argument_count:n {#1} } 
+  }
+\cs_new_nopar:Npn \cus_exec_psrrule:nn #1#2
+  { \cs:w cus/psr~#1 /rule~#2 :w \cs_end: }
+\cs_new_protected_nopar:Npn \cus_new_psrrule_eq:nnn #1#2#3
+  { \cs_new_eq:cc { cus/psr~#1 /rule~#2 :w } { cus/psr~#1 /rule~#3 :w } }
+\cs_new_protected_nopar:Npn \cus_set_psrrule_eq:nnn #1#2#3
+  { \cs_set_eq:cc { cus/psr~#1 /rule~#2 :w } { cus/psr~#1 /rule~#3 :w } }
+\cs_new_protected_nopar:Npn \cus_gset_psrrule_eq:nnn #1#2#3
+  { \cs_gset_eq:cc { cus/psr~#1 /rule~#2 :w } { cus/psr~#1 /rule~#3 :w } }
+\cs_new_protected_nopar:Npn \cus_new_psrrule_eq_cs:nnN #1#2#3
+  { \cs_new_eq:cN { cus/psr~#1 /rule~#2 :w } #3 }
+\cs_new_protected_nopar:Npn \cus_set_psrrule_eq_cs:nnN #1#2#3
+  { \cs_set_eq:cN { cus/psr~#1 /rule~#2 :w } #3 }
+\cs_new_protected_nopar:Npn \cus_gset_psrrule_eq_cs:nnN #1#2#3
+  { \cs_gset_eq:cN { cus/psr~#1 /rule~#2 :w } #3 }
+\cs_new_protected_nopar:Npn \cus_new_psrrule_eq_cs:nnc #1#2#3
+  { \cs_new_eq:cc { cus/psr~#1 /rule~#2 :w } {#3} }
+\cs_new_protected_nopar:Npn \cus_set_psrrule_eq_cs:nnc #1#2#3
+  { \cs_set_eq:cc { cus/psr~#1 /rule~#2 :w } {#3} }
+\cs_new_protected_nopar:Npn \cus_gset_psrrule_eq_cs:nnc #1#2#3
+  { \cs_gset_eq:cc { cus/psr~#1 /rule~#2 :w } {#3} }
+
+\cs_new:Npn \cus_exp_args:Nd #1#2
+  {
+    \exp_after:wN \exp_after:wN \exp_after:wN #1 
+    \exp_after:wN \exp_after:wN \exp_after:wN { #2 }
+  }
+\cs_new:Npn \cus_exp_args:NNd #1#2#3
+  {
+    \exp_after:wN #1 \exp_after:wN #2 \exp_after:wN
+    { \exp:w \exp_after:wN \exp_after:wN \exp_after:wN \exp_end: #3 }
+  }
+\cs_new:Npn \cus_exp_args:Nnd #1#2#3
+  {
+    \__cus_expanded:w { \exp_not:n { #1 {#2} } \exp_after:wN } \exp_after:wN
+    { \exp:w \exp_after:wN \exp_after:wN \exp_after:wN \exp_end: #3 }
+  }
+\cs_new:Npn \cus_exp_last_unbraced:Nd #1#2
+  { \exp_after:wN \exp_after:wN \exp_after:wN #1 #2 }
+\cs_new:Npn \cus_exp_last_unbraced:NNd #1#2#3
+  {
+    \exp_after:wN #1 \exp_after:wN #2 
+    \exp:w \exp_after:wN \exp_after:wN \exp_after:wN \exp_end: #3
+  }
+\cs_new:Npn \cus_exp_last_unbraced:Nnd #1#2#3
+  {
+    \__cus_expanded:w { \__cus_unexpanded:w { #1 {#2} }
+      \exp_after:wN \exp_after:wN \exp_after:wN } #3
+  }
+
+
+\cs_new_protected:Npn \cus_marks_new:N #1
+  {
+    \elkernel_chk_if_free_cs:N #1
+    \cs:w newmarks \cs_end: #1
+  }
+\cs_generate_variant:Nn \cus_marks_new:N { c }
+\cs_new_protected:Npn \cus_marks_gset:Nn #1#2
+  { \cus_marks_gset:Nx #1 { \exp_not:n {#2} } }
+\cs_generate_variant:Nn \cus_marks_gset:Nn { cn }
+\cs_new_protected:Npn \cus_marks_gset:Nx #1#2
+  { \tex_marks:D {#1} }
+\cs_generate_variant:Nn \cus_marks_gset:Nx { cx }
+\cs_gset_eq:NN \cus_marks_bot:N   \tex_botmarks:D
+\cs_generate_variant:Nn \cus_marks_bot:N { c }
+\cs_gset_eq:NN \cus_marks_first:N \tex_firstmarks:D
+\cs_generate_variant:Nn \cus_marks_first:N { c }
+\cs_gset_eq:NN \cus_marks_split_bot:N   \tex_splitbotmarks:D
+\cs_generate_variant:Nn \cus_marks_split_bot:N { c }
+\cs_gset_eq:NN \cus_marks_split_first:N \tex_splitfirstmarks:D
+\cs_generate_variant:Nn \cus_marks_split_first:N { c }
+\cs_gset_eq:NN \cus_marks_top:N   \tex_topmarks:D
+\cs_generate_variant:Nn \cus_marks_top:N { c }
+\cs_new_protected:Npn \cus_marks_gclear:N #1
+  { \cus_marks_gset:Nx #1 { } }
+\cs_generate_variant:Nn \cus_marks_gclear:N { c }
+
+
+\cs_gset_protected:Npn \cus_toks_new:N #1
+  {
+    \elkernel_chk_if_free_cs:N #1
+    \cs:w newtoks \cs_end: #1
+  }
+\cs_generate_variant:Nn \cus_toks_new:N { c }
+\cs_new_eq:NN \cus_toks_use:N \tex_the:D
+\cs_generate_variant:Nn \cus_toks_use:N { c }
+\cs_new_eq:NN \cus_toks_if_exist_p:N \cs_if_exist_p:N
+\cs_new_eq:NN \cus_toks_if_exist:NTF \cs_if_exist:NTF
+\cs_new_eq:NN \cus_toks_if_exist:NT \cs_if_exist:NT
+\cs_new_eq:NN \cus_toks_if_exist:NF \cs_if_exist:NF
+\cs_new_eq:NN \cus_toks_if_exist_p:c \cs_if_exist_p:c
+\cs_new_eq:NN \cus_toks_if_exist:cTF \cs_if_exist:cTF
+\cs_new_eq:NN \cus_toks_if_exist:cT \cs_if_exist:cT
+\cs_new_eq:NN \cus_toks_if_exist:cF \cs_if_exist:cF
+\cs_new_protected:Npn \cus_toks_set_eq:NN #1#2 { #1 = #2 }
+\cs_new_protected:Npn \cus_toks_gset_eq:NN #1#2 
+  { \tex_global:D #1 = #2 }
+\cs_new_protected:Npn \cus_toks_set:Nn #1#2 { #1 = {#2} }
+\cs_new_protected:Npn \cus_toks_gset:Nn #1#2 
+  { \tex_global:D #1 = {#2} }
+\cs_new_protected:Npn \cus_toks_clear:N #1 { #1 = {} }
+\cs_generate_variant:Nn \cus_toks_clear:N { c }
+\cs_new_protected:Npn \cus_toks_gclear:N #1 { \tex_global:D #1 = {} }
+\cs_generate_variant:Nn \cus_toks_gclear:N { c }
+\cs_new_protected:Npn \cus_toks_use_clear:N #1 
+  { \cus_toks_use:N #1 #1 = {} }
+\cs_generate_variant:Nn \cus_toks_use_clear:N { c }
+\cs_new_protected:Npn \cus_toks_use_gclear:N #1 
+  { \cus_toks_use:N #1 \tex_global:D #1 = {} }
+\cs_generate_variant:Nn \cus_toks_use_gclear:N { c }
+\cs_new_protected:Npn \cus_toks_put_right:Nn #1#2
+  { #1 \exp_after:wN { \cus_toks_use:N #1 #2 } }
+\cs_generate_variant:Nn \cus_toks_put_right:Nn { cn, Nf, cf, No, co, Nv, cv, NV, cV, Ne, ce }
+\cs_new_protected:Npn \cus_toks_put_left:Nn #1#2
+  {
+    \exp_args:Nx #1 
+      { \exp_not:n {#2} \exp_not:n \exp_after:wN { \cus_toks_use:N #1 } }
+  }
+\cs_generate_variant:Nn \cus_toks_put_left:Nn { cn, Nf, cf, No, co, Nv, cv, NV, cV, Ne, ce }
+\cs_new_protected:Npn \cus_toks_gput_right:Nn #1#2
+  { \tex_global:D #1 \exp_after:wN { \cus_toks_use:N #1 #2 } }
+\cs_generate_variant:Nn \cus_toks_gput_right:Nn { cn, Nf, cf, No, Ne, co, Nv, cv, NV, cV, ce }
+\cs_new_protected:Npn \cus_toks_gput_left:Nn #1#2
+  {
+    \exp_args:NNx \tex_global:D #1 
+      { \exp_not:n {#2} \exp_not:n \exp_after:wN { \cus_toks_use:N #1 } }
+  }
+\cs_generate_variant:Nn \cus_toks_gput_left:Nn { cn, Nf, cf, No, co, Nv, cv, NV, cV, Ne, ce }
+\cs_new:Npn \cus_toks_if_empty_p:N #1 { \str_if_eq_p:ee { \cus_toks_use:N #1 } { } }
+\cs_new:Npn \cus_toks_if_empty:NTF #1 { \str_if_eq:eeTF { \cus_toks_use:N #1 } { } }
+\cs_new:Npn \cus_toks_if_empty:NF #1 { \str_if_eq:eeF { \cus_toks_use:N #1 } { } }
+\cs_new:Npn \cus_toks_if_empty:NT #1 { \str_if_eq:eeT { \cus_toks_use:N #1 } { } }
+
+
+%% hack l3keys
+\msg_new:nnn { cus } { switch-only } 
+  { You~can~only~use~`true,~false,~yes,~no,~on,~off'~in~key~`#1',~while~you~use~`#2'. }
+\cs_new_protected:cpn { \c__keys_props_root_str .switch_set:N } #1 
+  { \__cus_switch_set:Nn #1 { } }
+\cs_new_protected:cpn { \c__keys_props_root_str .switch_set:c } #1 
+  { \__cus_switch_set:cn {#1} { } }
+\cs_new_protected:cpn { \c__keys_props_root_str .switch_gset:N } #1 
+  { \__cus_switch_set:Nn #1 { g } }
+\cs_new_protected:cpn { \c__keys_props_root_str .switch_gset:c } #1 
+  { \__cus_switch_set:cn {#1} { g } }
+\cs_new_protected:Npn \__cus_switch_set:Nn #1#2
+  {
+    \bool_if_exist:NF #1 { \bool_new:N #1 }
+    \__keys_choice_make:
+    \__keys_cmd_set:ne { \l_keys_path_str / true }
+      { \exp_not:c { bool_ #2 set_true:N } \exp_not:N #1 }
+    \__keys_cmd_set:ne { \l_keys_path_str / yes }
+      { \exp_not:c { bool_ #2 set_true:N } \exp_not:N #1 }
+    \__keys_cmd_set:ne { \l_keys_path_str / on }
+      { \exp_not:c { bool_ #2 set_true:N } \exp_not:N #1 }
+    \__keys_cmd_set:ne { \l_keys_path_str / false }
+      { \exp_not:c { bool_ #2 set_false:N } \exp_not:N #1 }
+    \__keys_cmd_set:ne { \l_keys_path_str / no }
+      { \exp_not:c { bool_ #2 set_false:N } \exp_not:N #1 }
+    \__keys_cmd_set:ne { \l_keys_path_str / off }
+      { \exp_not:c { bool_ #2 set_false:N } \exp_not:N #1 }
+    \__keys_cmd_set:nn { \l_keys_path_str / unknown }
+      { 
+        \msg_error:nnxx { cus } { switch-only } \l_keys_key_str { \tl_to_str:N \l_keys_value_tl } 
+      }
+    \__keys_default_set:n { true }
+  }
+\cs_generate_variant:Nn \__cus_switch_set:Nn { c }
+\cs_if_free:cT { \c__keys_props_root_str .clist_put_right:N }
+  {
+    \cs_new:Npn \__cus_keys_variable_set:NnnN #1#2#3#4
+      {
+        \use:c { #2_if_exist:NF } #1 { \use:c { #2 _new:N } #1 }
+        \__keys_cmd_set:ne \l_keys_path_str
+          {
+            \exp_not:c { #2 _ #3 :N #4 }
+            \exp_not:N #1
+            \exp_not:n  { {##1} }
+          }
+      }
+    \cs_new_protected:cpn { \c__keys_props_root_str .clist_put_right:N } #1
+      { \__cus_keys_variable_set:NnnN #1 { clist } { put_right } n }
+    \cs_new_protected:cpn { \c__keys_props_root_str .clist_gput_right:N } #1
+      { \__cus_keys_variable_set:NnnN #1 { clist } { gput_right } n }
+    \cs_new_protected:cpn { \c__keys_props_root_str .clist_put_left:N } #1
+      { \__cus_keys_variable_set:NnnN #1 { clist } { put_left } n }
+    \cs_new_protected:cpn { \c__keys_props_root_str .clist_gput_left:N } #1
+      { \__cus_keys_variable_set:NnnN #1 { clist } { gput_left } n }
+  }
+\cs_new_protected:cpn { \c__keys_props_root_str .toks_put_right:N } #1
+  { \__cus_variable_set:NnnN #1 { toks } { put_right } n }
+\cs_new_protected:cpn { \c__keys_props_root_str .toks_gput_right:N } #1
+  { \__cus_variable_set:NnnN #1 { toks } { gput_right } n }
+\cs_new_protected:cpn { \c__keys_props_root_str .toks_put_left:N } #1
+  { \__cus_variable_set:NnnN #1 { toks } { put_left } n }
+\cs_new_protected:cpn { \c__keys_props_root_str .toks_gput_left:N } #1
+  { \__cus_variable_set:NnnN #1 { toks } { gput_left } n }
+\cs_new:Npn \__cus_variable_set:NnnN #1#2#3#4
+  {
+    \use:c { cus_ #2 _if_exist:NF } #1 { \use:c { cus_ #2 _new:N } #1 }
+    \__keys_cmd_set:ne \l_keys_path_str
+      {
+        \exp_not:c { cus_ #2 _ #3 :N #4 }
+        \exp_not:N #1
+        \exp_not:n  { {##1} }
+      }
+  }
+\cs_generate_variant:Nn \__cus_variable_set:NnnN { c }
+\cs_new_protected:cpn { \c__keys_props_root_str .obey_psrrule:nn } #1#2
+  { \__keys_cmd_set:nn \l_keys_path_str { \cus_obey_psrrule:nn {##1} {##2} } }
+\cs_new_protected:cpn { \c__keys_props_root_str .gbey_psrrule:nn } #1#2
+  { \__keys_cmd_set:nn \l_keys_path_str { \cus_gbey_psrrule:nn {##1} {##2} } }
+
+%%end%%
+
+
+%% using quark is meant to forbid direct use 
+% exactly three expansions, considering \unexpanded needs one more expansion
+\cs_new:Npn \cus_split_bracket_head_default:nn #1#2 % [default], tl
+  { 
+    \__cus_split_bracket_head:w 
+      \q__cus_mark #2 \q__cus_mark [{#1}] #2 \q__cus_stop 
+  }
+\cs_new:Npn \__cus_split_bracket_head:w #1 \q__cus_mark [#2] #3 \q__cus_stop
+  { \__cus_split_bracket_head_b:nw {#2} #3 \q__cus_mark \q__cus_stop }
+\cs_new:Npn \__cus_split_bracket_head_b:nw #1 #2 \q__cus_mark #3 \q__cus_stop
+  { \elkernel_exp_not:w { [{#1}] {#2} } }
+% exactly three expansions, considering \unexpanded needs one more expansion
+\cs_new:Npn \cus_split_bracket_tail_default:nn #1#2 % tl, [default]
+  { 
+    \__cus_split_bracket_tail:nnw 
+      \prg_do_nothing: #1 \q__cus_mark [{#2}] \q__cus_mark \q__cus_stop 
+  }
+\cs_new:Npn \__cus_split_bracket_tail:nnw #1 #2 #3 [#4] \q__cus_mark #5 \q__cus_stop 
+  { \__cus_split_bracket_tail_b:nw {#4} #1#2#3 \q__cus_mark \q__cus_stop }
+\cs_new:Npn \__cus_split_bracket_tail_b:nw #1 #2 \q__cus_mark #3 \q__cus_stop
+  { \elkernel_exp_not:w \exp_after:wN { \exp_after:wN {#2} [{#1}] } }
+% exactly four expansions, considering \unexpanded needs one more expansion
+\cs_new:Npn \cus_split_bracket_outer_default:nnn #1#2#3 % [default1], tl, [default2]
+  {
+    \__cus_split_bracket_outer_a:w 
+      \q__cus_mark #2 \q__cus_mark [{#1}] #2 \q__cus_mark [{#3}] 
+      \q__cus_mark \q__cus_stop
+  }
+\cs_new:Npn \__cus_split_bracket_outer_a:w 
+  #1 \q__cus_mark [#2] #3 [#4] \q__cus_mark #5 \q__cus_stop
+  {
+    \__cus_split_bracket_outer_b:nw {#2}
+      #3 \q__cus_mark \q__cus_nil
+      [#4] [#4] #5 \q__cus_mark \q__cus_stop 
+  }
+\cs_new:Npn \__cus_split_bracket_outer_b:nw 
+  #1 #2 \q__cus_mark #3 \q__cus_nil 
+  #4 ][#5] \q__cus_mark #6 \q__cus_stop
+  { \__cus_split_bracket_outer_c:nnw {#1} {#2} [#5] \q__cus_mark [#5] \q__cus_stop }
+\cs_new:Npn \__cus_split_bracket_outer_c:nnw #1#2 #3 \q__cus_mark [ #4 ] #5 \q__cus_stop
+  { \elkernel_exp_not:w { [{#1}] {#2} [{#4}] } }
+\cs_new:Npn \cus_split_bracket_head:n { \cus_split_bracket_head_default:nn { } }
+\cs_new:Npn \cus_split_bracket_tail:n #1 { \cus_split_bracket_tail_default:nn {#1} { } }
+\cs_new:Npn \cus_split_bracket_outer:n #1
+  { \cus_split_bracket_outer_default:nnn { } {#1} { } }
+\cs_generate_variant:Nn \cus_split_bracket_head:n { f, e }
+\cs_generate_variant:Nn \cus_split_bracket_tail:n { f, e }
+\cs_generate_variant:Nn \cus_split_bracket_outer:n { f, e }
+
+
+% unordered options: ABC = BCA = CBA = ACB 
+\cs_new_protected:Npn \cus_new_uoptions:nn #1#2 % key name, initial settings 
+  {
+    \group_begin:
+    \clist_set_eq:NN \l__cus_index_clist \c_empty_clist
+    \int_zero:N \l__cus_tmpa_int
+    \int_zero:N \l__cus_tmpb_int
+    \cs_set_eq:NN \l__cus_uoptions_last_int \l__cus_tmpb_int
+    \keyval_parse:nnn 
+      { \cus_twiddle_N:nnn \__cus_new_uoptions_parse:nn { } }
+      { \__cus_new_uoptions_parse:nn }
+      {#2}
+    \clist_remove_duplicates:N \l__cus_index_clist
+    \clist_sort:Nn \l__cus_index_clist
+      {
+        \int_compare:nNnTF { ##1 } > { ##2 }
+          { \sort_return_swapped: } { \sort_return_same: }
+      }
+    \__seq_push_item_def:n 
+      { \exp_not:N \__seq_item:n { \exp_not:v { l__cus/uoptions~ ##1 _tl } } }
+    \exp_args:Nc \elkernel_tl_gset:Nx { c__cus/uoptions~ #1 _seq }
+      { \s__seq \clist_map_function:NN \l__cus_index_clist \__seq_item:n }
+    \__seq_pop_item_def:
+    \group_end:
+  }
+\cs_new:Npn \__cus_new_uoptions_parse:nn #1#2 % allow values, default value
+  {
+    \tl_set:Nx \l__cus_allow_info_tl
+      { 
+        \cus_split_bracket_tail_default:nn {#1} 
+          { \l__cus_uoptions_last_int + 1 }
+      }
+    \tl_set:Nx \l__cus_allow_tl { \tl_head:N \l__cus_allow_info_tl }
+    \tl_if_empty:nF \l__cus_allow_tl
+      {
+        \tl_set:Nx \l__cus_index_tl 
+          { \int_eval:w \cus_unbracket:f { \tl_tail:N \l__cus_allow_info_tl } }
+        \int_set:Nn \l__cus_uoptions_last_int { \l__cus_index_tl }
+        \tl_if_empty:nTF {#2} { \use_i:nn }
+          { \tl_if_in:NnTF \l__cus_allow_tl {#2} { \use_ii:nn } { \use_i:nn } }
+            { \tl_set:Nx \l__cus_default_tl { \tl_item:Nn \l__cus_allow_tl { 1 } } }
+            { \tl_set:Nn \l__cus_default_tl {#2} }
+        \clist_put_right:No \l__cus_index_clist { \l__cus_index_tl }
+        \tl_set:cx { l__cus/uoptions~ \l__cus_index_tl _tl }
+          { 
+            \exp_not:N \__cus_uoptions_item:nnn 
+            { \exp_not:o \l__cus_allow_tl }
+            { \exp_not:o \l__cus_default_tl }
+          }
+      }
+  }
+\cs_new_eq:NN \__cus_uoptions_item:nnn \use_none:nnn
+\cs_new:Npn \cus_log_uoptions:n #1
+  {
+    \group_begin:
+    \cs_set_eq:NN \__cus_uoptions_item:nnn \__cus_uoptions_item_log:nnw
+    \iow_log:x { The~cus~uoptions~`#1'~contains~(without~outer~braces): }
+    \seq_map_function:cN { c__cus/uoptions~ #1 _seq } \use:n
+    \group_end:
+  }
+\cs_new:Npn \__cus_uoptions_item_log:nnw #1#2
+  {
+    \iow_log:x 
+      { 
+        > \c_space_tl \c_space_tl 
+        available~values:~ \c_left_brace_str #1 \c_right_brace_str ;
+        \iow_newline: \c_space_tl \c_space_tl \c_space_tl
+        default ~\c_space_tl \c_space_tl value~ :~ \c_left_brace_str #2 \c_right_brace_str
+      }
+  }
+\cs_new_protected:Npn \cus_parse_uoptions:Nnn #1#2#3
+  {
+    \group_begin:
+    \clist_set_eq:NN \g__cus_tmpa_clist \c_empty_clist
+    \int_set:Nn \l__cus_tmpa_int { \seq_count:c { c__cus/uoptions~ #2 _seq } }
+    \cs_set_eq:NN \__cus_uoptions_item:nnn \__cus_uoptions_item_parse:nnn 
+    \clist_map_tokens:nn {#3} { \__cus_parse_uoptions:nn {#2} }
+    \group_end:
+    \cs_set_eq:NN #1 \g__cus_tmpa_clist
+  }
+\cs_new:Npn \__cus_parse_uoptions:nn #1#2
+  {
+    \int_zero:N \l__cus_tmpb_int
+    \cus_toks_clear:N \l__cus_tmpa_toks
+    \seq_map_inline:cn { c__cus/uoptions~ #1 _seq }
+      { 
+        \int_incr:N \l__cus_tmpb_int
+        \tl_set:cx { l__cus/uoptions~ \int_use:N \l__cus_tmpb_int _tl } 
+          { \exp_not:o { \use_iii:nnn ##1 } } 
+      }
+    \tl_map_inline:nn {#2}
+      {
+        \int_zero:N \l__cus_tmpb_int
+        \seq_map_inline:cn { c__cus/uoptions~ #1 _seq } 
+          { \int_incr:N \l__cus_tmpb_int ####1 ##1 }
+        \use:n { \msg_warning:nnn { cus } { unrecognize-options } {#2} }
+      }
+    \int_step_inline:nn \l__cus_tmpa_int
+      { \cus_toks_put_right:Nv \l__cus_tmpa_toks { l__cus/uoptions~ ##1 _tl } }
+    \clist_gput_right:Nx \g__cus_tmpa_clist { \cus_toks_use:N \l__cus_tmpa_toks }
+  }
+\cs_new:Npn \__cus_uoptions_item_parse:nnn #1#2#3
+  {
+    \tl_if_in:nnT {#1} {#3}
+      { 
+        \tl_set:cn { l__cus/uoptions~ \int_use:N \l__cus_tmpb_int _tl } {#3} 
+        \seq_map_break:n { \use_none:nn }
+      }
+  }
+\msg_new:nnn { cus } { unrecognize-options } 
+  { The~option~`#1'~contains~unrecognized~value. }
+
+
+\cs_new_nopar:Npn \__cus_uchar:n #1 { \tex_Uchar:D \int_eval:w #1 \scan_stop: }
+\cs_set:Npn \__cus_tmp:w #1
+  {
+    \cs_new_nopar:Npn \ucchars ##1
+      {
+        \__cus_unichar_aux:nw ##1 #1 
+          \q_cus_special #1 \q_cus_special #1 \q_cus_special #1 \q_cus_special #1
+          \q_cus_special #1 \q_stop
+      }
+    \cs_new:Npn \__cus_unichar_aux:nw ##1##2 #1 ##3##4 #1 ##5##6 #1 ##7##8 #1 ##9
+      { 
+        \cus_use_none_delimit_by_q_special:w ##9 \__cus_unichar_end:w \q_cus_special
+        \__cus_uchar:n {##1##2} \__cus_uchar:n {##3##4} 
+        \__cus_uchar:n {##5##6} \__cus_uchar:n {##7##8}
+        \__cus_unichar_aux:nw ##9
+      }
+    \cs_new:Npn \__cus_unichar_end:w \q_cus_special ##1##2
+      {
+        \cus_use_none_delimit_by_q_special:w ##2 \use_none_delimit_by_q_stop:w \q_cus_special
+        ##1 {##2}
+        \__cus_unichar_end:w \q_cus_special
+      }
+    \cs_new_nopar:Npn \ucchar ##1 
+      { \exp_args:Nf \__cus_uchar:n { ##1 } }
+  }
+\__cus_tmp:w { ~ }
+
+
+\cs_new_eq:NN \cus_color_select:n \color_select:n
+\cs_new_eq:NN \cus_color_select:nn \color_select:nn
+\cs_new_eq:NN \cus_color_set:nn \color_set:nn
+\cs_new_eq:NN \cus_color_set:nnn \color_set:nnn
+\cs_new_protected_nopar:Npn \__cus_key_color_select:n #1
+  {
+    \tl_if_head_eq_meaning:nNTF {#1} [ % ]
+      { \__cus_key_color_select_aux:w #1 \s__cus_stop }
+      { \cus_color_select:n {#1} }
+  }
+\cs_new:Npn \__cus_key_color_select_aux:w [#1] #2 \s__cus_stop
+  { \cus_color_select:nn {#1} {#2} }
+\cs_new_protected_nopar:Npn \__cus_key_color_set:nn #1#2
+  {
+    \tl_if_head_eq_meaning:nNTF {#2} [ % ]
+      { \__cus_key_color_set_aux:nw {#1} #2 \s__cus_stop }
+      { \cus_color_set:nn {#1} {#2} }
+  }
+\cs_new:Npn \__cus_key_color_set_aux:nw #1 [#2] #3 \s__cus_stop
+  { \cus_color_set:nnn {#1} {#2} {#3} }
+\hook_gput_code:nnn { package/xcolor/after } { cus/pkg/after }
+  {
+    \cs_set_protected:Npn \cus_color_select:n #1 { \color {#1} }
+    \cs_set_protected:Npn \cus_color_select:nn #1#2 { \color [#1] {#2} }
+    \cs_set_protected:Npn \cus_color_set:nn { \colorlet }
+    \cs_set_protected:Npn \cus_color_set:nnn { \definecolor }
+  }
+\cus_pkg_code:nnn { hyperref }
+  {
+    \cs_new_nopar:Npn \cus@colorfile { \normalcolor }
+    \cs_new_nopar:Npn \cus@colorcite { \normalcolor }
+    \cs_new_nopar:Npn \cus@colorlink { \normalcolor }
+    \cs_new_nopar:Npn \cus@colorurl { \normalcolor }
+    \cs_new_nopar:Npn \cus@colorrun { \normalcolor }
+    \cs_new_nopar:Npn \cus@colormenu { \normalcolor }
+  }
+  {
+    \cs_set_nopar:Npn \cus@colorfile { \color{\@filecolor} }
+    \cs_set_nopar:Npn \cus@colorlink { \color{\@linkcolor} }
+    \cs_set_nopar:Npn \cus@colorcite { \color{\@citecolor} }
+    \cs_set_nopar:Npn \cus@colorurl { \color{\@urlcolor} }
+    \cs_set_nopar:Npn \cus@colorrun { \normalcolor }
+    \cs_set_nopar:Npn \cus@colormenu { \normalcolor }
+  }
+
+%region protect write & newlabel
+\cs_new_protected:Npn \__cus_protect_iow_now:Nnn #1#2#3
+  {
+    \group_begin:
+    \cs_set_eq:NN \protect \@unexpandable@protect 
+    #2
+    \iow_now:Nn #1 {#3}
+    \group_end:
+    \legacy_if:nT { @nobreak } { \mode_if_vertical:T { \nobreak } }
+  }
+\cs_new_protected:Npn \__cus_protect_iow_now:Nnx #1#2#3
+  {
+    \group_begin:
+    \cs_set_eq:NN \protect \@unexpandable@protect 
+    #2
+    \iow_now:Nx #1 {#3}
+    \group_end:
+    \legacy_if:nT { @nobreak } { \mode_if_vertical:T { \nobreak } }
+  }
+\cs_new_protected:Npn \__cus_protect_iow_shipout:Nnn #1#2#3
+  {
+    \group_begin:
+    \cs_set_eq:NN \protect \@unexpandable@protect 
+    #2
+    \iow_shipout:Nn #1 {#3}
+    \group_end:
+    \legacy_if:nT { @nobreak } { \mode_if_vertical:T { \nobreak } }
+  }
+\cs_new_protected:Npn \__cus_protect_iow_shipout:Nnx #1#2#3
+  {
+    \group_begin:
+    \cs_set_eq:NN \protect \@unexpandable@protect 
+    #2
+    \iow_shipout:Nx #1 {#3}
+    \group_end:
+    \legacy_if:nT { @nobreak } { \mode_if_vertical:T { \nobreak } }
+  }
+\cs_new_protected:Npn \__cus_protect_iow_shipout_e:Nnn #1#2#3
+  {
+    \group_begin:
+    \cs_set_eq:NN \protect \@unexpandable@protect 
+    #2
+    \iow_shipout_e:Nn #1 {#3}
+    \group_end:
+    \legacy_if:nT { @nobreak } { \mode_if_vertical:T { \nobreak } }
+  }
+\cs_new_protected:Npn \__cus_protect_iow_shipout_e:Nnx #1#2#3
+  {
+    \group_begin:
+    \cs_set_eq:NN \protect \@unexpandable@protect 
+    #2
+    \iow_shipout_e:Ne #1 {#3}
+    \group_end:
+    \legacy_if:nT { @nobreak } { \mode_if_vertical:T { \nobreak } }
+  }
+% #1, #3, #4, #5 总是立即展开
+\cs_gset_protected:Npn \cus_newlabel_now:nnnnnn #1#2#3#4#5#6
+  {
+    \__cus_protect_iow_now:Nnx \@auxout { \str_set:Nx \@currentlabel {#1} }
+    {
+      \token_to_str:N \newlabel {#1}
+      { { \exp_not:n {#2} } {#3} {#4} {#5} { \exp_not:n {#6} } }
+    }
+  }
+\cs_gset_protected:Npn \cus_newlabel_now:xxxxxx #1#2#3#4#5#6 
+  {
+    \__cus_protect_iow_now:Nnx \@auxout { \str_set:Nx \@currentlabel {#1} }
+    {
+      \token_to_str:N \newlabel {#1}
+      { {#2} {#3} {#4} {#5} {#6} }
+    }
+  }
+\cs_gset_protected:Npn \cus_newlabel_shipout:nnnnnn #1#2#3#4#5#6
+  {
+    \__cus_protect_iow_shipout:Nnx \@auxout { \str_set:Nx \@currentlabel {#1} }
+    {
+      \token_to_str:N \newlabel {#1}
+      { { \exp_not:n {#2} } {#3} {#4} {#5} { \exp_not:n {#6} } }
+    }
+  }
+\cs_gset_protected:Npn \cus_newlabel_shipout:xxxxxx #1#2#3#4#5#6 
+  {
+    \__cus_protect_iow_now:Nnx \@auxout { \str_set:Nx \@currentlabel {#1} }
+    {
+      \token_to_str:N \newlabel {#1}
+      { {#2} {#3} {#4} {#5} {#6} }
+    }
+  }
+\cs_gset_protected:Npn \cus_newlabel_shipout_x:nnnnnn #1#2#3#4#5#6
+  {
+    \__cus_protect_iow_shipout_e:Nnx \@auxout { \str_set:Nx \@currentlabel {#1} }
+    {
+      \token_to_str:N \newlabel {#1}
+      { \exp_not:n { {#2} } {#3} {#4} {#5} \exp_not:n { {#6} } }
+    }
+  }
+\cs_gset_protected:Npn \cus_newlabel_shipout_x:xxxxxx #1#2#3#4#5#6 
+  {
+    \__cus_protect_iow_shipout_e:Nnx \@auxout { \str_set:Nx \@currentlabel {#1} }
+    {
+      \token_to_str:N \newlabel {#1}
+      { {#2} {#3} {#4} {#5} {#6} }
+    }
+  }
+%endregion
+
+\prg_new_conditional:Npnn \cus_label_if_exist:n #1 { p, T, F, TF }
+  { \cs_if_exist:cTF { r@#1 } { \prg_return_true: } { \prg_return_false: } }
+\cs_new:Npn \cus_label_info:nn #1#2 
+  { 
+    \exp_args:Nne \use:c { __cus_get_label_#1:n }
+      { \tl_if_blank:eTF {#2} { \tl_to_str:N \@currentlabel } {#2} }
+  }
+\cs_new_eq:NN \labelinfo \cus_label_info:nn 
+\cs_new:Npn \__cus_get_label_name:n #1 
+  { \cs_if_exist:cTF { r@#1 } {#1} { \c_novalue_tl } }
+\cs_new:Npn \__cus_get_label_ref:n #1
+  { \cs_if_exist:cTF { r@#1 } { \tl_item:cn { r@#1 } { 1 } } { \c_novalue_tl } }
+\cs_new:Npn \__cus_get_label_page:n #1
+  { \cs_if_exist:cTF { r@#1 } { \tl_item:cn { r@#1 } { 2 } } { 0 } }
+\cus_pkg_code:nnn { hyperref }
+  { 
+    \cs_new:Npn \__cus_get_label_anchor:n #1 { Doc-Start } 
+    \cs_new_eq:NN \__cus_get_label_pageanchor:n \__cus_get_label_anchor:n
+    \cs_new:Npn \__cus_get_label_extra:n #1 { \c_novalue_tl }
+  }
+  {
+    \cs_gset:Npn \__cus_get_label_anchor:n #1
+      { \cs_if_exist:cTF { r@#1 } { \tl_item:cn { r@#1 } { 4 } } { Doc-Start } }
+    \cs_gset:Npn \__cus_get_label_pageanchor:n #1
+      { \cs_if_exist:cTF { r@#1 } { \exp_not:e { page. \tl_item:cn { r@#1 } { 2 } } } { Doc-Start } }
+    \cs_gset:Npn \__cus_get_label_extra:n #1
+      { \cs_if_exist:cTF { r@#1 } { \tl_item:cn { r@#1 } { 5 } } { \c_novalue_tl } }
+  }
+
+
+\cs_gset:Npn \IfPageOdd 
+  { 
+    \if_int_odd:w \c@page \exp_after:wN \use_i:nn 
+    \else: \exp_after:wN \use_ii:nn 
+    \fi: 
+  }
+\cs_gset_eq:NN \@ifpageodd \IfPageOdd
+\cs_gset:Npn \IfAbsPageOdd % only can be used in shipout/foreground, background & after
+  {
+    \if_int_odd:w \g_shipout_readonly_int \exp_after:wN \use_i:nn 
+    \else: \exp_after:wN \use_ii:nn 
+    \fi: 
+  }
+\cs_gset_eq:NN \@ifabspageodd \IfAbsPageOdd
+\cs_gset_protected:Npn \IfLabelOdd #1
+  {
+    \tl_if_blank:nTF {#1} 
+      { \__cus_if_label_odd_aux:n { \@currentlabel } }
+      { \__cus_if_label_odd_aux:n {#1} }
+  }
+\cs_gset:Npn \@iflabelodd #1
+  {
+    \cus_label_if_exist:nTF {#1}
+      { 
+        \exp_args:Nf \__cus_if_head_digit:nTF 
+          { \__cus_get_label_page:n {#1} \exp_stop_f: \exp_stop_f: }
+          {
+            \if_int_odd:w \__cus_get_label_page:n {#1} \exp_stop_f: 
+              \exp_after:wN \use_i:nn
+            \else: \exp_after:wN \use_ii:nn
+            \fi:
+          }
+          { \use_ii:nn }
+      }
+      { \use_ii:nn }
+  }
+\cs_new:Npn \__cus_if_label_odd_aux:n #1
+  {
+    \cus_label_if_exist:nTF {#1}
+      {
+        \exp_args:Nf \__cus_if_head_digit:nTF 
+          { \__cus_get_label_page:n {#1} \exp_stop_f: \exp_stop_f: }
+          {
+            \if_int_odd:w \__cus_get_label_page:n {#1} \exp_stop_f: 
+              \exp_after:wN \use_i:nn
+            \else: \exp_after:wN \use_ii:nn
+            \fi:
+          }
+          { \use_ii:nn }
+      }
+      { \G@refundefinedtrue \use_ii:nn }
+  }
+
+
+\tl_new:N \l__cus_peek_tmp_tl
+\cs_set:Npn \__cus_tmp:w #1 \s__peek_stop 
+  {
+    \cs_new_protected:Npn \__cus_execute_peek_branches_simp:
+      { 
+        \if_case:w
+            \if_catcode:w \exp_not:N \l_peek_token {   1 \exp_stop_f: \fi:
+            \if_catcode:w \exp_not:N \l_peek_token }   2 \exp_stop_f: \fi:
+            \if_meaning:w \l_peek_token \c_space_token 3 \exp_stop_f: \fi:
+            \c_zero_int
+          \exp_after:wN \__cus_peek_act:w 
+            \token_to_meaning:N \l_peek_token
+            \s__peek_mark \__cus_peek_act_aux:nnw 
+            #1 \s__peek_mark \__peek_use_none_delimit_by_s_stop:w
+            \s__peek_stop 
+          \exp_after:wN \__cus_peek_act_N:
+        \or: \exp_after:wN \__cus_peek_act_group_begin: 
+        \or: \exp_after:wN \__cus_peek_act_group_end:
+        \or: \exp_after:wN \__cus_peek_act_space: 
+        \fi:
+      }
+  }
+\exp_after:wN \__cus_tmp:w \tl_to_str:n { outer } \s__peek_stop 
+\cs_new_protected:Npn \__cus_peek_act_aux:nnw #1 #2 #3 \fi:
+  {
+    \fi:
+    \tl_if_in:noTF {#1} { \tl_to_str:n { ma } }
+      { \__cus_peek_act_N: }
+      { 
+        \tl_if_empty:nTF {#2} 
+          { \__cus_peek_act_N: } 
+          { \__cus_peek_act_outer: } 
+      }
+  }
+% normal, space, group begin, group end, else 
+\cs_new_protected:Npn \cus_peek_act:nnnnn #1#2#3#4#5
+  {
+    \group_align_safe_begin:
+    \cs_set:Npx \__cus_peek_act_N: 
+      { 
+        \exp_not:N \group_align_safe_end:
+        \exp_not:n {#1}
+      }
+    \cs_set:Npx \__cus_peek_act_space: 
+      { 
+        \exp_not:N \group_align_safe_end:
+        \exp_not:n {#2}
+      }
+    \cs_set:Npx \__cus_peek_act_group_begin: 
+      { 
+        \exp_not:N \group_align_safe_end:
+        \exp_not:n {#3}
+      }
+    \cs_set:Npx \__cus_peek_act_group_end: 
+      { 
+        \exp_not:N \group_align_safe_end:
+        \exp_not:n {#4}
+      }
+    \cs_set:Npx \__cus_peek_act_outer: 
+      { 
+        \exp_not:N \group_align_safe_end:
+        \exp_not:n {#5}
+      }
+    \peek_after:Nw \__cus_execute_peek_branches_simp:
+  }
+\cs_new:Npn \__cus_peek_act_use_none:ww #1~#2~ { }
+\cs_new:Npn \__cus_peek_act_use_none:nww #1#2~#3~ { #1 }
+
+
+\cs_new:Npn \__cus_ref_box_aux:nw
+  { \collectn_box:NNnw \l__cus_tmpc_box \tex_hbox:D }
+% \cs_new:Npn \__cus_ref_box_aux:
+%   {
+%     \tex_afterassignment:D \__cus_ref_box_auxi:
+%     \tex_setbox:D \l__cus_tmpc_box \tex_hbox:D 
+%   }
+% \cs_new:Npn \__cus_ref_box_auxi:
+%   {
+%     \color_group_begin: \c_group_begin_token
+%     \group_insert_after:N \__cus_ref_box_auxii:
+%   }
+% \cs_new:Npn \__cus_ref_box_auxii:
+%   {
+%     \color_group_end: \c_group_end_token
+%     \l__cus_ref_tmp_tl
+%   }
+\cs_new_protected:Npn \cus@bookmark@hook 
+  {
+    \tl_if_exist:NT \cus@bookmark@text 
+      { 
+        \tl_set_eq:NN \bookmark@text \cus@bookmark@text 
+        \cs_undefine:N \cus@bookmark@text
+      }
+  }
+\cus_pkg_code:nnn { bookmark } 
+  { 
+    \cs_new_protected_nopar:Npn \cus_bookmark:nn #1#2 { }
+    \cs_new_protected:Npn \cus_gset_next_bookmark_text:n #1 { }
+  }
+  {
+    \ctex_patch_cmd:Nnn \BKM@setup { \BKM@hook } { \BKM@hook \cus@bookmark@hook }
+    \cs_gset_protected_nopar:Npn \cus_bookmark:nn #1 { \bookmark [{#1}] }
+    \cs_gset_protected:Npn \cus_gset_next_bookmark_text:n
+      { \tl_gset:Nn \cus@bookmark@text }
+  }
+\cs_gset_protected:Npn \cus_hyper_link_launch:nnn #1#2#3 { \group_begin: #2 \group_end: }
+\cs_gset_protected:Npn \cus_hyper_link_named:nn #1#2 { \group_begin: #2 \group_end: }
+\cs_new:Npn \cus_if_pdfstring:TF #1#2 {#2}
+\cs_new:Npn \cus_if_pdfstring:T  #1   {  }
+\cs_new:Npn \cus_if_pdfstring:F  #1   {#1}
+\cs_new:Npn \cus_if_pdfstring_p: { \c_false_bool }
+\tl_gset:Nn \g_cus_anchor_tl { Doc-Start }
+\cs_gset_protected:Npn \cus_hyper_anchor:n #1 { }
+\cs_gset_protected:Npn \cus_hyper_anchor_start:n #1 { }
+\cs_gset_protected:Npn \cus_hyper_anchor_stop: { }
+\cs_gset_protected:Npn \cus_hyper_link:nnn #1#2#3 { \group_begin: #3 \group_end: }
+\cs_gset_protected:Npn \cus_hyper_link_start:nn #1#2 { \group_begin: }
+\cs_gset_protected:Npn \cus_hyper_link_stop: { \group_end: }
+\cs_gset_protected:Npn \cus_hyper_link_file:nnn #1#2#3 { \group_begin: #1 \group_end: }
+\cs_gset_protected:Npn \cus_hyper_link_url:nn #1#2 { \group_begin: #1 \group_end: }
+\cs_new_protected_nopar:Npn \cus_make_target:n #1 { }
+\cs_new_protected_nopar:Npn \cus_make_unique_target:n #1 { }
+\cs_new_protected_nopar:Npn \cus_gset_next_anchor_name:n #1 { }
+\cs_new_protected_nopar:Npn \cus_gset_next_anchor_raise:n #1 { }
+\cs_new_protected_nopar:Npn \__cus_make_raised_target:nn #1#2 { }
+\cs_new_protected_nopar:Npn \cus_ref_label:nn #1#2 { \group_begin: #2 \group_end: }
+\cs_new_protected_nopar:Npn \cus_ref_target:nn #1#2 { \group_begin: #2 \group_end: }
+\cs_new_protected_nopar:Npn \cus_ref_label_box:nn #1
+  { \__cus_ref_box_aux:nw { \hbox_unpack_drop:N \l__cus_tmpc_box } }
+\cs_new_protected_nopar:Npn \cus_ref_target_box:nn #1
+  { \__cus_ref_box_aux:nw { \hbox_unpack_drop:N \l__cus_tmpc_box } }
+\cs_new_protected_nopar:Npn \cus@update@PL@page #1 { }
+\cs_new_protected_nopar:Npn \cus_gset_page_label:n #1 { }
+\cs_new_protected_nopar:Npn \cus_gset_next_page_label:n #1 { }
+\cs_new_protected_nopar:Npn \cus_gset_page_label_code:n #1 { }
+\cs_new_protected_nopar:Npn \cus_reset_page_label_code: { }
+\tl_const:Nn \c__cus_hyperref_define_tl
+  {
+    \cs_gset:Npn \cus_if_pdfstring:TF { \legacy_if:nTF { Hy@pdfstring } }
+    \cs_gset:Npn \cus_if_pdfstring:T  { \legacy_if:nT  { Hy@pdfstring } }
+    \cs_gset:Npn \cus_if_pdfstring:F  { \legacy_if:nF  { Hy@pdfstring } }
+    \cs_gset:Npn \cus_if_pdfstring_p: { \legacy_if_p:n { Hy@pdfstring } }
+    \tl_gset:Nn \g_cus_anchor_tl { \@currentHref }
+    \cs_gset_protected:Npn \cus_hyper_anchor:n { \hyper@anchor }
+    \cs_gset_protected:Npn \cus_hyper_anchor_start:n { \hyper@anchorstart }
+    \cs_gset_protected:Npn \cus_hyper_anchor_stop: { \hyper@anchorend }
+    \cs_gset_protected:Npn \cus_hyper_link:nnn { \hyper@link }
+    \cs_gset_protected:Npn \cus_hyper_link_start:nn { \hyper@linkstart }
+    \cs_gset_protected:Npn \cus_hyper_link_stop: { \hyper@linkend }
+    \cs_gset_protected:Npn \cus_hyper_link_file:nnn { \hyper@linkfile }
+    \cs_gset_protected:Npn \cus_hyper_link_url:nn { \hyper@linkurl }
+    \bool_lazy_and:nnT
+      { \cs_if_exist_p:N \pdfmanagement_if_active_p: } 
+      { \pdfmanagement_if_active_p: }
+      {
+        \cs_gset_protected:Npn \cus_hyper_link_launch:nnn { \hyper@linklaunch }
+        \cs_gset_protected:Npn \cus_hyper_link_named:nn { \hyper@linknamed }
+      }
+    \cs_gset_protected_nopar:Npn \cus_make_target:n #1
+      { 
+        \bool_if:NT \l__hyp_target_create_bool
+          { \group_begin: \__hyp_target_manual:nn { } {#1} \group_end: }
+      }
+    \cs_gset_protected_nopar:Npn \cus_make_unique_target:n #1
+      { 
+        \bool_if:NT \l__hyp_target_create_bool
+          { \group_begin: \__hyp_target_counter_anon:n {#1} \group_end: }
+      }
+    \cs_gset_protected_nopar:Npn \cus_gset_next_anchor_name:n #1
+      {
+        \use:e 
+          {
+            \hook_gput_next_code:nn {__hyp/target/setname}
+              { \tl_gset:Nn \exp_not:N \@currentHref {#1} }
+          }
+      }
+    \cs_gset_protected_nopar:Npn \cus_gset_next_anchor_raise:n #1
+      {
+        \use:e 
+          {
+            \hook_gput_next_code:nn {__hyp/target/setname}
+              { 
+                \normalbaselineskip = \dim_eval:n {#1} \relax  % \__hyp_target_raise:n
+                \edef\HyperRaiseLinkDefault{\the\normalbaselineskip} % \Hy@raisedlink
+              }
+          }
+      }
+    % \def\HyperRaiseLinkDefault{\normalbaselineskip}
+    \cs_gset_protected_nopar:Npn \__cus_make_raised_target:nn #1#2
+      {
+        \mode_if_vertical:TF { #2 }
+          {
+            \Hy@SaveSpaceFactor \penalty\@M
+            \smash
+              {
+                \box_move_up:nn { #1 }
+                  { \hbox:n { \Hy@RestoreSpaceFactor #2 \Hy@SaveSpaceFactor } }
+              }
+            \Hy@RestoreSpaceFactor
+          }
+      }
+    \cs_gset_protected_nopar:Npn \cus_ref_label:nn #1 { \hyperref [{#1}] } % label, text 
+    \cs_gset_protected_nopar:Npn \cus_ref_target:nn { \hyperlink } % target, text 
+    \sys_if_engine_xetex:TF
+      {
+        %% see hyperref.pdf, \XeTeXLinkBox
+        \cs_new_protected_nopar:Npn \cus@xetex@box #1
+          {
+            \setbox\z@\hbox{\llap{\lower\dp#1\hbox{\XeTeXLink@space}}}
+            \dp\z@=\dp#1 \ht\z@=\ht#1
+            \setbox\tw@\hbox{\rlap{\raise\ht#1\hbox{\XeTeXLink@space}}}
+            \dp\tw@=\dp#1 \ht\tw@=\ht#1
+            \box\z@ \unhbox#1 \box\tw@ 
+          }
+      }
+      { \cs_new_protected_nopar:Npn \cus@xetex@box #1 { \unhbox #1 } }
+    \cs_gset_protected_nopar:Npn \cus_ref_label_box:nn #1
+      {
+        \__cus_ref_box_aux:nw
+          { \hyperref [{#1}] { \cus@xetex@box \l__cus_tmpc_box } } 
+      }
+    \cs_gset_protected_nopar:Npn \cus_ref_target_box:nn #1
+      {
+        \__cus_ref_box_aux:nw
+          { \hyperlink {#1} { \cus@xetex@box \l__cus_tmpc_box } }
+      }
+    \cs_if_exist:NT \HyPL@EveryPage
+      {
+        \ctex_patch_cmd:Nnn \HyPL@EveryPage { \let\HyPL@page\thepage }
+          { \let\HyPL@page\thepage \cus@update@PL@page\HyPL@page }
+        \cs_gset_protected_nopar:Npn \cus_gset_next_page_label:n #1
+          { \tl_gset:Nn \HyPL@thisLabel {#1} }
+        \cs_gset_protected_nopar:Npn \cus_gset_page_label:n #1
+          { \cs_gset_protected:Npn \cus@update@PL@page ##1 { \tl_set:Nn ##1 {#1} } }
+        \cs_gset_protected_nopar:Npn \cus_gset_page_label_code:n 
+          { \cs_gset_protected:Npn \cus@update@PL@page ##1 }
+        \cs_gset_protected_nopar:Npn \cus_reset_page_label_code:
+          { \cs_gset_protected_nopar:Npn \cus@update@PL@page ##1 { } }
+      }
+  }
+\cus_pkg_code:nnn { hyperref } { } 
+  { \c__cus_hyperref_define_tl \tl_clear:N \c__cus_hyperref_define_tl }
+
+
+\cs_new_eq:NN \cus@pdfliteral \elkernel_backend_literal_pdf:e 

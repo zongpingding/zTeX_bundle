@@ -1,0 +1,149 @@
+\CUSProvideExplLibrary{pdf}{\cus@d@te}{\cus@versi@n}{pdf features}
+\RequirePackage{graphicx}
+\tl_const:Nn \c__cus_pdf_patch_tl
+  {
+    \keys_define:nn { cus/pdf } { unknown .code:n = { } }
+    \ekeysdeclarecmd \includegraphicspax { s O{} m }
+      { \IfBooleanTF {#1} { \Gin@ii [{clip,#2}] {#3} }{ \Gin@ii [{#2}] {#3} } }
+  }
+\CusIfPdfmana { } { \c__cus_pdf_patch_tl \file_input_stop: }
+
+\keys_define:nn { cus/pdf }
+  {
+    graphics-path .clist_set:N = \l__cus_graphics_path_clist ,
+    pax .clist_set:N = \l__cus_pax_clist ,
+    pax+ .code:n = \clist_put_right:Nn \l__cus_pax_clist {#1} ,
+    redefine .bool_set:N = \l__cus_pdf_redefine_bool ,
+  }
+
+\ProcessKeyOptions [ cus/pdf ]
+
+\RequirePackage { newpax }
+\newpaxsetup{usefileattributes=true}
+
+\cs_new:Npn \__cus_file_with_ext:nn #1
+  { \file_parse_full_name_apply:nN {#1} \__cus_file_with_ext:nnnn }
+\cs_new:Npn \__cus_file_with_ext:nnnn #1#2#3#4
+  { \tl_if_empty:nF {#1} { #1 / } #2 \tl_if_empty:nF {#4} { .#4 } }
+
+\int_new:N \g__cus_pdf_pax_int
+\prop_new_linked:N \g__cus_pdf_pax_prop
+\prop_new_linked:N \g__cus_pax_prop
+
+\cus_hook_gput_ae:n 
+  { 
+    \__cus_pax_build:V \l__cus_pax_clist
+    \__cus_pax_compile:N \g__cus_pdf_pax_prop
+    \bool_if:NT \l__cus_pdf_redefine_bool
+      { \cs_set_eq:NN \includegraphics \includegraphicspax }
+  }
+\cs_new_protected:Npn \__cus_pax_build:n #1
+  {
+    \group_begin:
+    \iow_open:Nn \g__cus_tmp_iow { \c_sys_jobname_str _pax_script.lua }
+    \iow_now:Nn \g__cus_tmp_iow { require("newpax") }
+    \clist_if_empty:NF \l__cus_graphics_path_clist
+      {
+        \exp_args:Ne \graphicspath
+          { \clist_map_function:NN \l__cus_graphics_path_clist \ekeys_exp_not_braced:n }
+      }
+    \clist_map_inline:nn {#1}
+      {
+        \cus_get_graphics_full_name:nNT {##1} \l__cus_tmp_tl
+          { \file_parse_full_name_apply:nN \l__cus_tmp_tl \__cus_pdf_pax_do:nnn }
+      }
+    \iow_close:N \g__cus_tmp_iow
+    \sys_if_engine_luatex:TF
+      { \lua_now:e { \__cus_pdf_pax_run_script: } }
+      {
+        \sys_if_shell_unrestricted:TF
+          { \sys_shell_now:e { \__cus_pdf_pax_run_lt_script:} }
+          { }
+      }
+    \group_end:
+  }
+\cs_generate_variant:Nn \__cus_pax_build:n { V }
+\cs_new:Npn \__cus_pdf_pax_do:nnn #1#2#3
+  {
+    \str_if_eq:eeT { \str_casefold:n {#3} } { \str_casefold:n { .pdf } }
+      {
+        \int_gincr:N \g__cus_pdf_pax_int
+        \prop_gput:NeV \g__cus_pdf_pax_prop 
+          { \__cus_file_with_ext:nnnn { }{#2}{#3}{ } } \g__cus_pdf_pax_int
+        \iow_now:Ne \g__cus_tmp_iow
+          { newpax.writenewpax " \__cus_file_with_ext:nnnn {#1}{#2}{#3}{ } " }
+      }
+  }
+\cs_new:Npn \__cus_pdf_pax_run_script: { dofile " \c_sys_jobname_str _pax_script.lua " }
+\cs_new:Npn \__cus_pdf_pax_run_lt_script:
+  {
+    lualatex~ "\string\def\string\x{
+      \noexpand\csname quote@name\endcsname{ \c_sys_jobname_str _pax_script.lua }
+    }\string\directlua{dofile(\string\x)}\noexpand\stop"
+  }
+\cs_new_protected:Npn \__cus_pax_compile:N #1 
+  { 
+    \group_begin: 
+    \cs_set_eq:NN \[ \__cus_pax_parse:w % \]
+    \tl_set:Nn \< { < } \tl_set:Nn \> { > }
+    \int_set:Nn \endlinechar { -1 }
+    \char_set_catcode_other:N \#
+    \char_set_catcode_other:N \%
+    \prop_map_inline:Nn #1 
+      { 
+        \int_zero:N \l__cus_tmpa_int
+        \tl_set:Nn \l__cus_tmp_tl {##2}
+        \elkernel_input:n { ##1 . newpax } 
+      } 
+    \group_end: 
+  }
+\cs_new:Npn \__cus_pax_parse:w #1
+  { \cs_if_exist:cTF { NEWPAX@cmd@#1 } { \__cus_pax_parse_aux:nn {#1} } { \NEWPAX@skip } }
+\cs_new:Npn \__cus_pax_parse_aux:nn #1#2 % type, page 
+  {
+    \tl_set:Nn \l__cus_tmpb_tl {#2}
+    \prop_if_exist:cF { __cus_pax -i \l__cus_tmp_tl -p #2 }
+      { \prop_clear_new_linked:c { __cus_pax -i \l__cus_tmp_tl -p #2 } }
+    \__cus_pax_parse_aux:w {#1} {#2}
+  }
+\cs_new:Npn \__cus_pax_parse_aux:w #1 \\ 
+  { 
+    \int_incr:N \l__cus_tmpa_int 
+    \prop_gput:cVn { __cus_pax -i \l__cus_tmp_tl -p \l__cus_tmpb_tl } 
+      \l__cus_tmpa_int {#1} 
+  }
+
+\cs_if_exist:NTF \NEWPAX@includegraphics
+  { 
+    \cs_new_eq:NN \cus@includegraphics \NEWPAX@includegraphics 
+    \tl_set:No \l__cus_tmpa_tl { \NEWPAX@AddAnnots{#1}{#2} }
+    \cs_set:Npn \__cus_tmp:w #1 \endlinechar #2 \q__cus_mark
+      {
+        \cs_set_protected:Npn \__cus_pdf_pax_add_annots:nn ##1##2
+          { #1 \cus@pdf@pax@add@annots }
+      }
+    \exp_after:wN \__cus_tmp:w \l__cus_tmpa_tl \q__cus_mark
+  }
+  { \cs_new_eq:NN \cus@includegraphics \Gin@ii }
+\cs_new:Npn \cus@pdf@pax@add@annots 
+  {
+    \prop_get:NeN \g__cus_pdf_pax_prop
+      { \__cus_file_with_ext:nn \NEWPAX@file { } }
+      \l__cus_tmp_tl
+    \bool_lazy_and:nnT { ! \quark_if_no_value_p:N \l__cus_tmp_tl }
+      { \prop_if_exist_p:c { __cus_pax -i \l__cus_tmp_tl -p \NEWPAX@Gin@page } }
+      { 
+        \prop_map_function:cN { __cus_pax -i \l__cus_tmp_tl -p \NEWPAX@Gin@page }
+          \__cus_pdf_pax_add_annots_aux:nn
+      }
+  }
+\cs_new:Npn \__cus_pdf_pax_add_annots_aux:nn #1#2 { \[#2\\ } % \]
+\ekeysdeclarecmd \includegraphicspax { s @O{} m }
+  {
+    \group_begin:
+    \cs_set_eq:NN \NEWPAX@AddAnnots \__cus_pdf_pax_add_annots:nn
+    \bool_if:nTF {#1}
+      { \cus@includegraphics [ { clip, #2 } ] {#3} }
+      { \cus@includegraphics [ {#2} ] {#3} }
+    \group_end:
+  }

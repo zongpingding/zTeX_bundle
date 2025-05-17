@@ -1,0 +1,566 @@
+\RequirePackage{fancyhdr}[2025/01/03]
+\CUSDependency{ package={
+  (cus@TATE)lltjp-geometry, geometry, [usegeometry]typearea,
+ } , disable={autofancyhdr}
+}
+\CUSProvideExplModule{layout}{\cus@d@te}{\cus@versi@n}{layout settings}
+
+\sys_if_engine_uptex:T { \KOMAoption {pagesize} {dvipdfmx} }
+
+\cs_new_eq:NN \layoutwidth \Gm@layoutwidth
+\cs_new_eq:NN \layoutheight \Gm@layoutheight
+\cs_new_eq:NN \layouttoffset \Gm@layoutvoffset 
+\cs_new_protected_nopar:Npn \layoutboffset 
+  { \dimexpr\paperheight-\Gm@layoutvoffset-\Gm@layoutheight\relax }
+\cs_new_eq:NN \layoutloffset \Gm@layouthoffset
+\cs_new_protected_nopar:Npn \layoutroffset
+  { \dimexpr\paperwidth-\Gm@layouthoffset-\Gm@layoutwidth\relax }
+\cs_new_protected_nopar:Npn \bodylmargin { \dimexpr\Gm@lmargin\relax }
+\cs_new_protected_nopar:Npn \bodyrmargin { \dimexpr\Gm@rmargin\relax }
+\cs_new_protected_nopar:Npn \bodytmargin { \dimexpr\Gm@tmargin\relax }
+\cs_new_protected_nopar:Npn \bodybmargin { \dimexpr\Gm@bmargin\relax }
+
+\NewDocumentCommand \setuplayout { s >{\TrimSpaces} O{} m }
+  { 
+    \tl_if_empty:nTF {#2} { \cus_set_layout:n {#3} } 
+      { \IfBooleanTF {#1} \cus_save_layout:nn \cus_store_layout:nn {#2} {#3} } 
+  }
+\clist_new:N \g__cus_layout_geometry_clist
+\tl_new:N \g__cus_hfoffset_tl
+\bool_new:N \g__cus_geometry_warnings_bool
+\bool_new:N \g__cus_layout_marking_bool
+\tl_gset:Nn \g__cus_paperorientation_tl {  }
+\tl_gset:Nn \g__cus_paperwidth_tl { 21cm }
+\tl_gset:Nn \g__cus_paperheight_tl { 29.7cm }
+\tl_gset:Nn \g__cus_layoutwidth_tl { 21cm }
+\tl_gset:Nn \g__cus_layoutheight_tl { 29.7cm }
+\msg_new:nnn { cus } { layout-not-exist } { layout~preset~`#1'~does~not~exist. }
+\cs_new_protected:Npn \cus_set_layout:n #1 
+  { 
+    \clist_gclear:N \g__cus_layout_geometry_clist
+    \tl_gclear:N \g__cus_hfoffset_tl
+    \keys_set:nn { cus/layout } {#1}
+    \bool_if:NTF \g__cus_geometry_warnings_bool
+      { \cs_set_nopar:Npn \Gm@warning ##1 { \PackageWarningNoLine {geometry} {##1} } }
+      { \cs_set_nopar:Npn \Gm@warning ##1 { } }
+    \use:e 
+      {
+        \exp_not:N \KOMAoption { paper } { \g__cus_paperorientation_tl }
+        \exp_not:N \KOMAoption { paper } { \g__cus_paperwidth_tl \c_colon_str \g__cus_paperheight_tl }
+      }
+    \recalctypearea
+    \clist_if_empty:NF \g__cus_layout_geometry_clist
+      { 
+        \cus_if_preamble:TF { \exp_args:No \geometry } { \exp_args:No \newgeometry }
+          { \g__cus_layout_geometry_clist }
+        \fancyhfoffset {0cm}
+      }
+    \g__cus_hfoffset_tl
+    \bool_if:NTF \g__cus_layout_marking_bool
+      { 
+        \cs_gset:Npn \__cus_layout_marking: 
+          { 
+            \vbox_set:Nn \l_shipout_box 
+              {
+                \skip_set_eq:NN \tex_baselineskip:D \c_zero_skip
+                \skip_set_eq:NN \tex_lineskip:D \c_zero_skip
+                \dim_set_eq:NN \tex_lineskiplimit:D \c_zero_dim 
+                \__cus_layout_marking_box:
+                \box_use_drop:N \l_shipout_box 
+              }
+          } 
+      }
+      { \cs_gset_eq:NN \__cus_layout_marking: \prg_do_nothing: }
+  }
+% store 还会执行
+\cs_new_protected:Npn \cus_store_layout:nn #1#2
+  {
+    \cus_set_layout:n {#2}
+    \Gm@save 
+    \cs_gset:cpx { __cus/layout~ #1 : }
+      {
+        \tl_gset:Nn \exp_not:N \g__cus_paperorientation_tl 
+          { \g__cus_paperorientation_tl }
+        \tl_gset:Nn \exp_not:N \g__cus_paperwidth_tl 
+          { \g__cus_paperwidth_tl }
+        \tl_gset:Nn \exp_not:N \g__cus_paperheight_tl 
+          { \g__cus_paperheight_tl }
+        \clist_set:Nn \exp_not:N \g__cus_layout_geometry_clist
+          { \exp_not:o \g__cus_layout_geometry_clist }
+        \tl_gset:Nn \exp_not:N \g__cus_hfoffset_tl
+          { \exp_not:o \g__cus_hfoffset_tl }
+        \Gm@restore
+      }
+  }
+% save 仅保存键值
+\cs_new_protected:Npn \cus_save_layout:nn #1#2
+  {
+    \group_begin:
+    \cs_set:Npx \__cus_tmp: 
+      {
+        \tl_gset:Nn \exp_not:N \g__cus_paperorientation_tl 
+          { \g__cus_paperorientation_tl }
+        \tl_gset:Nn \exp_not:N \g__cus_paperwidth_tl 
+          { \g__cus_paperwidth_tl }
+        \tl_gset:Nn \exp_not:N \g__cus_paperheight_tl 
+          { \g__cus_paperheight_tl }
+        \clist_set:Nn \exp_not:N \g__cus_layout_geometry_clist
+          { \exp_not:o \g__cus_layout_geometry_clist }
+        \tl_gset:Nn \exp_not:N \g__cus_hfoffset_tl
+          { \exp_not:o \g__cus_hfoffset_tl }
+      }
+    \keys_set:nn { cus/layout } {#2}
+    \cs_gset:cpx { __cus/layout~ #1 : }
+      {
+        \tl_gset:Nn \exp_not:N \g__cus_paperorientation_tl 
+          { \g__cus_paperorientation_tl }
+        \tl_gset:Nn \exp_not:N \g__cus_paperwidth_tl 
+          { \g__cus_paperwidth_tl }
+        \tl_gset:Nn \exp_not:N \g__cus_paperheight_tl 
+          { \g__cus_paperheight_tl }
+        \clist_set:Nn \exp_not:N \g__cus_layout_geometry_clist
+          { \exp_not:o \g__cus_layout_geometry_clist }
+        \tl_gset:Nn \exp_not:N \g__cus_hfoffset_tl
+          { \exp_not:o \g__cus_hfoffset_tl }
+      }
+    \__cus_tmp: 
+    \group_end:
+  }
+\cs_new_protected:Npn \cus_new_papername:nnn #1#2#3 % name, width, height
+  {
+    \group_begin:
+    \dim_set:Nn \l__cus_tmpa_dim {#2}
+    \dim_set:Nn \l__cus_tmpb_dim {#3}
+    \cs_new_nopar:cpx { Gm@ #1 paper } ##1
+      { % 1=landscape, 2=portrait
+        \if_dim:w \l__cus_tmpa_dim > \l__cus_tmpb_dim 1 \else: 2 \fi:
+        \exp_not:N \Gm@setsize {##1}
+        (
+        \dim_to_decimal_in_unit:nn { \l__cus_tmpa_dim } { 1mm }
+        ,
+        \dim_to_decimal_in_unit:nn { \l__cus_tmpb_dim } { 1mm }
+        )
+        { mm }
+      }
+    \group_end:
+  }
+\cus_new_papername:nnn { n0kai } { 787mm } { 1092mm }
+\cus_new_papername:nnn { n2kai } { 787mm } { 546mm }
+\cus_new_papername:nnn { n4kai } { 389mm } { 546mm }
+\cus_new_papername:nnn { n6kai } { 370mm } { 520mm }
+\cus_new_papername:nnn { n8kai } { 260mm } { 370mm }
+\cus_new_papername:nnn { n16kai } { 185mm } { 260mm }
+\cus_new_papername:nnn { n32kai } { 185mm } { 130mm }
+\cus_new_papername:nnn { b0kai } { 889mm } { 1194mm }
+\cus_new_papername:nnn { b2kai } { 889mm } { 597mm }
+\cus_new_papername:nnn { b4kai } { 444mm } { 597mm }
+\cus_new_papername:nnn { b8kai } { 420mm } { 285mm }
+\cus_new_papername:nnn { b16kai } { 210mm } { 285mm }
+\cus_new_papername:nnn { b32kai } { 142mm } { 210mm }
+
+
+\keys_define:nn { cus } { layout .meta:nn = { cus/layout } {#1} }
+\keys_define:nn { cus/layout }
+  {
+    papername .code:n = \__cus_get_size_from_name:n {#1} ,
+    paper .meta:n = { papername = {#1} } ,
+    paperorientation .choices:nn = { landscape , portrait } 
+      { \tl_set:Nx \g__cus_paperorientation_tl { \l_keys_choice_tl } } ,
+    orientation .meta:n = { paperorientation = {#1} } ,
+    landscape .meta:n = { paperorientation = landscape } ,
+    portrait .meta:n = { paperorientation = portrait } ,
+    papersize .code:n = \__cus_get_size:n {#1} ,
+    paperwidth .code:n = \tl_gset:Nx \g__cus_paperwidth_tl { \dim_eval:n {#1} } ,
+    paperheight .code:n = \tl_gset:Nx \g__cus_paperheight_tl { \dim_eval:n {#1} } ,
+    preset .code:n = 
+      {
+        \cs_if_exist:cTF { __cus/layout~ #1 : }
+          { \clearpage \cs:w __cus/layout~ #1 : \cs_end: \Gm@changelayout }
+          { \msg_error:nnn { cus } { layout-not-exist } {#1} }
+      } ,
+    name .meta:n = { preset = {#1} } ,
+
+    direction .choice: ,
+    direction / bigwidth  .meta:n = { paperorientation = landscape } ,
+    direction / bigheight .meta:n = { paperorientation = portrait } ,
+    direction / normal    .meta:n = { paperorientation = portrait } ,
+    direction / inverse   .meta:n = { paperorientation = landscape } ,
+
+    layoutname .code:n = 
+      {
+        \__cus_set_layout_name:n {#1} 
+        \str_if_eq:eeT { \g__cus_paperorientation_tl } { landscape }
+          { \cus_gswap:NN \g__cus_layoutwidth_tl \g__cus_layoutheight_tl }
+      } ,
+    layout .meta:n = { layoutname = {#1} } ,
+    centerlayout .code:n = 
+      {
+        \str_if_eq:eeTF { \g__cus_paperorientation_tl } { landscape }
+          {
+            \clist_gput_right:Nn \g__cus_layout_geometry_clist 
+              { 
+                layouthoffset = \dim_eval:n { (\g__cus_paperwidth_tl-\g__cus_layoutheight_tl)/2 } ,
+                layoutvoffset = \dim_eval:n { (\g__cus_paperheight_tl-\g__cus_layoutwidth_tl)/2 }
+              }
+          }
+          {
+            \clist_gput_right:Nn \g__cus_layout_geometry_clist 
+              {
+                layouthoffset = \dim_eval:n { (\g__cus_paperwidth_tl-\g__cus_layoutwidth_tl)/2 } ,
+                layoutvoffset = \dim_eval:n { (\g__cus_paperheight_tl-\g__cus_layoutheight_tl)/2 }
+              }
+          }
+      } ,
+    centerlayout .value_forbidden:n = true ,
+
+    hfoffset .code:n = 
+      { 
+        \tl_gput_right:Nx \g__cus_hfoffset_tl 
+          { \exp_not:N \fancyhfoffset \cus_split_bracket_head:n {#1} } 
+      } ,
+    offsethf .meta:n = { hfoffset = {#1} } ,
+    offsetheadfoot .meta:n = { hfoffset = {#1} } ,
+    headoffset .code:n = 
+      { 
+        \tl_gput_right:Nx \g__cus_hfoffset_tl
+          { \exp_not:N \fancyheadoffset \cus_split_bracket_head:n {#1} }
+      } ,
+    offsethead .meta:n = { headoffset = {#1} } ,
+    footoffset .code:n = 
+      { 
+        \tl_gput_right:Nx \g__cus_hfoffset_tl
+          { \exp_not:N \fancyfootoffset \cus_split_bracket_head:n {#1} }
+      } ,
+    offsetfoot .meta:n = { footoffset = {#1} } ,
+
+    topmargin .code:n = 
+      {
+        \clist_gput_right:Nx \g__cus_layout_geometry_clist
+          { tmargin = { \dim_eval:n {#1} } } 
+      } ,
+    bottommargin .code:n = 
+      {
+        \clist_gput_right:Nx \g__cus_layout_geometry_clist
+          { bmargin = { \dim_eval:n {#1} } } 
+      } ,
+    leftmargin .code:n = 
+      {
+        \clist_gput_right:Nx \g__cus_layout_geometry_clist
+          { lmargin = { \dim_eval:n {#1} } } 
+      } ,
+    rightmargin .code:n = 
+      {
+        \clist_gput_right:Nx \g__cus_layout_geometry_clist
+          { rmargin = { \dim_eval:n {#1} } } 
+      } ,
+    horizontalmargin .code:n = 
+      { \clist_gput_right:Nx \g__cus_layout_geometry_clist { hmargin = {#1} } } ,
+    verticalmargin .code:n = 
+      { \clist_gput_right:Nx \g__cus_layout_geometry_clist { vmargin = {#1} } } ,
+    horizontalmarginratio .code:n = 
+      { \clist_gput_right:Nx \g__cus_layout_geometry_clist { hmarginratio = {#1} } } ,
+    verticalmarginratio .code:n = 
+      { \clist_gput_right:Nx \g__cus_layout_geometry_clist { vmarginratio = {#1} } } ,
+
+    includehf .choices:nn = { true , false }
+      { \clist_gput_right:Nx \g__cus_layout_geometry_clist { includeheadfoot = \l_keys_choice_tl } } ,
+    includehf .default:n = true ,
+    includemarginpar .choices:nn = { true , false } 
+      { \clist_gput_right:Nx \g__cus_layout_geometry_clist { includemp = \l_keys_choice_tl } } ,
+    includemarginpar .default:n = true ,
+    ignorehf .choices:nn = { true , false }
+      { \clist_gput_right:Nx \g__cus_layout_geometry_clist { ignoreheadfoot = \l_keys_choice_tl } } ,
+    ignorehf .default:n = true ,
+    ignoremarginpar .choices:nn = { true , false } 
+      { \clist_gput_right:Nx \g__cus_layout_geometry_clist { ignoremp = \l_keys_choice_tl } } ,
+    ignoremarginpar .default:n = true ,
+    nohf .code:n = { \clist_gput_right:Nn \g__cus_layout_geometry_clist { noheadfoot } } ,
+    nomp .code:n = { \clist_gput_right:Nn \g__cus_layout_geometry_clist { nomarginpar } } ,
+
+    warnings .switch_gset:N = \g__cus_geometry_warnings_bool ,
+    showmarking  .switch_gset:N = \g__cus_layout_marking_bool ,
+    marking .meta:n = { showmarking = {#1} } ,
+    marking .default:n = true ,
+
+    unknown .code:n = 
+      { 
+        \tl_set:Nx \l__cus_tmpa_tl 
+          { \exp_args:No \cus_split_bracket_tail:n { \l_keys_key_str } }
+        \keys_if_exist:neTF { cus/layout } 
+          { \exp_after:wN \__cus_paper_key:w \l__cus_tmpa_tl }
+          { \exp_after:wN \__cus_execute_paper_key:w \l__cus_tmpa_tl }
+          { 
+            \clist_gput_right:Nx \g__cus_layout_geometry_clist 
+              { \l_keys_key_str = { \exp_not:o \l_keys_value_tl } } 
+          }
+      }
+  }
+\cs_new_protected:Npn \__cus_get_size_from_name:n #1 
+  {
+    \__cus_make_papername_gm:n {#1}
+    \cs_if_exist:cTF { Gm@ \l__cus_papername_str }
+      {
+        \tl_set:Nx \l__cus_tmpa_tl
+          { \exp_args:Nc \cs_replacement_spec:N { Gm@ \l__cus_papername_str } }
+        \exp_after:wN \__cus_get_size_from_name_aux:w \l__cus_tmpa_tl \s__cus_stop
+      }
+      {
+        \msg_warning:nnx { cus } { papername-unknown } { \l__cus_papername_str }
+        \tl_gset:Nn \g__cus_paperwidth_tl { 21cm }
+        \tl_gset:Nn \g__cus_paperheight_tl { 29.7cm }
+      }
+  }
+\use:e { \cs_new:Npn \exp_not:N \__cus_get_size_from_name_aux:w #1 \token_to_str:N \Gm@setsize #2 (#3,#4) \c_left_brace_str #5 \c_right_brace_str #6 \s__cus_stop }
+  { 
+    \tl_gset:Nn \g__cus_paperwidth_tl { #3#5 }
+    \tl_gset:Nn \g__cus_paperheight_tl { #4#5 }
+    \if_int_odd:w 0 #1 \exp_stop_f:
+      \tl_gset:Nn \g__cus_paperorientation_tl { landscape }
+      \tl_log:N\g__cus_paperorientation_tl
+    \else: \tl_gset:Nn \g__cus_paperorientation_tl { portrait }
+    \fi:
+  }
+\cs_new:Npn \__cus_set_layout_name:n #1
+  {
+    \__cus_make_papername_gm:n {#1}
+    \cs_if_exist:cTF { Gm@ \l__cus_papername_str }
+      {
+        \tl_set:Nx \l__cus_tmpa_tl
+          { \exp_args:Nc \cs_replacement_spec:N { Gm@ \l__cus_papername_str } }
+        \exp_after:wN \__cus_set_layout_name_aux:w \l__cus_tmpa_tl \s__cus_stop
+      }
+      {
+        \msg_warning:nnx { cus } { papername-unknown } { \l__cus_papername_str }
+        \tl_gset:Nn \g__cus_layoutwidth_tl { 21cm }
+        \tl_gset:Nn \g__cus_layoutheight_tl { 29.7cm }
+      }
+    \clist_gput_right:Nn \g__cus_layout_geometry_clist
+      { layoutwidth = \g__cus_layoutwidth_tl , layoutheight = \g__cus_layoutheight_tl }
+  }
+\use:e { \cs_new:Npn \exp_not:N \__cus_set_layout_name_aux:w #1 \token_to_str:N \Gm@setsize #2 (#3,#4) \c_left_brace_str #5 \c_right_brace_str #6 \s__cus_stop }
+  {
+    \tl_gset:Nn \g__cus_layoutwidth_tl { #3#5 }
+    \tl_gset:Nn \g__cus_layoutheight_tl { #4#5 }
+  }
+\cs_new:Npn \__cus_make_papername_gm:n #1 
+  {
+    \str_set:Nx \l__cus_tmpa_str { \text_lowercase:n {#1} }
+    \str_if_in:NnTF \l__cus_tmpa_str { paper }
+      { \str_set_eq:NN \l__cus_papername_str \l__cus_tmpa_str }
+      {
+        \str_if_eq:eeTF \l__cus_tmpa_str { screen }
+          { 
+            \str_set_eq:NN \l__cus_papername_str \l__cus_tmpa_str 
+            \tl_gset:Nn \g__cus_paperorientation_tl { landscape }
+          }
+          {
+            \cs_if_exist:cTF { Gm@ \l__cus_tmpa_str paper }
+              { \str_set:Nx \l__cus_papername_str { \l__cus_tmpa_str paper } }
+              { \str_set_eq:NN \l__cus_papername_str \l__cus_tmpa_str }
+          }
+      }
+  }
+\cs_new:Npn \__cus_get_size:n #1
+  {
+    \int_case:nnF { \clist_count:n {#1} }
+      {
+        { 0 } { }
+        { 1 } 
+          {
+            \str_if_in:nnTF {#1} { : }
+              {
+                \exp_last_unbraced:Ne \__cus_get_size_aux:w 
+                  { #1 \c_colon_str \c_colon_str } \s__cus_stop 
+              }
+              {
+                \tl_gset:Nx \g__cus_paperwidth_tl { \dim_eval:n {#1} }
+                \tl_gset:Nx \g__cus_paperheight_tl { \dim_eval:n {#1} }
+              }
+          }
+      }
+      {
+        \tl_gset:Nx \g__cus_paperwidth_tl { \dim_eval:n { \clist_item:nn {#1} 1 } }
+        \tl_gset:Nx \g__cus_paperheight_tl { \dim_eval:n { \clist_item:nn {#1} 2 } }
+      }
+  }
+\use:e { \cs_new:Npn \exp_not:N \__cus_get_size_aux:w #1 \c_colon_str #2 \c_colon_str #3 \s__cus_stop }
+  {
+    \tl_if_empty:nF {#1} { \tl_gset:Nx \g__cus_paperwidth_tl { \dim_eval:n {#1} } }
+    \tl_if_empty:nF {#2} { \tl_gset:Nx \g__cus_paperheight_tl { \dim_eval:n {#2} } }
+  }
+\cs_new:Npn \__cus_paper_key:w #1 [#2] { #1#2 }
+\cs_new:Npn \__cus_execute_paper_key:w #1 [#2] 
+  { \__keys_execute:no { \l__keys_module_str / #1#2 } \l_keys_value_tl }
+\cs_new_eq:NN \__cus_layout_marking: \prg_do_nothing:
+\cs_new_protected:Npn \__cus_layout_marking_box:
+  {
+    \vbox_to_zero:n {
+      \if@twoside
+        \ifodd\count\z@
+          \let\@themargin\oddsidemargin
+        \else
+          \let\@themargin\evensidemargin
+        \fi
+      \fi
+      \moveright\@themargin%
+      \vb@xt@\z@{%
+        \vskip\topmargin
+        \ifodd\count\z@
+          \let\@templeftskip\f@nch@offset@olh \let\@temprightskip\f@nch@offset@orh
+        \else
+          \let\@templeftskip\f@nch@offset@elh \let\@temprightskip\f@nch@offset@erh
+        \fi
+        \dim_set:Nn \@tempdima { \textwidth + \@templeftskip + \@temprightskip }
+        \vbox_to_zero:n { \cus_color_select:n {blue!50} \vss \hbox_to_wd:nn \textwidth { \hskip-\@templeftskip \vrule\@height\z@ \@width\@tempdima \@depth\headheight \hskip-\@temprightskip \hss } }
+        \vskip\headsep 
+        \vskip 0.2\p@ 
+        \dim_set:Nn \@tempdima { \textwidth + \marginparsep + \marginparwidth }
+        \if@mparswitch
+          \ifodd\count\z@
+            \hbox_to_wd:nn \@tempdima { 
+              \cus_color_select:n { red!50!yellow } 
+              \if@twocolumn
+                \vrule \@height\textheight \@width\columnwidth \@depth\z@
+                \hskip\columnsep
+                \vrule \@height\textheight \@width\columnwidth \@depth\z@
+              \else
+                \vrule \@height\textheight \@width\textwidth \@depth\z@ 
+              \fi 
+              \hskip\marginparsep 
+              \cus_color_select:n { red!70!yellow } 
+              \vrule \@height\textheight \@width\marginparwidth \@depth\z@ 
+              \hss
+            }
+          \else
+            \hbox_to_wd:nn \@tempdima {
+              \cus_color_select:n { red!70!yellow } 
+              \hskip-\marginparwidth \hskip-\marginparsep 
+              \vrule \@height\textheight \@width\marginparwidth \@depth\z@ 
+              \hskip\marginparsep 
+              \cus_color_select:n { red!50!yellow } 
+              \if@twocolumn
+                \vrule \@height\textheight \@width\columnwidth \@depth\z@
+                \hskip\columnsep
+                \vrule \@height\textheight \@width\columnwidth \@depth\z@
+              \else
+                \vrule \@height\textheight \@width\textwidth \@depth\z@ 
+              \fi 
+              \hss 
+            }
+          \fi
+        \else
+          \hbox_to_wd:nn \@tempdima { 
+            \cus_color_select:n { red!50!yellow } 
+            \if@twocolumn
+              \vrule \@height\textheight \@width\columnwidth \@depth\z@
+              \hskip\columnsep
+              \vrule \@height\textheight \@width\columnwidth \@depth\z@
+            \else
+              \vrule \@height\textheight \@width\textwidth \@depth\z@ 
+            \fi 
+            \hskip\marginparsep 
+            \cus_color_select:n { red!70!yellow } 
+            \vrule \@height\textheight \@width\marginparwidth \@depth\z@ 
+            \hss
+          }
+        \fi
+        \ifodd\count\z@
+          \let\@templeftskip\f@nch@offset@olf \let\@temprightskip\f@nch@offset@orf
+        \else
+          \let\@templeftskip\f@nch@offset@elf \let\@temprightskip\f@nch@offset@erf
+        \fi
+        \dim_set:Nn \@tempdima { \textwidth + \@templeftskip + \@temprightskip }
+        \vbox:n { \hbox_to_wd:nn \textwidth { \cus_color_select:n {blue!50} \hskip-\@templeftskip \vrule\@height\footskip \@width\@tempdima \@depth\z@ \hskip-\@temprightskip \hss } }
+      \vss}%
+    }
+  }
+
+\msg_new:nnn { cus } { papername-unknown } { The~papername~`#1'~is~unknown. }
+
+
+\protected\def\undefinedpagestyle#1{%
+  \msg_warning:nnx { cus } { unknown-pagestyle } {#1}
+}
+\protected\def\pagestyle#1{%
+  \@ifundefined{ps@#1}{\undefinedpagestyle{#1}}
+    {\edef\@currpagestyle{#1}\@nameuse{ps@\@currpagestyle}}}
+\protected\def\thispagestyle#1{%
+  \@ifundefined{ps@#1}{\undefinedpagestyle{#1}}
+    {\global\@specialpagetrue\xdef\@specialstyle{#1}}}
+\ctex_patch_cmd:Nnn \@outputpage { \if@specialpage } 
+  { \if@specialpage \let\@currpagestyle\@specialstyle }
+\ekeysdeclarecmd \setpagestyle { p{*.+!} s m O{f@nch@fancyproto} m }
+  {
+    \legacy_if_set:nn { f@nch@pagestyle@star }
+      { \bool_lazy_or_p:nn {#2} { \int_compare_p:nNn {#1} > { 3 } } }
+    \bool_lazy_or:nnTF 
+      { \str_if_eq_p:ee { \c_tilde_str } { \exp_not:n {#4} } }
+      { \str_if_eq_p:ee {#3} {#4} }
+      { \f@nch@pagestyle {#3} [f@nch@fancyproto] } 
+      { \f@nch@pagestyle {#3} [#4] } {#5}
+    \NumberCase {#1}
+      {
+        { } % None
+        { \usepagestyle{#3} }
+        { \usethispagestyle{#3} }
+        { \usepagestyle{#3} \usethispagestyle{#3} }
+      } { } % unvaliable
+  }
+\cs_new_protected_nopar:Npn \copypagestyle { \fancypagestyleassign }
+\cs_new_protected_nopar:Npn \usepagestyle { \pagestyle }
+\cs_new_protected_nopar:Npn \usethispagestyle { \thispagestyle }
+\cs_new_protected_nopar:Npn \sethead { \fancyhead }
+\cs_new_protected_nopar:Npn \setfoot { \fancyfoot }
+\cs_new_protected_nopar:Npn \setlefthead { \lhead }
+\cs_new_protected_nopar:Npn \setleftfoot { \lfoot }
+\cs_new_protected_nopar:Npn \setrighthead { \rhead }
+\cs_new_protected_nopar:Npn \setrightfoot { \rfoot }
+\cs_new_protected_nopar:Npn \setcenterhead { \chead }
+\cs_new_protected_nopar:Npn \setcenterfoot { \cfoot }
+\cs_new_protected_nopar:Npn \setheadfoot { \fancyhf }
+\cs_new_eq:NN \sethf \setheadfoot
+\cs_new_protected:Npn \setheadinit { \tl_set:Nn \f@nch@headinit }
+\cs_new_protected:Npn \setfootinit { \tl_set:Nn \f@nch@footinit }
+\cs_new_protected:Npn \setheadfootinit #1
+  { \tl_set:Nn \f@nch@headinit {#1} \tl_set:Nn \f@nch@footinit {#1} }
+\cs_new_eq:NN \sethfinit \setheadfootinit 
+\cs_new_protected_nopar:Npn \setheadrule { \cs_set_nopar:Npn \headrule }
+\cs_new_protected_nopar:Npn \setfootrule { \cs_set_nopar:Npn \footrule }
+\cs_new_protected_nopar:Npn \setheadrulewidth #1
+  { \cs_set_nopar:Npx \headrulewidth { \dim_eval:n {#1} } }
+\cs_new_protected_nopar:Npn \setfootrulewidth #1 
+  { \cs_set_nopar:Npx \footrulewidth { \dim_eval:n {#1} } }
+\cs_new_protected_nopar:Npn \setheadruleskip #1
+  { \cs_set_nopar:Npx \headruleskip { \skip_eval:n {#1} } }
+\cs_new_protected_nopar:Npn \setfootruleskip #1 
+  { \cs_set_nopar:Npx \footruleskip { \skip_eval:n {#1} } }
+\cs_set_nopar:Npn \ps@totalempty 
+  { 
+    \ps@f@nch@fancyproto 
+    \cs_set_nopar:Npn \headrulewidth { \z@ }
+    \cs_set_nopar:Npn \footrulewidth { \z@ }
+    \f@nch@def \f@nch@olh { } \f@nch@def \f@nch@och { } \f@nch@def \f@nch@orh { }
+    \f@nch@def \f@nch@elh { } \f@nch@def \f@nch@ech { } \f@nch@def \f@nch@erh { }
+    \f@nch@def \f@nch@olf { } \f@nch@def \f@nch@ocf { } \f@nch@def \f@nch@orf { }
+    \f@nch@def \f@nch@elf { } \f@nch@def \f@nch@ecf { } \f@nch@def \f@nch@erf { }
+  }
+\cs_set_nopar:cpn { ps@totalempty* }
+  {
+    \ps@totalempty
+    \f@nch@offset@olh\z@skip \f@nch@offset@orh\z@skip
+    \f@nch@offset@elh\z@skip \f@nch@offset@erh\z@skip
+    \f@nch@offset@olf\z@skip \f@nch@offset@orf\z@skip
+    \f@nch@offset@elf\z@skip \f@nch@offset@erf\z@skip
+  }
+\tl_set_eq:cN { f@nch@ps@totalempty-is-fancyhdr } \c_empty_tl
+\tl_set_eq:cN { f@nch@ps@totalempty*-is-fancyhdr } \c_empty_tl
+\cs_set:Npn \iftopfloat 
+  { \if_meaning:w \f@nch@topfloat \@empty \exp_after:wN \use_ii:nn \else: \use_i:nn \fi: }
+\cs_set:Npn \ifbotfloat 
+  { \if_meaning:w \f@nch@botfloat \@empty \exp_after:wN \use_ii:nn \else: \use_i:nn \fi: }
+\cs_set:Npn \iffloatpage 
+  { \if@fcolmade \exp_after:wN \use_i:nn \else: \use_ii:nn \fi: }
+\cs_set:Npn \iffootnote 
+  { \iff@nch@footnote \exp_after:wN \use_i:nn \else: \use_ii:nn \fi: }
+
+\msg_new:nnn { cus } { unknown-pagestyle } { Unknown~pagestyle~`#1'. }

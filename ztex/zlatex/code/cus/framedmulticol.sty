@@ -1,0 +1,546 @@
+%%
+%% This is file `framedmulticol.sty'.
+%%
+%% This work may be distributed and/or modified under the
+%% conditions of the LaTeX Project Public License, either
+%% version 1.3 of this license or (at your option) any
+%% later version.
+%% The latest version of the license is in
+%%    http://www.latex-project.org/lppl.txt
+%% and version 1.3 or later is part of all distributions of
+%% LaTeX version 2003/06/01 or later.
+%%
+%% This work has the LPPL maintenance status `maintained'.
+%%
+%% The Current Maintainer of this work is Wenjian Chern.
+%%
+%% This work consists of the file framedmulticol.sty.
+%%
+%%
+%% Since this package is based on the multicol and adjmulticol package,
+%% Copyright 1989-2005 Frank Mittelbach, the following additional
+%% condition is added to the licensing terms.  The term ``multicol''
+%% here should be interpreted as ``multicol and/or adjmulticol and/or 
+%% framedmulticol'' package, as appropriate.
+%%
+%%  In addition to the terms of LPPL any distributed version
+%%  (unchanged or modified) of multicol has to keep the statement
+%%  about the moral obligation for using multicol. In case of major
+%%  changes where this would not be appropriate the author of the
+%%  changed version should contact the copyright holder.
+%%
+%%
+%%  Moral obligation for using multicol:
+%%  ------------------------------------
+%%
+%%  Users of multicol who wish to include or use multicol or a modified
+%%  version in a proprietary and commercially market product are asked
+%%  under certain conditions (see below) for the payment of a license
+%%  fee.  The size of this fee is to be determined, in each instance,
+%%  by the commercial user, depending on his/her judgment of the value of
+%%  multicol for his/her product.
+%%
+%%
+%%  The conditions for this are as follows:
+%%
+%%   The producer of a proprietary and commercially market product
+%%   that involves typesetting using multicol is asked to determine
+%%   the value of a license fee for using multicol if
+%%
+%%   - the product is a document and the producer has decided to
+%%     include multicol to typeset (parts of) the document or has
+%%     directed the author of the document to include multicol (for
+%%     example, by providing a class file to be used by the author)
+%%
+%%   - the product is a LaTeX class or package that includes multicol
+%%
+%%
+%%   There is no moral obligation in case
+%%
+%%   - the product is a document but producer has not directed
+%%     the author to include multicol (in that case the moral obligation
+%%     lies with the author of the document)
+%%
+%%   - the product does not involve typesetting, e.g., consists, for
+%%     example, of distributing multicol and its documentation.
+%%
+%%   - the product is not proprietary, i.e., is made available as free
+%%     software itself (which doesn't prohibit its commercial marketing)
+%%
+%%   - multicol is used for non-commercial purposes
+%%
+%%
+%% Determinating a license fee might result in a license fee of zero
+%% (i.e., no payment) in case a producer has determined that the use
+%% of multicol has no enhancing effect on the product. This is a
+%% plausible scenario, i.e., in the above two cases the producer is
+%% only asked to evaluate the value of multicol for the product
+%% not for the payment of a license fee per se (which might or might
+%% not follow from this evaluation).
+%%
+%% The license fee, if any, can be payed either to the LaTeX3 fund
+%% (see ltx3info.txt in the base LaTeX distribution) or to the author of
+%% the program who can be contacted at
+%%
+%%     Frank.Mittelbach@latex-project.org
+%%
+\NeedsTeXFormat{LaTeX2e}[2020/10/01]
+\ProvidesPackage{framedmulticol}
+[2024/02/01 v0.2 add frame for multicolumn text]
+\RequirePackage{multicol}
+\RequirePackage{ctexpatch}
+\ExplSyntaxOn 
+\dim_if_exist:NF \@tempdimd { \dim_new:N \@tempdimd }
+\cs_if_exist:NF \IfPageOdd
+  {
+    \cs_new:Npn \IfPageOdd 
+      { 
+        \if_int_odd:w \c@page \exp_after:wN \use_i:nn 
+        \else: \exp_after:wN \use_ii:nn 
+        \fi: 
+      }
+  }
+%% patch multicol
+\cs_new_protected:Npn \fmulticol@update@framedgeometry #1 { }
+\cs_new_protected:Npn \fmulticol@update@height #1 { }
+\cs_new_protected:Npn \fmulticol@update@width #1 { }
+\cs_new_protected:Npn \fmulticol@update@box #1 {#1}
+\cs_new_protected:Npn \fmulticol@update@boxfirst { }
+\cs_new_protected:Npn \fmulticol@update@boxmiddle { }
+\cs_new_protected:Npn \fmulticol@update@boxlast { }
+\cs_new_protected:Npn \fmulticol@update@boxes #1#2 { }
+\cs_new_protected:Npn \fmulticol@update@rule 
+  { \columnseprulecolor\vrule\@width\columnseprule }
+\cs_new_eq:NN \fmulticol@drawrule \fmulticol_draw_rule:nnnn 
+\cs_new_protected:Npn \fmulticol@swapcolumninevenpages #1#2#3
+  {
+    \ifodd\fmulticol@swapcolumn 
+      \if@twoside 
+        \ifodd\c@page #3
+        \else \ifx#3#1 #2\else #1\fi 
+        \fi 
+      \else #3
+      \fi 
+    \else #3
+    \fi 
+  }
+\cs_set_eq:NN \fmulticol@update@boxes \fmulticol@swapcolumninevenpages 
+%% see multicolrule.sty
+\dim_new:N \l__fmulticol_tmpa_dim 
+\dim_new:N \l__fmulticol_rule_extend_top_dim
+\dim_new:N \l__fmulticol_rule_extend_bot_dim
+\cs_new_protected:Npn \fmulticol@rule 
+  { 
+    \dim_set:Nn \l__fmulticol_tmpa_dim 
+      {
+        \box_ht:N \mult@rightbox + % height
+        \dim_max:nn {\dimen\tw@} {\box_dp:N \mult@rightbox} + % depth
+        \dim_max:nn {\box_ht:N \mult@nat@firstbox - \box_ht:N \mult@rightbox} {0pt} % overflow
+      }
+    \box_move_down:nn 
+      { \l__fmulticol_tmpa_dim - \box_ht:N \mult@rightbox }
+      {
+        \vbox_to_ht:nn \l__fmulticol_tmpa_dim 
+          {
+            \tex_vss:D
+            \hbox:n
+              {
+                \use:e 
+                  {
+                    \exp_not:N \fmulticol@drawrule 
+                      { \dim_use:N \columnseprule } 
+                      { \dim_eval:n { \l__fmulticol_tmpa_dim + \l__fmulticol_rule_extend_top_dim + \l__fmulticol_rule_extend_bot_dim } } 
+                      { \dim_use:N \c_zero_dim } 
+                      { \exp_not:N \columnseprulecolor } 
+                  }
+              }
+            \tex_vss:D 
+          }
+      }
+  }
+\dim_new:N \fmulticol@extra@height 
+\dim_new:N \fmulticol@extra@width 
+\ctex_patch_cmd:Nnn \page@sofar 
+  { \hbox to\full@width { \mc@align@columns \rlap{ \phantom \multicolmindepthstring } } }
+  { 
+    \fmulticol@update@box 
+      {
+        \hbox to\full@width 
+          { \fmulticol@update@boxes\LR@column@boxes\RL@column@boxes\mc@align@columns 
+            \rlap{ \phantom \multicolmindepthstring } }
+      }
+  }
+\ctex_patch_cmd:Nnn \prepare@multicols { \hsize\linewidth }
+  {
+    \advance\linewidth-\fmulticol@extra@width 
+    \hsize\linewidth
+  }
+\ctex_patch_cmd:Nnn \prepare@multicols 
+  { \set@mult@vsize\relax }
+  { \fmulticol@update@boxfirst \set@mult@vsize\relax }
+\ctex_patch_cmd:Nnn \endmulticols 
+  { \par } { \par \fmulticol@update@boxlast }
+\ctex_patch_cmd:Nnn \multi@column@out { \dimen@\@colroom }
+  {
+    \advance\@colroom-\fmulticol@extra@height 
+    \dimen@\@colroom 
+  }
+\cs_set_eq:NN \fmulticol@LR@column@boxes \LR@column@boxes
+\cs_set_eq:NN \fmulticol@RL@column@boxes \RL@column@boxes
+\ctex_patch_cmd:Nnn \LR@column@boxes 
+  { \columnseprulecolor\vrule\@width\columnseprule }
+  { \fmulticol@update@rule }
+\ctex_patch_cmd:Nnn \RL@column@boxes 
+  { \columnseprulecolor\vrule\@width\columnseprule }
+  { \fmulticol@update@rule }
+\cs_set_eq:NN \mc@align@columns \LR@column@boxes 
+\hook_gput_code:nnn { package/multicolrule/before } { fmulticol }
+  {
+    \cs_set_eq:NN \LR@column@boxes \fmulticol@LR@column@boxes
+    \cs_set_eq:NN \RL@column@boxes \fmulticol@RL@column@boxes
+  }
+\RequirePackage {adjmulticol}
+\ctex_patch_cmd:Nnn \adjmc@page@sofar
+  { \ifodd\c@page } { \iftrue \fmulticol@adjmc@ifoddpage }
+\cs_new:Npn \fmulticol@adjmc@ifoddpage #1\else #2\fi
+  { 
+    \fi
+    \legacy_if:nTF { @boxedmulticols } 
+      { \IfPageOdd{#1}{#2} } { \ifodd\c@page#1\else#2\fi }
+  }
+\tl_new:N \l__fmulticol_adj_inner_tl 
+\tl_new:N \l__fmulticol_adj_outer_tl 
+%%end-of patch 
+\cs_new_protected:Npn \fmulticolsetup { \keys_set:nn { fmulticol } }
+\keys_define:nn { fmulticol } 
+  {
+    columns .code:n = \tl_set:Nx \l__fmulticol_cols_tl { \int_eval:n {#1} } ,
+    columns .initial:n = 2 ,
+    cols .meta:n = { columns = {#1} } ,
+    first-minimal .dim_set:N = \premulticols ,
+    last-minimal .dim_set:N = \postmulticols ,
+    outer-skip .skip_set:N = \multicolsep ,
+    outer-sep .meta:n = { outer-skip = {#1} } ,
+    column-sep .dim_set:N = \columnsep ,
+    sep .meta:n = { column-sep = {#1} } ,
+    heading .tl_set:N = \l__fmulticol_heading_tl ,
+    rule-width .dim_set:N = \columnseprule ,
+    rule-color .code:n = 
+      \tl_set:Nx \columnseprulecolor { \__fmulticol_color_select:n {#1} } ,
+    ragged .code:n = \raggedcolumns ,
+    ragged .value_forbidden:n = true ,
+    not-aligned .meta:n = { ragged } ,
+    not-aligned .value_forbidden:n = true ,
+    flush .code:n = \flushcolumns ,
+    flush .value_forbidden:n = true ,
+    aligned .meta:n = { flush } ,
+    aligned .value_forbidden:n = true ,
+    balanced .bool_set:N = \l__fmulticol_balanced_bool ,
+    balanced .initial:n = true ,
+    not-balanced .code:n = \bool_set_false:N \l__fmulticol_balanced_bool ,
+    not-balanced .value_forbidden:n = true ,
+    columns* .meta:n = { not-balanced , columns = {#1} } ,
+    cols*    .meta:n = { columns* = {#1} } ,
+
+    % hook point 
+    before .tl_set:N = \l__fmulticol_before_tl ,
+    after  .tl_set:N = \l__fmulticol_after_tl  ,
+    begin  .tl_set:N = \l__fmulticol_begin_tl  ,
+    end    .tl_set:N = \l__fmulticol_end_tl    ,
+
+    enable-swap-column .code:n = 
+      \cs_set_eq:NN \fmulticol@update@boxes \fmulticol@swapcolumninevenpages ,
+    enable-swap-column .value_forbidden:n = true ,
+    disable-swap-column .code:n = \cs_set_eq:NN \fmulticol@update@boxes \use_none:nn ,
+    disable-swap-column .value_forbidden:n = true ,
+    swap-column .bool_set:N = \fmulticol@swapcolumn ,
+
+    adj .bool_set:N = \l__fmulticol_adj_bool ,
+    adj-inner .code:n = \bool_set_true:N \l__fmulticol_adj_bool 
+      \tl_set:Nx \l__fmulticol_adj_inner_tl { \dim_eval:n {#1} } ,
+    adj-outer .code:n = \bool_set_true:N \l__fmulticol_adj_bool 
+      \tl_set:Nx \l__fmulticol_adj_outer_tl { \dim_eval:n {#1} } ,
+    adj*      .meta:n = { adj , not-balanced } ,
+    _adj      .code:n = \__fmulticol_adj:Nnnn #1 ,
+    shorten   .code:n = \bool_set_true:N \l__fmulticol_adj_bool
+      \__fmulticol_adj:Nnnn + {#1} { 0pt } { 0pt } ,
+    widen     .code:n = \bool_set_true:N \l__fmulticol_adj_bool 
+      \__fmulticol_adj:Nnnn - {#1} { 0pt } { 0pt } ,
+
+    wrap-box .bool_set:N = \l__fmulticol_wrap_box_bool ,
+
+    framed .choice: ,
+    framed-options  .clist_set:N = \fmulticol@framed@options ,
+    framed-options+ .code:n = \clist_put_right:Nn \fmulticol@framed@options {#1} ,
+    rule-top .dim_set:N = \l__fmulticol_rule_extend_top_dim ,
+    rule-bottom .dim_set:N = \l__fmulticol_rule_extend_bot_dim ,
+
+    % be careful to use
+    addto-baselineskip .dim_set:N = \multicolbaselineskip ,
+    tolerance .int_set:N = \multicoltolerance , % 9999
+    pretolerance .int_set:N = \multicolpretolerance ,
+    collectmore .int_set:N = \c@collectmore ,
+    minrows .int_set:N = \c@minrows , % 1
+    unbalance .int_set:N = \c@unbalance ,
+    column-badness .int_set:N = \c@columnbadness ,
+    final-column-badness .int_set:N = \c@finalcolumnbadness , % 9999
+    top-fuzz .dim_set:N = \multicolovershoot , % 0pt 
+    bottom-fuzz .dim_set:N = \multicolundershoot , % 2pt 
+    bot-fuzz .meta:n = { bottom-fuzz = {#1} } ,
+    v-fuzz .meta:n = { top-fuzz = {#1} , bottom-fuzz = {#1} } ,
+    h-fuzz .dim_set:N = \tex_hfuzz:D ,
+    overflow .dim_set:N = \maxbalancingoverflow , % 12pt 
+    right-to-left .code:n = \RLmulticolcolumns ,
+    right-to-left .value_forbidden:n = true ,
+    RL .meta:n = { right-to-left } ,
+    RL .value_forbidden:n = true ,
+    left-to-right .code:n = \LRmulticolcolumns ,
+    left-to-right .value_forbidden:n = true ,
+    LR .meta:n = { left-to-right } ,
+    LR .value_forbidden:n = true ,
+
+    unknown .code:n = 
+      { 
+        \exp_args:Nf \__fmulticol_if_head_int:nTF { \l_keys_key_str } 
+          { \tl_set:Nx \l__fmulticol_cols_tl { \int_eval:n { \l_keys_key_str } } } 
+          { \msg_error:nnx { fmulticol } { unknown-key } { \l_keys_key_str } }
+      } ,
+  }
+\cs_new_nopar:Npn \__fmulticol_color_select:n #1
+  {
+    \tl_if_head_eq_meaning:nNTF {#1} [ % ]
+      { \__fmulticol_color_select_aux:w #1 \scan_stop: }
+      { \tl_if_blank:nF {#1} { \exp_not:N \color {#1} } }
+  }
+\cs_new:Npn \__fmulticol_color_select_aux:w [#1] #2 \scan_stop:
+  { \exp_not:N \color [#1] {#2} }
+\cs_new:Npn \__fmulticol_if_head_int:nTF #1
+  {
+    \if_case:w 0 \if_case:w 1#1 \or:\or:\or:\or:\or:\or:\or:\or:\or:\else: 1\fi: \exp_stop_f:
+      \exp_after:wN \use_ii:nn
+    \else:
+      \exp_after:wN \use_i:nn
+    \fi:
+  }
+\cs_new:Npn \__fmulticol_adj:Nnnn #1#2#3#4
+  {
+    \tl_if_blank:nTF {#2}
+      {
+        \__kernel_tl_set:Nx \l__fmulticol_adj_inner_tl { #1 \dim_eval:n {#3} }
+        \__kernel_tl_set:Nx \l__fmulticol_adj_outer_tl { #1 \dim_eval:n {#4} }
+      }
+      {
+        \seq_set_split:Nnn \l__fmulticol_tmp_seq { , } {#2}
+        \int_compare:nNnTF { \seq_count:N \l__fmulticol_tmp_seq } = 1
+          {
+            \seq_pop_left:NN \l__fmulticol_tmp_seq \l__fmulticol_adj_inner_tl
+            \tl_set:Nx \l__fmulticol_adj_outer_tl
+              { #1 \dim_eval:n { \l__fmulticol_adj_inner_tl + #4 } }
+            \__kernel_tl_set:Nx \l__fmulticol_adj_inner_tl
+              { #1 \dim_eval:n { \l__fmulticol_adj_inner_tl + #3 } }
+          }
+          {
+            \seq_pop_left:NN \l__fmulticol_tmp_seq \l__fmulticol_adj_inner_tl
+            \__kernel_tl_set:Nx \l__fmulticol_adj_inner_tl 
+              { #1 \dim_eval:n { \l__fmulticol_adj_inner_tl + #3 } }
+            \seq_pop_left:NN \l__fmulticol_tmp_seq \l__fmulticol_adj_outer_tl
+            \__kernel_tl_set:Nx \l__fmulticol_adj_outer_tl 
+              { #1 \dim_eval:n { \l__fmulticol_adj_outer_tl + #4 } }
+          }
+      }
+  }
+\msg_new:nnn { fmulticol } { unknown-key }
+  { The~key~`#1'~is~unknown~and~is~being~ignored. }
+\cs_new_protected:Npn \__fmulticol_process_framedoptions: 
+  {
+    \hbox_set:Nn \c_zero_int % we never use it 
+      { 
+        %\setbox0\fmulticol@update@box{}
+        %\global\fmulticol@extra@height=\dimexpr\ht0+\dp0\relax 
+        %\global\fmulticol@extra@width=\wd0
+        \exp_args:No \fmulticol@update@framedgeometry { \fmulticol@framed@options } 
+        \fmulticol@update@height\fmulticol@extra@height 
+        \fmulticol@update@width\fmulticol@extra@width 
+        \tl_gset:Nx \g__fmulticol_tmpa_tl 
+          {
+            \dim_set:Nn \fmulticol@extra@height { \the\fmulticol@extra@height }
+            \dim_set:Nn \fmulticol@extra@width  { \the\fmulticol@extra@width  }
+          }
+      }
+    \g__fmulticol_tmpa_tl
+  }
+\cs_new_protected:Npn \fmulticolremove 
+  {
+    \cs_set_protected:Npn \fmulticol@update@framedgeometry ##1 { }
+    \cs_set_protected:Npn \fmulticol@update@height ##1 { }
+    \cs_set_protected:Npn \fmulticol@update@width ##1 { }
+    \cs_set_protected:Npn \fmulticol@update@box ##1 {##1}
+    \dim_zero:N \fmulticol@extra@height
+    \dim_zero:N \fmulticol@extra@width 
+  }
+\keys_define:nn { fmulticol }
+  {
+    framed / none .code:n = \fmulticolremove ,
+    framed / fbox .code:n = 
+      {
+        \cs_set_protected:Npn \fmulticol@update@height ##1
+          { ##1=\dimexpr2\fboxrule+2\fboxsep\relax }
+        \cs_set_eq:NN \fmulticol@update@width \fmulticol@update@height 
+        \cs_set_protected:Npn \fmulticol@update@box ##1 
+          { \hbox{ \exp_args:No\fmulticol@update@framedgeometry{\fmulticol@framed@options} \fbox{##1}} }
+        \cs_set_protected:Npn \fmulticol@update@framedgeometry ##1 
+          { \keyval_parse:nnn \use_none:n \__fmulticol_set_fbox_geometry:nn {##1} }
+      } ,
+    env-no-framed .code:n = \__fmulticol_env_remove: ,
+    env-framed .code:n = \__fmulticol_env_set: ,
+  }
+\cs_new_protected:Npn \__fmulticol_env_remove:
+  {
+    \clist_map_inline:nn { multicols, adjmulticols, adjmulticols* }
+      { \hook_gput_code:nnn { env/##1/begin } { fmulticol } { \fmulticolremove } }
+  }
+\cs_new_protected:Npn \__fmulticol_env_set:
+  {
+    \clist_map_inline:nn { multicols, adjmulticols, adjmulticols* }
+      { \hook_gremove_code:nn { env/##1/begin } { fmulticol } }
+  }
+\cs_new_protected:Npn \__fmulticol_set_fbox_geometry:nn #1#2
+  {
+    \str_case:nn {#1}
+      {
+        { sep }  { \dim_set:Nn \fboxsep {#2} }
+        { rule } { \dim_set:Nn \fboxrule {#2} }
+        { border } { \dim_set:Nn \fboxrule {#2} }
+        { border-width } { \dim_set:Nn \fboxrule {#2} }
+        { padding } { \dim_set:Nn \fboxsep {#2} }
+      }
+  }
+\cs_new_protected_nopar:Npn \fmulticol@startmulticolumns { \multicols }
+\cs_new_protected_nopar:Npn \fmulticol@stopmulticolumns  { \endmulticols }
+\NewDocumentCommand \startmulticolumns { +O{} }
+  {
+    \l__fmulticol_before_tl
+    \group_begin:
+    \cs_if_exist:NT \@captype { \bool_set_true:N \l__fmulticol_wrap_box_bool }
+    \keys_set:nn { fmulticol } {#1}
+    \__fmulticol_process_framedoptions: 
+    \int_compare:nNnTF \l__fmulticol_cols_tl < 2
+      { 
+        \bool_if:NTF \l__fmulticol_adj_bool 
+          {
+            \cs_set:Npx \fmulticol@startmulticolumns 
+              { 
+                \exp_not:c 
+                  { adjmulticols \bool_if:NF \l__fmulticol_balanced_bool * }
+                  { 1 } 
+                  { \l__fmulticol_adj_inner_tl }
+                  { \l__fmulticol_adj_outer_tl }
+                  [ \exp_not:N \l__fmulticol_heading_tl ]
+              }
+            \cs_set:Npx \fmulticol@stopmulticolumns 
+              {
+                \tl_set:Nn \exp_not:N \@currenvir { adjmulticols }
+                \exp_not:c
+                  { endadjmulticols \bool_if:NF \l__fmulticol_balanced_bool * }
+              }
+          }
+          {
+            \cs_set:Npn \fmulticol@startmulticolumns { \l__fmulticol_heading_tl }
+            \cs_set_eq:NN \fmulticol@stopmulticolumns \prg_do_nothing: 
+          }
+      }
+      {
+        \bool_if:NTF \l__fmulticol_adj_bool 
+          {
+            \cs_set:Npx \fmulticol@startmulticolumns 
+              {
+                \exp_not:c
+                  { adjmulticols \bool_if:NF \l__fmulticol_balanced_bool * }
+                  { \l__fmulticol_cols_tl }
+                  { \l__fmulticol_adj_inner_tl }
+                  { \l__fmulticol_adj_outer_tl }
+                  [ \exp_not:N \l__fmulticol_heading_tl ]
+              }
+            \cs_set:Npx \fmulticol@stopmulticolumns 
+              {
+                \tl_set:Nn \exp_not:N \@currenvir { adjmulticols }
+                \exp_not:c
+                  { endadjmulticols \bool_if:NF \l__fmulticol_balanced_bool * }
+              }
+          }
+          {
+            \cs_set:Npx \fmulticol@startmulticolumns 
+              {
+                \tl_set:Nn \exp_not:N \@currenvir { multicols }
+                \exp_not:c
+                  { multicols \bool_if:NF \l__fmulticol_balanced_bool * }
+                  { \l__fmulticol_cols_tl }
+                  [ \exp_not:N \l__fmulticol_heading_tl ]
+              }
+            \cs_set:Npx \fmulticol@stopmulticolumns 
+              {
+                \tl_set:Nn \exp_not:N \@currenvir { multicols }
+                \exp_not:c
+                  { endmulticols \bool_if:NF \l__fmulticol_balanced_bool * }
+              }
+          }
+      }
+    \bool_lazy_and:nnT { \bool_if_p:N \l__fmulticol_adj_bool }
+      { \bool_if_p:N \l__fmulticol_wrap_box_bool }
+      {
+        \tl_put_left:Nx \fmulticol@startmulticolumns
+          { \hbox to\linewidth\bgroup\vbox\bgroup\hsize\linewidth }
+        \tl_put_right:Nx \fmulticol@stopmulticolumns
+          { \egroup\hss\egroup }
+      }
+    \fmulticol@startmulticolumns \relax 
+    \l__fmulticol_begin_tl
+  }
+\cs_new_protected_nopar:Npn \stopmulticolumns 
+  { 
+    \l__fmulticol_end_tl 
+    \fmulticol@stopmulticolumns 
+    \group_end: 
+    \l__fmulticol_after_tl 
+  }
+\fmulticolsetup { env-no-framed }
+%% longfbox 
+\protected\def\fmulticol@lfbox@height{\dimexpr
+  (\dimexpr(\option{/fbox/padding-top}+\option{/fbox/padding-bottom}+
+    \option{/fbox/border-top-width}+\option{/fbox/border-bottom-width})\relax)}
+\protected\def\fmulticol@lfbox@width{\dimexpr
+  (\option{/fbox/padding-left}+\option{/fbox/padding-right}
+    +\option{/fbox/border-left-width}+\option{/fbox/border-right-width})\relax}
+\keys_define:nn { fmulticol }
+  {
+    framed / lfbox .code:n = 
+      {
+        \cs_set_protected:Npn \fmulticol@update@height ##1
+          { ##1=\fmulticol@lfbox@height }
+        \cs_set_protected:Npn \fmulticol@update@width ##1
+          { ##1=\fmulticol@lfbox@width }
+        \cs_set_protected:Npn \fmulticol@update@box ##1 
+          { \hbox { \exp_args:NNo \lfbox [ \fmulticol@framed@options ] {##1} } }
+        \cs_set_protected:Npn \fmulticol@update@framedgeometry { \fboxset }
+      }
+  }
+
+
+%% tcolorbox 
+\protected\def\fmulticol@tcb@height{\dimexpr(\kvtcb@boxsep+\kvtcb@boxsep)+
+  (\kvtcb@top@rule@stand)+(\kvtcb@bottom@rule@stand)+(\kvtcb@top)+(\kvtcb@bottom)\relax}
+\protected\def\fmulticol@tcb@width{\dimexpr(\kvtcb@boxsep+\kvtcb@boxsep)+
+  (\kvtcb@left@rule)+(\kvtcb@right@rule)+(\kvtcb@leftupper)+(\kvtcb@rightupper)\relax}
+\keys_define:nn { fmulticol }
+  {
+    framed / tcbox .code:n = 
+      {
+        \cs_set_protected:Npn \fmulticol@update@height ##1 { ##1=\fmulticol@tcb@height }
+        \cs_set_protected:Npn \fmulticol@update@width ##1 { ##1=\fmulticol@tcb@width }
+        \cs_set_protected:Npn \fmulticol@update@box ##1 
+          { \hbox { \exp_args:NNo \tcbox [ \fmulticol@framed@options ] {##1} } }
+        \cs_set_protected:Npn \fmulticol@update@framedgeometry { \tcbset }
+      } ,
+  }
+
+\ExplSyntaxOff

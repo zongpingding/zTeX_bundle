@@ -1,0 +1,110 @@
+\ProvidesExplFile{ztex.library.fancy.tex}{2025/04/26}{1.0.1}{fancy~library~for~ztex}
+
+
+%%%%%     fancy library for ztex     %%%%%
+\bool_gset_true:N \g__ztex_fancy_bool
+% ==> handle fancy option
+\RequirePackage[explicit]{titlesec}
+\newif\ifloadtikz
+\bool_if:NTF \g__ztex_fancy_bool {
+  \RequirePackage[many]{tcolorbox}
+  \loadtikztrue
+}{\loadtikzfalse}
+\ExplSyntaxOff\ifloadtikz
+  \RequirePackage{tikz}
+  \usetikzlibrary{calc}
+\fi\ExplSyntaxOn
+
+
+% ==> fancy chapter
+\definecolor{zchapColor}{HTML}{7f8184}
+\newif\ifFancyChapter
+\IfClassLoadedTF{book}{
+  \RequirePackage{anyfontsize}
+  \FancyChaptertrue
+  % numbered chapter format
+  \titleformat{\chapter}[display]
+    {\huge}{}
+    {20pt}{
+      \begin{tikzpicture}[overlay, remember~ picture]%
+        % mark nodes (need 'calc' library)
+        \coordinate (A) at ($(current~ page.north~ west)+(.125\paperwidth, 0pt)$);
+        \coordinate (stripES) at ($(A)+(3em, -.25\paperheight)$);
+        % chapter head
+        \fill[zchapColor] (A) rectangle (stripES);
+        \draw[draw=zchapColor] (stripES)++(.25em, 4em)   -- ++(.75\paperwidth-3.25em, 0pt);
+        \draw[draw=zchapColor] (stripES)++(.25em, 1.5pt) -- ++(.75\paperwidth-3.25em, 0pt);
+        \draw[draw=zchapColor] (stripES)++(.25em, 0em)   -- ++(.75\paperwidth-3.25em, 0pt);
+        % chapter title and index
+        \node[anchor=south, color=white] at ($(stripES)+(-1.5em, 0em)$)
+          {\normalsize\scalebox{4}{\thechapter}\zfancynumsuffix{\thechapter}};
+        \node[anchor=south~ west, inner~ sep=0pt, 
+              yshift=4.25em, xshift=.25em, 
+              font=\Large\bfseries, color=zchapColor
+          ] at (stripES) {\z@subtitle};
+        \node[anchor=south~ west, inner~ sep=0pt,
+              yshift=1.5em, xshift=.25em,
+              font=\cinzel\Huge\bfseries, color=zchapColor
+          ] at (stripES) {#1};
+        % parbox insert
+        \node[anchor=north~ west, inner~ sep=0pt] at ($(stripES)+(-3em, -1em)$){
+          \parbox[t]{.3\paperwidth}{\fontsize{10pt}{15pt}
+            \selectfont\cinzel\itshape\z@leftContent}
+        };
+        \node[anchor=north~ west, inner~ sep=0pt] at ($(stripES)+(-3em+.45em+.3\paperwidth, -1em)$){
+          \parbox[t]{\dimeval{.45\paperwidth-.45em}}{
+            \fontsize{10pt}{15pt}\selectfont\z@rightContent}
+        };
+        % saying block
+        \coordinate (sayingWN) at ($(current~ page.south~ west)+(0, .3\paperheight)$); 
+        \shade[top~ color=white, bottom~ color=zchapColor!25] (sayingWN) 
+          rectangle ++(1\paperwidth, 5pt);
+        \shade[top~ color=zchapColor!25, bottom~ color=white] ($(sayingWN)+(0em, -.15\paperheight)$) 
+          rectangle ++(1\paperwidth, -5pt);
+        \node at ($(sayingWN)+(.5\paperwidth, -0.075\paperheight)$) {
+          \parbox[t][][r]{.75\paperwidth}{\fontsize{15pt}{22.5pt}\selectfont
+            \MakeUppercase{\cinzel\z@saying\\\hspace*{\fill}{\itshape\normalsize\z@sayauthor}}}
+        };
+      \end{tikzpicture}
+    }
+    [\thispagestyle{empty}\clearpage]
+  % unnumbered chapter format
+  \titleformat{name=\chapter, numberless}
+    {\bfseries\Huge}
+    {}{0pt}{#1}
+}{\relax}
+% find number suffix: $1 \to \mbox{st}, 2 \to \mbox{nd}, \cdots$
+\prop_new:N \g_arabix_suffix_prop
+\prop_set_from_keyval:Nn \g_arabix_suffix_prop {
+  1=st, 2=nd, 3=rd, 11=th, 12=th, 13=th, 0=th, _=th
+} 
+\NewDocumentCommand\zfancynumsuffix{m}{
+  \int_compare:nTF {11 <= #1 <= 13}
+    {\prop_item:Ne \g_arabix_suffix_prop {#1}}
+    {\int_compare:nTF {\int_mod:nn {#1}{10} > 3}
+      {\prop_item:Ne \g_arabix_suffix_prop {_}}
+      {\prop_item:Ne \g_arabix_suffix_prop {\int_mod:nn {#1}{10}}}
+    }
+}
+% fancy chapter material default
+\ExplSyntaxOff\ifFancyChapter
+  % default settings
+  \newcommand{\z@subtitle}{Subtitle}
+  \newcommand{\z@saying}{SAYING}
+  \newcommand{\z@sayauthor}{-- Author}
+  \newcommand{\z@rightContent}{Right Content}
+  \newcommand{\z@leftContent}{\includegraphics[width=1\linewidth]{example-image-duck}\\[.5em]Figure Description}
+  % users' interface
+  \NewDocumentCommand{\zfancysubtitle}{m}{\renewcommand\z@subtitle{#1}}
+  \NewDocumentCommand{\zfancychapsaying}{O{}m}{\renewcommand\z@saying{#2}\renewcommand\z@sayauthor{#1}}
+  \NewDocumentCommand{\zfancychapl}{m}{\renewcommand\z@leftContent{#1}}
+  \NewDocumentCommand{\zfancychapr}{m}{\renewcommand\z@rightContent{#1}}
+\else 
+  \NewDocumentCommand{\zfancysubtitle}{m}{\relax}
+  \NewDocumentCommand{\zfancychapsaying}{O{}m}{\relax}
+  \NewDocumentCommand{\zfancychapl}{m}{\relax}
+  \NewDocumentCommand{\zfancychapr}{m}{\relax}
+\fi\ExplSyntaxOn
+
+
+% ==> fancy section: TODO

@@ -1,0 +1,197 @@
+\ProvidesExplFile{ztex.module.page.tex}{2025/05/05}{1.0.1}{page~module~for~ztex}
+
+
+%%%%%     page module for ztex     %%%%%
+\RequirePackage{geometry}
+\RequirePackage{sidenotes}
+\cs_set:Npn \__ztex_layout_setup:n #1
+  {% cus pagelayout cmd '\cs{setuplayout}' is 
+  % kind of different from '\cs{geometry}'.
+    \@ifpackageloaded{cus}
+      { \setuplayout{#1} }
+      { \geometry{#1} }
+  }
+
+
+% ==> document mode
+\if@twoside 
+  \bool_if:NTF \g__ztex_margin_bool {
+    \__ztex_layout_setup:n {
+      a4paper, 
+      left=2.5cm, right=7.5cm, 
+      bottom=3.5cm, top=3.2cm, 
+      headsep=.3cm, footskip=1.5cm, 
+      marginparsep=2em
+    }
+    \dim_gset:Nn \marginparwidth{14em}
+  }{
+    \__ztex_layout_setup:n {
+      a4paper, 
+      left=3cm, right=5.5cm, 
+      bottom=3.5cm, top=3.2cm, 
+      headsep=.3cm, footskip=1.5cm, 
+      marginparsep=1em
+    }
+    \ztex_msg_set:nn {option-page-margin}
+      {No~margin~option~is~only~accessible~in~oneside~layout,
+      ~margin~option~is~now~enabled~by~default.}
+    \ztex_msg_warn:n {option-page-margin}
+  }
+\else 
+  \bool_if:NTF \g__ztex_margin_bool {
+    \__ztex_layout_setup:n {
+      a4paper, 
+      left=2.5cm, right=7.5cm, 
+      bottom=3.5cm, top=3.2cm, 
+      headsep=.3cm, footskip=1.5cm, 
+      marginparsep=2em
+    }
+    \dim_gset:Nn \marginparwidth{14em}
+  }{
+    \__ztex_layout_setup:n {
+      a4paper, 
+      left=3cm, right=3cm, 
+      bottom=3.5cm, top=3.2cm, 
+      headsep=.3cm, footskip=1.5cm, 
+      marginparsep=1em
+    }
+    \renewcommand{\marginpar}[1]{\leftbar\noindent#1\endleftbar}
+  }
+\fi
+
+
+% ==> fancyhdr setup
+\bool_if:NF \g__ztex_slide_bool {
+  \RequirePackage{fancyhdr}
+  \fancypagestyle{fancy}{
+    \fancyhf{}  
+    \dim_gset:Nn \headheight{15pt}
+    \renewcommand{\headrule}{\hrule width\textwidth}
+    \if@twoside
+      \fancyhead[EL]{\leftmark}
+      \fancyhead[ER]{\thepage}
+      \fancyhead[OL]{\thepage}
+      \fancyhead[OR]{\rightmark}
+    \else
+      \IfClassLoadedTF{book}{
+        \fancyhead[L]{\thepage}
+        \fancyhead[R]{\rightmark}
+      }{
+        \fancyhead[L]{\thepage}
+        \fancyhead[R]{\leftmark}
+      }
+    \fi
+  }
+  \fancypagestyle{plain}{
+    \fancyhf{}  
+    \renewcommand{\headrulewidth}{0pt}
+    \renewcommand{\headrule}{}
+    \fancyfoot[C]{\thepage}
+  }
+}
+
+
+% ==> front/main matter
+\IfClassLoadedTF{book}{
+  \renewcommand\frontmatter{
+    \cleardoublepage
+    \pagestyle{plain}
+    \@mainmatterfalse
+    \pagenumbering{Roman}
+  }
+  \renewcommand\mainmatter{
+    \cleardoublepage
+    \pagestyle{fancy}
+    \@mainmattertrue
+    \pagenumbering{arabic}
+  }
+}{
+  \bool_if:NF \g__ztex_slide_bool 
+    {\ztex_hook_preamble_last:n {\pagestyle{fancy}}}
+}
+
+
+
+% ==> page annotation
+% #1: fore/background; #2: position; 
+% #3: anchor;          #4: object
+% #5: hook range
+\dim_const:Nn \zph {\paperheight}
+\dim_const:Nn \zpw {\paperwidth}
+\cs_generate_variant:Nn \hook_gput_code:nnn {nne}
+\cs_new_protected:Npn \ztex_page_annotate:nnnnn #1#2#3#4#5
+  {
+    \tl_if_empty:eTF {#5}
+      {
+        \hook_gput_code:nnn {shipout/#1}
+          {ztex@page@mask-\l__ztex_page_mask_label_tl}
+          {\put#2{\makebox(0, 0)[#3]{#4}}}
+      }{
+        \hook_gput_next_code:nn {shipout/#1}
+          {\put#2{\makebox(0, 0)[#3]{#4}}}
+      }
+  }
+\DeclareHookRule{shipout/background}{.}{<}{pgfrcs}
+\ztex_keys_define:nn { page/mask }{
+  layer    .tl_set:N  = \l__ztex_page_mask_layer_tl,
+  layer    .initial:n = background,
+  position .tl_set:N  = \l__ztex_page_mask_position_tl,
+  position .initial:n = {(.5\zpw, .5\zph)},
+  anchor   .tl_set:N  = \l__ztex_page_mask_anchor_tl,
+  anchor   .initial:n = c,
+  label    .tl_set:N  = \l__ztex_page_mask_label_tl,
+  label    .initial:n = { DEFAULT },
+}
+\cs_generate_variant:Nn \ztex_page_annotate:nnnnn {eee}
+\cs_new:Npn \__page_mask_pos_parse:w (#1, #2) 
+  {(
+    \dim_to_decimal:n {#1} pt, 
+    \dim_to_decimal:n {#2-\paperheight} pt
+  )}
+\ztex_msg_set:nn {pageinfo}{Only~star~version~of~\string\zpagemask\ is~label-allowed.}
+\NewDocumentCommand{\zpagemask}{so+m}
+  {
+    \group_begin:
+    \IfValueT{#2}{\ztex_keys_set:nn { page/mask }{#2}}
+    \IfBooleanTF{#1}{\gdef\@once@hook@sign{}}{
+      \gdef\@once@hook@sign{*}
+      \tl_if_eq:enF {\l__ztex_page_mask_label_tl}
+        { DEFAULT }
+        { \ztex_msg_warn:n {pageinfo} }
+    }
+    \exp_args:Neee \DeclareHookRule{shipout/\l__ztex_page_mask_layer_tl}
+      {ztex@page@mask-\l__ztex_page_mask_label_tl}
+      {<}{pgfrcs}
+    \ztex_page_annotate:eeenn 
+      {\l__ztex_page_mask_layer_tl}
+      {\exp_after:wN \__page_mask_pos_parse:w \l__ztex_page_mask_position_tl}
+      {\l__ztex_page_mask_anchor_tl}{#3}
+      {\@once@hook@sign}
+    \group_end:
+  }
+\NewDocumentCommand{\zpagemaskrm}{mm}
+  {
+    \hook_gremove_code:nn {shipout/#1}
+      {ztex@page@mask-#2}
+  }
+
+
+
+% ==> page target
+\AddToHook{shipout/firstpage}{
+  \label{ztex:titlepage}
+  \hyper@anchor{ztex@titlepage}
+}
+\AddToHook{shipout/lastpage}{
+  \label{ztex:lastpage}
+  \hyper@anchor{ztex@lastpage}
+}
+
+
+
+% ==> doc info
+\ztex_hook_preamble_last:n {
+  \let\ztextitle\@title
+  \let\ztexauthor\@author
+  \let\ztexdate\@date
+}

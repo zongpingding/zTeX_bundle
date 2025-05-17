@@ -1,0 +1,191 @@
+\ProvidesExplFile{ztikz.library.gnuplot.tex}{2024/12/17}{1.0.0}{gnuplot~library~for~ztikz}
+
+
+
+% ==> init variables 
+\ztool_shell_mkdir:n {ztikz_output/gnuplot_data/}
+\__ztikz_load_library:n {gnuscript}
+\int_new:N   \g__tikz_env_index_int
+\int_new:N   \g__gnu_data_index_int
+\int_new:N   \g__gnu_plotz_index_int
+\int_gadd:Nn \g__gnu_plotz_index_int {1}
+\tl_const:Nn \g__ztikz_gnu_path_tl {ztikz_output/gnuplot_data} 
+\pretocmd{\tikzpicture}{
+  \int_gincr:N \g__tikz_env_index_int
+  \int_gset:Nn \g__gnu_data_index_int {0}
+}{}{}
+% sed script
+\ztikz_keys_define:nn { sed-script }
+  {
+    file  .tl_set:N  = \l__ztikz_sed_script_file_tl,
+    line  .int_set:N = \l__ztikz_sed_script_line_int,
+    ori   .tl_set:N  = \l__ztikz_sed_script_ori_tl,
+    new   .tl_set:N  = \l__ztikz_sed_script_new_tl,
+  }
+\cs_new:Npn \__ztikz_sed_script:nnn #1#2#3 
+  {% #1: file; #2: line; #3:new
+    \ztool_replace_file_line:nnn 
+      {\g__ztikz_scripts_path_tl/#1}
+      {#2}{#3}
+  }
+\cs_generate_variant:Nn \__ztikz_sed_script:nnn {eee}
+\cs_generate_variant:Nn \__ztikz_sed_script:nnn {nne}
+
+% plot args
+\tl_new:N \l__pairs_x_domain_tl
+\tl_new:N \l__pairs_y_domain_tl
+\ztikz_keys_define:nn { 2dplot }
+  {
+    domain  .tl_set:N  = \l__ztikz_plot_domain_tl,
+    style   .tl_set:N  = \l__ztikz_plot_style_tl,
+    marker  .tl_set:N  = \l__ztikz_plot_marker_tl,
+  }
+\ztikz_keys_define:nn { 3dplot }
+  {
+    domain      .tl_set:N   = \l__ztikz_plotz_domain_tl,
+    domain      .initial:n  = {-5:5; -5:5},
+    palette     .tl_set:N   = \l__ztikz_plotz_palette_tl,
+    palette     .initial:n  = {rgbformulae~ 22,13,-31},
+    pm3d        .bool_set:N = \l__ztikz_plotz_pm_bool,
+    pm3d        .initial:n  = {true},
+    pm3d        .default:n  = {true},
+    width       .dim_set:N  = \l__ztikz_plotz_width_dim,
+    width       .initial:n  = {0.75\linewidth},
+  }
+\cs_new:Npn \__ztikz_pairs_domain_parse:w #1; #2\q_stop
+  {
+    \tl_set:Nn \l__pairs_x_domain_tl {#1}
+    \tl_if_empty:nTF {#2}
+      { \tl_set:Nn \l__pairs_y_domain_tl {*:*} }
+      { \tl_set:Nn \l__pairs_y_domain_tl {#2} }
+  }
+
+
+% ==> plot precise
+\bool_new:N \g__plot_precise_restore_bool
+\bool_new:N \g__contour_precise_restore_bool
+\bool_new:N \g__param_precise_restore_bool
+\bool_new:N \g__polar_precise_restore_bool
+\NewDocumentCommand\PlotPrecise{ smm }
+  {
+    \tl_if_in:nnF {plot, param, polar, contour}{#2}
+      {
+        \msg_new:nnn {ztikz}{ztikz-plot-type}
+          {Valid~plot~type~are:~'plot',~'param',~'polar'~and~'contour'}
+        \msg_error:nn {ztikz}{ztikz-plot-type}
+      }
+    \IfBooleanF{#1}{ \bool_gset_true:c {g__#2_precise_restore_bool} }
+    \tl_if_eq:nnTF {contour}{#2}{
+      \__ztikz_sed_script:nnn {contour_plot.gp}{2}{set~samples~#3}
+      \__ztikz_sed_script:nnn {contour_plot.gp}{3}{set~isosamples~#3,#3}
+    }{
+      \__ztikz_sed_script:nnn {#2_plot.gp}{3}{set~samples~#3}
+    }
+  }
+% data plot, precise, style
+\cs_new_protected:Npn \__ztikz_gnu_data_plot:nnn #1#2#3 
+  {
+    \ztool_shell_escape:e {gnuplot~ \g__ztikz_scripts_path_tl/#1_plot.gp}
+    \int_gadd:Nn \g__gnu_data_index_int {1}
+    \tl_set:Ne \l__gnu_data_new_name_tl 
+      {
+        gnu_data_\int_use:N \g__tikz_env_index_int 
+        _\int_use:N \g__gnu_data_index_int.table
+      }
+    \tl_set:Ne \l__gnu_data_full_path_tl 
+      { \g__ztikz_gnu_path_tl/\l__gnu_data_new_name_tl }
+    \ztool_shell_mv:ee 
+      {\g__ztikz_gnu_path_tl/gnu_data.table}
+      {\l__gnu_data_full_path_tl}
+    \tl_if_empty:nTF {#3}
+      {
+        \draw[#2] plot[smooth] file {\l__gnu_data_full_path_tl};
+      }{
+        \group_begin:
+        \ztikz_keys_set:nn { point } { #3 }
+        \draw[#2] plot [
+          mark = \str_use:N \l__point_type_str, 
+          mark~ size = \dim_use:N \l__point_radius_dim,
+          mark~ options = {
+            rotate  = \fp_use:N \l__point_rotate_angle, 
+            opacity = \tl_use:N \l__point_opacity_tl, 
+            color   = \tl_use:N \l__point_color_tl,
+            ball~ color = \tl_use:N \l__point_color_tl,
+          }
+        ] file {\l__gnu_data_full_path_tl};
+        \group_end:
+      }
+    \bool_if:cT {g__#1_precise_restore_bool}
+      { \PlotPrecise{#1}{100} }
+  }
+\cs_generate_variant:Nn \__ztikz_gnu_data_plot:nnn {nee}
+
+
+% ==> simple 2d function plot
+\NewDocumentCommand\Plot{ O{domain=-5:5, style={color=black}, marker=}m }
+  {
+    \group_begin:
+    \ztikz_keys_set:nn { 2dplot } { #1 }
+    \__ztikz_sed_script:nne {plot_plot.gp}{8}{set~xr~[\l__ztikz_plot_domain_tl]}
+    \__ztikz_sed_script:nnn {plot_plot.gp}{7}{f(x)~=~#2}
+    \__ztikz_gnu_data_plot:nee {plot}{\l__ztikz_plot_style_tl}{\l__ztikz_plot_marker_tl}
+    \group_end:
+  }
+\NewDocumentCommand\ContourPlot{ O{domain={-5:5;}, style={color=black}, marker=}m }
+  {
+    \group_begin:
+    \ztikz_keys_set:nn { 2dplot } { #1 }
+    \exp_last_unbraced:Nf \__ztikz_pairs_domain_parse:w \l__ztikz_plot_domain_tl\q_stop
+    \__ztikz_sed_script:nne {contour_plot.gp}{11}{set~xr~[\l__pairs_x_domain_tl]}
+    \__ztikz_sed_script:nne {contour_plot.gp}{12}{set~yr~[\l__pairs_y_domain_tl]}
+    \__ztikz_sed_script:nne {contour_plot.gp}{14}{f(x,~y)~=~#2}
+    \__ztikz_gnu_data_plot:nee {contour}{\l__ztikz_plot_style_tl}{\l__ztikz_plot_marker_tl}
+    \group_end:
+  }
+\NewDocumentCommand\ParamPlot{ O{domain=0:2*pi, style=black, marker=}m }
+  {
+    \group_begin:
+    \ztikz_keys_set:nn { 2dplot } { #1 }
+    \__ztikz_sed_script:nne {param_plot.gp}{8}{set~trange~[\l__ztikz_plot_domain_tl]}
+    \__ztikz_sed_script:nnn {param_plot.gp}{9}{plot~#2}
+    \__ztikz_gnu_data_plot:nee {param}{\l__ztikz_plot_style_tl}{\l__ztikz_plot_marker_tl}
+    \group_end:
+  }
+\NewDocumentCommand\PolarPlot{ O{domain=0:2*pi, style=black, marker=}m }
+  {
+    \group_begin:
+    \ztikz_keys_set:nn { 2dplot } { #1 }
+    \__ztikz_sed_script:nne {polar_plot.gp}{8}{set~trange~[\l__ztikz_plot_domain_tl]}
+    \__ztikz_sed_script:nnn {polar_plot.gp}{9}{plot~#2}
+    \__ztikz_gnu_data_plot:nee {polar}{\l__ztikz_plot_style_tl}{\l__ztikz_plot_marker_tl}
+    \group_end:
+  }
+\NewDocumentCommand\Plotz{ O{}m }
+  {
+    \group_begin:
+    \ztikz_keys_set:nn { 3dplot } { #1 }
+    \bool_if:NTF \l__ztikz_plotz_pm_bool {\def\plotz@pm{with~pm3d}}{\def\plotz@pm{}}
+    \exp_last_unbraced:Nf \__ztikz_pairs_domain_parse:w \l__ztikz_plotz_domain_tl\q_stop
+    \__ztikz_sed_script:nne {3d_plot.gp}{18}{set~palette~\l__ztikz_plotz_palette_tl}
+    \__ztikz_sed_script:nne {3d_plot.gp}{23}{set~xr~[\l__pairs_x_domain_tl]}
+    \__ztikz_sed_script:nne {3d_plot.gp}{24}{set~yr~[\l__pairs_y_domain_tl]}
+    \__ztikz_sed_script:nne {3d_plot.gp}{25}{splot~#2~\plotz@pm}
+    \ztool_shell_escape:e {gnuplot~ ./ztikz_output/scripts/3d_plot.gp}
+    \tl_set:Ne \l_tmpa_tl {./ztikz_output/gnuplot_data/plot_3d_\int_use:N \g__gnu_plotz_index_int.pdf}
+    \ztool_shell_mv:ne {./ztikz_output/gnuplot_data/plot_3d.pdf}{\l_tmpa_tl}
+    \includegraphics[width=\dim_use:N \l__ztikz_plotz_width_dim]{\l_tmpa_tl}
+    \int_gadd:Nn \g__gnu_plotz_index_int {1}
+    \group_end:
+  }
+
+
+% ==> users' interface
+\NewDocumentCommand{\currentTikzIndex}{}
+  {
+    \int_use:N \g__tikz_env_index_int
+  }
+\NewDocumentCommand\gnudata{m}
+  {
+    \tl_use:N \g__ztikz_gnu_path_tl/gnu_data_ 
+      \int_use:N \g__tikz_env_index_int _#1.table
+  }
