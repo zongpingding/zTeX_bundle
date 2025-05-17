@@ -185,8 +185,8 @@
     #1 / preamble .code:n    = { 
       % NOTE:
       % 1. thm preamble can be only set by one style
-      % 2. '\g__ztex_thm_style_tl' need to be set 
-      %       before '\ztexloadlib{theme}'
+      % 2. '\cs{g__ztex_thm_style_tl}' need to be set 
+      %       before '\cs{ztexloadlib}\{theme\}'
       \tl_if_eq:cnT {g__ztex_thm_style_tl}
         { #1 }{ ##1 }
     },
@@ -281,7 +281,6 @@
   \def\thm@tmp@color{\tl_use:c {l__ztex_#1_color_tl}}
   \def\thm@tmp@name{#1}
   \__ztex_thm_theorem_title_item:nnn {#1}{#2}{#3}
-  % \tl_use:c {g__ztex_thm_style_\g__ztex_thm_style_tl _option_tl}
   \tl_if_exist:cTF {g__ztex_thm_style_\g__ztex_thm_style_tl _option_tl}
     {\tl_use:c {g__ztex_thm_style_\g__ztex_thm_style_tl _option_tl}}
     {\ztex_msg_error:n {mathEnv-style}}
@@ -302,7 +301,6 @@
     \__ztex_thm_toc_add:eeoe
       {\g__ztex_thm_toc_level_tl}
       { 
-        % \ztexslideTF {\exp_not:N \exp_not:N \exp_not:N \numberline {\zthmnumber}}{}
         \exp_not:N \l__ztex_thm_toc_prefix_tl
         \exp_not:n {\prop_item:Nn \g_ztex_thm_toc_symbols_prop {#1}}
         \g__ztex_thm_theorem_title_tl 
@@ -317,7 +315,6 @@
   {% #1:env-name; #2:note; #3:separator
     \tl_set:Nn \l_tmpa_tl {\exp_not:n {#2}}
     \cs_set:Npn \zthmname {
-      % \textcolor{\tl_use:c {l__ztex_#1_color_tl}}
         {\prop_item:cn {g__ztex_thm_name_prop}{#1}}
       }
     \cs_set:Npn \zthmnote ##1##2
@@ -418,7 +415,7 @@
 \NewDocumentCommand\zthmtocstop{}
   {
     \bool_gset_false:N \g__ztex_thm_toc_bool
-    % \iow_close:N \tf@thlist
+    % \cs{iow_close:N} \cs{tf@thlist} leads to an error ??
     \cs_set:Npn \__ztex_thm_toc_add:nnnn ##1##2##3##4 {}
   }
 \cs_new:Npn \__ztex_thm_toc_add:nnnn #1#2#3#4 
@@ -433,8 +430,6 @@
 \cs_generate_variant:Nn \__ztex_thm_toc_add:nnnn { eeee, eeoe, nnee, nnoe }
 \ztex_keys_define:nn { thm/add }
   {
-    % level   .tl_set:N  = \l__ztex_add_thm_toc_level_tl,
-    % level   .initial:n = { section },
     name      .tl_set:N  = \l__ztex_add_thm_toc_name_tl,
     name      .initial:n = { ?? },
   }

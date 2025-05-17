@@ -28,7 +28,7 @@
 
 
 
-% ==> Shell escape tool 
+% ==> l3sys-shell tool \MakeLinkTarget*{l3sys@shell} \pdfbookmark[2]{l3sys shell}{l3sys@shell}
 % NOTE: Copy of the original 'l3sys-shell' + some modifications
 % windows path handle
 \cs_new:Npn \ztool_sys_path_to_win:N #1 
@@ -169,7 +169,7 @@
 
 
 
-% ==> IO operations
+% ==> file IO operations \MakeLinkTarget*{file@io} \pdfbookmark[2]{File IO}{file@io}
 \ior_new:N \g_ztool_file_read_ior
 \ior_new:N \g_ztool_file_append_ior
 \iow_new:N \g_ztool_file_append_iow
@@ -210,7 +210,7 @@
 \cs_generate_variant:Nn \ztool_gread_file_as_seq:nnN { ne, nnc, nec }
 
 \cs_new_protected:Npn \ztool_file_new:nn #1#2
-  {% #1: \c_true_bool to allow overwrite; #2: file name
+  {% #1: \cs{c_true_bool} to allow overwrite; #2: file name
     \bool_if:nT {#1}
       {
         \iow_open:Nn \g_ztool_file_append_iow {#2}
@@ -278,7 +278,7 @@
 
 
 
-% ==> box manipulation tool
+% ==> box manipulation tool \MakeLinkTarget*{box@manipulation} \pdfbookmark[2]{盒子操作}{box@manipulation}
 \cs_set:Nn \__ztool_leave_vmode:
   { \ifvmode \leavevmode \fi }
 % catch box dimension
@@ -314,8 +314,7 @@
 \cs_generate_variant:Nn \ztool_gget_wd:Nn { Ne, ce }
 
 
-
-% ==> modify box content
+%% modify box content
 % 1. auto scale and rotate (smaller of two)
 \cs_new_protected:Npn \ztool_autoset_to_wd_and_ht:nnn #1#2#3
   {% #1:width; #2:height; #3:object 
@@ -353,7 +352,7 @@
 \cs_generate_variant:Nn \ztool_set_to_ht:nn { e, ne, ee }
 
 % 3. only scale one dimension
-% NOTE: if \box_wd{content} <= given dim, no manipulation
+% NOTE: if boxwd{content} $\le$ given dim, no manipulation
 \cs_new_protected:Npn \ztool_scale_to_wd:nn #1#2
   {
     \hbox_set:Nn \l_tmpa_box {#2}
@@ -400,8 +399,7 @@
 \cs_generate_variant:Nn \ztool_scale_to_wd_and_ht:nnn { nne, nno, eee }
 
 
-
-% ==> box content align
+%% box content align
 \seq_new:N \l__ztool_boxitem_seq
 \cs_set_protected:Npn \ztool_box_item_align:Nnnn #1#2#3#4
   {% #1:cmd, #2:width, #3:object, #4:align format(left, right, scatter, center)
@@ -421,16 +419,6 @@
               \edef\seq@count{\seq_count:N \l__ztool_boxitem_seq}
               \seq_map_indexed_inline:Nn \l__ztool_boxitem_seq
                 {% ##1: index, ##2: content
-                  %% Method I: use coffin (overfull )
-                  % \hcoffin_set:Nn \l__ztool_boxitem_coffin {##2}
-                  % \hb@xt@0pt
-                  %   {
-                  %     \coffin_typeset:Nnnnn \l__ztool_boxitem_coffin
-                  %       { hc }{ b }
-                  %       { 
-                  %         \dim_eval:n {#2*##1/(\seq@count+1)}
-                  %       }{ 0pt }
-                  %   }
                   %% Method II: plain
                   \edef\item@width{\dim_eval:n {#2/(\seq@count+1)}}
                   \hskip\item@width\clap{##2}
@@ -451,8 +439,7 @@
 \cs_generate_variant:Nn \ztool_box_item_align:Nnnn { c, Nnno, cnno, Nne, Nnee }
 
 
-
-% ==> affine transformation
+%% affine transformation
 % REF:
 % 1. https://math.stackexchange.com/a/3521141/1235323
 % 2. https://math.stackexchange.com/a/281087/1235323
@@ -462,7 +449,7 @@
   {
     \fp_eval:n { #1*#4 - #2*#3 }
   }
-% (translation) + x-scale + y-scale + rotate
+% (translation) + $x$-scale + $y$-scale + rotate
 \fp_new:N \g_affine_precision_fp
 \fp_set:Nn \g_affine_precision_fp {0.0001}
 \fp_new:N \l__affine_@@_a_fp
@@ -478,7 +465,7 @@
 \coffin_new:N \l__affine_trans_coffin
 \cs_generate_variant:Nn \coffin_typeset:Nnnnn { Nxxxx }
 \cs_new:Npn \ztool_affine_transformation:Nnnnn #1#2#3#4#5
-  {% #1:box; #2:a_11; #3:a_21; #4:a_12; #5:a_22.
+  {% #1:box; #2:$a_{11}$; #3:$a_{21}$; #4:$a_{12}$; #5:$a_{22}$.
     \fp_compare:nNnT 
       { abs(\ztool_matrix_det:nnnn {#2}{#3}{#4}{#5}) } 
         < { \g_affine_precision_fp }
@@ -553,7 +540,7 @@
 \cs_new:Nn \__ztool_affine_debug_fp:N
   {
     \bool_if:NTF \g_ztool_affine_debug_bool 
-      { \string #1 % \show #1
+      { \string #1 % \cs{show} #1
         ~=~\fp_use:N #1\\
       }{ \relax } 
   }
@@ -644,7 +631,7 @@
 
 
 
-% ==> ztool draw (based on package 'pict2e' and 'picture' env)
+% ==> ztool draw (based on package 'pict2e' and 'picture' env) \MakeLinkTarget*{zdraw@} \pdfbookmark[2]{zdraw}{zdraw@}
 \RequirePackage{pict2e}
 \cs_new:Npn \_@@_begin_picture:nnnn #1#2#3#4 
   { \begin{picture}
@@ -725,14 +712,8 @@
       { 
         \tl_if_empty_p:e {#1} || 
         \tl_if_eq_p:NN \ztool@color@none \ztool@targer@color
-      }{ \prg_return_false: }{ 
-        %% TODO: make a expandable color validation check function
-        % Valid colors: gray, gray!20, {rgb}{1, 0, 0}, {cmyk}{1, 0, 0, 0}, ...
-        % \@ifundefinedcolor{#1}
-        %   { \prg_return_false:}
-        %   { \prg_return_true: } 
-        \prg_return_true:
-      }
+      }{ \prg_return_false: }
+      { \prg_return_true: }
   }
 \prg_generate_conditional_variant:Nnn \__color_if_valid:n 
   { V, e }{ p, T, F, TF }
@@ -744,12 +725,12 @@
 \fp_new:N \l__draw_vector_normal_fp
 \fp_new:N \l__draw_vector_xsep_fp
 \cs_new:Npn \__@@_pic_line:nnn #1#2#3
-  {% #1:x; #2:y; #3:x-distance NOT the length
+  {% #1:$x$; #2:$y$; #3:$x$-distance NOT the length
     \line(\fp_eval:n {#1}, \fp_eval:n {#2})
       { \fp_eval:n {#3} }
   }
 \cs_new:Npn \__@@_pic_vector:nnn #1#2#3
-  {% #1:x; #2:y; #3:x-distance NOT the length
+  {% #1:$x$; #2:$y$; #3:$x$-distance NOT the length
     \vector(\fp_eval:n {#1}, \fp_eval:n {#2})
       { \fp_eval:n {#3} }
   }
@@ -822,13 +803,13 @@
   }
 
 
-% --> \zdraw -- similar to \tikz command in tikz
+% --> \cs{zdraw} -- similar to \cs{tikz} command in tikz
 % NOTE: these line/vector commands are identical to
-%  1. \Line(x1, y1)(x2, y2)          \Vector(x1,y1)(x2,y2)
-%  2. \polyline(x1, y1) ... (xn, yn) \polyvector(x1, y1) ... (xn, yn)
-%  3. \polygon (x1, y1) ... (xn, yn), when set 'cycle', 
-%     \polygon*(x1, y1) ... (xn, yn), when set 'fill' (auto cycle).
-%  4. Trim leading space after '\polygon' or '*' to avoid error !!
+%  1. \cs{Line} $(x_1, y_1)(x_2, y_2)$,        \cs{Vector}$(x_1,y_1)(x_2,y_2)$
+%  2. \cs{polyline} $(x_1, y_1) \cdots (x_n, y_n)$, \cs{polyvector}$(x_1, y_1) \cdots (x_n, y_n)$
+%  3. \cs{polygon} $(x_1, y_1) \cdots (x_n, y_n)$, when set 'cycle', 
+%     \cs{polygon}*$(x_1, y_1) \cdots (x_n, y_n)$, when set 'fill' (auto cycle).
+%  4. Trim leading space after '\cs{polygon}' or '*' to avoid error !!
 \cs_new:Npn \__@@_pic_Line:nnnn #1#2#3#4
   { \Line (#1, #2)(#3, #4) }
 \cs_new:Npn \__@@_pic_Vector:nnnn #1#2#3#4
@@ -896,8 +877,6 @@
     \group_begin:
     \keys_set:nn { ztool / draw / picture / zdraw }{#1}
     \__region_fill_color_miss:n { gray }
-    % \bool_if:NT \l__pic_region_fill_bool
-    %   { \bool_set_true:N \l__pic_draw_cycle_bool }
     \edef\coors@first 
       {
         \exp_last_unbraced:Ne 
@@ -1019,8 +998,8 @@
 
 
 % --> oval / rectangle
-% \oval[arc](full-x-width, full-width)[part]
-% part: (l, r) x (t, b) 
+% \cs{oval}\oarg{arc}\parg{full-$x$-width, full-$y$-width}\oarg{part}
+% part: (l, r) $\times$ (t, b) 
 \cs_new:Npn \__@@_pic_oval:nnnn #1#2#3#4
   {% #1:arc; #2:part; #3:x-width; #4:y-width;
     \oval 

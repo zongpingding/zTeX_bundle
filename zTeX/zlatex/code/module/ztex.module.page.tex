@@ -5,8 +5,8 @@
 \RequirePackage{geometry}
 \RequirePackage{sidenotes}
 \cs_set:Npn \__ztex_layout_setup:n #1
-  {% cus pagelayout cmd '\setuplayout' is 
-  % kind of different from '\geometry'.
+  {% cus pagelayout cmd '\cs{setuplayout}' is 
+  % kind of different from '\cs{geometry}'.
     \@ifpackageloaded{cus}
       { \setuplayout{#1} }
       { \geometry{#1} }
@@ -61,7 +61,6 @@
 
 
 % ==> fancyhdr setup
-% TODO: implement this by new mark mechanism
 \bool_if:NF \g__ztex_slide_bool {
   \RequirePackage{fancyhdr}
   \fancypagestyle{fancy}{
@@ -117,7 +116,6 @@
 % #1: fore/background; #2: position; 
 % #3: anchor;          #4: object
 % #5: hook range
-% \RequirePackage{transparent}
 \dim_const:Nn \zph {\paperheight}
 \dim_const:Nn \zpw {\paperwidth}
 \cs_generate_variant:Nn \hook_gput_code:nnn {nne}

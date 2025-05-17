@@ -73,7 +73,7 @@
     {\bfseries\Huge}
     {}{0pt}{#1}
 }{\relax}
-% find number suffix: 1 -> st, 2 -> nd, ...
+% find number suffix: $1 \to \mbox{st}, 2 \to \mbox{nd}, \cdots$
 \prop_new:N \g_arabix_suffix_prop
 \prop_set_from_keyval:Nn \g_arabix_suffix_prop {
   1=st, 2=nd, 3=rd, 11=th, 12=th, 13=th, 0=th, _=th
@@ -107,4 +107,4 @@
 \fi\ExplSyntaxOn
 
 
-% ==> fancy section
+% ==> fancy section: TODO

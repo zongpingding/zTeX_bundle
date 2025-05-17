@@ -1,4 +1,4 @@
-\ProvidesExplFile{ztikz.library.zdraw.tex}{2024/12/17}{1.0.0}{zdraw~library~for~ztikz}
+\ProvidesExplFile{ztikz.library.l3draw.tex}{2024/12/17}{1.0.0}{zdraw~library~for~ztikz}
 
 
 
@@ -54,46 +54,46 @@
 
 % ==> zdraw layer               
 %% draw env 
-\NewDocumentEnvironment{zdraw}{O{}}
+\NewDocumentEnvironment{Zdraw}{O{}}
   {\ExplSyntaxOn\draw_begin:}
   {\draw_end:\ExplSyntaxOff}
-\NewDocumentEnvironment{zscope}{O{}}
+\NewDocumentEnvironment{Zscope}{O{}}
   {\draw_path_scope_begin:}
   {\draw_path_scope_end:}
 %% cmd alias
 % point/line
-\cs_new_eq:NN \moveto \draw_path_moveto:n
-\cs_new_eq:NN \lineto \draw_path_lineto:n
+\cs_new_eq:NN \zmoveto \draw_path_moveto:n
+\cs_new_eq:NN \zlineto \draw_path_lineto:n
 \cs_new_eq:NN \scolor \color_stroke:n
 \cs_new_eq:NN \fcolor \color_fill:n
 % base vector
-\cs_new_eq:NN \xvec   \draw_xvec:n
-\cs_new_eq:NN \yvec   \draw_yvec:n
+\cs_new_eq:NN \zxvec   \draw_xvec:n
+\cs_new_eq:NN \zyvec   \draw_yvec:n
 % both follows ref (0, 0)
-\cs_new_eq:NN \polar  \draw_point_polar:nn 
-\cs_new_eq:NN \coor   \draw_point_vec:nn  
+\cs_new_eq:NN \zpolar  \draw_point_polar:nn 
+\cs_new_eq:NN \zcoor   \draw_point_vec:nn  
 % shape and text
-\cs_new_eq:NN \rec \draw_path_rectangle_corners:nn
-\cs_new_eq:NN \cir \draw_path_circle:nn
-\cs_new_eq:NN \newtext    \coffin_new:N
-\cs_new_eq:NN \sethtext   \hcoffin_set:Nn
-\cs_new_eq:NN \setvtext   \vcoffin_set:Nnn
-\cs_new_eq:NN \scaletext  \coffin_scale:Nnn
-\cs_new_eq:NN \puttext    \draw_coffin_use:Nnnn
+\cs_new_eq:NN \zrect \draw_path_rectangle_corners:nn
+\cs_new_eq:NN \zcirc \draw_path_circle:nn
+\cs_new_eq:NN \znewtext    \coffin_new:N
+\cs_new_eq:NN \zsethtext   \hcoffin_set:Nn
+\cs_new_eq:NN \zsetvtext   \vcoffin_set:Nnn
+\cs_new_eq:NN \zscaletext  \coffin_scale:Nnn
+\cs_new_eq:NN \zputtext    \draw_coffin_use:Nnnn
 %% path operation
 % scope
-\cs_new_eq:NN \bg \draw_path_scope_begin:
-\cs_new_eq:NN \eg \draw_path_scope_end:
+\cs_new_eq:NN \zbg \draw_path_scope_begin:
+\cs_new_eq:NN \zeg \draw_path_scope_end:
 % segement connect
-\cs_new_eq:NN \capbutt   \draw_cap_butt:
-\cs_new_eq:NN \caproun   \draw_cap_round:
-\cs_new_eq:NN \caprect   \draw_cap_rectangle:
-\cs_new_eq:NN \closepath \draw_path_close:
+\cs_new_eq:NN \zcapbutt   \draw_cap_butt:
+\cs_new_eq:NN \zcaproun   \draw_cap_round:
+\cs_new_eq:NN \zcaprect   \draw_cap_rectangle:
+\cs_new_eq:NN \zclosepath \draw_path_close:
 % transformatio
-\cs_new_eq:NN \shift     \draw_transform_shift:n
-\cs_new_eq:NN \xscale    \draw_transform_xscale:n
-\cs_new_eq:NN \yscale    \draw_transform_yscale:n
-\cs_new_eq:NN \trans     \draw_transform_matrix:nnnn
+\cs_new_eq:NN \zshift     \draw_transform_shift:n
+\cs_new_eq:NN \zxscale    \draw_transform_xscale:n
+\cs_new_eq:NN \zyscale    \draw_transform_yscale:n
+\cs_new_eq:NN \ztrans     \draw_transform_matrix:nnnn
 \NewDocumentCommand{\usepath}{O{draw}}{
   \draw_path_use_clear:n {#1}
 }
@@ -245,7 +245,7 @@
     step          .initial:n  = {0.25}
   }
 \cs_generate_variant:Nn \gradient_rule:nnn {eee}
-\NewDocumentCommand\zrule{O{}O{}}
+\NewDocumentCommand\zrule{O{}}
   {
     \group_begin:
     \ztikz_keys_set:nn { zdraw/zrule } { #1 }

@@ -53,10 +53,10 @@
   {
     \cs_seq_eq:NN \NewLine \iow_newline:
     \cs_set_eq:NN \PrefixPath \g__ztikz_wolfram_path_tl
-    \__ztikz_wolfram_excute:e 
-      {#1}
+    \__ztikz_wolfram_excute:nne 
+      {}{}{}
   }{
-    \cs_seq_eq:NN \NewLine \prg_do_nothing: % \scan_stop:
+    \cs_seq_eq:NN \NewLine \prg_do_nothing:
     \cs_set_eq:NN \Path \c_empty_tl
   }
 
@@ -69,10 +69,9 @@
     \ior_get:NN  \g__ztikz_wolfram_ior \l__ztikz_wolfram_tmp_res_tl
     \seq_set_split:NnV \l__ztikz_wolfram_tmp_res_seq {@} \l__ztikz_wolfram_tmp_res_tl
     \IfBooleanTF{#1}
-      {
-        \__ztikz_if_int:eTF {\IfValueTF {#2}{#2}{1}}
-          {\seq_item:Ne \l__ztikz_wolfram_tmp_res_seq {\IfValueTF {#2}{#2}{1}}}
-          {\fbox{Index~Invalid}}
+      {% must be integer expression, or it will raise bug.
+        \seq_item:Ne \l__ztikz_wolfram_tmp_res_seq 
+          {\IfValueTF {#2}{\fp_eval:n {#2}}{1}}
       }
       { \seq_use:Nn \l__ztikz_wolfram_tmp_res_seq {\IfValueTF {#2}{#2}{,}}}
     \ior_close:N \g__ztikz_wolfram_ior

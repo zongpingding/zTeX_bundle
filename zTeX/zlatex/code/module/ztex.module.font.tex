@@ -63,12 +63,6 @@
     feat / bdsl            .tl_set:N   = \l__ztex_fontcfg_new_bdsl_tl,
     feat / BoldSlantedFont .meta:n     = { feat / bdsl = #1 },
     feat / bdsl            .initial:n  = { * }, % *-boldslant
-    % feat / AutoFakeBold    .tl_set:N   = \l__ztex_fontcfg_new_autofbd_tl,
-    % feat / AutoFakeBold    .default:n  = { true },
-    % feat / AutoFakeBold    .initial:n  = { false }, % false
-    % feat / AutoFakeSlant   .tl_set:N   = \l__ztex_fontcfg_new_autofsl_tl,
-    % feat / AutoFakeSlant   .default:n  = { true },
-    % feat / AutoFakeSlant   .initial:n  = { false }, % false
   }
 \cs_new_protected:Npn \__ztex_sysfont_new:nn #1#2
   {% #1:en/cn; #2:key-value(font cfg args)
@@ -90,10 +84,8 @@
         SmallCapsFont   = \l__ztex_fontcfg_new_sc_tl,
         BoldItalicFont  = \l__ztex_fontcfg_new_bdit_tl,
         BoldSlantedFont = \l__ztex_fontcfg_new_bdsl_tl,
-        % AutoFakeBold    = \l__ztex_fontcfg_new_autofbd_tl,
-        % AutoFakeSlant   = \l__ztex_fontcfg_new_autofsl_tl,
       }{#1}
-    % Reset key value, '\group_end:' conflict with '\newfontfamily',
+    % Reset key value, '\cs{group_end:}' conflict with '\cs{newfontfamily}',
     % See also: https://tex.stackexchange.com/q/729765/294585.
     \ztex_keys_set:nn { fontcfg / new }
       {
@@ -106,8 +98,6 @@
         feat / sc   = *,
         feat / bdsl = *,
         feat / bdit = *,
-        % feat / AutoFakeBold  = false,
-        % feat / AutoFakeSlant = false,
       }
   }
 \bool_if:NTF \g__ztex_sysfont_cfg_bool
@@ -149,7 +139,7 @@
       }
   }
 \cs_generate_variant:Nn \__ztex_fontcfg_newfamily_copy:nnnnn {ooooo}
-% TARGET: \zfontset{ en={main=, sans=}, CJK={main=, mono=} } 
+% TARGET: \cs{zfontset}\marg{en=\{main=, sans=\}, CJK=\{main=, mono=\}} 
 % Is this interface too complex ???
 \ztex_keys_define:nn { fontcfg / set }
   {
@@ -174,11 +164,3 @@
     \cs:w set #1 #2 font\cs_end: {#3}{#4}
   }
 \cs_generate_variant:Nn \__ztex_fontcfg_setfamily_copy:nnnn {oooo}
-
-
-% ==> math font
-% \DeclareFontShape{U}{rsfs}{m}{n}{
-%   <-7> rsfs5    
-%   <7-8> rsfs7    
-%   <8-> rsfs10
-% }{}

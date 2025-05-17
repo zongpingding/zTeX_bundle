@@ -1,4 +1,5 @@
 \usepackage{ztool}
+\usepackage{ztikz}
 \ztexloadlib{alias, thm}
 \ztexset{
   toc={
@@ -8,19 +9,14 @@
   }
 }
 \zcolorset{ link=purple } 
+\zthmstyle{leftbar}
 \geometry{left=2in, right=1in}
-\usepackage{zhnumber}
-\usepackage{tikzlings}
 \usepackage{comment}
-\usepackage{tabularray}
-\UseTblrLibrary{diagbox}
-\usepackage{pifont}
 \usepackage{minted}
-\usepackage{pdfpages}
+\usepackage{longtable}
 \usepackage{multicol}
 \usepackage{hologo}
 \usepackage[bottom]{footmisc}
-\usepackage{transparent}
 
 
 % ==> l3doc patches
@@ -123,6 +119,14 @@
 \ExplSyntaxOff
 
 
+% ==> logos
+\makeatletter
+\def\HoLogo@TikZ#1{Ti\textcolor{orange}{\textit{k}}Z}
+\def\latex{\hologo{LaTeX}}
+\def\ltxee{\hologo{LaTeX2e}}
+\makeatother
+
+
 % ==> source example env
 \fvset{gobble=0}
 \setmonofont{Latin Modern Mono}
@@ -143,9 +147,12 @@
   breakanywheresymbolpre=,
   breaksymbolleft=,
 }
-% \usepackage[most]{tcolorbox}
-% \tcbuselibrary{listings, minted, breakable, skins}
+% important: avoid conflict with tikz externalize 'prefix' settings
+\tcbuselibrary{external}
+\tcbsetforeverylayer{shield externalize} 
 \newcounter{DocExample}
+\def\exampleUR{\stepcounter{DocExample}\textbf{例\ \theDocExample}}
+\def\resetExampleUR{\def\exampleUR{\stepcounter{DocExample}\textbf{例\ \theDocExample}}}
 \tcbuselibrary{minted}
 \tcbset{listing engine=minted}
 \DeclareTCBListing{DocExample}{!s!O{//}}{
@@ -170,56 +177,9 @@
   },
   overlay unbroken and first = {
     \node[anchor=north east, outer sep=0pt, text=red] 
-      at (frame.north east) { \stepcounter{DocExample}\textbf{例\ \theDocExample}};
+      at (frame.north east) {\exampleUR};
   }
 }
-
-
-% ==> lipsum text
-\usepackage{comment}
-\def\blindText{As any dedicated reader can clearly see, the Ideal of practical
-reason is a representation of, as far as I know, the things in themselves; 
-\begin{align}
-\underset{}{\mathbf{v} \bigotimes \mathbf{w}} 
-    & = \sum_{i=1}^3\left(a_{i1}u^iv^1+a_{i2}u^iv^2+a_{i3}u^iv^3\right) \\
-    & = \int x \dd x = \frac12 x^2 + \R{C} 
-  \end{align}  
-As any dedicated reader can clearly see, the Ideal of practical reason is a 
-representation of, as far as I know, the things in themselves;}
-\def\zchcmd{(\textcolor{gray}{此命令仅能在文档的导言区使用, 但为了说明此命令的使用方法，在本手册中，此命令的定义被临时改变了})}
-
-
-% ==> ztex internal commands/states copy
-\ExplSyntaxOn\makeatletter
-\definecolor{slideRed}{HTML}{a30000}
-\definecolor{slideGray}{HTML}{e0e0e0}
-\definecolor{slideWhite}{HTML}{f0f0f0}
-\definecolor{zchapColor}{HTML}{7f8184}
-\definecolor{Ann-default-I}{HTML}{0000a3}
-\definecolor{zslide@title@color}{HTML}{d9d9d9}
-\colorlet{RoyalRed}{ztex@color@royalred}
-\prop_new:N \g_arabix_suffix_prop
-\prop_set_from_keyval:Nn \g_arabix_suffix_prop {
-  1=st, 2=nd, 3=rd, 11=th, 12=th, 13=th, 0=th, _=th
-} 
-\NewDocumentCommand\zfancynumsuffix{m}{
-  \int_compare:nTF {11 <= #1 <= 13}
-    {\prop_item:Ne \g_arabix_suffix_prop {#1}}
-    {\int_compare:nTF {\int_mod:nn {#1}{10} > 3}
-      {\prop_item:Ne \g_arabix_suffix_prop {_}}
-      {\prop_item:Ne \g_arabix_suffix_prop {\int_mod:nn {#1}{10}}}
-    }
-}
-\newcommand{\ztex@llapnote}[1]{
-  \mbox{}\llap{
-  \adjustbox{set~height=0pt, set~depth=0pt}{
-    \parbox[t]{2.85cm}{\raggedleft #1}}\hspace*{.75em}}
-}
-\zthmnew{Zaxiom, Ztheorem=Thm|{HTML}{a0d911}, Zproposition=Prop|blue}
-\zthmnew[proof]{Zproof, Zexample=EXAMPLE|red, Zsolution=Solution|}
-\bool_gset_true:N \g__ztex_math_alias_switch_bool
-\makeatother\ExplSyntaxOff
-
 
 
 % ==> print ztex source
@@ -233,7 +193,7 @@ representation of, as far as I know, the things in themselves;}
         \clist_put_right:Nn \l__ztex_doc_source_clist 
           {
             \subsubsection{##1}
-            \inputminted{latex}{../code/#1/ztex.#1.##1.tex}
+            \inputminted{latex}{../code/#1/ztikz.#1.##1.tex}
           }
       }
   }
@@ -247,64 +207,26 @@ representation of, as far as I know, the things in themselves;}
 \ExplSyntaxOff
 \newcommand{\ztexDocPrintSource}{%
   \ztexslideTF{}{
-    \section{\texorpdfstring{\zTeX{}}{zTeX} 源码}
+    \section{\texorpdfstring{\textcolor{black}{\ztikz}}{zTikZ} 源码}
     \pagestyle{empty}
     \zpagemask*[anchor=mr, position={(\zpw, .5\zph)}]{{\sffamily\color{gray}\scalebox{5}{\thepage}}}
     \renewcommand{\theFancyVerbLine}{\sffamily
       \textcolor{gray}{\small\oldstylenums{\arabic{FancyVerbLine}}}}
-    \setminted{ bgcolor=, linenos=true, numbers=both }
-
-    \subsection{ztex.cls}
-    \inputminted{latex}{../code/ztex.cls}
-
-    \newpage
-    \subsection{Module}
-    \inputZTeXSource{box, font, ref, page, color, thm, sect}
-
-    \newpage
+    \setminted{ bgcolor=, linenos=true, numbers=both, texcomments, escapeinside=«» }
+    \subsection{ztikz.sty}
+    \inputminted{latex}{../code/ztikz.sty}
+    \clearpage
     \subsection{Library}
-    \inputZTeXSource[library]{fancy, alias, slide, thm}
-
-    \newpage
-    \subsection{ztool}
-    \inputminted{latex}{../../ztool/code/ztool.sty}
+    \inputZTeXSource[library]{basic, gnuplot, cache, python, wolfram}
   }
 }
 
 
-
-% ==> CUS logo
-\makeatletter
-\def\CusTeX{\hologo{CusTeX}}
-\def\HoLogo@CusTeX#1{C\kern-.12em \raise.0466ex\hbox{u}\kern-.1em\lower .4ex\hbox{S}\kern-.15em\hologo{TeX}}
-\def\HoLogoBkm@CusTeX#1{Cus\hologo{TeX}}
-\def\CusLaTeX{\hologo{CusLaTeX}}
-\def\HoLogo@CusLaTeX#1{C\kern-.12em \raise.0466ex\hbox{u}\kern-.1em\lower .4ex\hbox{S}\kern-.1em\LaTeX}
-\def\HoLogoBkm@CusLaTeX#1{Cus\hologo{LaTeX}}
-\def\CUS@LOGO#1{\hologo{\NoCaseChange{#1}}}
-\def\CusTeX{\CUS@LOGO{CusTeX}}
-\makeatother
-
-
-% ==> only-preamble commands copy
-\let\Ozthmlang\zthmlang
-\let\Ozthmnameset\zthmnameset
-\let\Ozthmnew\zthmnew
-\let\Ozthmstyle\zthmstyle
-\let\Ozaliasopset\zaliasopset
-\let\Ozthmtitleformat\zthmtitleformat
-\let\Ozthmtitlebefore\zthmtitlebefore
-\let\Ozthmbefore\zthmbefore
-\let\Ozthmcolorset\zthmcolorset
-\let\Ozthmiconset\zthmiconset
-
-
 % ==> aux commands
-\newcommand{\zclassArg}{\textcolor{red}{\ding{73}}}
-\newcommand{\zcmdArg}{\textcolor{red}{\(\star\)}}
-\newcommand{\zFullExp}{\textcolor{red}{\(\star\)}}
-\newcommand{\zResExp}{\textcolor{red}{\ding{73}}}
+\colorlet{BLACK}{black}
+\ztexframe[gray]{leftbar}
 \newcommand{\block}[1]{{\color{#1}\rule{1em}{1em}}}
+\newcommand{\mstyle}[1]{\noindent\lower.25ex\hbox{\ding{224}}\;\textbf{#1}\par}
 \newcommand{\Footnote}[1]{\stepcounter{footnote}\footnote[\thefootnote]{#1}}
 \NewDocumentCommand{\zdefault}{sm}{%
   \IfBooleanTF{#1}%
@@ -312,7 +234,7 @@ representation of, as far as I know, the things in themselves;}
     {\textcolor{red}{:\textbf{#2}}}%
 }
 \ExplSyntaxOn
-\newcommand{\zarg}[1]{\texttt{\{}\cmd{#1}\texttt{\}}}
+\newcommand{\zarg}[1]{\texttt{\{} #1 \texttt{\}}}
 \newcommand{\zkey}[1]{
   \clist_clear:N \l_tmpa_clist
   \clist_map_inline:nn {#1}{
@@ -320,6 +242,7 @@ representation of, as far as I know, the things in themselves;}
   }
   \clist_use:Nn \l_tmpa_clist {,~}
 }
+\def\sineData{./support/data/sine.data}
 \ExplSyntaxOff
 
 

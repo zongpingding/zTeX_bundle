@@ -1,35 +1,33 @@
 # script Usage
 # doc: make
-# slide:make ztex_l3_manual_slide.pdf
+# slide:make ztex_interface_slide.pdf
 
 
-SOURCE = ztex_l3doc
-TARGET = ztex_l3_manual
+SOURCE = ztex_interface
+TARGET = ztex_interface
 
 # source
 MODULES = ../code/module/
 LIBS    = ../code/library/
 CLASS   = ../code/ztex
-SOURCE_FILES =  $(shell find $(MODULES) -name '*.tex') \
+SOURCE_FILES  = $(shell find $(MODULES) -name '*.tex') \
 				$(shell find $(LIBS) -name '*.tex') \
 				$(SOURCE).tex \
 				$(CLASS).cls
 
-# build
+# build doc
 $(TARGET).pdf: $(SOURCE_FILES)
-	lualatex --shell-escape $(SOURCE).tex
-	makeindex -s gind.ist   $(SOURCE) 
-	lualatex --shell-escape $(SOURCE).tex
-	lualatex --shell-escape $(SOURCE).tex
-	lualatex --shell-escape $(SOURCE).tex
-	mv $(SOURCE).pdf $(TARGET).pdf
+	lualatex $(SOURCE).tex
+	makeindex -s gind.ist $(SOURCE) 
+	lualatex $(SOURCE).tex
+	lualatex $(SOURCE).tex
 	rm -rf ./*.hd
 
+# build slide
 $(TARGET)_slide.pdf: $(SOURCE_FILES)
-	lualatex --shell-escape $(SOURCE).tex
-	makeindex -s gind.ist   $(SOURCE) 
-	lualatex --shell-escape $(SOURCE).tex
-	lualatex --shell-escape $(SOURCE).tex
-	lualatex --shell-escape $(SOURCE).tex
+	lualatex $(SOURCE).tex
+	makeindex -s gind.ist $(SOURCE) 
+	lualatex $(SOURCE).tex
+	lualatex $(SOURCE).tex
 	mv $(SOURCE).pdf $(TARGET)_slide.pdf
 

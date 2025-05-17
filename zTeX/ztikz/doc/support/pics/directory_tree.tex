@@ -3,30 +3,30 @@
 \usepackage{dirtree}
 \usepackage{xcolor}
 \usepackage{ctex}
+\def\meta#1{\ensuremath \langle #1\ensuremath \rangle}
 
 \renewcommand*\DTstylecomment{\rmfamily}
 \renewcommand*\DTstyle{\ttfamily}
 \begin{document}
 \dirtree{%
     .1 ztikz\_output.
-    .2 gnuplot\_data\DTcomment{\textcolor{gray}{gnuplot缓存文件夹}}.
-    .3 gnu\_data\_1\_1.table\DTcomment{\textcolor{gray}{tikzindex-dataindex}}.
-    .2 mma\_data\DTcomment{\textcolor{gray}{mma缓存文件夹}}.
-    .2 python\_data\DTcomment{\textcolor{gray}{Python缓存文件夹}}.
-    .2 scripts\DTcomment{\textcolor{gray}{gnuplot绘图脚本}}.
+    .2 gnuplot\_data\DTcomment{\textcolor{gray}{gnuplot 缓存文件夹}}.
+    .3 gnu\_data\_1\_1.table.
+    .2 mma\_data\DTcomment{\textcolor{gray}{WolframScript 缓存文件夹}}.
+    .2 python\_data\DTcomment{\textcolor{gray}{Python 缓存文件夹}}.
+    .2 scripts\DTcomment{\textcolor{gray}{gnuplot 绘图脚本}}.
+    .3 3d\_plot.gp.
     .3 contour\_plot.gp.
     .3 param\_plot.gp.
-    .3 plot.gp.
+    .3 plot\_plot.gp.
     .3 polar\_plot.gp.
-    .3 sympy\_script.py.
-    .3 float\_script.py.
-    .2 tikz\_data\DTcomment{\textcolor{gray}{tikz缓存文件夹}}.
-    .3 release-figure0.dpth.
-    .3 release-figure0.log.
-    .3 release-figure0.md5.
-    .3 release-figure0.pdf.
-    .3 release-figure0.run.xml.
-    .2 ztikz.hash\DTcomment{\textcolor{gray}{绘图代码Hash}}.
+    .2 tikz\_data\DTcomment{\textcolor{gray}{TikZ 缓存文件夹}}.
+    .3 \meta{file}-figure0.dpth.
+    .3 \meta{file}-figure0.log.
+    .3 \meta{file}-figure0.md5.
+    .3 \meta{file}-figure0.pdf.
+    .3 \meta{file}-figure0.run.xml.
+    .2 ztikz.hash\DTcomment{\textcolor{gray}{Hash 值记录}}.
 }
 
 \end{document}

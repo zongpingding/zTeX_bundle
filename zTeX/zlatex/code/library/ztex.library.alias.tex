@@ -3,8 +3,8 @@
 
 %%%%%     alias library for ztex     %%%%%
 % In case of duplicated macro name, save the original one 
-% in your preamble, for example the '\FF' in package 'ascii', 
-%   1. put '\let\asciiFF\FF' in your preamble to store it 
+% in your preamble, for example the '\cs{FF}' in package 'ascii', 
+%   1. put '\cs{let}\cs{asciiFF}\cs{FF}' in your preamble to store it 
 %   2. or load 'mathalias' library after 'ascii' package
 \bool_gset_true:N \g__ztex_math_alias_bool
 \RequirePackage{amssymb, mathrsfs}
@@ -62,7 +62,6 @@
   }
 \cs_set:Npn \__ztex_math_alias_set:nn #1#2 
   {
-    % \typeout{--->\string #1:\string #2}
     \cs_set:Npn #1 
       {
         \bool_if:NTF \g__ztex_math_alias_switch_bool
@@ -90,7 +89,7 @@
 \prop_new:N \g_ztex_math_simple_arrow_prop
 \prop_set_from_keyval:Nn \g_ztex_math_simple_arrow_prop 
   { % 1.double:long;  2.capital:double line; 
-    % 3.neg:negation; 4.No '\nlongleftarrow', '\nLongleftarrow' etc.
+    % 3.neg:negation; 4.No '\cs{nlongleftarrow}', '\cs{nLongleftarrow}' etc.
     ma   = \mapsto,
     mma  = \longmapsto,
     % left arrow
@@ -154,7 +153,7 @@
 
 
 % ==> Math Operator and symbols
-% REF: 1. https://en.wikipedia.org/wiki/List_of_mathematical_abbreviations
+% REF: 1. https://en.wikipedia.org/wiki/List\_of\_mathematical\_abbreviations
 %      2. https://tex.stackexchange.com/a/289946/294585
 \newcommand{\z@A}{\ensuremath{\forall}}
 \newcommand{\z@E}{\ensuremath{\exists}}
@@ -215,8 +214,8 @@
 \@onlypreamble\zaliasopset
 
 
-% ==> pyhsics package commands (\qty, ...) implementation ???
-% \qty(#1) --> \left(#1\right)
+% ==> pyhsics package commands (\cs{qty}, ...) implementation ???
+% \cs{qty}\parg{#1} --> \cs{left}\parg{#1}\cs{right}
 \NewDocumentCommand{\z@ab}{d()d[]d\{\}}
   { 
     \IfValueT{#1}{ \left(#1\right) }

@@ -1,5 +1,5 @@
 \DocumentMetadata{lang=cn} % lualatex + this line = bookmark content page error
-\InputIfFileExists{ztex_l3doc-cfg.tex}{}{}
+\InputIfFileExists{ztex_doc-cfg.tex}{}{}
 \documentclass[
   lang=cn, 
   hyper=true,
@@ -7,26 +7,20 @@
   % classOption={show-notes}
   % layout={slide, aspect=16|9, theme=AnnArborSpruce}
 ]{../code/ztex}
-\input{ztex_l3doc_preamble.tex}
+\input{ztex_interface_preamble.tex}
 
 
-\title{\texorpdfstring{\vspace{-4pt}z\TeX{} 用户手册}{zTeX 用户手册}}
+\title{\texorpdfstring{\vspace{-4pt}z\TeX{} 接口文档}{zTeX 接口文档}}
 \author{Eureka}
 \date{\today}
 \begin{document}
-\let\zthmlang\Ozthmlang
-\let\zthmnameset\Ozthmnameset
-\let\zthmnew\Ozthmnew
-\let\zthmstyle\Ozthmstyle
-\let\zaliasopset\Ozaliasopset
-\let\zthmtitleformat\Ozthmtitleformat
-\let\zthmtitlebefore\Ozthmtitlebefore
-\let\zthmbefore\Ozthmbefore
-\let\zthmcolorset\Ozthmcolorset
-\let\zthmiconset\Ozthmiconset
+\thmCommandRestore
+% cover
 \newgeometry{hmargin=1cm, vmargin=1.5in}
   \maketitle
 \restoregeometry
+
+% contents
 \newgeometry{hmargin=3cm, vmargin=1in}
   \ztexslideTF{
     \thispagestyle{empty}
@@ -39,8 +33,7 @@
   }
 \restoregeometry
 
-
-% ==> intro and quick ref
+% intro and quick ref
 \newgeometry{
   left=3cm, right=3cm, 
   bottom=3.5cm, top=3.2cm, 
@@ -179,7 +172,7 @@
 \thispagestyle{empty}
 \begin{center}
   \mbox{}\vfill
-  \includegraphics[width=.95\paperheight, angle=90]{ztex_options.pdf}
+  \includegraphics[width=.95\paperheight, angle=90]{./support/pics/ztex_options.pdf}
   \vfill\mbox{}
 \end{center}
 \restoregeometry
@@ -1098,7 +1091,7 @@ Permissions:         Unknown (12)
 \begin{DocExample}*
   % \usepackage{tikzlings}
   \zpagemask{
-    \transparent{.5}\includegraphics{latex-logo.pdf}
+    \transparent{.5}\includegraphics{./support/pics/latex-logo.pdf}
   }
   \zpagemask[anchor=tr, position={(\zpw, \zph)}]{
     \begin{tikzpicture}[scale=2]
@@ -3141,608 +3134,9 @@ reason is a representation of, as far as I know, the things in themselves;%
 除此之外, \pkg{ztool} 提供了 box 操作, 文件 IO 以及基本图形绘制相关的函数. 在 \pkg{ztool} 的协助下，\ztex{} 能够
 避免或减少命令行 \cmd{-shell-escape} 参数或其它相关宏包的调用(如 \pkg{robust-externalize} 宏包).
 
+\pkg{ztool} 宏包的详细使用方法请参见其用户手册.
 
-\subsection{l3sys-shell}
-本部分主要介绍 \pkg{ztool} 中实现的原始 \pkg{l3sys-shell} 宏包中的命令. 所以使用本部分的命令时需在编译
-\LaTeX{} 文档时启用 \cmd{-shell-escape} 参数, 否则此系列命令将不会执行任何操作.
 
-\vskip2em
-\noindent\textcolor{red}{\sffamily WARNING: 请谨慎使用此部分的命令, 部分不当操作可能会导致一些无法挽救的后果.}
-
-\begin{function}[updated=2024-12-05]{\ztool_shell_escape:n, \ztool_shell_escape:e}
-  \begin{syntax}
-    \cs{ztool_shell_escape:n} \marg{command}
-  \end{syntax}
-  当 \cmd{-shell-escape} 参数启用时, 此命令会在 shell 中执行 \meta{command}, 如果 \cmd{-shell-escape} 参数未启用,
-  此命令将不会执行任何操作.
-\end{function}
-
-
-\begin{function}[updated=2024-12-05]{\ztool_shell_mkdir:n, \ztool_shell_mkdir:e}
-  \begin{syntax}
-    \cs{ztool_shell_mkdir:n} \marg{dir}
-  \end{syntax}
-  当 \cmd{-shell-escape} 参数启用时, 此命令会创建一个目录 \meta{dir}, 如果 \cmd{-shell-escape} 参数未启用,
-  此命令将不会执行任何操作.
-\end{function}
-
-
-\begin{function}[updated=2024-12-05]{\ztool_shell_cp:nn, \ztool_shell_cp:ee, \ztool_shell_cp:ne, \ztool_shell_cp:en}
-  \begin{syntax}
-    \cs{ztool_shell_cp:nn} \marg{source}\marg{target}
-  \end{syntax}
-  当 \cmd{-shell-escape} 参数启用时, 此命令将把文件 \meta{source} 复制为文件 \meta{target}, 如果 \cmd{-shell-escape} 参数未启用,
-  此命令将不会执行任何操作.
-\end{function}
-
-
-\begin{function}[updated=2024-12-05]{\ztool_shell_mv:nn, \ztool_shell_mv:ee, \ztool_shell_mv:ne, \ztool_shell_mv:en}
-  \begin{syntax}
-    \cs{ztool_shell_mv:nn} \marg{source}\marg{target}
-  \end{syntax}
-  当 \cmd{-shell-escape} 参数启用时, 此命令将把文件 \meta{source} 移动到目录 \meta{target}, 如果 \cmd{-shell-escape} 参数未启用,
-  此命令将不会执行任何操作.
-\end{function}
-
-\begin{function}[updated=2024-12-05]{\ztool_shell_rm:n, \ztool_shell_rm:e}
-  \begin{syntax}
-    \cs{ztool_shell_rm:n} \marg{file}
-  \end{syntax}
-  当 \cmd{-shell-escape} 参数启用时, 此命令将删除文件 \meta{file}, 如果 \cmd{-shell-escape} 参数未启用,
-  此命令将不会执行任何操作.
-\end{function}
-
-\begin{function}[updated=2024-12-05]{\ztool_shell_rmdir:n, \ztool_shell_rmdir:e}
-  \begin{syntax}
-    \cs{ztool_shell_rmdir:n} \marg{dir}
-  \end{syntax}
-  当 \cmd{-shell-escape} 参数启用时, 此命令将删除目录 \meta{dir}, 如果 \cmd{-shell-escape} 参数未启用,
-  此命令将不会执行任何操作.
-\end{function}
-
-\begin{function}[updated=2024-12-05]{\ztool_get_shell_pwd:N, \ztool_get_shell_pwd:c}
-  \begin{syntax}
-    \cs{ztool_get_shell_pwd:N} \meta{tl}
-  \end{syntax}
-  当 \cmd{-shell-escape} 参数启用时, 此命令将返回当前的工作目录, 并将其存放在 \meta{tl} 中, 如果 \cmd{-shell-escape} 参数未启用,
-  此命令将不会执行任何操作.
-\end{function}
-
-
-\begin{function}[updated=2024-12-05]{\ztool_shell_split_ls:nN}
-  \begin{syntax}
-    \cs{ztool_shell_split_ls:nN} \marg{dir}\meta{tl}
-  \end{syntax}
-  当 \cmd{-shell-escape} 参数启用时, 此命令将返回目录 \meta{dir} 下的所有文件名, 并将其存放在 \meta{tl} 中, 如果 \cmd{-shell-escape} 参数未启用,
-  此命令将不会执行任何操作.
-\end{function}
-
-
-\clearpage
-\subsection{文件 IO}
-本部分主要介绍 \pkg{ztool} 中实现的文件 IO 操作, 包括: 读取文件, 写入文件, 追加文件等操作. 本部分的系列命令均不需要
-启用 \cmd{-shell-escape} 参数.
-
-
-\begin{function}[updated=2024-12-05]{\ztool_file_new:nn}
-  \begin{syntax}
-    \cs{ztool_file_new:nn} \marg{boolean}\marg{file}
-  \end{syntax}
-  此命令用于创建一个名为 \meta{file} 的新文件, 如果 \meta{file} 不存在, 则会创建一个名为 \meta{file} 的新文件.
-  若文件已存在，那么当 \meta{boolean} 为 \cs{c_true_bool} 时，\textcolor{red}{\sffamily 会覆盖原文件}，否则不会进行任何操作.
-\end{function}
-
-\begin{function}[updated=2024-12-05]{
-  \ztool_read_file_as_seq:nnN, \ztool_read_file_as_seq:neN, 
-  \ztool_read_file_as_seq:nnc, \ztool_read_file_as_seq:nec}
-  \begin{syntax}
-    \cs{ztool_read_file_as_seq:nnN} \marg{bool}\marg{file}\meta{seq}
-  \end{syntax}
-  此命令用于读取文件 \meta{file} 的内容, 并将其存放在 \meta{seq} 中, 如果 \meta{file} 不存在, 则 \meta{seq} 会被置为空.
-  \meta{bool} 用于控制是否保留行尾的空格, 可选值有:\cs{c_true_bool}, \cs{c_false_bool}, 默认为 \cs{c_true_bool}; 如果 \meta{bool} 
-  为 \cs{c_true_bool}, 则保留行尾的空格, 否则不保留.\par
-  \textbf{注意}: 此命令仅在一个组内有效, 且不可嵌套.
-\end{function}
-
-
-\begin{function}[updated=2025-01-05]{\ztool_gread_file_as_seq:nnN, \ztool_gread_file_as_seq:neN, \ztool_gread_file_as_seq:nnc, \ztool_gread_file_as_seq:nec}
-  \begin{syntax}
-    \cs{ztool_read_file_as_seq:nnN} \marg{bool}\marg{file}\meta{seq}
-  \end{syntax}
-  此命令用于读取文件 \meta{file} 的内容, 并将其存放在 \meta{seq} 中, 如果 \meta{file} 不存在, 则 \meta{seq} 会被置为空.
-  \meta{bool} 用于控制是否保留行尾的空格, 可选值有:\cs{c_true_bool}, \cs{c_false_bool}, 默认为 \cs{c_true_bool}; 如果 \meta{bool} 
-  为 \cs{c_true_bool}, 则保留行尾的空格, 否则不保留.\par
-  \textbf{注意}: 此命令作用于全局, 不可嵌套.
-\end{function}
-
-
-\begin{function}[updated=2025-01-05]{\ztool_append_to_file:nn, \ztool_append_to_file:no, \ztool_append_to_file:nf, \ztool_append_to_file:ee}
-  \begin{syntax}
-    \cs{ztool_append_to_file:nn} \marg{file}\marg{content}
-  \end{syntax}
-  此命令用于将 \meta{content} 追加到文件 \meta{file} 中, 如果 \meta{file} 不存在, 则会创建一个名为 \meta{file} 的
-  新文件, 并将 \meta{content} 写入其中.
-\end{function}
-
-
-\begin{function}[updated=2025-01-05]{\ztool_replace_file_line:nnn, \ztool_replace_file_line:enn, \ztool_replace_file_line:ene, \ztool_replace_file_line:eee}
-  \begin{syntax}
-    \cs{ztool_replace_file_line:nnn} \marg{file}\marg{line}\marg{content}
-  \end{syntax}
-  此命令用于将文件 \meta{file} 中的第 \meta{line} 行替换为 \meta{content}, 如果 \meta{file} 不存在, 则不会进行任何操作.
-\end{function}
-
-
-\begin{function}[updated=2025-01-05]{\ztool_insert_to_file:nnn, \ztool_insert_to_file:nen, \ztool_insert_to_file:nfn, \ztool_insert_to_file:een}
-  \begin{syntax}
-    \cs{ztool_insert_to_file:nnn} \marg{file}\marg{line}\marg{content}
-  \end{syntax}
-  此命令用于将 \meta{content} 插入到文件 \meta{file} 的第 \meta{line} 行之前, 如果 \meta{file} 不存在, 则不会进行任何操作.
-\end{function}
-
-
-下面一个示例展示了如何使用 \pkg{ztool} 中的几个文件 IO 操作命令:
-\begin{DocExample}*
-\ExplSyntaxOn
-\ztool_file_new:nn {\c_true_bool}{testIO.txt}
-\seq_new:N \l_ztool_tmp_seq \seq_clear:N \l_ztool_tmp_seq
-\ztool_append_to_file:nn {testIO.txt} {|APPEND-CONTENT|}
-\ztool_insert_to_file:nnn {testIO.txt} {2} {|~~INSERT-CONTENT~~|}
-\ztool_gread_file_as_seq:nnN {\c_false_bool} {testIO.txt} \l_ztool_tmp_seq
-\seq_use:Nn \l_ztool_tmp_seq {\par}
-\ExplSyntaxOff
-\inputminted{text}{testIO.txt}
-\end{DocExample}
-
-
-\clearpage
-\subsection{盒子操作}
-本部分介绍 \pkg{ztool} 中实现的 Box 操作, 包括 box 的测量以及 box 的简单变换.
-
-
-\begin{function}[updated=2024-12-05]{\ztool_get_ht:Nn, \ztool_get_ht:Ne, \ztool_get_ht:ce}
-  \begin{syntax}
-    \cs{ztool_get_ht:Nn} \meta{dim}\marg{content}
-  \end{syntax}
-  此命令用于将 \meta{content} 的高度保存在 \meta{dim} 这一寄存器中.
-\end{function}
-
-\begin{function}[updated=2024-12-05]{\ztool_get_ht_plus_dp:Nn, \ztool_get_ht_plus_dp:Ne, \ztool_get_ht_plus_dp:ce}
-  \begin{syntax}
-    \cs{ztool_get_ht:Nn} \meta{dim}\marg{content}
-  \end{syntax}
-  此命令用于将 \meta{content} 的高度和深度的和保存在 \meta{dim} 这一寄存器中.
-\end{function}
-
-\begin{function}[updated=2024-12-05]{\ztool_get_wd:Nn, \ztool_get_wd:Ne, \ztool_get_wd:ce}
-  \begin{syntax}
-    \cs{ztool_get_wd:Nn} \meta{dim}\marg{content}
-  \end{syntax}
-  此命令用于将 \meta{content} 的宽度保存在 \meta{dim} 这一寄存器中.
-\end{function}
-
-\begin{function}[updated=2024-12-05]{\ztool_get_dp:Nn, \ztool_get_dp:Ne, \ztool_get_dp:ce}
-  \begin{syntax}
-    \cs{ztool_get_dp:Nn} \meta{dim}\marg{content}
-  \end{syntax}
-  此命令用于将 \meta{content} 的深度保存在 \meta{dim} 这一寄存器中.
-\end{function}
-
-
-\begin{function}[updated=2024-12-05]{\ztool_gget_ht:Nn, \ztool_gget_ht:Ne, \ztool_gget_ht:ce}
-  \begin{syntax}
-    \cs{ztool_gget_ht:Nn} \meta{dim}\marg{content}
-  \end{syntax}
-  此命令用于将 \meta{content} 的高度保存在 \meta{dim} 这一寄存器中, 并且此操作是全局的.
-\end{function}
-
-\begin{function}[updated=2024-12-05]{\ztool_gget_wd:Nn, \ztool_gget_wd:Ne, \ztool_gget_wd:ce}
-  \begin{syntax}
-    \cs{ztool_gget_wd:Nn} \meta{dim}\marg{content}
-  \end{syntax}
-  此命令用于将 \meta{content} 的宽度保存在 \meta{dim} 这一寄存器中, 并且此操作是全局的.
-\end{function}
-
-\begin{function}[updated=2024-12-05]{\ztool_gget_dp:Nn, \ztool_gget_dp:Ne, \ztool_gget_dp:ce}
-  \begin{syntax}
-    \cs{ztool_gget_dp:nn} \meta{dim}\marg{content}
-  \end{syntax}
-  此命令用于将 \meta{content} 的深度保存在 \meta{dim} 这一寄存器中, 并且此操作是全局的.
-\end{function}
-
-
-\begin{function}[updated=2024-12-05]{\ztool_set_to_wd:nn, \ztool_set_to_wd:en, \ztool_set_to_wd:ne}
-  \begin{syntax}
-    \cs{ztool_set_to_wd:nn} \marg{dim}\marg{content}
-  \end{syntax}
-  此命令用于将 \meta{content} 的宽度调整为 \meta{dim}, 然后排版出来.
-\end{function}
-
-\begin{function}[updated=2024-12-05]{\ztool_set_to_ht:nn, \ztool_set_to_ht:en, \ztool_set_to_ht:ne}
-  \begin{syntax}
-    \cs{ztool_set_to_ht:nn} \marg{dim}\marg{content}
-  \end{syntax}
-  此命令用于将 \meta{content} 的高度调整为 \meta{dim}, 然后排版出来.
-\end{function}
-
-
-\begin{function}[updated=2025-04-29]{
-  \ztool_autoset_to_wd_and_ht:nnn, \ztool_autoset_to_wd_and_ht:nne, 
-  \ztool_autoset_to_wd_and_ht:een, \ztool_autoset_to_wd_and_ht:eee}
-  \begin{syntax}
-    \cs{ztool_autoset_to_wd_and_ht:nn} \marg{width}\marg{height}\marg{content}
-  \end{syntax}
-  此命令用于将 \meta{content} 的宽度调整为 $\min(\text{\texttt{\meta{width}}, \texttt{\meta{height}}})$,
-  然后排版出来.
-\end{function}
-
-
-\begin{function}[added=2025-04-29]{
-  \ztool_rotate:nn, \ztool_rotate:en, 
-  \ztool_rotate:ne, \ztool_rotate:ee}
-  \begin{syntax}
-    \cs{ztool_rotate:nn} \marg{angle}\marg{content}
-  \end{syntax}
-  此命令用于将 \meta{content} 旋转 \meta{angle} 度, 然后排版出来.
-\end{function}
-
-
-
-\begin{function}[added=2025-04-29]{
-  \ztool_scale_to_wd:nn, \ztool_scale_to_wd:en, 
-  \ztool_scale_to_wd:ne, \ztool_scale_to_wd:ee}
-  \begin{syntax}
-    \cs{ztool_scale_to_wd:nn} \marg{dim}\marg{content}
-  \end{syntax}
-  此命令用于将 \meta{content} 的宽度调整为 \meta{dim}, 但是不对盒子的高度做任何的调整, 然后排版出来.
-\end{function}
-
-
-\begin{function}[added=2025-04-29]{
-  \ztool_scale_to_ht:nn, \ztool_scale_to_ht:en, 
-  \ztool_scale_to_ht:ne, \ztool_scale_to_ht:ee}
-  \begin{syntax}
-    \cs{ztool_scale_to_ht:nn} \marg{dim}\marg{content}
-  \end{syntax}
-  此命令用于将 \meta{content} 的高度 $+$ 深度整体调整为 \meta{dim}, 但是不对盒子的宽度做任何的调整, 然后排版出来.
-\end{function}
-
-
-
-\begin{function}[added=2025-04-29]{
-  \ztool_scale_to_wd_and_ht:nnn, \ztool_scale_to_wd_and_ht:nno, 
-  \ztool_scale_to_wd_and_ht:nne, \ztool_scale_to_wd_and_ht:eee}
-  \begin{syntax}
-    \cs{ztool_scale_to_wd_and_ht:nnn} \marg{width}\marg{height}\marg{content}
-  \end{syntax}
-  此命令用于将 \meta{content} 的宽度调整为 \meta{width}, 高度 $+$ 深度整体调整为 \meta{height},
-  然后排版出来.
-\end{function}
-
-
-% #1:cmd, #2:width, #3:object, #4:align format(left, right, scatter, center)
-\begin{function}[updated=2025-05-13]{
-  \ztool_box_item_align:Nnnn, \ztool_box_item_align:cnnn,
-  \ztool_box_item_align:Nnno, \ztool_box_item_align:cnno, 
-  \ztool_box_item_align:Nnen, \ztool_box_item_align:Nnee }
-  \begin{syntax}
-    \cs{ztool_box_item_align:Nnnn} \meta{cmd}\marg{width}\marg{content}\marg{align}
-  \end{syntax}
-  此命令用于将 \meta{content} 的宽度调整为 \meta{width}, 然后排版出来, \meta{align} 用于控制对齐方式, 可选值有:
-  \texttt{left, center, right, scatter}. \meta{cmd} 为一个命令，其接受一个参数，它将应用到 \meta{content} 
-  的每一个 Token 上. \textbf{注意}:原 \meta{content} 中的空格会被删除.
-\end{function}
-
-
-\begin{function}[added=2025-05-12]{\ztool_fp_to_rad:n}
-  \begin{syntax}
-    \cs{ztool_fp_to_rad:n} \marg{angle}
-  \end{syntax}
-  此命令用于将 \meta{angle} 从弧度制转换为角度制.
-\end{function}
-
-
-
-\begin{function}[added=2025-05-12]{
-  \ztool_affine_transformation:Nnnnn,
-  \ztool_affine_transformation:Neeee,
-  \ztool_affine_transformation:cnnnn,
-  \ztool_affine_transformation:ceeee}
-  \begin{syntax}
-    \cs{ztool_affine_transformation:Nnnnn} \meta{box}\marg{a}\marg{b}\marg{c}\marg{d}
-  \end{syntax}
-  此命令用于对 \meta{box} 进行任意的仿射变换(线性变换), 具体的使用方法可以参见前述的 \cmd{ztoolboxaffine} 命令; 
-  上述参数对应的仿射变换矩阵 $\Lambda$ 为
-  \[\Lambda = \begin{bmatrix}
-    a & c \\
-    b & d
-  \end{bmatrix}.\]
-\end{function}
-
-
-
-{\sffamily\color{red} 关于上述函数 \cmd{\ztool_affine_transformation:Nnnnn} 的一些技术细节}: 给定任意一个仿射
-变换 $\Lambda$, 不妨设
-\[
-  \Lambda = \begin{bmatrix}
-    A_{11} & A_{12} \\
-    A_{21} & A_{22}
-  \end{bmatrix}.
-\]
-我们可以做如下的分解(与 SVD 分解类似), 令 $m=2x$, 则有:
-\begin{align}\label{eq:affine-matrix}
-  \Lambda 
-  & = \begin{bmatrix} A_{11} & A_{12} \ \\ A_{21} & A_{22} \end{bmatrix} 
-    = \begin{bmatrix} \cos \theta & -\sin \theta \\ \sin \theta & \cos \theta \end{bmatrix} 
-    \begin{bmatrix} 1 & m \\ 0 & 1 \end{bmatrix} 
-    \begin{bmatrix} s_x & 0 \\ 0 & s_y \end{bmatrix} \notag \\
-  & = \begin{bmatrix} \cos \theta & -\sin \theta \\ \sin \theta & \cos \theta \end{bmatrix}
-    \begin{bmatrix}\cos \phi&-\sin\phi\\\sin\phi&\cos\phi\end{bmatrix}
-    \begin{bmatrix}S_x&0\\0&S_y\end{bmatrix}
-    \begin{bmatrix}\cos \omega&-\sin\omega\\\sin\omega&\cos\omega\end{bmatrix}
-    \begin{bmatrix} s_x & 0 \\ 0 & s_y \end{bmatrix}.
-\end{align}
-
-我们给出如下的记号:
-\begin{itemize}
-  \item $\mathbf{T}_1(\theta)$: 旋转矩阵, 绕原点逆时针旋转 $\theta$ 角;
-  \item $\mathbf{T}_2(x)$: 缩放矩阵, 把 $x$ 轴方向的所有向量变为原来的 $x$ 倍;
-  \item $\mathbf{T}_3(y)$: 缩放矩阵, 把 $y$ 轴方向的所有向量变为原来的 $y$ 倍;
-\end{itemize}
-
-那么我们可以认为 $\{\mathbf{T}_1(\theta), \mathbf{T}_2(x), \mathbf{T}_3(y)\}$ 就是 $A_{2\times 2}$ 的基.
-所以我们可以把上面的 \cref{eq:affine-matrix} 写成如下表达式:
-\begin{align}\label{eq:affine-matrix-res}
-  \Lambda = \mathbf{T}_1(\theta) \cdot \mathbf{T}_1(\phi)
-  \cdot \mathbf{T}_2(S_x)\cdot \mathbf{T}_3(S_y)
-  \cdot \mathbf{T}_1(\omega)\cdot \mathbf{T}_2(s_x)\cdot \mathbf{T}_3(s_y).
-\end{align}
-
-根据矩阵乘法的结果, 我们可以知道上述的 $m, s_x, S_x, \phi$ 等参数如下:
-\begin{align*}
-  s_x = \sqrt{A_{11}^2 + A_{21}^2},\qquad \theta = \arctan\left( \frac{A_{21}}{A_{11}} \right).
-\end{align*}
-$s_y$ 和 $m$ 的求解结果如下:
-\begin{align*}
-  ms_y = A_{12}\cos\theta + A_{22}\sin\theta,\qquad
-  s_y = \left\{\begin{aligned}
-    & \frac{m s_y\cos\theta - A_{12}}{\sin\theta} && \text{ 如果 } \sin\theta \neq 0, \\
-    & \frac{A_{22} - m s_y\sin\theta}{\cos\theta} && \text{ 如果 } \sin\theta = 0;
-  \end{aligned}\right. 
-\end{align*}
-那么此时很容易知道 $m = ms_y / s_y$. 对 shear matrix 的分解结果如下:
-\begin{align*}
-  & S_x = \sqrt{\frac{m^2}4+1} - \frac{m}2, \qquad
-    S_y = \sqrt{\frac{m^2}4+1} + \frac{m}2, \\
-  & \phi = -\frac{\pi}{4} - \frac{1}{2}\arctan(\frac{m}2), \qquad
-    \omega = \frac{\pi}{4} - \frac{1}{2}\arctan(\frac{m}2).
-\end{align*}
-
-最后我们只需要从右到左将这一系列的变换应用到 \meta{box} 上即可. 从上面也可以看出, 命令 \cmd{\ztool_affine_transformation:Nnnnn} 
-仅依赖于 \LaTeX3 中的 \cs{coffin_scale:Nnn} 和 \cs{coffin_rotate:Nn} 两个函数. 命令 \cmd{\ztool_affine_transformation:Nnnnn} 实现
-过程中相关的参考链接如下:
-\begin{itemize}
-  \item \texttt{https://math.stackexchange.com/a/3521141/1235323};
-  \item \texttt{https://math.stackexchange.com/a/281087/1235323}.
-\end{itemize}
-
-\begin{leftbar}%
-\noindent 如果原 \TeX{} 引擎提供了 shear transformation 相关的 primitive, 那么上述
-对 shear matrix 的分解就是不必要的. 部分的引擎中原始提供了仿射变换矩阵这一 primitive, 
-比如 \hologo{pdfTeX} 中的 \cmd{\pdfsetmatrix} 命令.
-\end{leftbar}
-
-
-
-下面一个示例展示了如何使用 \pkg{ztool} 中的几个 Box 操作命令:
-\begin{DocExample}*
-\ExplSyntaxOn
-% get dim of content
-\dim_new:N \l_ztool_tmp_H_dim
-\dim_new:N \l_ztool_tmp_W_dim
-\ztool_get_ht:Nn \l_ztool_tmp_H_dim {Hello,~world!}
-\ztool_get_wd:Nn \l_ztool_tmp_W_dim {Hello,~world!}
-\dim_use:N \l_ztool_tmp_H_dim \quad \dim_use:N \l_ztool_tmp_W_dim\\
-% set content to dim
-Hello,~world|
-\ztool_set_to_ht:nn {.5cm} {Hello,~world}|
-\ztool_set_to_wd:nn {40pt} {Hello,~world}\par
-% scale one dimension
-\ztool_scale_to_wd:nn {2em}{AA}\par
-\ztool_scale_to_wd:nn {2em}{AAAAAA}\par
-
-\ztool_scale_to_ht:nn {2.5em}{\fbox{\vbox{\hbox{A}}}}\quad
-\ztool_scale_to_ht:nn {2.5em}{\fbox{\vbox{\hbox{A}\hbox{A}\hbox{A}\hbox{A}}}}
-\ExplSyntaxOff
-\end{DocExample}
-
-
-
-\clearpage
-\subsection{zdraw}
-这部分主要包含一些图像绘制命令, 这系列的命令并不依赖于 \pkg{tikz} 宏包, 它们的主要依赖项如下: 
-\begin{itemize}
-  \item \hologo{LaTeX2e} 内置 \env{picture} 环境;
-  \item \pkg{pict2e} : \hologo{LaTeX2e} 内置 \env{picture} 环境的增强版, 提供了更好的绘图功能;
-  \item \pkg{bxeepic}: 可以用于提供 dash line 支持, 目前还未引入该宏包.
-\end{itemize}
-
-
-\begin{function}[added=2025-05-13]{zpic}
-  \begin{syntax}
-    \cs{begin}\{zpic\}\oarg{key-value} \meta{draw commands} \cs{end}\{zpic\}
-  \end{syntax}
-  此环境基于 \hologo{LaTeX2e} 内置 \env{picture} 环境定义, 
-\end{function}
-
-\begin{keyval}[parent=ztool/draw/picture]{unit, width, height, xoffset, yoffset, opacity-color}
-  \begin{syntax}
-    unit    = \meta{长度}>\dval{1cm}
-    width   = \meta{浮点数}>\dval{0}
-    height  = \meta{浮点数}>\dval{0}
-    xoffset = \meta{浮点数}>\dval{0}
-    yoffset = \meta{浮点数}>\dval{0}
-    opacity-color = \meta{颜色}>\dval{white}
-  \end{syntax}
-  上述的 \meta{opacity-color} 选项用于设置当前 \env{zpic} 环境中的``透明''色彩, 也就是和当前文档默认背景色相同的色彩; 
-  所以可能会出现 \meta{opacity-color} 覆盖到其它 object 上的情况.
-\end{keyval}
-
-
-\begin{function}[added=2025-05-13]{\put}
-  \begin{syntax}
-    \cs{put} \parg{x, y} \marg{content}
-  \end{syntax}
-  此命令即为 \hologo{LaTeX2e} 内置 \env{picture} 环境中的 \cs{put} 命令.
-  \textbf{注意}: 此命令需要在 \env{picture} 或 \env{zpic} 环境中使用.
-\end{function}
-
-
-\begin{function}[added=2025-05-13]{\zline}
-  \begin{syntax}
-    \cs{zline} \oarg{key-value}\parg{coor-1}\parg{coor-2}
-  \end{syntax}
-  此命令用于绘制一条从 \meta{coor-1} 到 \meta{coor-2} 的线段, \meta{key-value} 用于设置线条的属性,
-  可用选项请参见后续的 \meta{parent=ztool/draw/picture/line}.
-\end{function}
-
-
-\begin{keyval}[parent=ztool/../line]{draw, width, dash}
-  \begin{syntax}
-    draw  = \meta{颜色}>\dval{black}
-    width = \meta{长度}>\dval{.4pt}
-    dash  = \meta{true|\textbf{false}}>\dval{false}
-  \end{syntax}
-  上述 \meta{width} 用于设置线条的宽度, \meta{draw} 用于设置线条的颜色, \meta{dash} 用于设置线条是否为虚线.
-  \textbf{注意}: 目前 \meta{dash} 选项还未适配, 处于不可用的状态.
-\end{keyval}
-
-
-\begin{function}[added=2025-05-13]{\zvector}
-  \begin{syntax}
-    \cs{zvector} \oarg{key-value}\parg{coor-1}\parg{coor-2}
-  \end{syntax}
-  此命令用于绘制向量, 该向量的起点为 \meta{coor-1}, 终点为 \meta{coor-2};
-  \meta{key-value} 用于设置该向量的外观属性, 其继承自 \meta{parent=ztool/draw/picture/line}, 
-  其余的可用选项请参见后续 \meta{parent=ztool/draw/picture/line/vector}.  
-\end{function}
-
-
-\begin{keyval}[parent=ztool/../vector]{>}
-  \begin{syntax}
-    \texttt{\char62} = \meta{\textbf{latex}|pst}>\dval{latex}
-  \end{syntax}
-  此选项用于控制箭头的样式, 默认为 \LaTeX{} 样式, 即 \cs{ltxarrows}; 
-  \meta{pst}, 即 PsTricks, 对应于 \cs{pstarrows} 命令.
-\end{keyval}
-
-
-
-\begin{function}[added=2025-05-13]{\zdraw}
-  \begin{syntax}
-    \cs{zdraw} \oarg{key-value}\parg{coor-1}...\parg{coor-n};
-  \end{syntax}
-  此命令将绘制一条从点 \meta{coor-1} 到点 \meta{coor-n} 的折线段, \meta{key-value} 继承自 \meta{parent=ztool/draw/picture/line}, 
-  可以用于设置线条的属性, 额外可用的选项请参见后续的 \meta{parent=ztool/draw/picture/zdraw}.\par 
-  \textbf{注意}: 此命令末尾的 ``;'' 是不能省略的, 否则会报错. 
-\end{function}
-
-
-\begin{keyval}[parent=ztool/../zdraw]{vector, cycle, fill, shift}
-  \begin{syntax}
-    vector = \meta{\textbf{false}|true}>\dval{false}
-    cycle  = \meta{\textbf{false}|true}>\dval{false}
-    fill   = \meta{\textbf{false}|true|颜色}>\dval{false}
-    shift  = \marg{浮点数, 浮点数}>\dval{\{0, 0\}}
-  \end{syntax}
-  当 \meta{fill} 设置为 \texttt{true} 时, \meta{cycle} 会自动设置为 \texttt{true}; 
-  \meta{vector} 用于设置是否将每一个子线段替换为向量. \meta{shift} 分别表示 $x$ 和 $y$ 方向的偏移量. 
-  \textbf{注意}: \meta{shift} 选项中的 \texttt{\{\}} 不能省略.
-\end{keyval}
-
-
-\begin{function}[added=2025-05-13]{\zarc}
-  \begin{syntax}
-    \cs{zarc}\oarg{key-value}\parg{浮点数, 浮点数}
-  \end{syntax}
-  此命令用于绘制一个圆弧, \texttt{\parg{浮点数, 浮点数}} 为其圆心, 默认绘制 $\frac{1}{4}$ 圆弧; 
-  \meta{key-value} 继承自 \meta{parent=ztool/draw/picture/line}, 
-  可以用于设置线条的属性, 额外可用的选项请参见后续的 \meta{parent=ztool/draw/picture/zarc}.
-\end{function}
-
-
-\begin{keyval}[parent=ztool/../zarc]{radius, start, end, fill}
-  \begin{syntax}
-    radius = \meta{浮点数}>\dval{.5}
-    start  = \meta{浮点数}>\dval{0}
-    end    = \meta{浮点数}>\dval{90}
-    fill   = \meta{\textbf{false}|true|颜色}>\dval{false}
-  \end{syntax}
-  \meta{start} 按照逆时针旋转到角度 \meta{end} 结束; \meta{radius} 为圆弧的半径;
-  \meta{fill} 用于设置圆弧的填充颜色.
-\end{keyval}
-
-
-\begin{function}[added=2025-05-13]{\zcircle}
-  \begin{syntax}
-    \cs{zcircle}\oarg{key-value}\parg{浮点数, 浮点数}
-  \end{syntax}
-  此命令基于上述的 \cs{zarc} 命令, 默认情况下将以 \texttt{\parg{浮点数, 浮点数}} 为圆心绘制一个完整的圆;
-  \meta{key-value} 和上述的 \cs{zrac} 命令中的 \meta{key-value} 选项相同,
-\end{function}
-
-
-\begin{function}[added=2025-05-13]{\zrectangle}
-  \begin{syntax}
-    \cs{zrectangle}\oarg{key-value}\parg{coor-1}\parg{coor-2}
-  \end{syntax}
-  此命令用于绘制矩形, \texttt{\parg{coor-1}} 和 \texttt{\parg{coor-2}} 为矩形对角线的两个端点坐标;
-  \meta{key-value} 继承自 \meta{parent=ztool/draw/picture/line}, 其余的 \meta{key-value} 
-  请参见后续 \meta{parent=ztool/draw/picture/zrectangle}.
-\end{function}
-
-
-\begin{keyval}[parent=ztool/../zrectangle]{arc, fill}
-  \begin{syntax}
-    arc  = \meta{浮点数}>\dval{0}
-    fill = \meta{\textbf{false}|true|颜色}>\dval{false}
-  \end{syntax}
-  \meta{fill} 用于设置矩形的填充颜色, \meta{arc} 用于设置矩形圆角对应的半径.
-\end{keyval}
-
-
-\newpage
-下面给出一些绘图示例, 方便读者理解上述绘图命令的基本使用方法:
-\begin{DocExample}*
-\mbox{}\vskip2em
-\begin{zpic}[unit=2em]
-  \zdraw[fill, cycle] (0, 0)(1, 0)(1, 1)(0, 1);
-  \zdraw[cycle, shift={2, 0}] (0, 0)(1, 0)(1, 1)(0, 1);
-  \zdraw[fill, shift={4, 0}] (0, 0)(1, 0)(1, 1)(0, 1);
-  \zdraw[draw=red, width=1pt, shift={6, 0}] (0, 0)(1, 0)(1, 1)(0, 1);
-  \zdraw[vector, shift={8, 0}] (0, 0)(1, 0)(1, 1)(0, 1);
-  \zdraw[vector, cycle, shift={10, 0}] (0, 0)(1, 0)(1, 1)(0, 1);
-  \zdraw[vector, fill, shift={12, 0}] (0, 0)(1, 0)(1, 1)(0, 1);
-  \zdraw[vector, cycle, fill, shift={14, 0}] (0, 0)(1, 0)(1, 1)(0, 1);
-\end{zpic}
-
-\vskip2cm
-\begin{zpic}[unit=2cm, xoffset=2]
-  % 1. rectangle
-  \zrectangle[arc=.1, fill=gray!20](0, 0)(2, 1)
-  \zrectangle[draw=green, width=1pt](.5, .25)(1.5, .75)
-  % 2. line / vecter
-  \zline[width=3pt, draw=red](0, .5)(2, .5)
-  \zvector[>=pst](0, 0)(1, 1)
-  \zvector[draw=blue, width=2pt](1, 1)(2, 0)
-  % 3. arc / circle
-  \zarc[draw=blue, end=45](0, 0) % fill=<empty>
-  \zarc[draw=blue, width=2pt, end=15, fill=, draw=red](0, 0)
-  \zcircle[radius=.25, fill, draw=purple](1, .5)
-  \zcircle[radius=.25, fill=orange, draw=none](1.5, 1)
-  \zcircle[radius=.25, fill=red, draw=](2, .5)
-\end{zpic}
-\end{DocExample}
 
 
 \clearpage
@@ -3815,11 +3209,11 @@ Hello,~world|
 %                              Implement
 % ----------------------------------------------------------------------
 \cleardoublepage
-\newgeometry{left=1in, top=.75in, right=.9in, bottom=.75in}
+\newgeometry{left=1in, top=0pt, right=.9in, bottom=0pt}
 \ztexDocPrintSource
 
 
-\clearpage
+\newgeometry{left=1in, top=.75in, right=.9in, bottom=.75in}
 \renewcommand\indexname{索引}
 \PrintIndex
 \end{document}

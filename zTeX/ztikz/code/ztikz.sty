@@ -6,30 +6,31 @@
 % ----------------------------------------------------------------------
 %                        load module interface
 % ----------------------------------------------------------------------
-\clist_new:N \g__ztikz_module_library_loaded_clist
-\clist_gclear:N \g__ztikz_module_library_loaded_clist
-\cs_new_nopar:Npn \__ztikz_load_module_library:nn #1#2 
+\clist_new:N \g__ztikz_library_loaded_clist
+\clist_gclear:N \g__ztikz_library_loaded_clist
+\cs_new_nopar:Npn \__ztikz_load_library:n #1 
   {
-    \clist_map_inline:nn {#2} {
-      \clist_if_in:NnTF \g__ztikz_module_library_loaded_clist {##1} {
-        \msg_set:nnn {ztikz} {#1-loaded} {ztikz~#1~"##1"~already~loaded,ignored~loading~\msg_line_context:}
-        \msg_warning:nnn {ztikz} {#1-loaded} {##1}
+    \clist_map_inline:nn {#1} {
+      \clist_if_in:NnTF \g__ztikz_library_loaded_clist {##1} {
+        \msg_set:nnn {ztikz} {library-loaded} 
+          {
+            ztikz~library~"##1"~already~loaded,ignored~loading.
+            \msg_line_context:
+          }
+        \msg_warning:nnn {ztikz} {library-loaded} {##1}
       }{
-        \file_if_exist:nTF {#1/ztikz.#1.##1.tex}{
-          \clist_gput_right:Nn \g__ztikz_module_library_loaded_clist {##1}
-          \makeatletter\file_input:n {#1/ztikz.#1.##1.tex}
+        \file_if_exist:nTF {library/ztikz.library.##1.tex}{
+          \clist_gput_right:Nn \g__ztikz_library_loaded_clist {##1}
+          \makeatletter\file_input:n {library/ztikz.library.##1.tex}
         }{
-          \msg_set:nnn {ztikz} {#1-not-found} {ztikz~#1~`##1'~not~found.}
-          \msg_error:nnn {ztikz} {#1-not-found} {##1}
+          \msg_set:nnn {ztikz} {library-not-found} {ztikz~library~`##1'~not~found.}
+          \msg_error:nnn {ztikz} {library-not-found} {##1}
         }
       }
     }
   }
-\NewDocumentCommand\ztikzloadmodule{m}{
-  \__ztikz_load_module_library:nn {module}{#1}\ExplSyntaxOff
-}
-\NewDocumentCommand\ztikzloadlibrary{m}{
-  \__ztikz_load_module_library:nn {library}{#1}\ExplSyntaxOff
+\NewDocumentCommand\ztikzloadlib{m}{
+  \__ztikz_load_library:n {#1}\ExplSyntaxOff
 }
 \cs_new_protected:Npn \ztikz_option_keys_define:n
   { \keys_define:nn { ztikz / option } }
@@ -47,7 +48,7 @@
 \ztool_shell_mkdir:n {ztikz_output/}
 \tl_const:Nn \g__ztikz_scripts_path_tl  {ztikz_output/scripts}
 \NewDocumentCommand\ztikzMkdir{m}{ \ztool_shell_mkdir:n {#1} }
-\__ztikz_load_module_library:nn {library}{basic}
+\__ztikz_load_library:n {basic}
 \cs_new_protected:Npn \ztikz_term_info:n #1 
   {
     \iow_now:Nn \c_term_iow {#1}
@@ -56,10 +57,9 @@
   {
     \iow_now:Ne \c_term_iow {#1}
   }
-% \cs_generate_variant:Nn \ztikz_term_info:n { e }
 
 
-
+ 
 % ----------------------------------------------------------------------
 %                            basic packages
 % ----------------------------------------------------------------------
@@ -93,3 +93,14 @@
   }
 \prg_generate_conditional_variant:Nnn 
   \ztikz_hash_if_change:nn { ne } { p, T, F, TF }
+
+
+% other 
+\NewDocumentCommand\TikZ{}{Ti\textcolor{orange}{\textit{k}}Z}
+\NewDocumentCommand\zTikZ{}
+  {
+    \ztool_scale_to_wd_and_ht:nnn {.9ex}{1.3ex}{
+      \ztool_rotate:nn {89}{\(\aleph\)}
+    }\kern-0.3423ex\hbox{\TikZ}
+  }
+\let\ztikz\zTikZ

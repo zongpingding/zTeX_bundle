@@ -84,6 +84,7 @@
     \coordinate (mv) at (\tl_use:N \l__polygon_shift_tl);
     % create polygon
     \begin{scope}[shift=(mv), rotate=\fp_use:N \l__polygon_rotate_angle]
+    % arg require: #2 $\ge$ 3 
     \int_step_inline:nnn {1}{#2}{
       % draw edges
       \fp_set:Nn \l_angle_fp {360/#2*##1*\c_one_degree_fp}
@@ -282,7 +283,7 @@
 
 % ==> statistic plot function                
 \cs_new_protected:Npn \ztikz_statistic_plot_cs:nnnn #1#2#3#4 
-  {
+  {% #1:starts option; #2:draw-keyval; #3:point-keyval; #4:filename
     \tl_if_empty:nTF {#3}{\draw[#2] plot[#1] file {#4};}
     {
       \group_begin:

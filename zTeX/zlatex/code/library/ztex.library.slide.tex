@@ -224,7 +224,7 @@
 \dim_gset:Nn \g_zslide_status_info_foot_C_dim {-\paperheight+0.35em} % 1.5pt
 \coffin_new:N \g__zslide_status_info_coffin
 \cs_new_protected:Npn \zslide_status_info:nnnn #1#2#3#4
-  {% #1:head/foot; #2:start-x; #3:width; #4:content;
+  {% #1:head/foot; #2:start-$x$; #3:width; #4:content;
     \hcoffin_gset:Nn \g__zslide_status_info_coffin 
       { \hbox~ to~ #3\paperwidth {#4} }
     \ifnum\thepage=0\else
@@ -357,7 +357,6 @@
 \ztex_keys_define:nn { slide / logo }
   {
     position  .tl_gset:N    = \g__ztex_slide_logo_position_tl,
-    % position  .initial:n  = { (\textwidth/2+\paperwidth/2, 1.5em) }, % deprecated
     position  .initial:n    = { (\paperwidth-\c_ztex_quad_dim, 1.5em) },
     width     .dim_gset:N   = \g__ztex_slide_logo_width_dim,
     width     .initial:n    = { 2.5em },
@@ -379,7 +378,7 @@
 \@onlypreamble\zslidelogo
 % slide toc customization
 \let\zslidetoc@page\contentspage
-% bug: can NOT alias for command:'\thecontentslabel'
+% bug: can NOT alias for command:'\cs{thecontentslabel}'
 \NewDocumentCommand{\zslidetoc@labelset}{om}{
   \ztool_get_wd:Nn \l_tmpa_dim {#2}
   \IfNoValueTF {#1}{\dim_set:Nn \l_tmpb_dim {\l_tmpa_dim}}
@@ -486,7 +485,7 @@
 \str_case:NnF \g__ztex_slide_theme_str {
   % slide theme: AnnArbor-default
   {AnnArborDefault}{
-    \definecolor{Ann-default-I}{HTML}{0000a3} % blue
+    \definecolor{Ann-default-I}{HTML}{0000a3}  % blue
     \definecolor{Ann-default-II}{HTML}{ffc20c} % light yellow
     \definecolor{Ann-default-III}{HTML}{ffcb03}
     \__zslide_theme_create:nn {AnnArborDefault}{
@@ -576,12 +575,12 @@
 
   % slide theme: AnnArbor-Albatross
   {AnnArborAlbatross}{
-    \definecolor{Ann-alb-I}{HTML}{000039} % UL bg
-    \definecolor{Ann-alb-II}{HTML}{bfbfff}% UL fg 
-    \definecolor{Ann-alb-III}{HTML}{00005f}% UR bg
-    \definecolor{Ann-alb-IV}{HTML}{00004c}% BC bg
-    \definecolor{Ann-alb-V}{HTML}{00007f} % doc bg
-    \definecolor{Ann-alb-VI}{HTML}{ffe700}% doc text color
+    \definecolor{Ann-alb-I}{HTML}{000039}   % UL bg
+    \definecolor{Ann-alb-II}{HTML}{bfbfff}  % UL fg 
+    \definecolor{Ann-alb-III}{HTML}{00005f} % UR bg
+    \definecolor{Ann-alb-IV}{HTML}{00004c}  % BC bg
+    \definecolor{Ann-alb-V}{HTML}{00007f}   % doc bg
+    \definecolor{Ann-alb-VI}{HTML}{ffe700}  % doc text color
     \__zslide_theme_create:nn {AnnArborAlbatross}{
       doc = {
         bg-color = Ann-alb-V,
@@ -624,9 +623,9 @@
 
   % slide theme: AnnArbor-seahorse
   {AnnArborSeahorse}{
-    \definecolor{Ann-sea-I}{HTML}{c2c2e8} % UL bg
-    \definecolor{Ann-sea-II}{HTML}{d7d7f0}% UR bg
-    \definecolor{Ann-sea-III}{HTML}{ccccec}% BC bg
+    \definecolor{Ann-sea-I}{HTML}{c2c2e8}   % UL bg
+    \definecolor{Ann-sea-II}{HTML}{d7d7f0}  % UR bg
+    \definecolor{Ann-sea-III}{HTML}{ccccec} % BC bg
     \__zslide_theme_create:nn {AnnArborSeahorse}{
       doc = {
         bg-color = white,
@@ -669,11 +668,11 @@
 
   % slide theme: AnnArbor-Spruce
   {AnnArborSpruce}{
-    \definecolor{Ann-spr-I}{HTML}{005128} % UL bg
-    \definecolor{Ann-spr-II}{HTML}{d8e8e0}% UR bg
-    \definecolor{Ann-spr-III}{HTML}{99c1ad}% BC bg
-    \definecolor{Ann-spr-IV}{HTML}{7fb298}% UL/BL fg
-    \definecolor{Ann-spr-V}{HTML}{e5efea}% sec bg
+    \definecolor{Ann-spr-I}{HTML}{005128}   % UL bg
+    \definecolor{Ann-spr-II}{HTML}{d8e8e0}  % UR bg
+    \definecolor{Ann-spr-III}{HTML}{99c1ad} % BC bg
+    \definecolor{Ann-spr-IV}{HTML}{7fb298}  % UL/BL fg
+    \definecolor{Ann-spr-V}{HTML}{e5efea}   % sec bg
     \__zslide_theme_create:nn {AnnArborSpruce}{
       doc = {
         bg-color = white,

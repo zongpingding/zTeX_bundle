@@ -89,7 +89,6 @@
 \cs_new_protected:Npn \ztex_option_keys_define:n
   { \keys_define:nn { ztex / option } }
 \cs_new_protected:Npn \ztex_keys_define:nn #1
-  % { \exp_args:Ne \keys_define:nn { ztex \tl_if_empty:oF {#1}{/} #1} }
   { \keys_define:nn { ztex / #1 } }
 \cs_new_protected:Npn \ztex_keys_set:nn #1
   { \keys_set:nn { ztex / #1 } }

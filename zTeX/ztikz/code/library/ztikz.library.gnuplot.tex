@@ -4,7 +4,7 @@
 
 % ==> init variables 
 \ztool_shell_mkdir:n {ztikz_output/gnuplot_data/}
-\__ztikz_load_module_library:nn {library}{gnuscript}
+\__ztikz_load_library:n {gnuscript}
 \int_new:N   \g__tikz_env_index_int
 \int_new:N   \g__gnu_data_index_int
 \int_new:N   \g__gnu_plotz_index_int
@@ -48,6 +48,7 @@
     palette     .initial:n  = {rgbformulae~ 22,13,-31},
     pm3d        .bool_set:N = \l__ztikz_plotz_pm_bool,
     pm3d        .initial:n  = {true},
+    pm3d        .default:n  = {true},
     width       .dim_set:N  = \l__ztikz_plotz_width_dim,
     width       .initial:n  = {0.75\linewidth},
   }

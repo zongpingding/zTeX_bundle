@@ -4,7 +4,7 @@
 
 % ==> writing scripts
 \RequirePackage{xsimverb}
-\__ztikz_load_module_library:nn {library}{pyscript}
+\__ztikz_load_library:n {pyscript}
 \ztool_shell_mkdir:n {ztikz_output/python_data/}
 \tl_const:Nn \g__ztikz_python_path_tl   {ztikz_output/python_data} 
 \ior_new:N \g__file_read_ior
@@ -63,7 +63,7 @@
     \ztool_shell_escape:e {python~ \g__ztikz_scripts_path_tl/python_script.py}
     \zlatex_Readlines_cs:ee {#1}{\g__ztikz_python_path_tl/PyFloat.out}
     % ---> cause bug that can't write ToC to file
-    % \iow_close:N \g__file_read_ior
+    % \cs{iow_close:N} \cs{g__file_read_ior} leads to bug ??
   }
 % python-sympy
 \NewDocumentCommand\sympy{m}

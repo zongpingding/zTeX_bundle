@@ -75,9 +75,9 @@
           {\prop_item:cn {g__ztex_thm_name_prop}{#1}}
           {\prop_item:cn {g__ztex_thm_name_prop}{#1}\cref@pl@suffix}
         \creflabelformat{#1}{##2(##1)##3} 
-        % arg-spec of command \creflabelformat:
-        % ##1: the counter, like '2.1';
-        % ##2/##3: hyperlink scope identifier
+        % Arg-spec of command \cs{creflabelformat}:
+        %   ##1: the counter, like '2.1';
+        %   ##2/##3: hyperlink scope identifier
       }
     }
     {zref-clever}{
@@ -89,7 +89,8 @@
         refbounds = { ,( ,), },
       }
       % Pre-defined Language files:
-      %   English, German, French, Portuguese, and Spanish
+      %   English, German, French, 
+      %   Portuguese, and Spanish.
       \zcDeclareLanguageAlias{en}{english}
       \zcLanguageSetup{english}{
         type = ztex@thm@sharecnt,
@@ -152,7 +153,6 @@
               Name-pl = \prop_item:cn {g__ztex_thm_name_prop}{#1}\cref@pl@suffix,
             }
         }
-      % uniform cleveref commands
       \let\cref\zcref
     }
   }{
