@@ -29,18 +29,20 @@
       { ztikz_output/ztikz.hash } 
       { g__ztikz_file_hash_seq }
     \seq_gremove_duplicates:N \g__ztikz_file_hash_seq
-    \ztikz_term_info:e {
-      \iow_newline: CURRENT~FILE:'#2.wls'
-      \iow_newline: HASH:\l__ztikz_current_hash_tl
-    }
-    \seq_if_in:NVTF \g__ztikz_file_hash_seq \l__ztikz_current_hash_tl {
-      \ztikz_term_info:n {CURRENT~HASH~ALREADY~EXISTS}
-      \prg_return_false:
-    }{
-      \ztikz_term_info:n {CURRENT~HASH~IS~UNIQUE:RECORDING...}
-      \ztool_append_to_file:nn {ztikz_output/ztikz.hash}{\l__ztikz_current_hash_tl}
-      \prg_return_true:
-    }
+    \ztikz_term_info:e 
+      {
+        \iow_newline: CURRENT~FILE:'#2.wls'
+        \iow_newline: HASH:\l__ztikz_current_hash_tl
+      }
+    \seq_if_in:NVTF \g__ztikz_file_hash_seq \l__ztikz_current_hash_tl 
+      {
+        \ztikz_term_info:n {CURRENT~HASH~ALREADY~EXISTS}
+        \prg_return_false:
+      }{
+        \ztikz_term_info:n {CURRENT~HASH~IS~UNIQUE:RECORDING...}
+        \ztool_append_to_file:nn {ztikz_output/ztikz.hash}{\l__ztikz_current_hash_tl}
+        \prg_return_true:
+      }
   }
 \prg_generate_conditional_variant:Nnn \ztikz_hash_if_change:nn { ne } { p, T, F, TF }
 
@@ -51,10 +53,22 @@
     \iow_open:Nn \g__ztikz_file_ior {./ztikz_output/ztikz.hash}
     \ior_close:N \g__ztikz_file_ior
   }
-\NewDocumentCommand{\ztikzHashClean}{}{
+\NewDocumentCommand{\ztikzHashClean}{s}{
   \ztikz_clear_hash:
   \ztikz_term_info:n {CLEAN~ALL~ztikz~HASH~SUCCESSFULLY...}
 }
-\NewDocumentCommand{\ztikzHashCurrent}{+O{,}}{
-  \seq_use:Nn \g__ztikz_file_hash_seq {#1}
+\NewDocumentCommand{\ztikzHashCurrent}{s+O{,}}{
+  \IfBooleanTF{#1}
+    { \tl_use:N \l__ztikz_current_hash_tl }
+    { \seq_use:Nn \g__ztikz_file_hash_seq {#2} }
 }
+% hash changed --> NOT run again ( need to implement )
+% hash not changed --> run again ( not consider )
+\bool_new:N \g__ztikz_hashchg_norun_bool
+\bool_gset_false:N \g__ztikz_hashchg_norun_bool
+\NewDocumentCommand{\ztikzHashchgNorun}{O{txt}m}
+  {
+    \bool_gset_true:N \g__ztikz_hashchg_norun_bool
+    \xdef\wolfram@tmp@file{\g__ztikz_wolfram_path_tl/#2}
+    \xdef\wolframOuputFile{\wolfram@tmp@file.#1}
+  }

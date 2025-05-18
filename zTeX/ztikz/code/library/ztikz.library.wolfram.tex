@@ -33,32 +33,36 @@
   }
 \cs_new_protected:Npn \__ztikz_wolfram_excute:nnn #1#2#3
   {% #1:contents(empty->not add); #2:extension; #3: output object
+    \bool_if:NT \g__ztikz_hashchg_norun_bool
+      { 
+        \prg_map_break:Nn \l__hashchg_norun_flag {} 
+      }
     \__ztikz_wolfram_tmp_file_handle:n {#1}
     \ztool_append_to_file:ee {\wolfram@tmp@file.wls}{Export["\wolfram@tmp@file.#2", #3]}
     \int_gadd:Nn \g__ztikz_wolfram_text_index_int {1}
     \ztikz_hash_if_change:neTF { \c_false_bool }{ \l__ztikz_current_hash_tl }   
       {
-        \ztool_shell_escape:e { wolframscript~ -script~ \wolfram@tmp@file.wls }
-        \ztikz_term_info:e {Wolfram~is~running~on:'\wolfram@tmp@file.wls'...\iow_newline:}
+        \edef\wolfram@cmd
+          {
+            \g__ztikz_wolfram_engine_tl\space
+            \bool_if:NT \g__ztikz_wolfram_cloud_bool {-cloud\space}
+            -script\space
+            \wolfram@tmp@file.wls 
+          }
+        \ztikz_term_info:e 
+          {
+            \g__ztikz_wolfram_engine_tl\space~is~running~on:'\wolfram@tmp@file.wls'
+            ...\iow_newline:
+          }
+        \ztool_shell_escape:e { \wolfram@cmd }
       }{
         \ztikz_term_info:e {Use~cache~result:'\wolfram@tmp@file.#2'\iow_newline:}
       }
     \xdef\wolframOuputFile{\wolfram@tmp@file.#2}
+    \prg_break_point:Nn \l__hashchg_norun_flag 
+      { \bool_gset_false:N \g__ztikz_hashchg_norun_bool }
   }
-\cs_generate_variant:Nn \__ztikz_wolfram_excute:nnn { e }
-% TODO: 
-% 1. implement environment 'wolframAny'
-% 2. Remove redundant cache file
-\NewDocumentEnvironment{wolframAny}{m}
-  {
-    \cs_seq_eq:NN \NewLine \iow_newline:
-    \cs_set_eq:NN \PrefixPath \g__ztikz_wolfram_path_tl
-    \__ztikz_wolfram_excute:nne 
-      {}{}{}
-  }{
-    \cs_seq_eq:NN \NewLine \prg_do_nothing:
-    \cs_set_eq:NN \Path \c_empty_tl
-  }
+\cs_generate_variant:Nn \__ztikz_wolfram_excute:nnn { e, o }
 
 
 % ==> user interface
@@ -76,6 +80,7 @@
       { \seq_use:Nn \l__ztikz_wolfram_tmp_res_seq {\IfValueTF {#2}{#2}{,}}}
     \ior_close:N \g__ztikz_wolfram_ior
   }
+
 % wolfram graphicx
 \NewDocumentEnvironment{wolframGraphics}{O{}}
   {
@@ -91,6 +96,8 @@
       }
     \int_gadd:Nn \g__ztikz_wolfram_picture_index_int {1} 
   }
+
+% wolfram simple code
 \NewDocumentCommand\wolfram{sm}
   {
     \__ztikz_wolfram_excute:enn
@@ -100,6 +107,32 @@
           { TeXResult = ToString[TeXForm[#2]]; }
       }{txt}{TeXResult}
   }
+
+% wolfram tex code(expandable token replace)
+\group_begin:
+  \char_set_catcode_escape:n { 36 }
+  \char_set_catcode_letter:n { 92 }
+  $cs_gset:Nn $__double_backslash:n 
+    { $tl_if_eq:NNTF #1\ {\\}{#1} }
+  $gdef$wolframTex{
+    $char_set_catcode_letter:n { 92 }
+    $wolframTex@getarg
+  }
+  $gdef$wolframTex@getarg#1{
+    $tl_set:Ne $l_tmpa_tl 
+      {
+        $tl_map_function:nN {#1}                            
+          $__double_backslash:n
+      }
+    $__ztikz_wolfram_excute:onn
+      {TeXResult = TeXForm[ToExpression["$l_tmpa_tl", TeXForm]]}
+      {txt}{TeXResult}
+    $char_set_catcode_escape:n { 92 }
+  }
+  $char_set_catcode_escape:n { 92 }
+  $char_set_catcode_letter:n { 36 }
+\group_end:
+
 % equation solve
 \ztikz_keys_define:nn { wolfram/solve }
   {
@@ -128,6 +161,7 @@
       }{txt}{TeXResult}
     \group_end:
   }
+
 % differential equation solve
 \ztikz_keys_define:nn { wolfram/dsolve }
   {
@@ -156,6 +190,19 @@
       }{txt}{TeXResult}
     \group_end:
   }
+
+% any wolfram/mathics code
+\NewDocumentEnvironment{wolframAny}{m}
+  {
+    \cs_seq_eq:NN \NewLine \iow_newline:
+    \cs_set_eq:NN \PrefixPath \g__ztikz_wolfram_path_tl
+    \__ztikz_wolfram_excute:nne 
+      {}{}{}
+  }{
+    \cs_seq_eq:NN \NewLine \scan_stop:
+    \cs_set_eq:NN \PrefixPath \scan_stop:
+  }
+
 % check if integer
 \prg_new_protected_conditional:Npnn \__ztikz_if_int:n #1 { T, F, TF }
   {

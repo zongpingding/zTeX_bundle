@@ -1,3 +1,140 @@
+% ==> wolfram cloud / mathics config
+\InputIfFileExists{ztikz-cfg.tex}{}{}
+\documentclass{article}
+\usepackage[
+  library={basic, wolfram},
+  % wolfram={cloud=false, engine=mathics}
+]{ztikz}
+\ztikzloadlib{cache}
+\ExplSyntaxOn
+\def\curHASH{\tl_use:N \l__ztikz_current_hash_tl}
+\ExplSyntaxOff
+
+
+\begin{document}
+Hello world
+
+% \begin{tikzpicture}
+% \draw[gray] (-2, -1) grid (2, 2);
+% \ShowPoint[color=teal, radius=2pt, type=pentagon*, opacity=.8, rotate=60]
+%   {(-1.5, 0); (2, .5)}[$O=(0, 0)$; $(\pi, 0)$]
+%   [above right=3pt and 0em, font=\small]
+% \end{tikzpicture}
+
+% \wolfram{LaplaceTransform[t^4 Sin[3*t], t, s]}
+% \wolfram{101/123 + 124/179}
+% \[
+%   \mathcal{L}(t^4\sin(3t)) = \wolframResult
+% \]
+
+% \begin{wolframGraphics}
+%   FIGURE=Plot[Sin[x], {x, -Pi, Pi}]
+% \end{wolframGraphics}
+% \includegraphics[width=.5\linewidth]{\wolframOuputFile}
+
+
+% \ztikzHashchgNorun{2E0D5457C90B9A5E88888FCA300716A2}
+\wolframTex{\int_a^b2\sin(x)\,dx}
+\ztikzHashCurrent* % CURRENT FILE:'2E0D5457C90B9A5E88888FCA300716A2.wls'
+\[
+  \int_a^b \sin(x)\,dx = \wolframResult
+\]
+\end{document}
+
+
+
+% ==> expandale token replace command
+\documentclass{article}
+\usepackage[T1]{fontenc}
+
+\begin{document}
+\ExplSyntaxOn
+\cs_generate_variant:Nn \tl_map_function:nN { e, V }
+
+\group_begin:
+  \char_set_catcode_escape:n { 36 }
+  \char_set_catcode_letter:n { 92 }
+  $cs_gset:Nn $__double_backslash:n 
+    { $tl_if_eq:NNTF #1\ {\\}{#1} }
+  $gdef$TEST{
+    $char_set_catcode_letter:n { 92 }   % '\'
+    $TESTGetARG
+  }
+  $gdef$TESTGetARG#1{
+    $tl_set:Ne $l_tmpa_tl 
+      {
+        $tl_map_function:nN {#1}                            
+          $__double_backslash:n
+      }
+    $tl_show:N $l_tmpa_tl
+    $char_set_catcode_escape:n { 92 }
+  }
+  $char_set_catcode_escape:n { 92 }
+  $char_set_catcode_letter:n { 36 }
+\group_end:
+\ExplSyntaxOff
+
+Hello world: |\TEST{\abc1\23\def4}| this is an equation below:
+$$
+  1 + 1 = \alpha + \beta = 2
+$$
+\end{document}
+
+
+\documentclass{article}
+\usepackage[T1]{fontenc}
+
+\begin{document}
+\ExplSyntaxOn
+\cs_generate_variant:Nn \tl_map_function:nN { e, V }
+
+\group_begin:
+  \char_set_catcode_escape:n { 36 } % '$': escape char
+  $char_set_catcode_letter:n { 92 } % '\'
+  $cs_gset:Nn $__double_backslash:n 
+    { $tl_if_eq:NNTF #1\ {\\}{#1} } % '$'
+  $char_set_catcode_escape:n { 92 } % '\': restore escape
+  \char_set_catcode_letter:n { 36 } % '$': restore letter
+\group_end:
+
+% \tl_set:Nn \l_tmpa_tl {\abc1\23\def}
+% \tl_set_rescan:NnV \l_tmpa_tl {\cctab_select:N \c_str_cctab} \l_tmpa_tl
+\str_set:Nn \l_tmpa_str {\abc1\23\def}
+\group_begin:
+  \char_set_catcode_escape:n { 36 }
+  \char_set_catcode_letter:n { 92 }
+  % $cs_gset:Nn $TEST:n #1
+  %   {
+  %     $tl_map_function:nN {#1}
+  %       $__double_backslash:n
+  %   }
+  % $cs_generate_variant:Nn $TEST:n { V, e }
+  $xdef$TEST#1{
+    % $tl_map_function:nN {\abc1\23\def4} 
+    % $tl_map_function:nN {$tl_to_str:n {#1}}  % bug
+    % $tl_map_function:VN $l_tmpa_tl   % failed
+    % $tl_map_function:nN $l_tmpa_str  % failed
+    $tl_map_function:eN {#1}         
+      $__double_backslash:n
+  }
+  % $show$TEST
+  $char_set_catcode_escape:n { 92 }
+\group_end:
+% \exp_args:NV \TEST \l_tmpa_str % failed
+\char_set_catcode_escape:n { 124 } % '|': escape char
+|char_set_catcode_letter:n { 92 } % '\'
+|TEST{\abc1\23\def4}
+|char_set_catcode_escape:n { 92 }
+\ExplSyntaxOff
+
+% \verb|\TEST| is: \TEST{abc}. and Hello world 
+
+% $$\alpha + \beta = \gamma$$
+\end{document}
+
+
+
+
 % ==> roboust externalize test
 \InputIfFileExists{ztikz-cfg.tex}{}{}
 \documentclass{article}

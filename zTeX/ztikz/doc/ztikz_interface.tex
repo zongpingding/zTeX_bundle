@@ -4,7 +4,7 @@
   class=l3dox, 
 ]{../../zlatex/code/ztex}
 \input{ztikz_interface_preamble.tex}
-\ztikzloadlib{cache, gnuplot, python, wolfram, l3draw}
+\ztikzloadlib{basic, cache, gnuplot, python, wolfram, l3draw}
 
 
 \title{\texorpdfstring{\ztikz{} 接口文档}{zTool 接口文档}}
@@ -129,11 +129,11 @@ Python 的 \pkg{matplotlib} 库, WolframScript 的绘图功能; 计算部分基�
 目前 \pkg{ztikz} 宏包兼容 Windows/Linux/MacOS 三个平台. 各个平台中不同 \TeX{}Live 版本的
 兼容性如下:
 
-\hspace*{3.5cm}\parbox{\linewidth}{
+\hspace*{5cm}\parbox{\linewidth}{
 \begin{itemize}
-  \item Windows: \TeX{}Live 最低版本 2023
-  \item Linux: \TeX{}Live 最低版本 2022
-  \item MacOS: \TeX{}Live 最低版本 2024
+  \item [Windows] : \TeX{}Live 最低版本 2023
+  \item [Linux] : \TeX{}Live 最低版本 2022
+  \item [MacOS] : \TeX{}Live 最低版本 2024
 \end{itemize}}
 
 \ztikz{} 在 Windows 下的表现可能没有在 Linux/MacOS 下的那么好, 建议用户在 Linux/MacOS 下使用本宏包.
@@ -166,14 +166,24 @@ Python 的 \pkg{matplotlib} 库, WolframScript 的绘图功能; 计算部分基�
 \vspace*{-.5em}
 \subsubsection{Wolfram}
 若用户需要使用 \pkg{wolfram} 库对应的功能，那么用户需要安装 WolframScript 或
-Mathematica 软件. 执行命令时可以选择在云端执行, 这样就避免调用本地 Mathematica 计算内核. 
+Mathematica 软件. 执行命令时可以选择在云端执行, 这样就避免调用本地 Mathematica 计算内核. 用户需首先在
+命令行完成 wolfram 账号绑定, 绑定方法如下(当用户第一次在命令行调用 Wolfram Cloud 上执行时):
+\begin{DocExample}[@@]
+> wolframscript -cloud -code 2+2
+Wolfram ID: @\meta{Account}@
+Password: @\meta{Password}@
+\end{DocExample}
+
+上述命令会提示用户输入 Wolfram ID 和密码, 输入对应的 \meta{Account} 和 \meta{Password} 后即可使用. 但云端执行
+速度可能比较慢, 用户需自行决定是否采用此方案. 下面介绍在本地安装 wolfram 引擎的方法:
+
 
 在 Linux 下, 除 wolfram 以外的软件都是很好安装的, 直接使用 Linux 发行版自带的包管理器即可. 这里我
-提供一个在 WSL 中使用 Windows 下 Mathematica 的方法: 其实就是创建一个从 Linux 到 Windows 的软连接,
-命令中 WolframScript 在 Windows 下的路径请根据自己的实际情况更改, 命令如下:
+提供一个在 WSL 中使用 Windows 下 Mathematica 的方法(用户也可以不按照此方法配置 WolframScript): 其实就是
+创建一个从 Linux 到 Windows 的软连接, 命令中 WolframScript 在 Windows 下的路径请根据自己的实际情况更改, 命令如下:
 
 \begin{DocExample}[@@]
-ln -sf \
+sudo ln -sf \
   "/mnt/c/Program Files/Wolfram Research/WolframScript/wolframscript.exe" \
   /usr/bin/wolframscript  
 \end{DocExample}
@@ -207,21 +217,72 @@ Export["works_well.pdf", figure];
 \end{DocExample}
 
 
-把上述的源码保存为 \file{test.wls}, 然后在命令行运行:
+把上述的源码保存为 \file{test.wls}, 然后在命令行运行如下命令:
 \begin{DocExample}
 wolframscript -script test.wls
 \end{DocExample}
-\resetExampleUR
+
 
 如果配置成功, 那么在当前工作目录下会产生一个名为 \file{works_well.pdf} 的 PDF 文件;
 反之，则说明你的 WolframScript 没有配置成功, 也就不能够使用本库.
 
-\vskip1.5em
-\noindent\textbf{注记}: \ztikz{} 的 \pkg{wolfram} 库可以在 Windwos/Linux/MacOs 三大平台上使用, 并且可以在
-源码中键入 ``\verb|\, #, $, _, ^, &|'' 等特殊字符, 极大的弥补了 \href{https://github.com/stevenliuyi/latex-alpha2}{\pkg{latexalpha2}} 的不足.
+
+\subsubsection{Mathics}
+用户除了选择 WolframScript 作为计算引擎外, 还可以选择 Mathics 作为计算引擎. Mathics
+是什么 ? An open-source Mathematica Kernel. MathsciScript 为 Mathics 的一个前端, 具有
+自动命令/变量补全, 语法高亮等功能.
+
+
+在本地安装 Mathics 的方法请参见: 
+\href{https://mathics-development-guide.readthedocs.io/en/latest/installing.html}{Installing Mathics3}.
+若用户在 Windows 下已经安装好 Mathics, 不想要在 WSL 中重新安装一次, 那么在 WSL 下创建软连接的方法和
+上述 WolframScript 的配置方法同理. 如果用户通过命令 ``pip install Mathics-omnibus'' 安装了 Mathics, 那么
+创建软连接的命令如下:
+\begin{DocExample}[@@]
+sudo ln -sf \
+  "/mnt/c/Users/@\meta{name}@/AppData/Local/Programs/Python/Python312/Scripts/mathics.exe" \
+  /usr/bin/mathics
+\end{DocExample}
+\resetExampleUR
+
+上述命令中的 \meta{name} 需要替换为你自己的用户名, 同时也需要注意 Python 的版本号.\par
+
+\vskip2em
+\noindent{\sffamily\color{red} NOTE: 部分 Mathematica 中的函数 Mathsci 也许并没有支持, 具体请参考 Mathics 的文档.}
 
 
 \restoregeometry
+\clearpage
+\section{宏包选项}
+\begin{keyval}[added=2025-05-18, parent=ztikz]{library}
+  \begin{syntax}
+    library  = \meta{basic|gnuplot|cache|python|wolfram|l3draw}>\dval{空}
+  \end{syntax}
+  此选项和命令 \cs{ztikzloadlib} 等价, 用于指定 \ztikz{} 加载的库名列表, 在加载 \pkg{ztikz} 宏包
+  时使用, 一个简单的配置样例如下:
+\end{keyval}
+\begin{DocExample}
+\usepackage[library={basic, gnuplot}]{ztikz}
+\end{DocExample}
+
+
+\begin{keyval}[added=2025-05-18, parent=ztikz/wolfram]{engine, cloud}
+  \begin{syntax}
+    engine = \meta{\textbf{wolfram}|mathics}>\dval{wolfram}
+    cloud  = \meta{true|\textbf{false}}>\dval{false}
+  \end{syntax}
+  \meta{engine} 用于指定 Wolfram 代码的计算引擎, 目前支持 Wolfram 和 Mathics 两种引擎,
+  前者为商业闭源软件, 后者为开源软件; \meta{cloud} 用于指定是否使用 Wolfram Cloud 进行计算;
+  \textbf{注意}: Mathics 目前不支持云计算. 一个简单的配置样例如下:
+\end{keyval}
+\begin{DocExample}
+\usepackage[
+  library = { wolfram },
+  wolfram = { engine=wolfram, cloud=true }
+]{ztikz}
+\end{DocExample}
+
+
 \clearpage
 \section{杂项}
 \begin{function}[added=2025-05-15]{\ztikzMkdir}
@@ -248,7 +309,7 @@ wolframscript -script test.wls
   \end{itemize}
 \end{multicols}
 
-上述的 \pkg{basic} 库将自动加载, 其他库需要用户手动加载. \pkg{basic} 库中仅包含了用于绘制点, 直线, 坐标轴和基本多边形等系列命令.
+上述的所有库均不自动加载, 需用户手动加载. \pkg{basic} 库中仅包含了用于绘制点, 直线, 坐标轴和基本多边形等系列命令.
 在导言区使用如下命令加载 \pkg{ztikz} 的库方法如下, 比如加载 \pkg{cache} 库和 \pkg{gnuplot} 库:
 \begin{DocExample}
 \ztikzloadlib{cache, gnuplot}
@@ -509,11 +570,8 @@ wolframscript -script test.wls
   \draw/\oarg{key-value} plot [raw gnuplot, \meta{id}]\marg{gnuplot code};/
 \end{DocExample}
 \resetExampleUR
-
-
-在这里给出此内置命令的一个使用案例:
 \begin{DocExample}*
-\begin{tikzpicture}[domain=0:4]
+\begin{tikzpicture}[domain=0:4, scale=.85]
   \draw[very thin,color=gray] (-0.1,-1.1) grid (3.9,3.9);
   \draw[->] (-0.2,0) -- (4.2,0) node[right] {$x$};
   \draw[->] (0,-1.2) -- (0,4.2) node[above] {$f(x)$};
@@ -535,6 +593,8 @@ wolframscript -script test.wls
 \end{itemize}
 
 不熟悉 gnuplot 的用户可阅读这份 7 页的快速入门指南: \href{http://www.gnuplot.info/docs_4.0/gpcard.pdf}{gnuplot card}.
+\vskip1em
+\noindent{\sffamily\color{red} NOTE: 调用此库后, 需在编译时启用 ``\texttt{-shell-escape}'' 参数.}
 
 
 \begin{keyval}[parent=ztikz/2dplot]{domain, style, marker}
@@ -569,9 +629,7 @@ wolframscript -script test.wls
   \end{syntax}
   此命令用于绘制函数 $y=y(x)$, \meta{function} 为 gnuplot 中的函数表达式, 自变量为 ``\texttt{x}'';
   \meta{key-value} 用于设置绘图样式, 对应 \meta{ztikz/2dplot}. \meta{domain}
-  默认为 \texttt{-5:5}.\par
-  \vskip1em
-  \noindent{\sffamily\color{red} NOTE: 只需将 \meta{opacity} 设置为 0, 即可实现散点图绘制.}
+  默认为 \texttt{-5:5}. \textbf{注记:} 只需将 \meta{opacity} 置为 0, 即可实现散点图绘制.
 \end{function}
 
 
@@ -696,15 +754,18 @@ wolframscript -script test.wls
 
 \cmd{\gnudata} 的用法补充说明, 为后面区域填充案例做铺垫: 比如 \verb|\gnudata{2}|, 参数中
 的 ``2'' 表示此数据是在当前 \env{tikzpicture} 环境中的第二个函数绘图数据; 所以在第一个 \env{tikzpicture} 环境中
-它的返回值可能为 ``\texttt{./ztikz_output/gnuplot_data/gnu_data_1_2.table}''.\par 
-\textbf{注意}: 由于技术原因，\cmd{\ContourPlot} 命令生成的数据暂时不可用于后续填充操作. 可考虑先将隐函数转化为
-参数方程形式或极坐标形式, 再导出对应的数据. 如果你强行使用此类型数据，那么用户可能会得到如下不良输出:
-\begin{figure}[H]
+它的返回值可能为 ``\texttt{./ztikz_output/gnuplot_data/gnu_data_1_2.table}''.
+
+\begin{figure}[!htb]
   \centering
-  \includegraphics[width=.3\linewidth]{./support//pics/contour_data_bug.pdf}
-  \caption{BUG -- ContourPlot Fill}
-  \label{fig:ContourPlot Fill Bug}
+  \includegraphics[width=.5\linewidth]{./support//pics/contour_data_bug.pdf}
+  \caption{\cs{ContourPlot} Fill Issue}
+  \label{fig:contour-fill-bug}
 \end{figure}
+
+\textbf{注意}: 由于技术原因，\cmd{\ContourPlot} 命令生成的数据暂时不可用于后续填充操作. 可考虑先将隐函数转化为
+参数方程形式或极坐标形式, 再导出对应的数据. 如果你强行使用此类型数据，那么用户可能会得到类似 \cref{fig:contour-fill-bug} 
+这样的不良输出.
 
 
 \clearpage
@@ -756,12 +817,24 @@ entering extended mode
 
 \begin{function}[added=2025-05-15]{\ztikzHashCurrent}
   \begin{syntax}
+    \cs{ztikzHashCurrent}*
     \cs{ztikzHashCurrent}\oarg{separator}
   \end{syntax}
-  此命令主要用于 debug, 用于输出截至目前位置所有缓存的 Hash 值, 以 \meta{separator} 分隔输出到 PDF.
+  此命令主要用于调试或与命令 \cs{ztikzHashchgNorun} 配合使用; \texttt{\cs{ztikzHashCurrent}*} 将输出最近的一次 Hash 值计算结果;
+  \cs{ztikzHashCurrent}\oarg{separator} 用于输出截至目前位置所有缓存的 Hash 值, 以 \meta{separator} 分隔输出到 PDF.
   \meta{separator} 默认为 ``\texttt{,}''.
 \end{function}
 
+
+\begin{function}[added=2025-05-15]{\ztikzHashchgNorun}
+  \begin{syntax}
+    \cs{ztikzHashchgNorun}\oarg{type}\marg{hash}
+  \end{syntax}
+  此命令用于决定 Hash 值改变后是否再次调用外部程序, 作用于它之后的第一个具有 cache 机制的环境或命令; 建议配合 \cs{ztikzHashCurrent}
+  使用. \meta{type} 表示上一次缓存内容的文件类型, 默认为 ``\texttt{txt}'', 可选值有: ``\texttt{txt}, \texttt{pdf}'' 等. 
+  \meta{hash} 为该环境或命令改变之前的 Hash 值, 且后续 \cs{wolframResult} 或 \cs{wolframOuputFile} 命令都将引用该命令或环境之
+  前 Hash 值为 \meta{hash} 时的结果. \textbf{注意}: 目前该命令仅对 \pkg{wolfram} 库中的命令或环境有效.
+\end{function}
 
 
 \clearpage
@@ -773,6 +846,11 @@ entering extended mode
 \zTikZ{} 在调用此库时默认导入 Python 的 \pkg{numpy}, \pkg{sympy}, \pkg{scipy} 三个包; 此外, 用户在
 使用 \pkg{numpy} 中的函数时不用再加以前缀, 比如求解 $\sin(2.345)$ 时, 直接使用 \verb|\py{sin(2.345)}| 即可, 
 不必写为 \verb|\py{np.sin(2.345)}| 之类的格式了. 对于其它 Python 库中的函数, 使用方法同理.
+
+\vskip1em
+\noindent{\sffamily\color{red} NOTE: 调用此库后, 需在编译时启用 ``\texttt{-shell-escape}'' 参数.}
+
+
 
 \begin{function}[added=2025-05-15]{\py}
   \begin{syntax}
@@ -802,7 +880,7 @@ entering extended mode
     \cs{sympy}\marg{expression}
   \end{syntax}
   此命令主要用于调用 Python 的 \pkg{sympy} 库进行符号计算, \meta{expression} 为符号表达式. \zTikZ{} 对此
-  命令提供了 cache 机制. \ztikz{} 预定义的符号变量: \verb|x, y, z, u, v, t|, 这些预定义变量无需用户再次声明.
+  命令提供了 cache 机制. \pkg{python} 库中预定义了一系列的符号变量, 包括: \texttt{x, y, z, u, v, t}, 这些预定义变量无需用户再次声明.
   \par \textbf{注意}: 默认的情况下, 此命令的返回结果中包含: \verb|^, _| 等特殊字符, 所以请将此命令置于数学环境中.
 \end{function}
 \begin{DocExample}*
@@ -867,6 +945,12 @@ plt.plot(x, y)
 由于 WolframScript 的限制, 脚本的后缀只能为: ``\texttt{.wls}'', 否则 WolframScript
 会无法识别此脚本(也就不会去执行此脚本了). 
 
+\textbf{注记}: \ztikz{} 的 \pkg{wolfram} 库可以在 Windwos/Linux/MacOs 三大平台上使用, 并且可以在
+对应环境的源码中键入 ``\verb|\, #, $, _, ^, &|'' 等特殊字符, 极大的弥补了 \href{https://github.com/stevenliuyi/latex-alpha2}{\pkg{latexalpha2}} 的不足.
+
+\vskip1em
+\noindent{\sffamily\color{red} NOTE: 调用此库后, 需在编译时启用 ``\texttt{-shell-escape}'' 参数.}
+
 \begin{function}[added=2025-05-15]{\wolframResult}
   \begin{syntax}
     \cs{wolframResult}\oarg{separator}
@@ -897,6 +981,24 @@ plt.plot(x, y)
 \wolfram{LaplaceTransform[t^4 Sin[3*t], t, s]}
 \[
   \mathcal{L}(t^4\sin(3t)) = \wolframResult
+\]
+\end{DocExample}
+
+
+\begin{function}[added=2025-05-18]{\wolframTex}
+  \begin{syntax}
+    \cs{wolframTex}\marg{Tex code}
+  \end{syntax}
+  此命令和上述的 \cs{wolfram} 命令类似, 不同的是, 此命令会将 \meta{Tex code} 中的所有内容转化为对应的
+  Mathematica 代码, 返回的结果为 \LaTeX{} 代码. \par
+  \vskip1em
+  \noindent{\sffamily\color{red}NOTE: 由于此命令的实现原理较为复杂与特殊, 所以 \meta{Tex code} 中不能
+  包含 ``\verb|$|'' 符号, 否则会出现解析错误.} 
+\end{function}
+\begin{DocExample}*
+\wolframTex{\int_a^b\sin(x)\,dx}
+\[
+  \int_a^b \sin(x)\,dx = \wolframResult
 \]
 \end{DocExample}
 
@@ -978,8 +1080,8 @@ plt.plot(x, y)
   \meta{spec} 可以设置值, 对应图片的排版参数, 比如 \verb|width=10em|; 若 \meta{spec} 非空, 则该环境会
   返回: \texttt{\cs{includegraphics}\oarg{spec}\zarg{\meta{path}/\meta{HASH}.pdf}}, 其中 \meta{HASH} 
   为当前 \env{wolframGraphics} 环境中代码的 Hash 值, \meta{path} 为 WolframScript 缓存文件夹对应的目录.\par
-  \vskip2em
-  \noindent{\sffamily\color{red} NOTE: \meta{plot code} 中最后得到的图片名称必须为 \texttt{FIGURE}, 否则会报错.}
+  \vskip.5em
+  \noindent{\sffamily\color{red} NOTE: \meta{plot code} 中最后得到的图片名称必须为 ``\texttt{FIGURE}'', 否则会报错.}
 \end{function}
 \begin{DocExample}*
 \begin{wolframGraphics}
@@ -1049,7 +1151,7 @@ plt.plot(x, y)
   此命令用于绘制函数, 水平方向和垂直方向的渐变, \meta{key-value} 用于设置函数的属性;
   \meta{function} 为合法的函数表达式. \par
   \vskip2em
-  \noindent{\sffamily\color{red}NOTE: 目前 \cs{zplot} 命令有 Bug, 用户暂时不应该使用.}  
+  \noindent{\sffamily\color{red}NOTE: 目前 \cs{zplot} 命令不太稳定, 在部分情况下可能会报错, 用户应该谨慎使用该命令.}  
 \end{function}
 
 
@@ -1339,9 +1441,10 @@ with open ('./ztikz_output/python_data/pycode-1.py.out', 'w') as file:
   }
 \begin{todolist}
   \item 实现类似 \pkg{tikz-3dplot} 的接口, 使用 \LaTeX3 对其进行重写.
-  \item 增加 Matlab 脚本的调用接口.
+  \item 增加 Matlab 脚本的调用接口, 或者直接使用其开源替代 \href{https://octave.org/}{GNU Octave} ?
   \item 实现 \env{wolframAny} 环境, 该环境实现的功能类似 \env{pycode}.
   \item 重写缓存机制对应的函数 \cs{ztikz_hash_if_change:nn}, 目前不够灵活(或许直接使用 \href{https://github.com/leo-colisson/robust-externalize}{\pkg{robust-externalize}} 宏包).
+  \item 针对 \pkg{cache} 库, 需要清除多余的 Hash 值: 例如某个环境/命令产生的原 Hash 值为 ``A'', 对应环境/命令中的参数改变后，其 Hash 值变为了 ``B'', 那么此时需要清除原始的 ``A''.
 \end{todolist}
 
 
