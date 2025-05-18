@@ -67,8 +67,6 @@
 }
 % hash changed --> NOT run again ( need to implement )
 % hash not changed --> run again ( not consider )
-\bool_new:N \g__ztikz_hashchg_norun_bool
-\bool_gset_false:N \g__ztikz_hashchg_norun_bool
 \NewDocumentCommand{\ztikzHashchgNorun}{O{txt}m}
   {
     \bool_gset_true:N \g__ztikz_hashchg_norun_bool
