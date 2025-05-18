@@ -1,12 +1,15 @@
-\ProvidesExplFile{ztikz.library.cache.tex}{2024/12/17}{1.0.0}{cache~library~for~ztikz}
+\ProvidesExplFile{ztikz.library.cache.tex}{2025/05/17}{1.0.0}{cache~library~for~ztikz}
 
 
 
 % ==> init cache
 % TODO: HASH form: 'HASH-<index>'
-\ztool_shell_mkdir:n {ztikz_output/tikz_data/}
-\usetikzlibrary{external}
-\tikzexternalize[prefix=ztikz_output/tikz_data/]
+\clist_if_in:NnT \g__ztikz_library_loaded_clist {basic}
+  {
+    \ztool_shell_mkdir:n {ztikz_output/tikz_data/}
+    \usetikzlibrary{external}
+    \tikzexternalize[prefix=ztikz_output/tikz_data/]
+  }
 \ztool_shell_escape:n {touch~ ztikz_output/ztikz.hash}
 
 
