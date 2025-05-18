@@ -2,6 +2,20 @@
 \ProvidesExplPackage{ztikz}{2024/12/17}{1.0.0}{A~pre-release~diagram~plot~package}
 
 
+% ----------------------------------------------------------------------
+%                        basic tools
+% ----------------------------------------------------------------------
+\RequirePackage{ztool}
+\cs_new_protected:Npn \ztikz_hook_preamble_last:n #1
+  { \AddToHook{env/document/before}{#1} }
+\cs_new_protected:Npn \ztikz_label_hook_preamble_last:nn #1#2
+  { \AddToHook{env/document/before}[#1]{#2} }
+\cs_new_protected:Npn \ztikz_hook_doc_begin:n #1
+  { \AddToHook{begindocument}{#1} }
+\cs_new_protected:Npn \ztikz_hook_doc_end:n #1
+  { \AddToHook{enddocument}{#1} }
+
+
 
 % ----------------------------------------------------------------------
 %                        load module interface
@@ -32,23 +46,80 @@
 \NewDocumentCommand\ztikzloadlib{m}{
   \__ztikz_load_library:n {#1}\ExplSyntaxOff
 }
-\cs_new_protected:Npn \ztikz_option_keys_define:n
-  { \keys_define:nn { ztikz / option } }
-\cs_new_protected:Npn \ztikz_keys_define:nn #1
-  { \keys_define:nn { ztikz / #1} }
-\cs_new_protected:Npn \ztikz_keys_set:nn #1
-  { \keys_set:nn { ztikz / #1 } }
+\cs_new_protected:Npn \ztikz_keys_define:n #1
+  { \keys_define:nn { ztikz }{ #1 } }
+\cs_new_protected:Npn \ztikz_keys_define:nn #1#2
+  { \keys_define:nn { ztikz / #1}{ #2 } }
+\cs_new_protected:Npn \ztikz_keys_set:nn #1#2
+  { \keys_set:nn { ztikz / #1 }{ #2 } }
+
+\ztikz_keys_define:n 
+  {
+    library           .multichoice:,
+    library / basic   .code:n  = { \__ztikz_load_library:n {basic}   },
+    library / gnuplot .code:n  = { \__ztikz_load_library:n {gnuplot} },
+    library / cache   .code:n  = { \__ztikz_load_library:n {cache}   },
+    library / python  .code:n  = { \__ztikz_load_library:n {python}  },
+    library / wolfram .code:n  = { \__ztikz_load_library:n {wolfram} },
+    library / l3draw  .code:n  = { \__ztikz_load_library:n {l3draw}  },
+    library / unknown .code:n  = { 
+      \msg_set:nnn {ztikz} {library-not-found} 
+        {ztikz~library~`#1'~not~found,~valid~libraries~are~'basic', 
+        ~'gnuplot',~'cache',~'python',~'wolfram'~and~'l3draw'.}
+      \msg_error:nn {ztikz} {library-not-found}
+    },
+    wolfram           .meta:nn = { ztikz/wolfram }{ #1 },
+  }
+
+\tl_new:N \g__ztikz_wolfram_engine_tl
+\bool_new:N \g__ztikz_wolfram_cloud_bool
+\ztikz_keys_define:nn { wolfram }
+  {
+    engine  .choice:,
+    engine / wolfram .code:n  = 
+      { 
+        \tl_gset:Nn \g__ztikz_wolfram_engine_tl { wolframscript } 
+      },
+    engine / mathics .code:n  = 
+      { 
+        \tl_gset:Nn \g__ztikz_wolfram_engine_tl { mathics } 
+      },
+    engine / unknown .code:n  = 
+      { 
+        \msg_set:nnn {ztikz} {wolfram-engine-not-found} 
+          {ztik's~'wolfram'~engine~option~`#1'~invalid,
+          ~valid~engine~is~'wolframscript'~or~'mathics'.}
+        \msg_error:nn {ztikz} {wolfram-engine-not-found}
+      },
+    engine  .initial:n        = { wolfram },
+    cloud   .choices:nn       = { true, false }
+      {
+        \use:c { bool_gset_ \l_keys_choice_tl :N } 
+          \g__ztikz_wolfram_cloud_bool 
+      },
+    cloud   .initial:n        = { false },
+    cloud   .default:n        = { true },
+  }
+\ProcessKeyOptions [ ztikz ]
+% only 'wolfram' support 'cloud'
+\bool_if:NT \g__ztikz_wolfram_cloud_bool
+  {
+    \tl_if_eq:VnT \g__ztikz_wolfram_engine_tl { mathics }
+      { 
+        \msg_set:nnn {ztikz}{mathics-cloud}
+          {mathics~'cloud'~is~not~supported.}
+        \msg_error:nn {ztikz}{mathics-cloud}
+      }
+  }
 
 
 
 % ----------------------------------------------------------------------
 %                        Init ztikz's Environment
 % ----------------------------------------------------------------------
-\RequirePackage{ztool}
 \ztool_shell_mkdir:n {ztikz_output/}
 \tl_const:Nn \g__ztikz_scripts_path_tl  {ztikz_output/scripts}
 \NewDocumentCommand\ztikzMkdir{m}{ \ztool_shell_mkdir:n {#1} }
-\__ztikz_load_library:n {basic}
 \cs_new_protected:Npn \ztikz_term_info:n #1 
   {
     \iow_now:Nn \c_term_iow {#1}
@@ -59,40 +130,26 @@
   }
 
 
- 
-% ----------------------------------------------------------------------
-%                            basic packages
-% ----------------------------------------------------------------------
-\RequirePackage{tikz}
-\RequirePackage{etoolbox}
-\patchcmd{\pgfutil@InputIfFileExists}{\input #1}{%
-  \@pushfilename
-  \xdef\@currname{#1}
-  \input #1
-  \@popfilename
-}{}{}
-\usetikzlibrary{arrows.meta}
-\usetikzlibrary{intersections}
-\usetikzlibrary{patterns}
-\usetikzlibrary{plotmarks}
-\usetikzlibrary{positioning}
-\usetikzlibrary{shapes.geometric}
-\usetikzlibrary{decorations.markings}
-\usetikzlibrary{fadings}
-
-
 
 % ----------------------------------------------------------------------
 %                          ztikz's cache mechanism 
 % ----------------------------------------------------------------------
 \cs_generate_variant:Nn \ior_open:Nn { Ne }
 \cs_generate_variant:Nn \iow_open:Nn { Ne }
-\prg_new_conditional:Npnn \ztikz_hash_if_change:nn #1 {p, T, F, TF}
+\cs_generate_variant:Nn \tl_map_function:nN { eN }
+\ztikz_hook_preamble_last:n
   {
-    \bool_gset_true:N \g__hash_change_bool
+    \clist_if_in:NnF \g__ztikz_library_loaded_clist {cache}
+      {
+        \prg_new_conditional:Npnn \ztikz_hash_if_change:nn #1#2 {p, T, F, TF}
+          {
+            \bool_gset_true:N \g__hash_change_bool
+            \prg_return_true:
+          }
+        \prg_generate_conditional_variant:Nnn \ztikz_hash_if_change:nn 
+          { ne } { p, T, F, TF }
+      }
   }
-\prg_generate_conditional_variant:Nnn 
-  \ztikz_hash_if_change:nn { ne } { p, T, F, TF }
 
 
 % other 

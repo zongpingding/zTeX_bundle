@@ -2,6 +2,28 @@
 
 
 
+% ----------------------------------------------------------------------
+%                            basic packages
+% ----------------------------------------------------------------------
+\RequirePackage{tikz}
+\RequirePackage{etoolbox}
+\patchcmd{\pgfutil@InputIfFileExists}{\input #1}{%
+  \@pushfilename
+  \xdef\@currname{#1}
+  \input #1
+  \@popfilename
+}{}{}
+\usetikzlibrary{arrows.meta}
+\usetikzlibrary{intersections}
+\usetikzlibrary{patterns}
+\usetikzlibrary{plotmarks}
+\usetikzlibrary{positioning}
+\usetikzlibrary{shapes.geometric}
+\usetikzlibrary{decorations.markings}
+\usetikzlibrary{fadings}
+
+
+
 % ==> coordinate basic components
 \ztikz_keys_define:nn { point }
   {
