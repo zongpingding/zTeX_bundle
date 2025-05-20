@@ -28,11 +28,22 @@
   }
 \restoregeometry
 
+\section{基本介绍}
 \ztex{} 宏集已独立实现了一个 \pkg{ztool} 宏包, 此宏包中包含原来已被废弃的 \pkg{l3sys-shell} 中的所有命令.
 除此之外, \pkg{ztool} 提供了 box 操作, 文件 IO 以及基本图形绘制相关的函数. 在 \pkg{ztool} 的协助下，\ztex{} 能够
 避免或减少命令行 \cmd{-shell-escape} 参数或其它相关宏包的调用(如 \pkg{robust-externalize} 宏包).
 
+本宏包在 Github 上的地址如下:
 
+\begin{center}
+  \fbox{https://github.com/zongpingding/zTeX\_bundle}
+\end{center}
+
+该仓库中包含本宏集的源码与用户手册; 当前宏集的稳定版本于半年之前发布, 最新的开发版请切换到 ``dev'' 分支; 
+本手册适用于当前最新的开发版.
+
+
+\clearpage
 \section{l3sys-shell}
 本部分主要介绍 \pkg{ztool} 中实现的原始 \pkg{l3sys-shell} 宏包中的命令. 所以使用本部分的命令时需在编译
 \LaTeX{} 文档时启用 \cmd{-shell-escape} 参数, 否则此系列命令将不会执行任何操作.
@@ -131,8 +142,7 @@
   \end{syntax}
   此命令用于读取文件 \meta{file} 的内容, 并将其存放在 \meta{seq} 中, 如果 \meta{file} 不存在, 则 \meta{seq} 会被置为空.
   \meta{bool} 用于控制是否保留行尾的空格, 可选值有:\cs{c_true_bool}, \cs{c_false_bool}, 默认为 \cs{c_true_bool}; 如果 \meta{bool} 
-  为 \cs{c_true_bool}, 则保留行尾的空格, 否则不保留.\par
-  \textbf{注意}: 此命令仅在一个组内有效, 且不可嵌套.
+  为 \cs{c_true_bool}, 则保留行尾的空格, 否则不保留. \textbf{注意}: 此命令仅在当前组生效.
 \end{function}
 
 
@@ -142,8 +152,7 @@
   \end{syntax}
   此命令用于读取文件 \meta{file} 的内容, 并将其存放在 \meta{seq} 中, 如果 \meta{file} 不存在, 则 \meta{seq} 会被置为空.
   \meta{bool} 用于控制是否保留行尾的空格, 可选值有:\cs{c_true_bool}, \cs{c_false_bool}, 默认为 \cs{c_true_bool}; 如果 \meta{bool} 
-  为 \cs{c_true_bool}, 则保留行尾的空格, 否则不保留.\par
-  \textbf{注意}: 此命令作用于全局, 不可嵌套.
+  为 \cs{c_true_bool}, 则保留行尾的空格, 否则不保留. \textbf{注意}: 此命令的设置是全局有效的.
 \end{function}
 
 
@@ -321,7 +330,8 @@
   \end{syntax}
   此命令用于将 \meta{content} 的宽度调整为 \meta{width}, 然后排版出来, \meta{align} 用于控制对齐方式, 可选值有:
   \texttt{left, center, right, scatter}. \meta{cmd} 为一个命令，其接受一个参数，它将应用到 \meta{content} 
-  的每一个 Token 上. \textbf{注意}:原 \meta{content} 中的空格会被删除.
+  的每一个 Token 上. \textbf{注意}: \meta{content} 中的空格会被忽略, 如果需要空格，请使用 ``\texttt{\char92\vsp}'' 
+  或 ``\;\,\texttt{\~}'' 替代.
 \end{function}
 
 
@@ -340,9 +350,9 @@
   \ztool_affine_transformation:cnnnn,
   \ztool_affine_transformation:ceeee}
   \begin{syntax}
-    \cs{ztool_affine_transformation:Nnnnn} \meta{box}\marg{a}\marg{b}\marg{c}\marg{d}
+    \cs{ztool_affine_transformation:Nnnnn} \meta{coffin}\marg{a}\marg{b}\marg{c}\marg{d}
   \end{syntax}
-  此命令用于对 \meta{box} 进行任意的仿射变换(线性变换), 具体的使用方法可以参见前述的 \cmd{ztoolboxaffine} 命令; 
+  此命令用于对 \meta{coffin} 进行任意的仿射变换(线性变换), 具体的使用方法可以参见前述的 \cmd{ztoolboxaffine} 命令; 
   上述参数对应的仿射变换矩阵 $\Lambda$ 为
   \[\Lambda = \begin{bmatrix}
     a & c \\
@@ -425,25 +435,50 @@ $s_y$ 和 $m$ 的求解结果如下:
 
 
 
-下面一个示例展示了如何使用 \pkg{ztool} 中的几个 Box 操作命令:
+下面的示例展示了如何使用这一章节中的几个 Box 操作命令:
 \begin{DocExample}*
 \ExplSyntaxOn
+\setlength{\fboxsep}{0pt}
 % get dim of content
+\dotfill\par
 \dim_new:N \l_ztool_tmp_H_dim
 \dim_new:N \l_ztool_tmp_W_dim
 \ztool_get_ht:Nn \l_ztool_tmp_H_dim {Hello,~world!}
 \ztool_get_wd:Nn \l_ztool_tmp_W_dim {Hello,~world!}
-\dim_use:N \l_ztool_tmp_H_dim \quad \dim_use:N \l_ztool_tmp_W_dim\\
+\dim_use:N \l_ztool_tmp_H_dim \quad \dim_use:N \l_ztool_tmp_W_dim\par
+
 % set content to dim
+\dotfill\par
 Hello,~world|
 \ztool_set_to_ht:nn {.5cm} {Hello,~world}|
 \ztool_set_to_wd:nn {40pt} {Hello,~world}\par
-% scale one dimension
-\ztool_scale_to_wd:nn {2em}{AA}\par
-\ztool_scale_to_wd:nn {2em}{AAAAAA}\par
 
+% scale one dimension
+\dotfill\par
+\ztool_scale_to_wd:nn {2em}{\fbox{AA}}\par
+\ztool_scale_to_wd:nn {2em}{\fbox{AAA}}\par
+\ztool_scale_to_wd:nn {2em}{\fbox{AAAAA}}\par
 \ztool_scale_to_ht:nn {2.5em}{\fbox{\vbox{\hbox{A}}}}\quad
-\ztool_scale_to_ht:nn {2.5em}{\fbox{\vbox{\hbox{A}\hbox{A}\hbox{A}\hbox{A}}}}
+\ztool_scale_to_ht:nn {2.5em}{\fbox{\vbox{\hbox{A}\hbox{A}}}}\quad
+\ztool_scale_to_ht:nn {2.5em}{\fbox{\vbox{\hbox{A}\hbox{A}\hbox{A}}}}\quad
+\ztool_scale_to_ht:nn {2.5em}{\fbox{\vbox{\hbox{A}\hbox{A}\hbox{A}\hbox{A}}}}\par
+
+% box item align
+\dotfill\par
+\def\boxItemCmd#1{\textcolor{blue}{|#1|}}
+\underline{
+  \ztool_box_item_align:Nnnn \boxItemCmd{15em}{{Tom}{Amy}{Jennery}}{scatter}
+}\par
+\underline{
+  \ztool_box_item_align:Nnnn \boxItemCmd{15em}{{Tom} {Amy}\ {Jennery}}{center}
+}\par 
+
+% affine transform
+\dotfill\par
+\hcoffin_set:Nn \l_tmpa_coffin {\rule{2em}{2em}}
+\coffin_typeset:Nnnnn \l_tmpa_coffin {l}{b}{0pt}{0pt}
+\ztool_affine_transformation:Nnnnn \l_tmpa_coffin {1}{0}{.5}{1}
+\coffin_typeset:Nnnnn \l_tmpa_coffin {l}{b}{0pt}{0pt}
 \ExplSyntaxOff
 \end{DocExample}
 

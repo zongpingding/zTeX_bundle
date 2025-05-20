@@ -59,6 +59,16 @@
 \zTikZ{} 的命令格式基本遵守了类似 Mathematica 中函数的命名规范.
 
 
+\subsection{项目地址}
+本宏包在 Github 上的地址如下:
+
+\begin{center}
+  \fbox{https://github.com/zongpingding/zTeX\_bundle}
+\end{center}
+
+该仓库中包含本宏集的源码, 用户手册以及一些测试用例; 当前宏集的稳定版本于半年之前发布, 最新的开发版请切换到 ``dev'' 分支; 
+本手册适用于当前最新的开发版.
+
 
 \subsection{功能概述}
 \zTikZ{} 宏包主要用于绘图与计算, 支持调用外部程序, 比如 Python, Mathematica, gnuplot; 同时也提供了调用缓存机制; 
@@ -133,7 +143,7 @@ Python 的 \pkg{matplotlib} 库, WolframScript 的绘图功能; 计算部分基�
 \begin{itemize}
   \item [Windows] : \TeX{}Live 最低版本 2023
   \item [Linux] : \TeX{}Live 最低版本 2022
-  \item [MacOS] : \TeX{}Live 最低版本 2024
+  \item [MacOS] : Mac\TeX{} 最低版本 2024
 \end{itemize}}
 
 \ztikz{} 在 Windows 下的表现可能没有在 Linux/MacOS 下的那么好, 建议用户在 Linux/MacOS 下使用本宏包.
@@ -939,14 +949,16 @@ plt.plot(x, y)
 
 \clearpage
 \subsection{wolfram 库}
-用户需注意 WolframScript 脚本中注释的写法, 不是 ``\verb|(* something*)|'', 而是 ``\verb|(* something *)|'',
-即注释内容不能够紧挨 ``\verb|*|'', 否则可能会造成 WolframScript 的解析错误.
-
-由于 WolframScript 的限制, 脚本的后缀只能为: ``\texttt{.wls}'', 否则 WolframScript
-会无法识别此脚本(也就不会去执行此脚本了). 
-
-\textbf{注记}: \ztikz{} 的 \pkg{wolfram} 库可以在 Windwos/Linux/MacOs 三大平台上使用, 并且可以在
-对应环境的源码中键入 ``\verb|\, #, $, _, ^, &|'' 等特殊字符, 极大的弥补了 \href{https://github.com/stevenliuyi/latex-alpha2}{\pkg{latexalpha2}} 的不足.
+\ztikz{} 的 \pkg{wolfram} 库可看作是原始宏包 \pkg{latexalpha2} 的一个新实现, 可以弥补 \href{https://github.com/stevenliuyi/latex-alpha2}{\pkg{latexalpha2}} 
+宏包的一系列不足. 目前 \pkg{wolfram} 库已经实现 \pkg{latexalpha2} 中除 \cs{wolframanimation} 命令外的所有命令, 并且在兼容性, 易用性和可拓展性上
+相较于原始的 \pkg{latexalpha2} 宏包都有了极大的提升. 例如, \ztikz{} 的 \pkg{wolfram} 库可以在 Windwos/Linux/MacOs 三大平台上使用; 
+\pkg{wolfram} 库的环境源码中支持直接键入 ``\verb|\, #, $, _, ^, &|'' 等特殊字符. 下面是使用 \pkg{wolfram} 库时的一些注意事项:
+\begin{itemize}
+  \item 用户需注意 WolframScript 脚本中注释的写法, 不是 ``\verb|(* something*)|'', 而是 ``\verb|(* something *)|'',
+    即注释内容不能够紧挨 ``\verb|*|'', 否则可能会造成 WolframScript 的解析错误.
+  \item 由于 WolframScript 的限制, 脚本的后缀只能为: ``\texttt{.wls}'', 否则 WolframScript
+    会无法识别此脚本(也就不会去执行此脚本了).  
+\end{itemize}
 
 \vskip1em
 \noindent{\sffamily\color{red} NOTE: 调用此库后, 需在编译时启用 ``\texttt{-shell-escape}'' 参数.}
@@ -975,7 +987,7 @@ plt.plot(x, y)
     \cs{wolfram}*\marg{code}
   \end{syntax}
   此命令用于调用 WolframScript 中的进行计算, 具有缓存机制; \meta{code} 为合法的 WolframScript 代码;
-  默认返回 \LaTeX{} 格式的代码, 含有 ``\texttt{*}'' 的命令返回的结果为普通的字符串(catcode 并没有改变).
+  默认计算结果为 \LaTeX{} 代码, 含有 ``\texttt{*}'' 的命令计算结果为普通的字符串(catcode 并没有改变).
 \end{function}
 \begin{DocExample}*
 \wolfram{LaplaceTransform[t^4 Sin[3*t], t, s]}
@@ -1000,6 +1012,59 @@ plt.plot(x, y)
 \[
   \int_a^b \sin(x)\,dx = \wolframResult
 \]
+\end{DocExample}
+
+
+\begin{function}[added=2025-05-18]{\wolframTable}
+  \begin{syntax}
+    \cs{wolframTable}\marg{code}
+    \cs{wolframTable}*\oarg{key-value}\marg{code}
+  \end{syntax}
+  此命令用于调用 Wolfram 引擎生成表格, 具有缓存机制; 前者(不带有 ``\texttt{*}'' 的命令) 不会在 PDF 
+  中输出对应的表格, 此命令设置了 \cs{wolframTablePData}, \cs{wolframTableFData} 两个临时变量, 其中保存了表格数据; 
+  后者(带有 ``\texttt{*}'' 的命令) 会在 PDF 中输出对应的表格, 
+  表格的样式可以通过 \meta{key-value} 进行指定; \meta{code} 为合法的 WolframScript/Mathics 代码;
+\end{function}
+
+
+\begin{keyval}[parent=ztikz/wolfram/table]{format, header, hdbt-rule, cell-cmd}
+  \begin{syntax}
+    format    = \meta{列格式}>\dval{*\{12\}\{l\}}
+    header    = \meta{表头}>\dval{空}
+    hdbt-rule = \meta{\textbf{false}|true}>\dval{false}
+    cell-cmd  = \meta{单元格命令}>\dval{\#1}
+  \end{syntax}
+  \meta{format} 用于设置表格的列格式; \meta{header} 用于设置表格的表头, 该参数会在表格的第一行输出;
+  \meta{hdbt-rule}(header bottom rule) 用于设置是否显示表头与后续表格内容之间的横线, 默认不显示; 
+  该选项仅对 ``\cs{wolframTable}\texttt{*}'' 命令有效, 即仅在需要排版表格时有效; 
+  \meta{cell-cmd} 接受一个参数, 其将应用于每一个 \cs{wolframTablePData} 中的单元格(不包括表头), 
+  使用 ``\verb|#1|'' 表示当前单元格内容;
+\end{keyval}
+
+
+\begin{function}[added=2025-05-18]{\wolframTablePData, \wolframTableFData}
+  这两个命令表示最近一次 \cs{wolframTable} 命令的运算结果, 不含有 \cs{hline}, \cs{midrule} 等命令, 即二者仅含有纯表格数据; 
+  \cs{wolframTablePData} (Part Data)返回的数据不包括表格的表头, \cs{wolframTableFData} (Full Data)返回的数据包括表格的表头; 
+  此二命令可以传入 \pkg{tabularray} 等表格排版宏包的数据输入. \textbf{注意}: 命令 \cs{wolframTable} 中的 \meta{cell-cmd} 
+  不建议与 \pkg{tabularray} 中的 \meta{cells/cmd} 混用.
+\end{function}
+\begin{DocExample}*
+\wolframTable*[
+  format=cccc, hdbt-rule,
+  header={$x$ & $x^2$ & $x^3$ & $x^4$},
+  cell-cmd={\textcolor{red}{(#1)}}
+]{Table[{i, i^2, i^3, i^4}, {i, 6}]}
+\SetTblrOuter{expand=\wolframTableFData}
+\hskip6em
+\begin{tblr}
+  {
+    colspec = {cccc}, 
+    rowspec = {
+      |[2pt,green7]Q|[2pt, teal7]Q|[green7]Q|[green6]
+      Q|[green5]Q|[green4]Q|[green3]Q|[3pt,teal7]
+    }
+  } \wolframTableFData
+\end{tblr}
 \end{DocExample}
 
 
@@ -1162,20 +1227,21 @@ plt.plot(x, y)
     range  = \meta{浮点数, 浮点数}>\dval{-5, 5}
     startColor = \meta{颜色}>\dval{black}
     endColor   = \meta{颜色}>\dval{white}
-    axis       = \meta{x|\textbf{y}}
+    axis       = \meta{x|\textbf{y}}>\dval{y}
   \end{syntax}
   \meta{action} 用于控制绘制的行为; \meta{domain} 用于设置函数的自变量范围, 其中第一个浮点数为起始值, 
   第二个浮点数为步长, 第三个浮点数为结束值; \meta{range} 用于设置 $y$ 轴范围, 在 \meta{action}\texttt{=shade}
   时比较有用; \meta{startColor} 和 \meta{endColor} 用于设置函数的起始颜色和结束颜色; \meta{axis} 用于设置 
   渐变方式, `\texttt{x}' 对应水平渐变, `\texttt{y}' 对应垂直渐变.
 \end{keyval}
-\begin{DocExample}
+\begin{DocExample}*
+\def\PI{3.1415926}
 \zplot[
-  domain={0, 0.02*\c_pi_fp, 2*\c_pi_fp}, 
+  domain={0, 0.02*\PI, 2*\PI}, 
   action=shade, startColor=blue,
   endColor=green, axis=x]{sin(x)}
 \zplot[
-  domain={0, 0.02*\c_pi_fp, 2*\c_pi_fp}, 
+  domain={0, 0.02*\PI, 2*\PI}, 
   action=shade, startColor=blue,
   endColor=green, axis=y]{sin(x)}
 \end{DocExample}

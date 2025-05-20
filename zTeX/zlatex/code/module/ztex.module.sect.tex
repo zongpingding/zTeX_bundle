@@ -1,4 +1,4 @@
-\ProvidesExplFile{ztex.module.sect.tex}{2025/05/15}{1.0.1}{secformat~module~for~ztex}
+\ProvidesExplFile{ztex.module.sect.tex}{2025/05/19}{1.0.1}{secformat~module~for~ztex}
 
 
 %%%%%     sect module for ztex     %%%%%
@@ -37,11 +37,11 @@
         \newgeometry{margin=1cm}
         \null\vfill\begin{center}
           \begin{tabular}{c}
-            {\colorbox{zslide@title@color}{
-              \hspace*{.075\textwidth}
-              \parbox{.80\textwidth}{\centering\huge\zslidetitle}
-            \hspace*{.075\textwidth}}}\\[3em]
-            \zslideauthor\\[2em]
+            \begin{zpic}[unit=\textwidth]
+              \zrectangle[arc=.01, draw=white, fill=zslide@title@color](-0.48, -.05)(.48, .05)
+              \put(-.425, -.015){\hb@xt@.85\textwidth{\hss\Large\zslidetitle\hss}}
+            \end{zpic}\\[3.5em]
+            \zslideauthor\\[3em]
             \zslidedate
           \end{tabular}
         \end{center}\vfill\null

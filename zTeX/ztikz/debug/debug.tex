@@ -1,3 +1,343 @@
+% \documentclass{article}
+% \usepackage{tabularray}
+% \NewDashStyle {AAA} {on .4pt off 2pt}
+% \ExplSyntaxOn
+% % \cs_set_protected:Npn \__tblr_dash_style_make_boxes:nnn #1 #2 #3
+% %   {
+% %     \dim_set:Nn \l_tmpa_dim { #2 + #3 }
+% %     \tl_set:Nn \l__tblr_h_tl { \hbox_to_wd:nn }
+% %     \tl_put_right:Nx \l__tblr_h_tl { { \dim_use:N \l_tmpa_dim } }
+% %     \tl_put_right:Nn \l__tblr_h_tl
+% %       {
+% %         { \hss \vbox:n { \hbox_to_wd:nn {#2} {} \hrule height \rulewidth } \hss }
+% %       }
+% %     \prop_gput:NnV \g__tblr_defined_hdash_styles_prop {#1} \l__tblr_h_tl
+% %     \prop_show:N \g__tblr_defined_hdash_styles_prop
+% %     \tl_set:Nn \l__tblr_v_tl { \vbox_to_ht:nn }
+% %     \tl_put_right:Nx \l__tblr_v_tl { { \dim_use:N \l_tmpa_dim } }
+% %     \tl_put_right:Nn \l__tblr_v_tl
+% %       {
+% %         { \vss \hbox:n { \vbox_to_ht:nn {#2} {} \vrule width \rulewidth } \vss }
+% %       }
+% %     \prop_gput:NnV \g__tblr_defined_vdash_styles_prop {#1} \l__tblr_v_tl
+% %     %\prop_log:N \g__tblr_defined_vdash_styles_prop
+% %   }
+% \ExplSyntaxOff
+
+% \begin{document}
+
+% \centering
+% \begin{tblr}{colspec = {c|c|[AAA]c|c}}
+% \hline
+% \textbf{???} & \SetCell[c=2]{c}\textbf{???} && \textbf{??}\\
+% \hline
+% ?? & ?? & ?? & ??\\
+% \hline
+% \SetCell[r=3]{c}??? & ?? & ?? & \SetCell[r=3]{c}???\\
+% \hline
+% & ?? & ?? & \\
+% \hline
+% & ?? & ?? & \\
+% \hline
+% ?? & ?? & ?? & ??\\
+% \hline
+% \SetCell[r=6]{c}?? & ?? & ?? & \SetCell[r=6]{c}?? \\
+% \hline
+% & ?? & ?? & \\
+% \hline
+% & ?? & ?? & \\
+% \hline
+% & ?? & ?? & \\
+% \hline
+% & ?? & ?? & \\
+% \hline
+% & ?? & ?? & \\
+% \hline
+% ?? & ?? & ?? & ??\\
+% \hline
+% \SetCell[r=3]{c}?? & ?? & ?? & \SetCell[r=3]{c}?? \\
+% \hline
+% & ?? & ?? & \\
+% \hline
+% & ?? & ?? & \\
+% \hline
+% \end{tblr}
+% \end{document}
+
+
+
+
+
+
+
+% \documentclass{article}
+% \begin{document}
+% % \newcommand{\MyFunction}[1]{#1---#1}
+% \newcommand{\MyFunction}[1]{(#1)}
+
+% \ExplSyntaxOn
+
+% \cs_new:Nn \__zpding_ii:n { \MyFunction { #1 } , }
+% \cs_new:Nn \__zpding_i:n 
+%   {{ 
+%     \clist_use:en { \clist_map_function:nN { #1 } \__zpding_ii:n  } 
+%       { & } 
+%   },}
+% \clist_set:Nn \l_tmpa_clist { { a1, a2, a3 } , { b1, b2, b3 } }
+% \cs_generate_variant:Nn \clist_use:nn { en }
+% \tl_set:Ne \l_tmpb_tl
+%   {
+%     \clist_use:en
+%       { \clist_map_function:NN \l_tmpa_clist \__zpding_i:n }
+%       { \\ }
+%   }
+% \tl_show:N \l_tmpb_tl % > \l_tmpb_tl=(a1)&(a2)&(a3)\\(b1)&(b2)&(b3).
+
+% % \begin{tabular}{ccc}
+% % \l_tmpb_tl
+% % \end{tabular}
+
+% \ExplSyntaxOff
+% \end{document}
+
+
+
+% wolfram table in tabularray
+\InputIfFileExists{ztikz-cfg.tex}{}{}
+\documentclass{article}
+\usepackage[margin=2.5cm]{geometry}
+\usepackage{xcolor, tabularray}
+\usepackage[wolfram = { engine=wolfram }]{ztikz}
+\ztikzloadlib{cache, wolfram, l3draw}
+
+
+\begin{document}
+% \wolframTable*[
+%   format=ccccc, 
+%   header={$x$ & $x^2$ & $x^3$ & $x^4$},
+%   cell-cmd={\textcolor{red}{(#1)}}
+% ]{Table[{i, i^2, i^3, i^4}, {i, 6}]}
+\wolframTable*[
+  cell-cmd={\textcolor{red}{(#1)}},
+  hdbt-rule,
+  header={$x$ & $x^2$ & $x^3$ & $x^4$},
+]{Table[{i, i^2, i^3, i^4}, {i, 6}]}
+
+\vskip4em
+\dotfill\par
+(tabular) PART DATA
+\begin{tabular}{cccc}
+  \wolframTablePData
+\end{tabular}
+
+\vskip4em
+\dotfill\par
+(tabular) FULL DATA
+\begin{tabular}{llll}
+  \wolframTableFData
+\end{tabular}
+
+
+\ExplSyntaxOn
+% \cs_show:N \__wolfram_table_cell_cmd:n
+% \show\wolframTablePData
+% \show\wolframTablePData
+\ExplSyntaxOff
+\vskip4em
+\dotfill\par
+\SetTblrOuter{expand=\wolframTablePData\wolframTableFData}
+(tabularray) PART DATA
+\begin{tblr}[
+    expand+=\expanded,
+  ]{
+    colspec={cccc}, 
+    rowspec={|[2pt,green7]Q|[teal7]Q|[green7]Q|[green6]Q|[green5]Q|[green4]Q|[3pt,teal7]}
+  }
+  % \wolframTableFData   % --> bug in 'tabularray': cell-cmd lose ??
+  \wolframTablePData
+\end{tblr}
+
+(tabularray) FULL DATA
+\begin{tblr}
+  {
+    colspec={cccc}, 
+    rowspec={|[2pt,green7]Q|[teal7]Q|[green7]Q|[green6]Q|[green5]Q|[green4]Q|[green3]Q|[3pt,teal7]}
+  }
+  \wolframTableFData   % --> works
+\end{tblr}
+
+
+\zplot[
+domain={0, 0.02*3.1415, 2*3.1415},
+action=shade, startColor=blue,
+endColor=green, axis=x]{sin(x)}
+\zplot[
+domain={0, 0.02*3.1415, 2*3.1415},
+action=shade, startColor=blue,
+endColor=green, axis=y]{sin(x)}
+\end{document}
+
+
+
+
+
+\def\totab#1{\totabA#1\relax}
+\def\totabA#1{\totabC#1,\relax \cr \totabB}
+\def\totabB#1{\ifx,#1\expandafter\totabA\fi}
+\def\totabC#1,#2{\ifx\relax#2[#1]\else [#1]&\afterfi{\totabC #2}\fi}
+\def\afterfi #1#2\fi{\fi#1}
+
+\message{... \totab{{a1, a2, a3}, {b1, b2, b3, b4}} ...}
+\bye
+
+
+
+\documentclass{article}
+\begin{document}
+\ExplSyntaxOn
+\clist_set:Nn \l_tmpa_clist {{a1, a2, a3}, {b1, b2, b3}}
+
+\cs_set:Nn \__zpding_one_row:n { \clist_use:nn { #1 } { & } \\ }
+
+\tl_set:Ne \l_tmpb_tl 
+  { \clist_map_function:NN \l_tmpa_clist \__zpding_one_row:n }
+\tl_show:N \l_tmpb_tl 
+\ExplSyntaxOff
+\end{document}
+
+
+
+\documentclass{article}
+
+\begin{document}
+\ExplSyntaxOn
+% --> 1 loop
+% \cs_set:Npn \_item_cmd:n #1
+%   { & (#1) }
+% \clist_set:Nn \l_tmpa_clist {a, b, c}
+% \tl_set:Ne \l_tmpa_tl 
+%   {
+%     \clist_map_function:NN \l_tmpa_clist 
+%       \_item_cmd:n
+%   }
+% \cs_generate_variant:Nn \tl_tail:n { e }
+% \exp_args:NNe \tl_set:Ne \l_tmpa_tl 
+%   { \exp_not:N \tl_tail:n { \l_tmpa_tl } }
+% \tl_show:N \l_tmpa_tl % > \l_tmpa_tl=(a)&(b)&(c).
+
+
+% --> 2 loop
+\clist_set:Nn \l_tmpa_clist {{a1, a2, a3}, {b1, b2, b3}}
+\cs_set:Npn \__item_cmd:n #1
+  { (#1) & }
+\cs_set:Npn \__row_cmd:n #1 
+  {
+    \clist_map_function:nN {#1} 
+      \__item_cmd:n \\
+  }
+\tl_set:Ne \l_tmpb_tl 
+  {
+    \clist_map_function:NN \l_tmpa_clist 
+      \__row_cmd:n
+  }
+\tl_show:N \l_tmpb_tl % > \l_tmpb_tl=(a1)&(a2)&(a3&\\(b1)&(b2)&(b3&\\.
+\ExplSyntaxOff
+\end{document}
+
+
+
+
+
+
+% implement '\wolframTable' function
+\InputIfFileExists{ztikz-cfg.tex}{}{}
+\documentclass{article}
+\usepackage{xcolor}
+\usepackage[wolfram = { engine=wolfram }]{ztikz}
+\ztikzloadlib{cache, wolfram}
+% \ExplSyntaxOn
+% ==> TO PARSER DATA IN FORM: {{x, x ^ 2, x ^ 3}, {1, 1, 1}, {2, 4, 8}, {3, 9, 27}, {4, 16, 64}, {5, 25, 125}}
+% \cs_set:Npn \__table_item_handle:n #1 
+%   { #1 & }
+% \cs_set:Npn \__table_row_handle:n #1
+%   { 
+%     \clist_map_function:nN { #1\use_none:n }
+%       \__table_item_handle:n \\
+%   }
+% \cs_set:Npn \__typeset_table:nn #1#2 
+%   {% #1:table format; #2:table data
+%     \begin{tabular}{#1}
+%       \hline #2 \hline
+%     \end{tabular}
+%   }
+% % {1, 1, 1, 1}, {2, 4, 8, 16}, {3, 9, 27, 81}
+% \cs_new:Npn \part_table_from_file:nN #1#2 
+%   {% #1:file ; #2:data var
+%     \ztool_gread_file_as_seq:neN {\c_true_bool}
+%       { #1 } \l_tmpa_seq
+%     \tl_set:Ne #2 { \seq_item:Nn \l_tmpa_seq {1} }
+%     \exp_last_unbraced:NNV \tl_set:Ne #2 #2
+%     \tl_set:Ne #2
+%       {
+%         \clist_map_function:oN { #2 } 
+%           \__table_row_handle:n
+%       }
+%   }
+% \cs_generate_variant:Nn \clist_map_function:nN { oN }
+% \cs_generate_variant:Nn \__typeset_table:nn { ne, no, nV }
+% \cs_generate_variant:Nn \part_table_from_file:nN { e, V }
+% \tl_new:N \l_part_table_data_tl
+% \tl_new:N \l_full_table_data_tl
+% \cs_set:Npn \full_part_table_from_file:nnn #1#2#3
+%   {% #1:file; #2:table format; #3:table header
+%     \part_table_from_file:eN 
+%       { #1 } \l_part_table_data_tl
+%     \tl_set:Ne \l_full_table_data_tl
+%       { 
+%         \tl_if_empty:eF {#3}
+%           {#3 \\\exp_not:N \hline } 
+%         \l_part_table_data_tl 
+%       }
+%   }
+% \NewDocumentCommand{\TableFromFile}{mmm}
+%   { 
+%     % generate full table data
+%     \full_part_table_from_file:nnn {#1}{#2}{#3} 
+%     % typeset this table
+%     \__typeset_table:no {#2}{\l_full_table_data_tl}
+%   }
+% \ExplSyntaxOff
+% \wolfram*{Table[{i, i^2, i^3, i^4}, {i, 6}]}
+% \begin{center}
+%   \wolframTable{\wolframOuputFile}{cccc}
+%     {$x$ & $x^2$ & $x^3$ & $x^4$ }
+% \end{center}
+
+
+
+\begin{document}
+Hello world \dotfill\par
+
+\vskip3em
+\wolframTable*[
+  format=ccccc, 
+  header={$x$ & $x^2$ & $x^3$ & $x^4$},
+  cell-cmd={\textcolor{red}{(#1)}}
+]{Table[{i, i^2, i^3, i^4}, {i, 6}]}
+% \begin{center}
+%   \begin
+% \end{center}
+
+
+% \wolframTable*{Join[{{$x$, $x^2$, $x^3$}}, Table[{i,i^2,i^3}, {i,5}]]} % bug: ''{$x$, $*$x^2, $*$x^3}''
+
+\end{document}
+
+
+
+
+
+
 % ==> wolfram cloud / mathics config
 \InputIfFileExists{ztikz-cfg.tex}{}{}
 \documentclass{article}
@@ -5,7 +345,7 @@
   library={wolfram},
   % wolfram={cloud=false, engine=mathics}
 ]{ztikz}
-\ztikzloadlib{cache}
+% \ztikzloadlib{cache}
 \ExplSyntaxOn
 \def\curHASH{\tl_use:N \l__ztikz_current_hash_tl}
 \ExplSyntaxOff
@@ -35,7 +375,7 @@ Hello world
 
 % \ztikzHashchgNorun{2E0D5457C90B9A5E88888FCA300716A2}
 \wolframTex{\int_a^b2\sin(x)\,dx}
-\ztikzHashCurrent* % CURRENT FILE:'2E0D5457C90B9A5E88888FCA300716A2.wls'
+% \ztikzHashCurrent* % CURRENT FILE:'2E0D5457C90B9A5E88888FCA300716A2.wls'
 \[
   \int_a^b \sin(x)\,dx = \wolframResult
 \]

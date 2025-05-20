@@ -97,25 +97,25 @@
   \fbox{https://github.com/zongpingding/zTeX\_bundle}
 \end{center}
 
-仓库中包含本手册以及 zTikZ 宏集的源码与文档. (由于部分的技术原因，zTikZ 请在本地体验). 当前仓库的稳定版本于半年之前
-发布, 最新的开发版请切换到 ``dev'' 分支; 本手册适用于当前最新的开发版.
+仓库中包含本手册以及 \zTikZ{} 宏集(由于技术原因，\zTikZ{} 请在本地体验)的源码, 用户手册以及部分的使用示例; 
+当前宏集的稳定版本于半年之前发布, 最新的开发版请切换到 ``dev'' 分支; 本手册适用于当前最新的开发版.
 
 
 \subsection{本地安装}
-目前本文档类 \ztex{}  还没有登陆CTAN，未来可能也没有这个打算，本模板还没有完全开发完成. 本文档类使用的部分
-\LaTeX3 命令在老版本下并不存在，所以如果你的 \TeX{}Live 版本过于落后，那么可能就会出现无法编译的情况. 
-目前已知 \ztex{} 文档类在各平台的兼容情况为:
+\ztex{} 宏集目前还未上传 CTAN, 因为还没有开发完成. 本文档类使用的部分
+\LaTeX3 命令在老版本的 \TeX{}Live 下并不存在, 若用户的 \TeX{}Live 版本过低，则可能无法正常使用本宏集. 
+目前 \ztex{} 文档类在各平台的兼容情况为:
 
-\hspace*{10em}\parbox{8cm}{
+\hspace*{12em}\parbox{8cm}{
 \begin{itemize}
-  \item[Windows]: \TeX{}Live最低版本2022
-  \item[Linux]: \TeX{}Live最低版本2022
-  \item[MacOS]: 兼容Mac{}\TeX{}2024(老版也应兼容) 
+  \item[Windows]: \TeX{}Live 最低版本 2022
+  \item[Linux]: \TeX{}Live 最低版本 2022
+  \item[MacOS]: Mac{}\TeX{} 最低版本 2024 
 \end{itemize}}
 
-由于 \ztex{} 还没有传入CTAN(未来可能会考虑)，所以想要使用此文档类，可以有如下的两种方法:
+因 \ztex{} 还未传入 CTAN(未来可能会考虑), 所以想要使用此文档类，只有如下两种方法:
 \begin{itemize}
-    \item 把此宏集 -- \file{ztex} 目录中的所有内容放入当前项目文件夹下
+    \item 把此宏集 -- \file{ztex} 目录中的所有内容放入当前项目文件夹下;
     \item 在命令行运行命令: \file{kpsewhich -var-value=TEXMFHOME}, 在 Windows 上这个路径一般是: \texttt{C:/Users/\meta{name}/texmf/}, 
       在Linux下一般是: \file{~/texmf/}; 具体路径以自己的实际情况为准. 在此路径下新建文件夹 \file{tex/latex/ztex}; 此文件夹对应的路径
       我们记为 \meta{z\TeX}, 随后把 \file{ztex} 目录中的所有内容放入 \meta{z\TeX} 下即可.
@@ -390,7 +390,7 @@
 \section{杂项}
 本小节会列举部分在 \file{ztex.cls} 源文件中定义的命令, 这部分命令未迁移到任何的 module 或者是 library 中.
 
-\begin{function}[updated=2025-04-25]{\texttt}
+\begin{function}[updated=2025-04-25]{\ztexverb}
   \begin{syntax}
     \cs{ztexverb}\oarg{format}\marg{item}
   \end{syntax}
@@ -554,7 +554,7 @@
 \clearpage
 \subsection{font 模块}
 本模块主要用于配置 \ztex{} 的字体, 尽管 \pkg{fontspec} 和 \pkg{unicode-math} 已经在很大程度上
-简化了字体的配置，但是对于一些用户来说，仍然会感到困扰. 本模块的目的就是为了简化字体的配置，让普通的
+简化了字体的配置，但是对于一些用户来说，仍然会感到困惑. 本模块的目的就是为了简化字体的配置，让普通的
 \LaTeX{} 用户也能够方便的配置字体, 用上自己喜欢的字体. 
 
 
@@ -577,6 +577,7 @@
 
 怎么查看 font name ? \TeX{}Live 提供了 \texttt{otfinfo} 这一命令行工具, 比如我们想要查看 Latin Modern Roman 字体, 其对应的
 命令为: \texttt{otfinfo -i `kpsewhich lmroman10-regular.otf`}. 命令的运行结果如下(Linux 下):
+\def\exampleUR{}
 \begin{DocExample}[@@]
 > otfinfo -i `kpsewhich lmroman10-regular.otf`
 Family:              LM Roman 10
@@ -604,9 +605,12 @@ Permissions:         Unknown (12)
 /usr/share/fonts/adobe-source-code-pro/SourceCodeVF-Italic.otf: SourceCodeVF:style=Medium Italic
 /usr/share/fonts/adobe-source-code-pro/SourceCodePro-Bold.otf: Source Code Pro:style=Bold
 \end{DocExample}
+\resetExampleUR
 
 本节中所有命令参数中的 \meta{font} 既可以是字体名(font name), 也可以是字体文件名(file name), 用户需要根据自己的实际情况
-选择适合自己的方式.
+选择适合自己的方式.\par
+\vskip3em
+\noindent{\sffamily\color{red}NOTE: 请尊重字体版权 !!!} 
 
 
 \newpage
@@ -806,7 +810,7 @@ Permissions:         Unknown (12)
 
 
 关于 \cs{zfontnew} 命令的一个简单使用样例如下:
-\begin{DocExample}[@@]
+\begin{DocExample}*[@@]
 %% \zfontset{sysfont}
 %% begin preamble
 \zfontfamilynew[CJK]{
@@ -831,7 +835,7 @@ Permissions:         Unknown (12)
 {\Arial Hello world,\itshape Hello world.}\par
 {Hello world,\SourceCodePro Hello world,\bfseries Hello world.}
 \end{DocExample}
-\textbf{注意事项}: 
+\noindent\textbf{注意事项}: 
 \begin{itemize}
   % \item 原 \pkg{fontspec} 中的 \meta{Extension} 这一 font feature 配置参数需要在给定字体名时给出(此时通过文件名调用), 
   %   也就是说:此时 \meta{name} 必须指定为 \file{times.ttf} 而不是 \file{times}.
@@ -866,8 +870,10 @@ Permissions:         Unknown (12)
   \end{syntax}
   这三个选项会同时设置整个文档中的正文字体和数学字体, 目前仅在 \hologo{pdfTeX} 下可用.
   \textbf{注意}: 如果在设置了此选项的同时也设置了后续的 \meta{text} 或 \meta{math} 选项, 
-  那么此时后续的字体配置会覆盖前面的配置.
+  那么此时后续的字体配置会覆盖前面的配置. \pkg{newtxtext} 字体宏包目前并不推荐使用, \meta{newtx} 
+  选项仅作为一个备选项设置.
 \end{keyval}
+
 
 
 \begin{keyval}[parent=ztex/font/text]{cmr, times}
@@ -1088,7 +1094,7 @@ Permissions:         Unknown (12)
   添加水印:
 \end{keyval}
 
-\begin{DocExample}*
+\begin{DocExample}*[@@]
   % \usepackage{tikzlings}
   \zpagemask{
     \transparent{.5}\includegraphics{./support/pics/latex-logo.pdf}
@@ -1119,8 +1125,7 @@ Permissions:         Unknown (12)
   此命令为 \cmd{\zpagemask} 的底层命令, 用户可以依据此命令创建更加具有针对性的水印命令.
 \end{function}
 
-
-\vskip3em
+\vskip2em
 \noindent\textcolor{red}{\sffamily NOTE:目前可以使用 \CusTeX{} 提供的接口进行水印定制, 请参见其 \pkg{bgfg} 模块.}
 
 
@@ -1139,8 +1144,8 @@ Permissions:         Unknown (12)
 
 
 \begin{function}[updated=2025-04-25]{\frontmatter, \mainmatter, \appmatter, \backmatter}
-  此系列命令用于分割文档, 当加载的 \meta{class} 为 \cls{book} 或 \cls{ctexbook} 时, 前两个命令
-  会自动处理页眉页脚相关设置.
+  此系列命令用于分割文档, 当加载的 \meta{class} 为 \cls{book} 或 \cls{ctexbook} 时, 这系列命令
+  会自动处理页眉页脚, 计数器和超链接等相关设置.
 \end{function}
 
 
@@ -1771,12 +1776,14 @@ Hook, 方便用户直接对环境进行操作.
   已有的 Hook: \zkey{ztex/thm/before, ztex/thm/begin, ztex/thm/end, ztex/thm/after}. \cs{zthmhook} 只应用于下
   一个定理类环境, \cs{zthmhook*} 会应用于接下来的所有定理类环境. 各个 Hook 的位置分布如下:
 \end{function}
+\def\exampleUR{}
 \begin{DocExample}[@@]
 (ztex/thm/before) --> (warper begin) 
   --> (thm-title)   --> (ztex/thm/begin) 
   --> (thm-content) --> (ztex/thm/end) --> 
 (warper end) --> (ztex/thm/after)
 \end{DocExample}
+\resetExampleUR
 
 这两个命令不支持手动设置\meta{label}, 针对于 \cmd{\zthmhook*}, \ztex{} 会自动设置 \meta{label}, 其格式
 为 \cmd{thm-hook.\meta{Hook Index}}. 
@@ -1813,12 +1820,14 @@ Hook, 方便用户直接对环境进行操作.
   \cs{zthmproofhook} 只应用于下一个证明类环境, \cs{zthmproofhook*} 会应用于接下来的所有证明类环境.
   各个 Hook 的位置分布如下:
 \end{function}
+\def\exampleUR{}
 \begin{DocExample}[@@]
 (ztex/proof/before) --> (proof-title)  
-  --> (ztex/proof/begin) 
-  --> (proof-content) --> (ztex/proof/end) -->
+  --> (ztex/proof/begin) --> (proof-content) 
+  --> (ztex/proof/end)   -->
 (env icon) --> (ztex/proof/after)
 \end{DocExample}
+\resetExampleUR
 
 和 \cs{zthmhook}, \cs{zthmhook*} 类似, 此二命令会自动设置对应的 \meta{label}, 无需用户手动指定.
 
@@ -2449,6 +2458,30 @@ zslide 中的坐标系统:在不另加说明的情况下, zslide 中的坐标系
 目前定位到 \cs{titlecontents}\texttt{\{subsection\}}, 如果后续自己实现了 \pkg{titletoc} 和 \pkg{titlesec} 两个宏包，那么这个问题就比较方便解决了}
 
 
+\subsubsection{使用方法}
+\pkg{slide} 库的使用方法是非常简单的, 一个基本的使用样例如下:
+\begin{DocExample}
+\documentclass[
+  layout={slide, aspect=16|9},
+]{ztex}
+\title{Rounded corner style Title Page}
+\author{Eureka\quad and \quad \ztex{} Eureka}
+\date{\today}
+\begin{document}
+\maketitle
+\section{FIRST}
+The FIRST section.
+\end{document}
+\end{DocExample}
+
+上述代码的编译产生的 slide 结果如下:
+\begin{center}
+  \setlength{\fboxsep}{0pt}
+  \fbox{\includegraphics[height=10em]{./support/pics/zslide_example-1.pdf}}
+  \fbox{\includegraphics[height=10em]{./support/pics/zslide_example-2.pdf}}
+\end{center}
+
+
 \subsubsection{颜色主题}
 \begin{function}[updated=2025-04-25]{\zslidethemeuse}
   \begin{syntax}
@@ -2684,7 +2717,7 @@ zslide 中的坐标系统:在不另加说明的情况下, zslide 中的坐标系
     \cs{color}\zarg{zslide@title@color}\meta{item}
     \cs{textcolor}\zarg{zslide@title@color}\marg{item}
   \end{syntax}
-  此颜色用于设置 slide 模式下 title 的颜色, 默认为: \texttt{HTML:d9d9d9}(即 \block{zslide@title@color}).
+  此颜色用于设置 slide 模式下 title 的背景色, 默认为: \texttt{HTML:d9d9d9}(即 \block{zslide@title@color}).
 \end{function}
 
 
@@ -3134,7 +3167,7 @@ reason is a representation of, as far as I know, the things in themselves;%
 除此之外, \pkg{ztool} 提供了 box 操作, 文件 IO 以及基本图形绘制相关的函数. 在 \pkg{ztool} 的协助下，\ztex{} 能够
 避免或减少命令行 \cmd{-shell-escape} 参数或其它相关宏包的调用(如 \pkg{robust-externalize} 宏包).
 
-\pkg{ztool} 宏包的详细使用方法请参见其用户手册.
+\pkg{ztool} 宏包的详细使用方法请参见其\href{https://github.com/zongpingding/zTeX_bundle/blob/main/ztex/ztool/doc/ztool_interface.pdf}{用户手册}.
 
 
 

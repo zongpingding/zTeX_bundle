@@ -51,6 +51,7 @@
 latex.out/
 ztikz_output/
 keytheorems/
+Fonts/
 *.hd
 testIO.txt
 # debug.*

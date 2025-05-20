@@ -1,4 +1,4 @@
-\ProvidesExplFile{ztikz.library.wolfram.tex}{2025/05/17}{1.0.0}{wolfram~library~for~ztikz}
+\ProvidesExplFile{ztikz.library.wolfram.tex}{2025/05/19}{1.0.0}{wolfram~library~for~ztikz}
 
 
 
@@ -66,7 +66,7 @@
 
 
 % ==> user interface
-% load result
+% --> load result
 \NewDocumentCommand\wolframResult{so}
   {
     \ior_open:Ne \g__ztikz_wolfram_ior {\wolfram@tmp@file.txt}
@@ -81,7 +81,7 @@
     \ior_close:N \g__ztikz_wolfram_ior
   }
 
-% wolfram graphicx
+% --> wolfram graphicx
 \NewDocumentEnvironment{wolframGraphics}{O{}}
   {
     \gdef\graphics@dimen{#1}
@@ -97,7 +97,7 @@
     \int_gadd:Nn \g__ztikz_wolfram_picture_index_int {1} 
   }
 
-% wolfram simple code
+% --> wolfram simple code
 \NewDocumentCommand\wolfram{sm}
   {
     \__ztikz_wolfram_excute:enn
@@ -108,7 +108,7 @@
       }{txt}{TeXResult}
   }
 
-% wolfram tex code(expandable token replace)
+% --> wolfram tex code(expandable token replace)
 \group_begin:
   \char_set_catcode_escape:n { 36 }
   \char_set_catcode_letter:n { 92 }
@@ -133,7 +133,94 @@
   $char_set_catcode_letter:n { 36 }
 \group_end:
 
-% equation solve
+% --> wolfram table (extended the interface of 'latexalpha2')
+\flag_new:N \l_wolfram_table_column_int
+\cs_set:Npn \__table_item_handle:n #1 
+  {% the inner '\cs{exp_not:N}' prevent expansion from 'tabularray'.
+    \exp_not:n {
+      \exp_not:N \__wolfram_table_cell_cmd:n {#1}
+    },
+  }
+\cs_set:Npn \__table_row_handle:n #1 % #1='{1, 2, 3}'
+  { 
+    \clist_use:en 
+      { 
+        \clist_map_function:oN #1
+          \__table_item_handle:n  
+      }{ & } \\
+  }
+\cs_generate_variant:Nn \clist_use:nn { en }
+\cs_generate_variant:Nn \clist_map_function:nN { oN }
+\cs_new:Npn \__part_table_from_file:nN #1#2 
+  {% #1:file;  #2:data var
+    \ztool_gread_file_as_seq:neN {\c_true_bool}
+      { #1 } \l_tmpa_seq
+    \tl_set:Ne #2
+      {
+        \seq_map_function:NN \l_tmpa_seq 
+          \__table_row_handle:n
+      }
+  }
+\tl_new:N \l_part_table_data_tl
+\tl_new:N \l_full_table_data_tl
+\cs_set:Npn \__full_table_from_file:nn #1#2
+  {% #1:file;  #2:table header
+    \__part_table_from_file:nN 
+      { #1 } \l_part_table_data_tl
+    \tl_set:Ne \l_full_table_data_tl
+      { 
+        \tl_if_empty:eF {#2}{#2 \\} 
+        \l_part_table_data_tl 
+      }
+    \tl_set:Ne \l_part_table_data_tl 
+      { \l_part_table_data_tl }
+  }
+\cs_generate_variant:Nn \__full_table_from_file:nn { VV }
+\cs_set:Npn \__typeset_table:nnn #1#2#3 
+  {% #1:table format; #2:table header; #3:table part data
+    \begin{tabular}{#1}
+      \hline
+        \bool_if:NT \l_wolfram_table_hdbt_rule_bool 
+          { #2\\ \hline }
+        #3
+      \hline
+    \end{tabular}
+  }
+\cs_generate_variant:Nn \__typeset_table:nnn { VVV }
+\ztikz_keys_define:nn { wolfram / table }
+  {
+    format    .tl_set:N   = \l__ztikz_wolfram_table_format_tl,
+    format    .initial:n  = { *{12}{l} },
+    header    .tl_set:N   = \l__ztikz_wolfram_table_header_tl,
+    header    .initial:n  = { },
+    hdbt-rule .bool_set:N = \l_wolfram_table_hdbt_rule_bool,
+    hdbt-rule .initial:n  = { false },
+    hdbt-rule .default:n  = { true  },
+    cell-cmd  .cs_gset:Np = \__wolfram_table_cell_cmd:n #1,
+    cell-cmd  .initial:n  = { #1 },
+  }
+\NewDocumentCommand{\wolframTable}{sO{}m}
+  {% #1:if typeset; #2:key-value; #3:code
+    \group_begin:
+      \ztikz_keys_set:nn { wolfram/table } {#2}
+      \__ztikz_wolfram_excute:enn
+        { TeXResult = #3;  }
+        { txt }{ TeXResult }
+      \__full_table_from_file:VV \wolframOuputFile
+        \l__ztikz_wolfram_table_header_tl 
+      \IfBooleanT{#1}
+        {
+          \__typeset_table:VVV 
+            \l__ztikz_wolfram_table_format_tl
+            \l__ztikz_wolfram_table_header_tl
+            \l_part_table_data_tl
+        }
+      \exp_args:NNo \gdef\wolframTablePData{ \l_part_table_data_tl }
+      \exp_args:NNo \gdef\wolframTableFData{ \l_full_table_data_tl } 
+    \group_end:
+  }
+
+% --> equation solve
 \ztikz_keys_define:nn { wolfram/solve }
   {
     var     .tl_set:N  = \l__ztikz_wolfram_var_tl,
@@ -162,7 +249,7 @@
     \group_end:
   }
 
-% differential equation solve
+% --> differential equation solve
 \ztikz_keys_define:nn { wolfram/dsolve }
   {
     depend    .tl_set:N  = \l__ztikz_wolfram_de_var_tl,
@@ -191,7 +278,7 @@
     \group_end:
   }
 
-% any wolfram/mathics code
+% --> any wolfram/mathics code
 \NewDocumentEnvironment{wolframAny}{m}
   {
     \cs_seq_eq:NN \NewLine \iow_newline:

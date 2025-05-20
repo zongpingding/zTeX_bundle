@@ -146,6 +146,8 @@
 % \usepackage[most]{tcolorbox}
 % \tcbuselibrary{listings, minted, breakable, skins}
 \newcounter{DocExample}
+\def\exampleUR{\stepcounter{DocExample}\textbf{例\ \theDocExample}}
+\def\resetExampleUR{\def\exampleUR{\stepcounter{DocExample}\textbf{例\ \theDocExample}}}
 \tcbuselibrary{minted}
 \tcbset{listing engine=minted}
 \DeclareTCBListing{DocExample}{!s!O{//}}{
@@ -170,7 +172,7 @@
   },
   overlay unbroken and first = {
     \node[anchor=north east, outer sep=0pt, text=red] 
-      at (frame.north east) { \stepcounter{DocExample}\textbf{例\ \theDocExample}};
+      at (frame.north east) {\exampleUR};
   }
 }
 
@@ -329,6 +331,14 @@ representation of, as far as I know, the things in themselves;}
   }
   \clist_use:Nn \l_tmpa_clist {,~}
 }
+\NewDocumentCommand\TikZ{}{Ti\textcolor{orange}{\textit{k}}Z}
+\NewDocumentCommand\zTikZ{}
+  {
+    \ztool_scale_to_wd_and_ht:nnn {.9ex}{1.3ex}{
+      \ztool_rotate:nn {89}{\(\aleph\)}
+    }\kern-0.3423ex\hbox{\TikZ}
+  }
+\let\ztikz\zTikZ
 \ExplSyntaxOff
 
 
