@@ -1,0 +1,26 @@
+\input{regression-test.tex}
+\documentclass{article}
+\usepackage{ztikz}
+\START
+\TEST{ztikz-module-load-test-cache}{
+  \ztikzloadlibrary{cache}
+}
+
+\TEST{ztikz-module-load-test-gnuplot}{
+  \ztikzloadlibrary{gnuplot}
+}
+
+\TEST{ztikz-module-load-test-python}{
+  \ztikzloadlibrary{python}
+}
+
+\TEST{ztikz-module-load-test-wolfram}{
+  \ztikzloadlibrary{wolfram}
+}
+
+\TEST{ztikz-module-load-test-zdraw}{
+  \ztikzloadlibrary{zdraw}
+}
+\END
+\begin{document}
+\end{document}

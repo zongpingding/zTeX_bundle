@@ -1,0 +1,13 @@
+\input{regression-test.tex}
+\documentclass{article}
+\usepackage{ztikz}
+\ztikzloadlibrary{python}
+
+
+\begin{document}
+\START
+\TEST{ztikz-module-python-sympy}{
+  \sympy{1+1}
+}
+\END
+\end{document}

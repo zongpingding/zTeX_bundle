@@ -12,6 +12,8 @@
 *.cb2
 .*.lb
 *.Identifier
+*.ttf
+*.ttc
 *.out
 *.tmp
 
@@ -42,19 +44,21 @@
 *.synctex.gz
 *.synctex.gz(busy)
 *.pdfsync
+*.thlist
 
 ## Build tool directories for auxiliary files
 # latexrun
 latex.out/
 ztikz_output/
-debug.*
+keytheorems/
+Fonts/
+*.hd
+testIO.txt
+# debug.*
+# debug/
 
 ## l3build
 build/
-<<<<<<< HEAD
-debug/
-=======
->>>>>>> 251a5459e0a18f78b841e2efc0fe574a26966d68
 
 ## Auxiliary and intermediate files from other packages:
 # algorithms

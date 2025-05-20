@@ -1,0 +1,190 @@
+\NeedsTeXFormat{LaTeX2e}
+\ProvidesPackage{zslide}
+
+
+
+% ----------------------------------------------------------------------
+%                          package options 
+% ----------------------------------------------------------------------
+\ExplSyntaxOn
+\RequirePackage{l3keys2e}
+% key-value alias
+\cs_new_protected:Npn \zslide_define_option:n
+  { \keys_define:nn { zslide / option } }
+\cs_new_protected:Npn \zslide_define:nn #1
+  { \keys_define:nn { zslide / #1} }
+\cs_new_protected:Npn \zslide_set:nn #1
+  { \keys_set:nn { zslide / #1 } }
+\cs_new_protected:Npn \zslide_load_after:n #1
+  { \AtBeginDocument {#1} }
+
+% process key
+\def\blockSplitBool{false}
+\def\blockRoundedBool{false}
+\def\blockShadowBool{false}
+\msg_new:nnn {zslide}{block-shadow}{'shadow'~only~has~effect~if~used~with~'rounded'.}
+\zslide_define_option:n {
+  lang              .tl_gset:N    = \g__zslide_lang_str,
+  lang              .initial:n    = en,
+  minted            .bool_gset:N  = \g__zslide_minted_bool,
+  minted            .initial:n    = false,
+  block             .multichoice:,
+  block / split     .code:n       = { \def\blockSplitBool{true} },
+  block / rounded   .code:n       = { \def\blockRoundedBool{true} },
+  block / shadow    .code:n       = { 
+    \def\blockShadowBool{true}  
+    \tl_if_eq:NnT \blockRoundedBool {false} 
+      { \msg_warning:nn {zslide}{block-shadow} }
+  },
+  serif             .choice:,
+  serif / all       .code:n       = { \usefonttheme{serif} },
+  serif / math      .code:n       = { \usefonttheme[onlymath]{serif} },
+}
+\ProcessKeysOptions { zslide / option }
+
+% language
+\msg_new:nnn {zslide}{compile-engine-pdftex}{Current~compile~engine~is~XETEX,~use~PDFTEX~instead.}
+\msg_new:nnn {zslide}{compile-engine-xetex }{Current~compile~engine~is~PDFTEX,~use~XETEX~instead.}
+\str_case:VnF \g__zslide_lang_str {
+  {en} { 
+    \sys_if_engine_xetex:TF 
+      {\msg_warning:nn {zslide}{compile-engine-pdftex}}
+      {\RequirePackage[utf8]{inputenc}}
+    \RequirePackage[T1]{fontenc}
+  }
+  {cn} {
+    \sys_if_engine_xetex:TF {}{\msg_error:nn {zslide}{compile-engine-xetex}}
+    \PassOptionsToPackage{quiet}{fontspec}
+    \PassOptionsToPackage{no-math}{fontspec}
+    \RequirePackage{ctex}
+  }
+}{\msg_error:nn {zslide}{option-language}}  
+
+% minted 
+\bool_if:NTF \g__zslide_minted_bool {
+  \usepackage{minted}
+  \setminted{
+    fontsize=\small,
+    bgcolor=zslideGray, 
+    breaklines=true, 
+    tabsize=2,
+    breakanywhere=true,
+    breakanywheresymbolpre=,
+    breaksymbolleft=,
+    autogobble = true
+  }
+}{\relax}
+\ExplSyntaxOff
+
+
+
+% ----------------------------------------------------------------------
+%                          struct and color theme 
+% ----------------------------------------------------------------------
+% theme
+\usetheme{Dresden}
+\usecolortheme{beaver}
+\setbeamertemplate{navigation symbols}{}
+
+% color re-define
+\definecolor{zslideRed}{HTML}{a30000}
+\definecolor{zslideGray}{HTML}{e0e0e0}
+\definecolor{zslideWhite}{HTML}{f0f0f0}
+\definecolor{zslideBlueBG}{HTML}{d6d6f0}
+\definecolor{zslideBlueFG}{HTML}{3333b2}
+\setbeamercolor{author in head/foot}{bg=zslideRed,fg=white}
+\setbeamercolor{title in head/foot}{fg=zslideRed,bg=zslideWhite}
+\setbeamercolor{date in head/foot}{fg=zslideRed,bg=zslideGray}
+
+% inner style
+\setbeamertemplate{title page}[default][colsep=-4bp,rounded=true,shadow=true]
+\setbeamertemplate{part page}[default][colsep=-4bp,rounded=true,shadow=true]
+\setbeamercolor{block title}{bg=zslideBlueBG, fg=zslideBlueFG}
+\setbeamercolor{block body}{bg=zslideGray, fg=black}
+% ==> original: beamerbaseauxtemplates.sty
+% \defbeamertemplate{block begin}{rounded}[1][shadow=false]
+% {%
+%   \par\vskip\medskipamount%
+%   \begin{beamerboxesrounded}[upper=block title,lower=block body,#1]%
+%     {\raggedright\usebeamerfont*{block title}\insertblocktitle}%
+%     \raggedright%
+%     \usebeamerfont{block body}%
+% }
+% \defbeamertemplate{block end}{rounded}[1][]
+% {\end{beamerboxesrounded}\vskip\smallskipamount}
+% ==> new style
+\defbeamertemplate{block begin}{zslide}
+  {
+    \par\vskip\medskipamount%
+    \ifbeamercolorempty[bg]{block title}{}
+    {\ifbeamercolorempty[bg]{block body}{}{\nointerlineskip\vskip-0.5pt}}%
+    \usebeamerfont{block body}%
+    \begin{beamercolorbox}[colsep*=.75ex, vmode, shadow=\blockShadowBool, rounded=\blockRoundedBool]{block body}%
+      \ifbeamercolorempty[bg]{block body}{\vskip-.25ex}{\vskip-.75ex}%
+      {\usebeamercolor[fg]{block title}\usebeamerfont*{block title}\insertblocktitle}%
+  }
+\def\block@split@false{false}
+\def\block@rounded@true{true}
+\ifx\blockSplitBool\block@split@false
+  \setbeamertemplate{blocks}[zslide]
+\else 
+  \ifx\block@rounded@true\blockRoundedBool
+    \setbeamertemplate{blocks}[rounded][shadow=\blockShadowBool]
+  \else
+    \setbeamertemplate{blocks}[shadow=\blockShadowBool]
+  \fi
+\fi
+\setbeamertemplate{theorems}[numbered]
+
+% toc style
+\setbeamertemplate{section in toc}{%
+  {\color{zslideRed}\inserttocsectionnumber.}~\inserttocsection}
+\setbeamercolor{subsection in toc}{bg=white,fg=structure}
+\setbeamertemplate{subsection in toc}{%
+  \hspace{1.2em}{\color{zslideRed}\raise1.5pt\hbox{\rule{2.5pt}{2.5pt}}}~{\color{black}\inserttocsubsection}\par}
+
+% footline
+\setbeamertemplate{footline}{%
+  \leavevmode%
+  \hbox{%
+  \begin{beamercolorbox}[wd=.3\paperwidth,ht=2.25ex,dp=1ex,center]{author in head/foot}%
+    \usebeamerfont{author in head/foot}
+    \insertshortauthor
+  \end{beamercolorbox}%
+  \begin{beamercolorbox}[wd=.4\paperwidth,ht=2.25ex,dp=1ex,center]{title in head/foot}%
+    \usebeamerfont{title in head/foot}
+    \insertshorttitle
+  \end{beamercolorbox}%
+  \begin{beamercolorbox}[wd=.3\paperwidth,ht=2.25ex,dp=1ex,center]{date in head/foot}%
+    \usebeamerfont{title in head/foot}
+    \insertframenumber{}/\inserttotalframenumber\hspace*{1ex}
+  \end{beamercolorbox}}%
+  \vskip0pt%
+}
+
+
+
+% ----------------------------------------------------------------------
+%                          other settings 
+% ----------------------------------------------------------------------
+% item style
+\setlength{\leftmarginii}{1em}
+\setlength{\leftmarginiii}{1em}
+\setbeamertemplate{itemize item}{\({\color{zslideRed}\bullet}\)\kern-2pt}
+\setbeamertemplate{itemize subitem}{\({\color{zslideRed}\circ}\)\kern-2pt}
+\setbeamertemplate{itemize subsubitem}{\({\color{zslideRed}\diamond}\)\kern-2pt}
+\setbeamertemplate{enumerate item}{\textcolor{zslideRed}{\insertenumlabel}.\kern-2pt}
+\setbeamertemplate{enumerate subitem}{\textcolor{zslideRed}{\insertenumlabel.\insertsubenumlabel}\kern-2pt}
+\setbeamertemplate{enumerate subsubitem}{\textcolor{zslideRed}{\insertenumlabel.\insertsubenumlabel.\insertsubsubenumlabel}\kern-2pt}
+
+% column and pifont
+\RequirePackage{multicol}
+\RequirePackage{pifont}
+
+% other command
+\ExplSyntaxOn
+% circle num
+\cs_set:Npn \circleNum #1{
+  \exp_args:Nx \ding{\fp_eval:n {191+#1}}
+}
+\ExplSyntaxOff

@@ -1,0 +1,10 @@
+This is a generated file for the l3build validation system.
+Don't change this file in any respect.
+============================================================
+TEST 1: ztikz-module-gnuplot-PolarPlot
+============================================================
+runsystem(sed -i "8s|set trange .*|set trange [0:10*pi]|" ztikz_output/scripts/polar_plot.gp)...executed.
+runsystem(sed -i "9s|plot .*|plot 0.1*t|" ztikz_output/scripts/polar_plot.gp)...executed.
+runsystem(gnuplot ztikz_output/scripts/polar_plot.gp)...executed.
+runsystem(mv ztikz_output/gnuplot_data/gnu_data.table ztikz_output/gnuplot_data/gnu_data_1_1.table)...executed.
+============================================================

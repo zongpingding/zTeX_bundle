@@ -1,0 +1,17 @@
+This is a generated file for the l3build validation system.
+Don't change this file in any respect.
+============================================================
+TEST 1: ztikz-module-gnuplot-Plotz
+============================================================
+runsystem(sed -i "18s|set palette .*|set palette cubehelix start 0 cycles -1. saturation 1|" ztikz_output/scripts/plot_3d.gp)...executed.
+runsystem(sed -i "23s|set xr .*|set xr [-3:3]|" ztikz_output/scripts/plot_3d.gp)...executed.
+runsystem(sed -i "24s|set yr .*|set yr [-3:3]|" ztikz_output/scripts/plot_3d.gp)...executed.
+runsystem(sed -i "25s|splot .*|splot x**2-y**2-2 with pm3d|" ztikz_output/scripts/plot_3d.gp)...executed.
+runsystem(gnuplot ztikz_output/scripts/plot_3d.gp)...executed.
+runsystem(mv ./ztikz_output/gnuplot_data/plot_3d.pdf ./ztikz_output/gnuplot_data/plot_3d_1.pdf)...executed.
+<./ztikz_output/gnuplot_data/plot_3d_1.pdf, id=28, 578.16pt x 578.16pt>
+File: ./ztikz_output/gnuplot_data/plot_3d_1.pdf Graphic file (type pdf)
+<use ./ztikz_output/gnuplot_data/plot_3d_1.pdf>
+Package pdftex.def Info: ./ztikz_output/gnuplot_data/plot_3d_1.pdf  used on input line ....
+(pdftex.def)             Requested size: 345.0pt x 344.99312pt.
+============================================================

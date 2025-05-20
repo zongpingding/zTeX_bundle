@@ -1,0 +1,1372 @@
+% ==> change zslide title box to rounded rectangle
+\InputIfFileExists{zlatex-cfg.tex}{}{}
+\documentclass[
+  layout={slide, aspect=16|9},
+]{../code/ztex}
+
+\title{Rounded corner style Title Page}
+\author{Eureka\quad and \quad \ztex{} Eureka}
+\date{\today}
+\begin{document}
+\maketitle
+
+\section{FIRST}
+The FIRST section.
+\end{document}
+
+
+
+
+
+
+
+
+
+% ==> ztex partial toc test
+\InputIfFileExists{zlatex-cfg.tex}{}{}
+\documentclass[
+  % class=l3doc,
+  class=book,
+]{../code/ztex}
+
+
+
+\begin{document}
+\ztexptoc[1]
+% \startcontents[sections]
+% \printcontents[sections]{}{1}{}
+
+\dotfill\par
+%%% book
+\chapter{A-1}
+\ztexptoc[2]
+
+\section{A-1-1}
+\subsection{A-1-1-1}
+\subsection{A-1-1-2}
+\section{A-1-2}
+
+\chapter{A-2}
+\section{A-2-1}
+\section{A-2-2}
+\chapter{A-3}
+
+
+%%% article
+% \section{A-1}
+% \subsection{A-1-1}
+% \subsection{A-1-2}
+% \subsubsection{A-1-2-1}
+% \subsubsection{A-1-2-2}
+% \subsection{A-1-3}
+
+% \section{A-2}
+% \section{A-3}
+\end{document}
+
+
+
+
+% ==> add dashed line feature
+\InputIfFileExists{zlatex-cfg.tex}{}{}
+\documentclass[
+  % layout=margin
+]{../code/ztex}
+\usepackage{lipsum}
+\setlength{\fboxsep}{0pt}
+
+
+\begin{document}
+\setlength{\unitlength}{2mm}
+\begin{picture}(27,16)(-1,-1)
+\path(-1,-1)(-1,15)(26,15)(26,-1)(-1,-1)
+% \linethickness{2pt}
+\drawline[-10](0,0)(10,7)(5,11)
+(0,7)(10,0)(10,7)(0,7)(0,0)(10,0)
+% \linethickness{3pt} \roundcap \beveljoin
+% \polyline(15.1,0.1)(25,7)(20,11)
+% (15,7)(25,0)(25,7)(15,7)(15,0)(25,0)
+\end{picture}
+\end{document}
+
+
+
+
+\InputIfFileExists{zlatex-cfg.tex}{}{}
+\documentclass[
+  % layout=margin
+]{../code/ztex}
+\usepackage{lipsum}
+\setlength{\fboxsep}{0pt}
+
+
+
+\begin{document}
+\section{Internal commands}
+\vskip1cm
+\def\poly#1#2{\put(0, 0){\polygon #1#2}}
+\makeatletter\ExplSyntaxOn
+\begin{zpic}[unit=2em]
+  % \poly {}{(1, 2)(2, 3)(4, 5)(4, 4)}
+  % \poly {*}{(1, 2)(2, 3)(4, 5)(4, 4)}
+  % \put (0, 0) {\polygon (0, 0)(1, 1)}
+  % \put (2, 0) {\__@@_pic_polygon:nn {}{(0, 0)(1, 1)}} % works
+  % \put (2, 0) {\__@@_pic_polyline:n {(0, 0)(1, 1)}}   % works
+  % \put (2, 0) {\__@@_pic_polyvector:n {(0, 0)(1, 1)}}   % works
+  % \zdraw[shift={2, 0}] (0, 0)(1, 1); % works
+  % \zdraw[shift={2, 0}, vector, cycle] (0, 0)(1, 1)(2, 1); % works
+  % \zdraw[shift={4, 0}, vector, fill] (0, 0)(1, 1)(2, 1); % works
+  % \zdraw[shift={6, 0}, vector, cycle, fill] (0, 0)(1, 1)(2, 1); % works
+  % \zdraw[shift={4, 0}, cycle, fill] (0, 0)(1, 1)(2, 1); % works
+  % \zdraw[fill, cycle] (0, 0)(1, 0)(1, 1)(0, 1);
+\end{zpic}
+\ExplSyntaxOff\makeatother
+
+
+\section{zpic env}
+\lipsum[1]
+
+XXX\rule{2cm}{2cm}%
+\begin{zpic}[unit=2cm, xoffset=1]%[unit=.5cm, height=2, width=1, xoffset=1, yoffset=1]
+  % 1. rectangle
+  \zrectangle[fill=gray!20, arc=.1](0, 0)(2, 1)
+  \zrectangle[draw=red, width=1pt](.5, .25)(1.5, .75)
+  % 2. line / vecter
+  \zline[width=3pt, draw=red](0, .5)(2, .5)
+  \zvector[>=pst](0, 0)(1, 1)
+  \zvector[draw=purple, width=2pt](1, 1)(2, 0)
+  \put (0, 0){\vector(2, 1){2}}
+  % 3. arc / circle
+  \zarc[draw=blue, end=45](0, 0) % fill=<empty>
+  \zarc[draw=blue, width=2pt, end=15, fill=, draw=red](0, 0)
+  \zcircle[radius=.25, fill, draw=blue](1, .5)
+  \zcircle[radius=.25, fill=orange, draw=none](1.5, 1)
+  \zcircle[radius=.25, fill=red, draw=](2, .5)
+  \put (2, 0){\circle{.5}}
+  % 4. ovaL
+  \put(1, 0){\oval(1, .5)[lb]}
+\end{zpic}
+
+
+\section{zdraw}
+XXX{\color{teal}\rule{4em}{4em}}
+\begin{zpic}[unit=2em]
+  \zdraw (0, 0)(1, 0)(1, 1)(0, 1);
+  \zdraw[] (0, 0)(1, 0)(1, 1)(0, 1);
+  \zdraw[cycle, shift={2, 0}]  (0, 0)(1, 0)(1, 1)(0, 1);
+  \zdraw[fill, shift={4, 0}]     (0, 0)(1, 0)(1, 1)(0, 1);
+  \zdraw[draw=red, width=1pt, shift={6, 0}] (0, 0)(1, 0)(1, 1)(0, 1);
+  \zdraw[vector, shift={8, 0}] (0, 0)(1, 0)(1, 1)(0, 1);
+  \zdraw[vector, cycle, shift={10, 0}] (0, 0)    (1, 0)(1, 1)(0, 1);
+  \zdraw[vector, fill, shift={12, 0}]    (0, 0)(1, 0)(1, 1)  (0, 1);
+  \zdraw[vector, cycle, fill, shift={14, 0}] (0, 0)  (1, 0)(1, 1)(0, 1);
+\end{zpic}
+
+
+% \mbox{}\vskip6em
+% XXX\rlap{\rule{1cm}{1cm}}\zrectangle[yoffset=1, xoffset=1, arc=.25]
+
+% \mbox{}\vskip6em
+% XXX\rlap{\zsquare[unit=.5cm, fill=black]}\zrectangle[unit=.5cm, yoffset=1, xoffset=1, arc=.125]
+
+% \vskip1em
+% XXX\zsquare[unit=1cm, fill=teal, width=.5, arc=.1]
+
+
+% \section{vector}
+% \setlength{\unitlength}{1cm}
+% \dotfill\par
+% \vskip4em
+% XXX%
+% \begin{picture}(0, 0)
+%   \zvector(0, 0) (1, 1)
+%   \zvector (1, 1) (2, 0)
+% \end{picture}
+
+
+% \def\P@radius{1}
+% \def\P@width{10}
+% \def\P@height{6}
+% \begin{picture}(8,4)
+%   \put(0,0){\vector(1,0){8}}  % x axis
+%   \put(0,0){\vector(0,1){4}}  % y axis
+%   \put(2,0){\line(0,1){3}}       % left side
+%   \put(4,0){\line(0,1){3.5}}     % right side
+%   \qbezier(2,3)(2.5,2.9)(3,3.25)
+%     \qbezier(3,3.25)(3.5,3.6)(4,3.5)
+%   \thicklines                 % below here, lines are twice as thick
+%   \put(2,3){\line(4,1){2}}
+%   \put(4.5,2.5){\framebox{Trapezoidal Rule}}
+% \end{picture}
+\end{document}
+
+
+
+
+
+
+
+% ===> l3keys bug patch
+\documentclass{article}
+
+\begin{document}
+\ExplSyntaxOn
+\cs_set_protected:Npn \__keys_initialise:n #1
+  {
+    \exp_after:wN \__keys_find_key_module:wNN
+      \l_keys_path_str \s__keys_stop
+      \l_keys_key_tl \l_keys_key_str
+    \tl_set_eq:NN \l_keys_key_tl \l_keys_key_str
+    \tl_set:Nn \l_keys_value_tl {#1}
+    \cs_if_exist:cTF { \c__keys_code_root_str \l_keys_path_str }
+      {
+        \str_clear:N \l__keys_inherit_str
+        \__keys_execute:nn \l_keys_path_str {#1}
+      }
+      {
+        \cs_if_exist:cT
+          { \c__keys_inherit_root_str \__keys_parent:o \l_keys_path_str }
+          { \__keys_execute_inherit: }
+      }
+  }
+
+\keys_define:nn { a } {
+  A .tl_set:N = \l__A_tl,
+  A .code:n = {PARENT~`a'\par}
+}
+\keys_define:nn { aa } {
+  AA .tl_set:N = \l__AA_tl,
+  AA .code:n = {PARENT~`aa'\par}
+}
+\keys_define:nn { } {
+  b .inherit:n = {a, aa},
+  % b .inherit:n = a,  % ---> works
+  % c .inherit:n = aa, % ---> works
+  % b .inherit:n = aa, % ---> error
+}
+\keys_define:nn { b } {
+  B .tl_set:N = \l__B_tl,
+  B .default:n = {DEFAULT}, % --> works
+  B .initial:n = {INITIAL}, % --> works
+}
+%% DOES NOT work EXAMPLE BEGIN
+% \keys_define:nn { } {
+%     b .inherit:n = aa,
+% }
+%% DOES NOT work EXAMPLE END
+\keys_set:nn { b } { A = x, AA=y }
+% \show \__keys_initialise:n
+\ExplSyntaxOff
+
+Hello
+\end{document}
+
+
+
+
+
+% ===> xetex primitive graphics
+\documentclass{article}
+\usepackage[scheme=plain]{ctex}
+\makeatletter
+\def\test{\XeTeXpicfile "logo.jpg"
+  height \f@size pt}
+\def\fSize{\f@size}
+\makeatother
+\setlength{\fboxsep}{0pt}
+
+\begin{document}
+
+\fbox{测}\fbox{试}:\raisebox{\dimexpr-\fontchardp\font`y}{\test}:
+(depth: \hbox{\the\dimexpr\fontchardp\font`y})
+
+\XeTeXuseglyphmetrics=0
+\fbox{测}\fbox{试}:\raisebox{\XeTeXglyphbounds4\fontcharwd\font`你}{\fbox{\test}}:
+\the\XeTeXglyphbounds4`节 (\fSize pt)\setbox0\hbox{测}\the\ht0 )
+\end{document}
+
+
+
+
+% affine transform for tikz
+\InputIfFileExists{zlatex-cfg.tex}{}{}
+\documentclass[
+  layout=margin
+]{../code/ztex}
+\setlength{\fboxsep}{0pt}
+\parindent0pt
+\usepackage{lipsum}
+\usepackage{graphicx}
+\makeatletter
+% \usepackage{newtxtext}
+
+
+\begin{document}
+\section{FIRST}
+\lipsum[1][1-3]
+\marginpar{
+  \sffamily\small\lipsum[2][2-4]\vskip1em
+  \ztoolboxaffine{\includegraphics[width=10em]{example-image-a}}{.5, 0, .25, .5}
+}
+\lipsum[1][1-3]
+
+
+\lipsum[2]
+\marginpar{
+  \sffamily\small\lipsum[2][2-4]\vskip1em
+  \centerline{
+    \includegraphics[width=10em]{example-image-a}
+  }
+  \hb@xt@\marginparwidth{\hfill XXX \hfill}
+  \label{fig:1}
+}
+
+\cref{fig:1}
+
+\end{document}
+
+
+
+% debug command: \ztoolboxaffine 
+\InputIfFileExists{zlatex-cfg.tex}{}{}
+\documentclass[
+  % hyper, 
+  % font={math=var-euler}
+]{../code/ztex}
+\setlength{\fboxsep}{0pt}
+
+\begin{document}
+% \fbox{XXX}\pdfsave\pdfsetmatrix{1 0 1 1}\rlap{XXX}\pdfrestore\par
+
+% \fbox{XXX}\fbox{\ztoolboxaffine[debug]{XXX}{1, 0, 1, 1}}\par
+
+% \ExplSyntaxOn\hbox_set:Nn \l_tmpa_box {XXX} \box_rotate:Nn \l_tmpa_box {45}\fbox{\box_use:N \l_tmpa_box}\ExplSyntaxOff
+
+
+\fbox{XXX}\pdfsave\pdfsetmatrix{1 .5 .5 1}\rlap{\rule{1em}{1em}}\pdfrestore\par
+
+XXX\ztoolboxaffine[]{\rule{1em}{1em}}{1, .5, .5, 1}XXX
+\end{document}
+
+
+
+% clean todo
+\InputIfFileExists{zlatex-cfg.tex}{}{}
+\documentclass[hyper, font={math=var-euler}]{../code/ztex}
+\zthmstyle{obsidian}
+\ztexloadlib{thm}
+\zthmcnt{share}
+\parindent0pt
+% \zthmiconset{
+%   theorem=$>$
+% }
+\makeatletter
+\def\seeTargets{%
+  \par\noindent\dotfill\\
+  \string\@currentHref\ = \meaning\@currentHref\\
+  \string\@currentHpage\ = \meaning\@currentHpage\\
+  \string\Hy@currentbookmarklevel\ = \meaning\Hy@currentbookmarklevel\\
+  \vskip3em
+}
+\makeatother
+
+\begin{document}
+\section{Test}
+Hello world.
+\zthmiconuse{theorem}
+\zthmiconuse{lemma}
+\seeTargets
+
+\dotfill\par
+\zthmtoc
+\seeTargets
+
+\vskip5em
+\begin{remark}[Pythagoras]
+  A simple theorem.
+  \begin{align}
+    \sum_{i=1}^{+\infty}{\int_{0}^{i}-\frac{1}{t}\mathrm{d}t} = \frac{\pi^2}{6}
+  \end{align}
+\end{remark}
+
+\begin{lemma}[Pythagoras]
+  A simple theorem.
+\end{lemma}
+\seeTargets
+
+\newpage
+\mbox{}\vskip10em
+New added theorem
+\zthmtocadd[subsection]{name=New:Added Thm ITEM}
+\seeTargets
+
+\newpage
+XXX
+\seeTargets
+\end{document}
+
+
+
+
+% ztex box shear transform
+\documentclass{article}
+\makeatletter\ExplSyntaxOn
+% REF:
+% 1. https://math.stackexchange.com/a/3521141/1235323
+% 2. https://math.stackexchange.com/a/281087/1235323
+\cs_new:Npn \__fp_to_rad:n #1
+  { \fp_eval:n {#1/pi*180} }
+\cs_new:Npn \__matrix_det:nnnn #1#2#3#4
+  {
+    \fp_eval:n { #1*#4 - #2*#3 }
+  }
+% (translation) + x-scale + y-scale + rotate
+\coffin_new:N \l__affine_trans_coffin
+\fp_new:N \g_affine_precision_fp
+\fp_set:Nn \g_affine_precision_fp {0.0001}
+\fp_new:N \l__affine_@@_a_fp
+\fp_new:N \l__affine_@@_b_fp
+\fp_new:N \l__affine_@@_c_fp
+\fp_new:N \l__affine_@@_d_fp
+\msg_set:nnn { module }{affine-det_zero}
+  {
+    current~determination~of~the~affine~transformation~
+    matrix~equals~to~zero,~give~up~this~transformation
+  }
+\cs_new:Npn \__affine_transformation:nnnnn #1#2#3#4#5
+  {% #1:box content; #2: a_11; #3: a_21; #4: a_12; #5: a_22
+    \hcoffin_set:Nn \l__affine_trans_coffin {#1}
+    %% check affine matrix determination 
+    \fp_compare:nNnT 
+      { abs(\__matrix_det:nnnn {#2}{#3}{#4}{#5}) } 
+        < { \g_affine_precision_fp }
+      { \prg_map_break:Nn \l__affine_matrix_det_zero 
+        { \msg_warning:nn { module }{affine-det_zero} }}
+    %% set matrix elements
+    \fp_set:Nn \l__affine_@@_a_fp {#2}
+    \fp_set:Nn \l__affine_@@_b_fp {#3}
+    \fp_set:Nn \l__affine_@@_c_fp {#4}
+    \fp_set:Nn \l__affine_@@_d_fp {#5}
+    %% get factors
+    \__box_affine_get_sx:     
+    \__box_affine_get_theta:  
+    \__box_affine_get_msy:    
+    \__box_affine_get_sy:     
+    \__box_affine_get_m:      
+    \__box_affine_get_Sx:     
+    \__box_affine_get_Sy:     
+    \__box_affine_get_phi:    
+    \__box_affine_get_omega:  
+    %% box transformation
+    \coffin_scale:Nnn \l__affine_trans_coffin 
+      { \l__box_affine_sx_fp }
+      { \l__box_affine_sy_fp }
+    \coffin_rotate:Nn \l__affine_trans_coffin 
+      { \__fp_to_rad:n {\l__box_affine_omega_fp} }
+    \coffin_scale:Nnn \l__affine_trans_coffin
+      { \l__box_affine_Sx_fp }
+      { \l__box_affine_Sy_fp }
+    \coffin_rotate:Nn \l__affine_trans_coffin
+      { \__fp_to_rad:n {\l__box_affine_phi_fp} }
+    \coffin_rotate:Nn \l__affine_trans_coffin 
+      { \__fp_to_rad:n {\l__box_affine_theta_fp} }
+    \prg_break_point:Nn \l__affine_matrix_det_zero { }
+    \coffin_typeset:Nnnnn \l__affine_trans_coffin
+      {l}{b}{0pt}{0pt}
+  }
+\NewDocumentCommand{\boxaffine}{m>{\SplitList{,}}m}
+  {% #1:content; #2:matrix
+    \__affine_transformation:nnnnn {#1}#2
+  }
+% internal calculating functions
+\fp_new:N \l__box_affine_sx_fp
+\cs_new:Nn \__box_affine_get_sx: 
+  {
+    \fp_set:Nn \l__box_affine_sx_fp 
+      { \fp_eval:n {sqrt(\l__affine_@@_a_fp^2 + \l__affine_@@_b_fp^2)} }
+  }
+\fp_new:N \l__box_affine_theta_fp 
+\cs_new:Nn \__box_affine_get_theta: 
+  {
+    \fp_set:Nn \l__box_affine_theta_fp 
+      { \fp_eval:n {atan(\l__affine_@@_b_fp/\l__affine_@@_a_fp)} }
+  }
+\fp_new:N \l__box_affine_msy_fp 
+\cs_new:Nn \__box_affine_get_msy: 
+  {
+    \fp_set:Nn \l__box_affine_msy_fp 
+      { \fp_eval:n {
+        \l__affine_@@_c_fp*cos(\l__box_affine_theta_fp) 
+        + 
+        \l__affine_@@_d_fp*sin(\l__box_affine_theta_fp)
+      } }
+  }
+\fp_new:N \l__box_affine_sy_fp
+\cs_new:Nn \__box_affine_get_sy: 
+  {
+    \bool_if:nTF
+      {
+        \fp_compare_p:nNn { abs(sin(\l__box_affine_theta_fp)) } 
+          < {\c_zero_fp + \g_affine_precision_fp}
+      }{
+        \fp_set:Nn \l__box_affine_sy_fp 
+          {
+            ( \l__affine_@@_d_fp - \l__box_affine_msy_fp*sin(\l__box_affine_theta_fp) )
+            / cos(\l__box_affine_theta_fp)
+          }
+      }{
+        \fp_set:Nn \l__box_affine_sy_fp 
+          {
+            ( \l__box_affine_msy_fp*cos(\l__box_affine_theta_fp) - \l__affine_@@_c_fp )
+            / sin(\l__box_affine_theta_fp)
+          }
+      }
+  }
+\fp_new:N \l__box_affine_m_fp
+\cs_new:Nn \__box_affine_get_m: 
+  {
+    \fp_set:Nn \l__box_affine_m_fp 
+      { \l__box_affine_msy_fp / \l__box_affine_sy_fp }
+  }
+\fp_new:N \l__box_affine_Sx_fp
+\fp_new:N \l__box_affine_Sy_fp
+\cs_new:Nn \__box_affine_get_Sx: 
+  {
+    \fp_set:Nn \l__box_affine_Sx_fp 
+      { sqrt(\l__box_affine_m_fp^2/4 + 1) - \l__box_affine_m_fp/2 }
+  }
+\cs_new:Nn \__box_affine_get_Sy: 
+  {
+    \fp_set:Nn \l__box_affine_Sy_fp 
+      { sqrt(\l__box_affine_m_fp^2/4 + 1) + \l__box_affine_m_fp/2 }
+  }
+\fp_new:N \l__box_affine_phi_fp
+\fp_new:N \l__box_affine_omega_fp
+\cs_new:Nn \__box_affine_get_phi: 
+  {
+    \fp_set:Nn \l__box_affine_phi_fp 
+      { -pi/4 - 1/2*atan(\l__box_affine_m_fp/2) }
+  }
+\cs_new:Nn \__box_affine_get_omega: 
+  {
+    \fp_set:Nn \l__box_affine_omega_fp 
+      { pi/4 - 1/2*atan(\l__box_affine_m_fp/2) }
+  }
+\ExplSyntaxOff\makeatother
+
+
+\begin{document}
+Original Text: XXX\par
+$\det(A) = 0$: \boxaffine{XXX}{0, 0, 0, 2}\par  % det(A) = 0
+Unit Matrix: \boxaffine{XXX}{1, 0, 0, 1}\par    % unit matrix
+Scale Matrix: \boxaffine{XXX}{2, 0, 0, 2}\par   % scale
+$x$-scale Matrix: \boxaffine{XXX}{2, 0, 0, 1}\par % x-scale
+$y$-scale Matrix: \boxaffine{XXX}{1, 0, 0, 2}\par % y-scale
+$x$-shear Matrix: \boxaffine{XXX}{1, 0, 1, 1}\par % x-sheae
+$y$-shear Matrix: \boxaffine{XXX}{1, 1, 0, 1}\par % y-sheae
+Graphics: \rule{2em}{2em}~\boxaffine{\rule{2em}{2em}}{1, 0, .5, 1}\par
+pdfsetmatrix: \rule{2em}{2em}~\pdfsave\pdfsetmatrix{1 0 .5 1}\rlap{\rule{2em}{2em}}\pdfrestore 
+
+% det(A) = 0 --> warning:
+% Package module Warning: current determination of the affine transformation
+% (module)                matrix equals to zero, give up this transformation
+\end{document}
+
+
+
+
+\InputIfFileExists{zlatex-cfg.tex}{}{}
+\documentclass[]{../code/ztex}
+\usepackage{graphicx}
+\def\image{\includegraphics[width=10em]{example-image-a}}
+\ExplSyntaxOn\makeatletter
+% % \hshearbox{vertical_prescale_times_shearfactor}{one_divide_by_shearfactor}{content}
+% % an initial vertical downscale is often necessary for a 3d projection
+% \newcommand{\hshearbox}[3]{\scalebox{0.866025}[#2]{\rotatebox{210}%
+%   {\scalebox{1.73205}[-0.57735]{\rotatebox{60}{\scalebox{-1.1547}[#1]{#3}}}}}}
+% % \vshearbox{horizontal_prescale_times_shearfactor}{one_divide_by_shearfactor}{content}
+% % an initial horizontal downscale is often necessary for a 3d projection
+% \newcommand{\vshearbox}[3]{\scalebox{#2}[0.866025]{\rotatebox{210}%
+%   {\scalebox{-0.57735}[1.73205]{\rotatebox{60}{\scalebox{#1}[-1.1547]{#3}}}}}}
+\makeatother\ExplSyntaxOff
+\parindent0pt
+
+
+\begin{document}
+Original Text: XXX
+% \hshearbox{1}{.5}{HELLO}
+% \ExplSyntaxOn
+% \fp_eval:n { atan(1) }:% output radian 
+% \fp_eval:n { sin(pi/2) }% input radian
+
+% \fp_set:Nn \l_tmpa_fp { pi/4 }
+% \fp_use:N \l_tmpa_fp
+% \ExplSyntaxOff
+
+
+%%%%%%%     BEGIN DEBUG    %%%%%%%
+% \ztoolboxaffine{XXX}{0, 0, 0, 2}\par % det=0, works
+% \ztoolboxaffine{XXX}{1, 0, 0, 1}\par % unit matrix --> works
+% \ztoolboxaffine{XXX}{2, 0, 0, 2}\par % scale --> works
+% \ztoolboxaffine{XXX}{2, 0, 0, 1}\par % x-scale --> works
+% \ztoolboxaffine{XXX}{1, 0, 0, 2}\par % y-scale --> works
+% \ztoolboxaffine{XXX}{1, 0, 1, 1}\par % x-shear --> works
+% \ztoolboxaffine{XXX}{1, 1, 0, 1}\par % y-shear --> works
+\image~\ztoolboxaffine{\image}{1, 0, .5, 1}
+%%%%%%%     END DEBUG      %%%%%%%
+\end{document}
+
+
+
+
+% ztex box content align test
+\documentclass{article}
+\usepackage[showframe, textwidth=18cm]{geometry}
+\usepackage{graphicx}
+\usepackage{xcolor}
+\usepackage{lipsum}
+\ExplSyntaxOn\makeatletter
+\cs_set_protected:Npn \__item_align:nnn #1#2#3
+  {% #1:cmd, #2:width, #3:object
+    \hb@xt@#2{
+      \tl_map_inline:nn {#3} 
+        {
+          \seq_put_right:No \l_tmpa_seq {\exp_not:N #1{##1}}
+        } 
+      \edef\seq@count{\seq_count:N \l_tmpa_seq}
+      \seq_map_inline:Nn \l_tmpa_seq
+        {
+          \edef\item@width{\dim_eval:n {#2/(\seq@count+1)}}
+          \hskip\item@width\clap{##1}
+        }\hskip\item@width\hss
+    }
+  }
+\NewDocumentCommand\itemAlign{O{}mm}
+	{
+		\__item_align:nnn {#1}{#2}{#3}
+	}
+\makeatother\ExplSyntaxOff
+\parindent0pt
+
+\begin{document}
+\itemAlign{\linewidth}{A}\par
+\itemAlign{\linewidth}{AA}\par
+\itemAlign{\linewidth}{{(A)}{(A)}{(A)}}\par
+
+\vskip6em
+\dotfill\par
+\def\imageA{\includegraphics[width=5em]{example-image-a}}
+\def\imageB{\includegraphics[width=5em]{example-image-b}}
+\itemAlign{\linewidth}{\imageA}\par
+\itemAlign{\linewidth}{\imageA\imageA}\par
+\itemAlign{\linewidth}{\imageB\imageB\imageB}\par
+\itemAlign{\linewidth}{\imageB\imageB\imageB\imageB}
+
+\vskip6em
+\dotfill\par
+\def\parA{\parbox[c]{12em}{\lipsum[1][1-2]}}
+\def\parB{\parbox[c]{12em}{\lipsum[1][3-5]}}
+\itemAlign[\sffamily]{\linewidth}{\parA}\par
+\itemAlign[\color{red}]{\linewidth}{\parA\parA}\par
+\itemAlign[\fbox]{\linewidth}{\parB\parB\parB}
+\end{document}
+
+
+
+
+\InputIfFileExists{zlatex-cfg.tex}{}{}
+\documentclass[
+]{../code/ztex}
+\parindent0pt
+\makeatletter
+
+
+\begin{document}
+Hello world.\rlap{A}B
+
+
+\zboxitemalign[type=tower]{\linewidth}{A}\par
+\zboxitemalign[type=tower]{\linewidth}{AA}\par
+\zboxitemalign[type=tower]{\linewidth}{AAA}\par
+\zboxitemalign[type=tower]{\linewidth}{AAAA}\par
+\zboxitemalign[type=tower]{\linewidth}{AAAAA}\par
+
+\dotfill\par
+\ExplSyntaxOn
+\def\custom@type{
+  \edef\seq@count{\seq_count:N \l__ztool_boxitem_seq}
+  \seq_map_inline:Nn \l__ztool_boxitem_seq
+    {
+      \edef\item@width{\dim_eval:n {\total@width/(\seq@count+1)}}
+      \hskip\item@width\clap{##1}
+    }\hskip\item@width\hss
+}
+\ExplSyntaxOff
+\def\Blue#1{\textcolor{blue}{\sffamily #1}}
+\zboxitemalign[type=custom, cmd=\Blue, custom=\custom@type]{\linewidth}{AAAAAA}\par
+\end{document}
+
+
+
+
+% ztex check box and \item color in manual
+\documentclass{article} 
+\usepackage{xcolor}
+\usepackage{ctex}
+
+
+% REF: https://tex.stackexchange.com/q/247681/294585
+% *: wont fix
+% [<arg>]: done
+% [<blank>]: undone
+\usepackage{enumitem}
+\newlist{todolist}{itemize}{2}
+\setlist[todolist]{label=\checkmark}
+\usepackage{pifont, amssymb}
+\newcommand{\done}{\rlap{\raisebox{0.3ex}{\hspace{0.4ex}\tiny \ding{52}}}$\square$}
+\newcommand{\undone}{$\square$}
+\newcommand{\wontfix}{\rlap{\raisebox{0.3ex}{\hspace{0.4ex}\scriptsize \ding{56}}}$\square$}
+
+
+\let\olditem\item
+\RenewDocumentCommand{\item}{so}
+  {
+    \IfValueTF{#2}
+      {\color{black}\def\checkmark{\IfBooleanTF{#1}{\wontfix}{\done}}% 
+        \olditem\IfBooleanF{#1}{\IfValueT{#2}{#2-}已完成:}\color{gray}}
+      {\color{black}\def\checkmark{\IfBooleanTF{#1}{\wontfix}{\undone}}%
+        \olditem}
+  }
+
+
+\begin{document}        
+\begin{todolist}
+  \item undone text
+  \item*[2025-05-10] wont fixed + done: I want this to be blue
+  \item[2025-05-10] done: another text
+  \item* done: one more
+\end{todolist}
+
+HELLO:  \undone{} -- 未完成; \done{} -- 已完成; \wontfix{} -- 不会完成
+\end{document}
+
+
+
+
+% ztex slide nav bug
+\InputIfFileExists{zlatex-cfg.tex}{}{}
+\documentclass[
+  hyper,
+  layout={slide, aspect=12|9}, 
+]{../code/ztex}
+\zslidethemeuse[
+  UL = {text=},
+  UR={text=\zslidenavsym}
+]{AnnArborDefault}
+\makeatletter
+\def\seeTargets{%
+  \par\noindent\dotfill\\
+  \string\@currentHref\ = \meaning\@currentHref\\
+  \string\@currentHpage\ = \meaning\@currentHpage\\
+  \string\Hy@currentbookmarklevel\ = \meaning\Hy@currentbookmarklevel\\
+  \vskip3em
+}
+% \makeatother
+
+\title{Test hyper symbol}
+\author{Eureka}
+\date{\today}
+\begin{document}
+\maketitle
+\section{FIRST}
+% AAAA \zslidenavsym{}\par 
+\dotfill\par 
+% \hyper@link{link}{zslide@FIRST.1}{TEST HYPER-1}\par
+% \hyper@link{link}{zslide@FIRST.2}{TEST HYPER-2}\par
+% \hyper@link{link}{zslide@FIRST.3}{TEST HYPER-3}\par
+
+\dotfill\par
+% \seeTargets
+
+\hyper@link{link}{zslide@FIRST.3}{TEST HYPER}
+
+\newpage
+BBBB 
+\newpage
+CCCC
+
+% \hyper@anchor{zslide@\FirstMark{zslide-left}.3}
+
+\section{SECOND}
+AAAA-2
+\newpage
+BBBB-2
+\newpage
+CCCC-2
+
+\end{document}
+
+
+
+% ztex slide test
+\InputIfFileExists{zlatex-cfg.tex}{}{}
+\documentclass[
+  % lang=cn,
+  layout={slide, aspect=12|9, theme=AnnArborSpruce}, 
+  classOption={12pt}
+]{../code/ztex}
+\usepackage{xcoffins}
+\usepackage{lipsum}
+% \usepackage{zhlipsum}
+% \usepackage[hshift=0mm,vshift=0mm]{fgruler}
+\def\isCJK#1{\ifnum`#1>19968 is CJK\else not CJK\fi}
+
+\title{Test \ztex{} AOh}
+\author{Eureka}
+\date{\today}
+\begin{document}
+\maketitle
+
+\section{FIRST}
+If $Y$ is a Banach space, an equivalent definition is that the embedding operator
+(the identity) $i:X\to Y$ is a compact operator.When applied to functional analysis, this
+version of compact embedding is usually used with Banach spaces of functions. Several of
+the Sobolev embedding theorems are compact embedding theorems. When an embedding is not 
+compact, it may possess a related, but weaker, property of cocompactness.
+
+\lipsum[1]
+
+
+\section{International}%{国际形势}
+The following term ``Compact embedding'' can be defined in Topology spaces or in
+Normed spaces. In the first case: we can simply think that $X$ is compactly embedded in $Y$.
+
+% \zhlipsum[1]
+
+% \newpage
+\zslideframetitle{New Frame TITLE}%{ 新的 Frame Title}
+% \par\vspace*{3em}\par
+% 派则指细流金义月无采列，走压看计和眼提
+% 问接，作半极水红素支花。果都济素各半走，意红接器长标，等杏近乱共。层题提万
+% 任号，信来查段格，农张雨。省着素科程建持色被什，所界走置派农难取眼，并细杆
+% 至志本。
+\lipsum[1]
+
+
+\newpage
+\lipsum[1]
+% 派则指细流金义月无采列，走压看计和眼提
+% 问接，作半极水红素支花。果都济素各半走，意红接器长标，等杏近乱共。层题提万
+% 任号，信来查段格，农张雨。省着素科程建持色被什，所界走置派农难取眼，并细杆
+% 至志本。
+
+\section{TEXT HEIGHT}
+\ExplSyntaxOn
+\NewCoffin \encoff
+\NewCoffin \cncoff
+\NewCoffin \mathcoff
+\NewCoffin \mixcoff
+% \SetHorizontalCoffin \encoff {\Large Hello}
+% \SetHorizontalCoffin \cncoff {\Large 国际形势}
+% \SetHorizontalCoffin \mathcoff {$\sum\int$}
+% \SetHorizontalCoffin \mixcoff {\Large 中文 Hello English}
+\ExplSyntaxOff
+
+\TypesetCoffin \encoff (0pt, 0pt)\hspace{4em}
+% \TypesetCoffin \cncoff (0pt, 2pt)
+
+% \isCJK{A} \isCJK{你}
+
+\end{document}
+
+
+
+
+
+\documentclass{article}
+
+
+\begin{document}
+\ExplSyntaxOn
+\cs_new:Npn \__aaa_bbb:n #1 
+  {HELLO~#1}
+
+% \__aaa_bbb:n {WORLD}
+\__aaa_bbb_:n {WORLD}
+\ExplSyntaxOff
+\end{document}
+
+
+
+
+% test ztex after explcheck
+\InputIfFileExists{zlatex-cfg.tex}{}{}
+\documentclass[layout={slide}]{../code/ztex}
+\zthmnew{Zaxiom, Ztheorem=Thm|{HTML}{a0d911}, Zproposition=Prop|blue}
+\zthmnew[proof]{Zproof, Zexample=EXAMPLE|red, Zsolution=Solution|}
+\zthmstyle{background}
+
+\begin{document}
+\begin{Zproof}[zthmnew-1]
+  This is a Zproof zthmnew-1.
+  \end{Zproof}
+  \begin{Zexample}[zthmnew-2]
+  This is a Zexample zthmnew-2.
+  \end{Zexample}
+  \begin{Ztheorem}[zthmnew-3]
+  This is a Ztheorem zthmnew-3
+  \end{Ztheorem}
+\end{document}
+
+
+
+% test thm module
+\InputIfFileExists{zlatex-cfg.tex}{}{}
+\documentclass[
+  fancy,
+  class=book,
+  lang=cn, 
+]{../code/ztex}
+\makeatletter
+\zthmstylenew{
+  styleA={
+    begin={
+      \begin{tcolorbox}[
+        enhanced jigsaw,
+        breakable, sharp corners, 
+        colframe=\thm@tmp@color, 
+        top=2ex, boxrule=2pt, toprule=0pt, 
+        fonttitle=\large\bfseries, colback=white, 
+        attach boxed title to top left={xshift=3em,yshift=-\tcboxedtitleheight/2},
+        coltitle=\thm@tmp@color, title={\zthmname~\zthmnumber},
+        boxed title style={%
+          empty, left=1pt, right=1pt, bottom=0pt,
+          overlay={%
+            \draw[color=\thm@tmp@color,line width=2pt,line cap=round]
+            ([yshift=-1pt]frame.west)--
+            ++(-2.9em,0) ([yshift=-1pt]frame.east)--
+            ++(3em,0);
+          }
+        },
+      ]
+    },
+    end = {\end{tcolorbox}},
+  }
+}
+\makeatother
+\zthmstyle{styleA}
+\zthmlang{en}
+\usepackage{zhlipsum}
+\usepackage{lipsum}
+
+
+\begin{document}
+\mainmatter
+\chapter{FIRST CHAP}
+\section{FIRST}
+\lipsum[1][1-2]
+\begin{definition}[DEF-TEST]\label{def:A}
+  \lipsum[1][1-2]
+  \begin{align}
+    \sum_{i=1}^{+\infty}{\int_{0}^{i}-\frac{1}{t}\mathrm{d}t} = \frac{\pi^2}{6}
+  \end{align}
+  \lipsum[1][3-5]
+\end{definition}
+\lipsum[1][3-5] -- \cref{thm:A}.
+
+
+\vspace*{13em}
+\section{SECOND}
+\begin{theorem}[THM-TEST]\label{thm:A}
+  \zhlipsum[1]
+\end{theorem}
+\lipsum[1][3-5] -- \cref{def:A}.
+\end{document}
+
+
+
+
+
+
+% ==> ztex font module test
+\InputIfFileExists{zlatex-cfg.tex}{}{}
+\documentclass[lang=cn]{../code/ztex}
+% \documentclass{ctexart}
+% \usepackage{lipsum}
+% \usepackage{zhlipsum}
+% \setmainfont{Times New Roman}
+% \ztexset{mathSpec={font=mathpazo}}
+% \zfontset{
+%   sysfont,
+%   % doc = lmm,
+%   % text=times,
+%   math = euler
+% }
+\zfontfamilynew[CJK]{
+  cmd = YaHei, 
+  name = msyh.ttc,
+  path = ./Fonts/, 
+  % feat = { bd=*bd } 
+}
+\zfontfamilynew{
+  cmd = Arial,
+  name = arial.ttf,
+  path = ./Fonts/,
+  feat = {sl=*i}
+}
+% % do NOT 'file name' and  'font name' in one decalre.
+% \zfontfamilynew{
+%   cmd = SourceCodePro,
+%   name = Source Code Pro,
+%   feat = { bd=Source Code Pro Bold }
+% }
+% \newfontfamily\TEST{Times New Roman}
+%   [
+%     BoldFont = Times New Roman,
+%     ItalicFont = Times New Roman
+%   ]
+% \xeCJKsetup{EmboldenFactor=8}
+% \setCJKfamilyfont{NewYH}{msyh.ttc}
+%   [
+%     Path = ./Fonts/,
+%     AutoFakeBold = 12, % works
+%     % AutoFakeBold = true,
+%     % EmboldenFactor = 1, % do NOT make sense, when just use this.
+%     % BoldFont = msyhbd.ttc
+%   ]
+
+% \setCJKfamilyfont{NewYHII}{msyh.ttc}
+%   [
+%     Path = ./Fonts/,
+%     % AutoFakeBold = 8, % works.
+%     % 
+%     AutoFakeBold = true,
+%     % EmboldenFactor = 8, 
+%     % NOTE:
+%     % 1. do NOT make sense, when just use this.
+%     % 2. can NOT use this arg in local.
+%   ]
+
+
+\begin{document}
+\ExplSyntaxOn
+% \def\bdnum{\fp_use:N \g__xeCJK_embolden_factor_fp}
+% \fp_gset:Nn \g__xeCJK_embolden_factor_fp {10}
+\ExplSyntaxOff
+
+% System: {你好世界,\bfseries 你好世界}.
+
+% {\CJKfamily{NewYH}\bdnum{} 你好世界,\bfseries 你好世界.}
+
+% {\CJKfamily{NewYHII}\bdnum{} 你好世界,\bfseries 你好世界.}
+
+{\YaHei 你好世界,\bfseries 你好世界.}
+
+
+{\Arial Hello world,\slshape Hello world.}
+
+
+% {Hello world,\SourceCodePro Hello world,\bfseries Hello world.}
+\end{document}
+
+
+
+
+
+% ==> box scale
+\InputIfFileExists{zlatex-cfg.tex}{}{}
+\documentclass[lang=en, hyper]{../code/ztex}
+\usepackage{minted}
+% \usepackage[T4,T1]{fontenc}
+% \newcommand{\USP}[1]{{\fontencoding{T4}\selectfont\char"20}}
+\ExplSyntaxOn\makeatletter
+\setlength\fboxsep{0pt}
+% \NewDocumentCommand{\ztexscatter}{O{\use:n}mm}
+%   {% #1:item cmd, #2:width; #3:object
+%     \hb@xt@#2{
+%       \tl_map_inline:nn {#3} 
+%         {
+%           \seq_put_right:No \l__ztex_scatter_seq {#1{##1}}
+%         } 
+%       \seq_use:Nn \l__ztex_scatter_seq { \hfill }
+%     }
+%     \seq_clear:N \l__ztex_scatter_seq
+%   }
+% \seq_new:N \l__ztex_scatter_seq
+% \cs_generate_variant:Nn \tl_set:Nn {No}
+% \gdef\ztoolWdScale#1{\textcolor{blue}{\ztool_onlyset_to_wd:nn {1em}{#1}}}
+\gdef\ztoolWdScale#1{\textcolor{blue}{#1}}
+\ExplSyntaxOff
+
+\ExplSyntaxOn
+\clist_new:N \l__ztex_doc_source_clist
+\clist_clear:N \l__ztex_doc_source_clist
+\cs_set:Npn \__ztex_doc_source:nn #1#2 
+  {
+    \clist_map_inline:nn {#2}
+      {
+        \clist_put_right:Nn \l__ztex_doc_source_clist 
+          {
+            \subsubsection{##1}
+            \inputminted{latex}{../code/#1/ztex.#1.##1.tex}
+          }
+      }
+  }
+\newcommand{\inputZTeXSource}[2][module]
+  {
+    \__ztex_doc_source:nn {#1}{#2}
+    \clist_use:Nn \l__ztex_doc_source_clist   
+      { \newpage }
+  }
+\ExplSyntaxOff
+
+
+\begin{document}
+\section{\ztex{} and \ztex*}
+\zTeX*{} introduction. Introduction to \zTeX{} and \ztex*.
+
+Hello, this is \zlatex{} and \zlatex*{}. 
+
+
+Space token:{\usefont{OT1}{cmtt}{m}{n}\asciispace}
+% Space token: \USP{ }.
+% \ztexscatter{5em}{mmm}
+
+
+\underline{%
+  \zboxitemalign[cmd=\ztoolWdScale, type=scatter]{9em}{{Tom}{Amy}{Jennery}}%
+}
+
+\underline{%
+  \zboxitemalign[cmd=\ztoolWdScale, type=right]{9em}{{Tom}{Amy}{Jennery}}%
+}
+
+
+\underline{%
+  \zboxitemalign[cmd=\ztoolWdScale, type=center]{9em}{Tom Amy\ Jenn ery}%
+}
+
+\underline{%
+  \zboxitemalign[cmd=\ztoolWdScale, type=left]{9em}{{Tom}{Amy}{Jennery}}%
+}
+
+
+% \inputZTeXSource{box, font}
+% \inputZTeXSource[library]{fancy, alias}
+
+\ExplSyntaxOn
+% \def\zTeX{
+%   \texorpdfstring{
+%     \ztool_set_to_wd:nn {7pt}{
+%       \ztool_rotate:nn {89.25}{\(\aleph\)}
+%     }\kern-1.5pt\hbox{}\TeX{}
+%   }{zTeX}
+% }
+
+
+% \maketitle
+% \ExplSyntaxOn
+% \ztool_onlyset_to_wd:nn {2em}{A}\par
+% \ztool_onlyset_to_wd:nn {2em}{AA}\par
+% \ztool_onlyset_to_wd:nn {2em}{AAA}\par
+% \ztool_onlyset_to_wd:nn {2em}{AAAA}\par
+% \ztool_onlyset_to_wd:nn {2em}{AAAAAA}\par
+
+% \ztool_onlyset_to_ht:nn {2.5em}{\fbox{\vbox{\hbox{A}}}}\quad
+% \ztool_onlyset_to_ht:nn {2.5em}{\fbox{\vbox{\hbox{A}\hbox{A}}}}\quad
+% \ztool_onlyset_to_ht:nn {2.5em}{\fbox{\vbox{\hbox{A}\hbox{A}\hbox{A}}}}\quad
+% \ztool_onlyset_to_ht:nn {2.5em}{\fbox{\vbox{\hbox{A}\hbox{A}\hbox{A}\hbox{A}}}}
+
+
+% box height test
+% \hbox_set:Nn \l_tmpa_box {\huge\bfseries Hello}
+% \dim_set:Nn \l_tmpa_dim { \box_ht:N \l_tmpa_box }
+% \dim_show:N \l_tmpa_dim
+% luatex:15.32524pt; xetex:15.32524pt % ==> no bug
+
+
+% \hbox_set:Nn \l_tmpb_box {
+%   \parbox[b][][r]{10em}{
+%       {\huge\bfseries Hello}\\[0pt]
+%       {\huge\bfseries world}
+%     }
+% }
+% \dim_set:Nn \l_tmpb_dim { \box_ht:N \l_tmpb_box }
+% \dim_show:N \l_tmpb_dim
+% luatex:31.7667pt; xetex:31.7667pt % ==> no bug
+
+
+% \long\def\formatTitle{{\huge\bfseries \zTeX{} 用户手册}}
+% \long\def\formatAuthor{{\Large\bfseries World}}
+% \newcommand\titleUpperBox[2][0pt]{
+%   \parbox[b][#2][r]{\l_tmpa_dim}{
+%     {\formatTitle}\\[#1]
+%     {\formatAuthor}
+%   }
+% }
+% \ztool_get_ht_plus_dp:Nn \l_tmpb_dim {\titleUpperBox{}}
+% \dim_show:N \l_tmpb_dim % luatex:80.14294pt; xetex:\l_tmpb_dim=75.46144pt % bug
+
+
+% \hbox_set:Nn \l_tmpa_box {\huge\bfseries 用户手册}
+% \dim_set:Nn \l_tmpa_dim { \box_ht:N \l_tmpa_box }
+% \dim_show:N \l_tmpa_dim
+% luatex:19.43259pt; xetex:16.73853pt % bug !!!!
+\ExplSyntaxOff
+\end{document}
+
+
+% \documentclass{article}
+% \usepackage[T1]{fontenc}
+
+% \begin{document}
+% \ExplSyntaxOn
+% \cs_set_eq:NN \cctabend \cctab_end:
+% \cctab_const:Nn \g__ztex_keyval_cctab 
+% {
+%   \cctab_select:N \c_document_cctab
+%   \char_set_catcode_active:n {124}
+% }
+% \cctab_begin:N \g__ztex_keyval_cctab
+% \gdef|{XXX}
+
+% ||\par
+% \cctabend
+% ||
+% \ExplSyntaxOff
+% \end{document}
+
+
+% ==> format l3doc syntax description
+\InputIfFileExists{zlatex-cfg.tex}{}{}
+\documentclass[class=l3dox]{../code/ztex}
+% \documentclass[twoside]{l3dox}
+% \usepackage{xcolor}
+% \usepackage{geometry}
+\AtBeginDocument{
+  % \DeleteShortVerb \"
+  \DeleteShortVerb \|
+}
+\catcode`>=13\gdef>{\dotfill}
+% \catcode`|=13
+% \AddToHook{env/function/begin}{\def|{\textup{\string|}}}
+% \AddToHook{env/function/after}{\catcode`|=12}
+% key-value env 
+\ExplSyntaxOn
+\cs_new_protected:Npn \__codedoc_function_ztex:nnw #1#2
+  {
+    \__codedoc_function_typeset_start:
+    \__codedoc_function_init:
+    \tl_set:Nn \l__codedoc_macro_argument_tl {#2}
+    \keys_set:nn { l3doc/function } {#1}
+    \__codedoc_names_get_seq_ztex:nN {#2} \l__codedoc_names_seq
+    \__codedoc_names_parse:
+    \__codedoc_function_typeset:
+    \__codedoc_function_reset:
+    \__codedoc_function_descr_start:w
+  }
+\cs_new_protected:Npn \__codedoc_names_get_seq_ztex:nN #1#2
+  {
+    \bool_if:NTF \l__codedoc_names_verb_bool
+      {
+        \seq_clear:N #2
+        \seq_put_right:No #2 { {#1} }
+      }
+      {
+        \tl_set:Nn \l__codedoc_tmpa_tl {#1}
+        \tl_remove_all:Ne \l__codedoc_tmpa_tl
+          { \exp_not:N \obeyedline \c_percent_str }
+        \tl_remove_all:Ne \l__codedoc_tmpa_tl
+          { \exp_not:N \obeyedline }
+        \__kernel_tl_set:Nx \l__codedoc_tmpa_tl { \l__codedoc_tmpa_tl }
+        \tl_remove_all:Ne \l__codedoc_tmpa_tl
+          { \iow_char:N \^^M \c_percent_str }
+        \tl_remove_all:Ne \l__codedoc_tmpa_tl { \tl_to_str:n { ^ ^ A } }
+        \tl_remove_all:Ne \l__codedoc_tmpa_tl { \iow_char:N \^^I }
+        \tl_remove_all:Ne \l__codedoc_tmpa_tl { \iow_char:N \^^M }
+        \__codedoc_detect_internals:N \l__codedoc_tmpa_tl
+        \__codedoc_replace_at_at:N \l__codedoc_tmpa_tl
+        \tl_set:Ne \l__codedoc_tmpa_tl 
+          { 
+            \clist_map_function:NN \l__codedoc_tmpa_tl 
+              \__ztex_add_parent_key:n
+          }
+        \exp_args:NNe \seq_set_from_clist:Nn #2
+          { \l__codedoc_tmpa_tl }
+      }
+  }
+\cs_set:Npn \__ztex_add_parent_key:n #1 
+  {
+    \textcolor{gray}{\l__codedoc_parent_key_ztex_tl/}
+    \tl_trim_spaces:n {#1},
+  }
+\cs_set_eq:NN \cctabend \cctab_end:
+\cctab_const:Nn \g__ztex_keyval_cctab 
+{
+  \cctab_select:N \c_document_cctab
+  \char_set_catcode_active:n {124}
+}
+\DeclareDocumentEnvironment { keyval } { O{} +m }
+  { 
+    \cctab_begin:N \g__ztex_keyval_cctab
+    \__codedoc_function_ztex:nnw {#1} {#2} 
+  }
+  { 
+    \__codedoc_function_end: 
+    % \cctab_end: 
+  }
+\group_begin:
+\catcode`|=\active
+\gdef\ztexbar{\def|{\textup{YYY}}}
+\group_end:
+\DeclareDocumentEnvironment { syntax } { }
+  { 
+    \cctab_begin:N \g__ztex_keyval_cctab
+    % \catcode`|=\active
+    \ztexbar
+    \__codedoc_syntax:w 
+  }{
+    \__codedoc_syntax_end:
+    \cctab_end: 
+    \ignorespacesafterend
+  }
+\ExplSyntaxOff
+
+
+\begin{document}
+\tableofcontents
+\section{Hello}
+Hello world.
+\begin{function}[added=2024-04-27]{\testA}
+  \begin{syntax}
+    \cs{testA}\oarg{arg1}\meta{\upshape{AAA\string|BBB}}
+    \cs{testA}\oarg{arg1}\meta{AAA|BBB}
+  \end{syntax}
+  A simple test for verb short hand, |.
+\end{function}
+
+
+
+Key value, |, env test:
+\begin{keyval}[parent=lang]{en, cn, en cn}
+\begin{syntax}
+en > value forbidden 
+en cn > value forbidden 
+cn > initial value:\textcolor{red}{9999}
+\end{syntax}
+document class automatically processes and loads corresponding packages based
+on user-specified options. Therefore, the packages and commands loaded by the z\TeX{}
+document class vary depending on
+\end{keyval}
+
+
+\newpage
+Hello world II.
+\begin{function}[added=2024-04-27]{\testB}
+  \begin{syntax}
+    \cs{testB}\Arg{arg1}\meta{\upshape{AAA\string|BBB}}
+    \cs{testB}\parg{arg1}\meta{AAA|BBB}
+  \end{syntax}
+  A simple test for verb short hand.
+\end{function}
+\end{document}

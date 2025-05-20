@@ -1,0 +1,10 @@
+This is a generated file for the l3build validation system.
+Don't change this file in any respect.
+============================================================
+TEST 1: ztikz-module-python-pycode
+============================================================
+\l__xsim_file_contents_iow=\write...
+runsystem(python ztikz_output/python_data/TEST.py)...executed.
+(ztikz_output/python_data/TEST.py.out)
+Writing 'pycode' environment source to ztikz_output/python_data/TEST.py
+============================================================

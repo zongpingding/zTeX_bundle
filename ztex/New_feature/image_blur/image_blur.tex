@@ -1,0 +1,27 @@
+%% Example 1 %%%
+\documentclass[tikz]{standalone}
+%\usepackage{luatex85} %if used with lualatex
+\usepackage{graphicx}
+%Parameters:
+%- at position
+%- blur parameter
+%- image name
+\newcommand\blurredimage[3]{
+    \node[opacity=0.2] at (#1) {\includegraphics{#3}};
+    \node[opacity=0.2] at (#1+ #2, #2) {\includegraphics{#3}};
+    \node[opacity=0.2] at (#1+-#2, #2) {\includegraphics{#3}};
+    \node[opacity=0.2] at (#1+-#2,-#2) {\includegraphics{#3}};
+    \node[opacity=0.2] at (#1+ #2,-#2) {\includegraphics{#3}};
+}
+% ----------------------------------------------------------------
+\begin{document}
+\begin{tikzpicture}
+\blurredimage{0.0,0.0}{.2}{../Pics/087.png}
+\begin{scope}
+    \clip (-10,-10) rectangle (20,20);
+    \node[] at (0,0) {\includegraphics{../Pics/087.png}};
+    \node[color=white] at (0, 0) {\scalebox{10}{Test Image Blur}};
+\end{scope}
+\end{tikzpicture}
+
+\end{document}

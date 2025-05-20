@@ -1,0 +1,5 @@
+\begin {ctikzpicture}{Mand}{HHJKHJKHJ}\__hook_next env/ctikzpicture/before \@ifundefined {ctikzpicture}{\def \reserved@a {\@latex@error {Environment ctikzpicture undefined}\@eha }}{\def \reserved@a {\def \@currenvir {ctikzpicture}\edef \@currenvline {\on@line }\@execute@begin@hook {ctikzpicture}\csname ctikzpicture\endcsname }}\@ignorefalse \begingroup \@endpefalse \reserved@a {Mand}{HHJKHJKHJ}
+  \node[draw,rounded corners,fill=orange!50](A){BBB \AAA{} bbb.};
+  \draw[->] (0, 0) -- (1, 1)node {\BBB};
+\end{ctikzpicture}
+% 

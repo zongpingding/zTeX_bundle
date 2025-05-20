@@ -1,0 +1,14 @@
+\input{regression-test.tex}
+\documentclass{article}
+\usepackage{ztikz}
+\ztikzloadlibrary{wolfram}
+
+
+\begin{document}
+\START
+\TEST{ztikz-module-wolfram-wolframSolve}{
+  \wolframSolve{a x + y == 7 && b x - y == 1}[x, y]
+  \[\wolframResult[raw][,\;]\]
+}
+\END
+\end{document}

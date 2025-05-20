@@ -1,0 +1,16 @@
+\input{regression-test.tex}
+\documentclass{article}
+\usepackage{ztikz}
+\ztikzloadlibrary{cache, wolfram}
+
+
+\begin{document}
+\START
+\OMIT
+\wolfram{1+1}
+\TIMO
+\TEST{ztikz-module-wolfram-wolframResult}{
+  \wolframResult
+}
+\END
+\end{document}
