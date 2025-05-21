@@ -31,7 +31,7 @@
 \clist_const:Nn \c__ztex_lang_support_clist    {en, cn}
 \tl_const:Nn \c__ztex_class_name_tl            {ztex}
 \tl_const:Nn \c__ztex_class_version_tl         {1.0.1}
-\tl_const:Nn \c__ztex_class_date_tl            {2025/05/12}
+\tl_const:Nn \c__ztex_class_date_tl            {2025/05/20}
 \tl_const:Nn \c__ztex_class_description_tl     {A~pre-release~latex3~document~class~for~article,~book,~or~slides;
                                                 Support~languages:\clist_use:Nn \c__ztex_lang_support_clist{,~}}
 
@@ -392,21 +392,17 @@
   {\ztex_msg_error:n {option-language}}
 \str_case:VnF \g__ztex_lang_str {
   {en} { 
-    \sys_if_engine_xetex:TF {
-      \ztex_hook_preamble_last:n {
-        \bool_if:NF \g__ztex_sysfont_cfg_bool {
-          \ztex_msg_set:nn {compile-engine-pdftex}
-            {Current~compile~engine~is~XETEX,~For~better~output,~use~PDFTEX~instead.}
-          \ztex_msg_warn:n {compile-engine-pdftex}
+    \sys_if_engine_xetex:T 
+      {
+        \ztex_hook_preamble_last:n {
+          \bool_if:NF \g__ztex_sysfont_cfg_bool {
+            \ztex_msg_set:nn {compile-engine-pdftex}
+              {Current~compile~engine~is~XETEX,~For~better~output,~use~PDFTEX~instead.}
+            \ztex_msg_warn:n {compile-engine-pdftex}
+          }
         }
       }
-    }{\RequirePackage[utf8]{inputenc}}
     \RequirePackage[T1]{fontenc}
-    \RequirePackage[english]{babel}
-    \ztex_hook_preamble_last:n {
-      \RequirePackage{csquotes}
-      \RequirePackage{microtype}
-    }
   }
   {cn} {
     \sys_if_engine_pdftex:T {
@@ -543,8 +539,3 @@
 \let\ztex\zTeX 
 \let\zLaTeX\zTeX
 \let\zlatex\zTeX
-
-
-% ==> define constant
-\dim_new:N \c_ztex_quad_dim 
-\ztool_gget_wd:Nn \c_ztex_quad_dim {\quad}

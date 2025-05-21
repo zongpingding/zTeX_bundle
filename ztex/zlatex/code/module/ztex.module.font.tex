@@ -1,4 +1,4 @@
-\ProvidesExplFile{ztex.module.font.tex}{2025/05/02}{1.0.1}{font~module~for~ztex}
+\ProvidesExplFile{ztex.module.font.tex}{2025/05/20}{1.0.1}{font~module~for~ztex}
 
 
 %%%%%     font module for ztex     %%%%%
@@ -14,6 +14,18 @@
   { 
     \ztex_font_set:n {#1}
   }
+
+
+%%%%    BEGIN OPTIONAL FONT CONFIG   %%%%
+% \sys_if_engine_pdftex:T 
+%   { \RequirePackage[utf8]{inputenc} }
+% \RequirePackage[english]{babel}
+% \ztex_hook_preamble_last:n 
+%   {
+%     \RequirePackage{csquotes}
+%     \RequirePackage{microtype}
+%   }
+%%%%    END OPTIONAL FONT CONFIG   %%%%
 
 
 % ==> font symbols patch

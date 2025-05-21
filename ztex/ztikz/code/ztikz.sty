@@ -31,6 +31,8 @@
 %                        basic tools
 % ----------------------------------------------------------------------
 \RequirePackage{ztool}
+\RequirePackage{graphicx}
+\__ztool_load_library:n {shell-escape, file-io}
 \cs_new_protected:Npn \ztikz_hook_preamble_last:n #1
   { \AddToHook{env/document/before}{#1} }
 \cs_new_protected:Npn \ztikz_label_hook_preamble_last:nn #1#2
@@ -68,16 +70,40 @@
       }
     }
   }
-\NewDocumentCommand\ztikzloadlib{m}{
-  \__ztikz_load_library:n {#1}\ExplSyntaxOff
-}
+\NewDocumentCommand\ztikzloadlib{m}
+  {
+    \__ztikz_load_library:n {#1}
+    \ExplSyntaxOff
+  }
+
+
+
+% ----------------------------------------------------------------------
+%                        Init ztikz's Environment
+% ----------------------------------------------------------------------
+\ztool_shell_mkdir:n {ztikz_output/}
+\tl_const:Nn \g__ztikz_scripts_path_tl  {ztikz_output/scripts}
+\NewDocumentCommand\ztikzMkdir{m}{ \ztool_shell_mkdir:n {#1} }
+\cs_new_protected:Npn \ztikz_term_info:n #1 
+  {
+    \iow_now:Nn \c_term_iow {#1}
+  }
+\cs_new_protected:Npn \ztikz_term_info:e #1 
+  {
+    \iow_now:Ne \c_term_iow {#1}
+  }
+
+
+
+% ----------------------------------------------------------------------
+%                          ztikz's options
+% ----------------------------------------------------------------------
 \cs_new_protected:Npn \ztikz_keys_define:n #1
   { \keys_define:nn { ztikz }{ #1 } }
 \cs_new_protected:Npn \ztikz_keys_define:nn #1#2
-  { \keys_define:nn { ztikz / #1}{ #2 } }
+  { \keys_define:nn { ztikz / #1 }{ #2 } }
 \cs_new_protected:Npn \ztikz_keys_set:nn #1#2
   { \keys_set:nn { ztikz / #1 }{ #2 } }
-
 \ztikz_keys_define:n 
   {
     library           .multichoice:,
@@ -140,24 +166,7 @@
 
 
 % ----------------------------------------------------------------------
-%                        Init ztikz's Environment
-% ----------------------------------------------------------------------
-\ztool_shell_mkdir:n {ztikz_output/}
-\tl_const:Nn \g__ztikz_scripts_path_tl  {ztikz_output/scripts}
-\NewDocumentCommand\ztikzMkdir{m}{ \ztool_shell_mkdir:n {#1} }
-\cs_new_protected:Npn \ztikz_term_info:n #1 
-  {
-    \iow_now:Nn \c_term_iow {#1}
-  }
-\cs_new_protected:Npn \ztikz_term_info:e #1 
-  {
-    \iow_now:Ne \c_term_iow {#1}
-  }
-
-
-
-% ----------------------------------------------------------------------
-%                          ztikz's cache mechanism 
+%                         cache and other commands 
 % ----------------------------------------------------------------------
 \cs_generate_variant:Nn \ior_open:Nn { Ne }
 \cs_generate_variant:Nn \iow_open:Nn { Ne }
@@ -175,11 +184,26 @@
           { ne } { p, T, F, TF }
       }
   }
+% sed script
+\ztikz_keys_define:nn { sed-script }
+  {
+    file  .tl_set:N  = \l__ztikz_sed_script_file_tl,
+    line  .int_set:N = \l__ztikz_sed_script_line_int,
+    ori   .tl_set:N  = \l__ztikz_sed_script_ori_tl,
+    new   .tl_set:N  = \l__ztikz_sed_script_new_tl,
+  }
+\cs_new:Npn \__ztikz_sed_script:nnn #1#2#3 
+  {% #1: file; #2: line; #3:new
+    \ztool_replace_file_line:nnn 
+      {\g__ztikz_scripts_path_tl/#1}
+      {#2}{#3}
+  }
+\cs_generate_variant:Nn \__ztikz_sed_script:nnn {eee}
+\cs_generate_variant:Nn \__ztikz_sed_script:nnn {nne}
+% hash change norun 
 \bool_new:N \g__ztikz_hashchg_norun_bool
 \bool_gset_false:N \g__ztikz_hashchg_norun_bool
-
-
-% other 
+% ztik logo 
 \NewDocumentCommand\TikZ{}{Ti\textcolor{orange}{\textit{k}}Z}
 \NewDocumentCommand\zTikZ{}
   {

@@ -3,7 +3,6 @@
 
 
 % ==> init cache
-% TODO: HASH form: 'HASH-<index>'
 \clist_if_in:NnT \g__ztikz_library_loaded_clist {basic}
   {
     \ztool_shell_mkdir:n {ztikz_output/tikz_data/}
@@ -34,8 +33,7 @@
     \seq_gremove_duplicates:N \g__ztikz_file_hash_seq
     \ztikz_term_info:e 
       {
-        \iow_newline: CURRENT~FILE:'#2.wls'
-        \iow_newline: HASH:\l__ztikz_current_hash_tl
+        \iow_newline: CURRENT~FILE's~HASH:\l__ztikz_current_hash_tl
       }
     \seq_if_in:NVTF \g__ztikz_file_hash_seq \l__ztikz_current_hash_tl 
       {
@@ -66,7 +64,7 @@
     { \seq_use:Nn \g__ztikz_file_hash_seq {#2} }
 }
 % hash changed --> NOT run again ( need to implement )
-% hash not changed --> run again ( not consider )
+% hash not changed --> run again ( need to implement )
 \NewDocumentCommand{\ztikzHashchgNorun}{O{txt}m}
   {
     \bool_gset_true:N \g__ztikz_hashchg_norun_bool

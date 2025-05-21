@@ -9,10 +9,6 @@
 \tl_new:N \l__ztikz_wolfram_tmp_arg_tl
 \tl_new:N \l__ztikz_wolfram_tmp_res_tl
 \seq_new:N \l__ztikz_wolfram_tmp_res_seq
-\int_new:N   \g__ztikz_wolfram_text_index_int
-\int_new:N   \g__ztikz_wolfram_picture_index_int
-\int_gadd:Nn \g__ztikz_wolfram_text_index_int {1}
-\int_gadd:Nn \g__ztikz_wolfram_picture_index_int {1}
 \ior_new:N \g__ztikz_wolfram_ior 
 \iow_new:N \g__ztikz_wolfram_iow
 \cs_generate_variant:Nn \xsim_file_write_start:nn {ne}
@@ -39,7 +35,6 @@
       }
     \__ztikz_wolfram_tmp_file_handle:n {#1}
     \ztool_append_to_file:ee {\wolfram@tmp@file.wls}{Export["\wolfram@tmp@file.#2", #3]}
-    \int_gadd:Nn \g__ztikz_wolfram_text_index_int {1}
     \ztikz_hash_if_change:neTF { \c_false_bool }{ \l__ztikz_current_hash_tl }   
       {
         \edef\wolfram@cmd
@@ -94,7 +89,6 @@
         \exp_after:wN \includegraphics \exp_after:wN 
           [\graphics@dimen]{\wolfram@tmp@file.pdf}
       }
-    \int_gadd:Nn \g__ztikz_wolfram_picture_index_int {1} 
   }
 
 % --> wolfram simple code

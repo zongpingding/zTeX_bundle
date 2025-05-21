@@ -1,9 +1,9 @@
-\ProvidesExplFile{ztex.module.page.tex}{2025/05/05}{1.0.1}{page~module~for~ztex}
+\ProvidesExplFile{ztex.module.page.tex}{2025/05/20}{1.0.1}{page~module~for~ztex}
 
 
 %%%%%     page module for ztex     %%%%%
 \RequirePackage{geometry}
-\RequirePackage{sidenotes}
+% TODO: replace 'sidenotes' by 'minipage'
 \cs_set:Npn \__ztex_layout_setup:n #1
   {% cus pagelayout cmd '\cs{setuplayout}' is 
   % kind of different from '\cs{geometry}'.
