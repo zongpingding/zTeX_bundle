@@ -905,46 +905,70 @@ entering extended mode
 \end{DocExample}
 
 
-\begin{function}[added=2025-05-15]{pyfig}
+\begin{function}[updated=2025-05-21]{pyfig}
   \begin{syntax}
-    \cs{begin}\zarg{pyfig}\oarg{spec}\marg{file} 
+    \cs{begin}\zarg{pyfig}\marg{output file} 
     ~~~~\meta{plot code} 
     \cs{end}\zarg{pyfig}
   \end{syntax}
-  此环境用于调用 Python 进行绘图, 具有缓存机制; \meta{spec} 用于设置图片的的排版参数, 默认为 \verb|width=.75\linewidth|;
-  \meta{file} 用于设置当前代码片段对应的文件名. 该命令返回的结果为: \texttt{\cs{includegraphics}\oarg{spec}\marg{file}.pdf},
-  用户可以将此命令嵌入 \env{figure} 或 \env{table} 等浮动体环境中. \par 
-  \textbf{注意}: 针对不同的 \env{pyfig} 环境请使用不同的 \meta{file} 值; 用户不需要在代码末尾添加 \verb|plt.savefig()| 命令,
-  \ztikz{} 会自动处理相关的问题. 代码在抄录过程中会保留用户的缩进格式, 从行首开始抄录, 所以请不要添加多余的行首缩进.  
+  此环境用于调用 Python 进行绘图, 不会返回任何结果, 该环境具有缓存机制;
+  \meta{output file} 用于指定代码 \meta{plot code} 的输出文件名, \meta{output file} 中无需给出输出文件路径, 但需指定输
+  出文件的拓展名;\par 
+  \textbf{注意}: 针对不同的 \env{pyfig} 环境建议使用不同的 \meta{output file} 值; 用户不需要在代码末尾添加 \verb|plt.savefig()| 命令,
+  \ztikz{} 会自动处理相关的问题. 代码在抄录过程中会保留用户的缩进格式, 从行首开始抄录, 所以请不要添加多余的行首缩进;
+  请确保 \meta{output file} 与后续环境代码中的输出文件名保持一致, 否则会报错.
 \end{function}
+
+
+\begin{function}[added=2025-04-21]{\pyfigOutputFile}
+  此命令将返回 \env{pyfig} 环境运行输出的文件名, 用户可以使用 \cs{input} 
+  或 \cs{includegraphics} 之类的命令导入该文件.
+\end{function}
+
 \begin{DocExample}*
-\begin{pyfig}[width=.5\linewidth]{pycode.py}
+\begin{pyfig}{sin_graph.pdf}
 import matplotlib
 matplotlib.use('Agg')
 from matplotlib import pyplot as plt
 import numpy as np
 x = np.linspace(0, 2*np.pi, num = 80)
 y = np.sin(x)*np.cos(x)+.2
-plt.plot(x, y)
+plt.plot(x, y, 'o')
 \end{pyfig}
+\begin{center}
+  \includegraphics[width=.5\linewidth]{\pyfigOutputFile}
+\end{center}
 \end{DocExample}
 
 
-\begin{function}[added=2025-05-15]{pycode}
+\begin{function}[added=2025-05-21]{pycode}
   \begin{syntax}
-  \cs{begin}\zarg{pycode}\marg{file} 
+  \cs{begin}\zarg{pycode}\marg{output file} 
   ~~~~\meta{any python code} 
   \cs{end}\zarg{pycode}
   \end{syntax}
-  此环境会将其内的代码抄录到 \meta{file} 中, 然后 \ztikz{} 会自动调用 Python 执行该文件, 但其不会返回任何结果;
-  该环境的执行结果保存在文件 \texttt{\meta{file}.out} 中, 用户需要使用 \cs{input} 命令自行导入. 此环境同样具有
-  cache 机制. \textbf{注意}: 代码在抄录过程中会保留用户的缩进格式, 从行首开始抄录, 所以不要过度使用缩进.
+  此环境用于调用 Python 执行环境中的 \meta{any python code}, 不会返回任何结果, 该环境具有缓存机制; 
+  \meta{output file} 用于指定该环境代码的输出文件名, \meta{output file} 中无需给出输出文件路径, 但需指定输出文件的拓展名; 
+  随后 \ztikz{} 会自动调用 Python 执行该文件，该环境的运行结果保存于文件 \cs{pycodeOutputFile} 中, 用户后续仅需
+  导入该文件即可;\par 
+  \textbf{注意}: 针对不同的 \env{pycode} 环境建议使用不同的 \meta{output file} 值; 代码在抄录过程中会保留用户的缩进格式, 
+  从行首开始抄录, 所以不要过度使用缩进; 请确保 \meta{output file} 与后续环境代码中的输出文件名保持一致, 否则会报错.
 \end{function}
-下面是一个关于 \env{pycode} 环境的简单使用示例, \file{table.py} 对应的内容请参见 \cref{imple:code-data}.
-\begin{DocExample}*[@@]
-\input{./table.py}
-\end{DocExample}
 
+
+\begin{function}[added=2025-04-21]{\pycodeOutputFile}
+  此命令将返回 \env{pycode} 环境运行输出的文件名, 用户可以使用 \cs{input} 
+  或 \cs{includegraphics} 之类的命令导入该文件.
+\end{function}
+
+
+下面是一个关于 \env{pycode} 环境的简单使用示例, \file{table.py.txt} 对应的文件内容请参见 \cref{imple:code-data}.
+\begin{DocExample}*[@@]
+\input{./table.py.txt}
+\begin{center}
+  \input{\pycodeOutputFile}
+\end{center}
+\end{DocExample}
 
 
 \clearpage
@@ -1468,13 +1492,13 @@ but this may be changed to degrees using the command set angles.
 \end{DocExample}
 
 
-\def\exampleUR{\textcolor{red}{\sffamily table.py}}
+\def\exampleUR{\textcolor{red}{\sffamily table.py.txt}}
 \begin{DocExample}[@@]
-\begin{pycode}{pycode-1.py}
+\begin{pycode}{pycode_table.txt}
 import numpy as np
 
 # write file
-with open ('./ztikz_output/python_data/pycode-1.py.out', 'w') as file:
+with open ('pycode_table.txt', 'w') as file:
   file.write("\\begin{tabular}{p{3cm}ccc}\n")
   file.write("\\hline\n")
   file.write("number/function & $\\sin$ & $\\cos$ & $\\tan$\\\\\n")

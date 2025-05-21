@@ -1,0 +1,73 @@
+\documentclass{article} % 
+\usepackage{graphicx}
+\usepackage[T1]{fontenc}
+\usepackage[library={cache, python}]{ztikz}
+\newcommand{\calc}[1]{\sympy{#1}}
+
+\begin{document}
+Hello world
+
+
+$2^{64} = \calc{2**64}$
+
+\begin{tabular}{ccc}
+\hline 
+$x$ & $2x+1$ & $x^2+4x+ 4$ \\  
+\calc{1} & \calc{2*1+1} & \calc{1**2+4*1+4} \\
+\calc{2} & \calc{2*2+1} & \calc{2**2+4*2+4} \\
+\calc{3} & \calc{2*3+1} & \calc{3**2+4*3+4} \\
+\calc{4} & \calc{2*4+1} & \calc{4**2+4*4+4} \\
+\hline
+\end{tabular}
+
+
+\begin{pyfig}{sin_graph.pdf}
+import matplotlib
+matplotlib.use('Agg')
+from matplotlib import pyplot as plt
+import numpy as np
+x = np.linspace(0, 2*np.pi, num = 80)
+y = np.sin(x)*np.cos(x)+.2
+plt.plot(x, y, 'o')
+\end{pyfig}
+\begin{center}
+  \includegraphics[width=.75\linewidth]{\pyfigOutputFile}
+\end{center}
+
+
+\begin{pycode}{anything.pdf}
+import matplotlib
+matplotlib.use('Agg')
+from matplotlib import pyplot as plt
+import numpy as np
+x = np.linspace(0, 2*np.pi, num = 80)
+y = np.sin(x)*np.cos(x)+.2
+plt.plot(x, y, 'r*')
+plt.savefig('anything.pdf')
+\end{pycode}
+\begin{center}
+  \includegraphics[width=.75\linewidth]{\pycodeOutputFile}
+\end{center}
+
+
+\begin{pycode}{pycode_table.txt}
+import numpy as np
+
+# write file
+with open ('pycode_table.txt', 'w') as file:
+  file.write("\\begin{tabular}{p{3cm}ccc}\n")
+  file.write("\\hline\n")
+  file.write("number/function & $\\sin$ & $\\cos$ & $\\tan$\\\\\n")
+  file.write("\\hline\n")
+  for i in range(1, 16):
+    file.write(
+      f"${i}$ & ${np.around(np.sin(i), decimals=4)}$ &  ${np.around(np.cos(i), decimals=4)}$ & ${np.around(np.tan(i), decimals=4)}$\\\\\n"
+    )
+
+  file.write("\\hline\n")
+  file.write("\\end{tabular}\n")
+\end{pycode}
+\begin{center}
+  \input{\pycodeOutputFile}
+\end{center}
+\end{document}

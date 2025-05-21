@@ -7,7 +7,6 @@
 %                          package options 
 % ----------------------------------------------------------------------
 \ExplSyntaxOn
-\RequirePackage{l3keys2e}
 % key-value alias
 \cs_new_protected:Npn \zslide_define_option:n
   { \keys_define:nn { zslide / option } }
@@ -40,7 +39,7 @@
   serif / all       .code:n       = { \usefonttheme{serif} },
   serif / math      .code:n       = { \usefonttheme[onlymath]{serif} },
 }
-\ProcessKeysOptions { zslide / option }
+\ProcessKeyOptions [ zslide / option ]
 
 % language
 \msg_new:nnn {zslide}{compile-engine-pdftex}{Current~compile~engine~is~XETEX,~use~PDFTEX~instead.}
