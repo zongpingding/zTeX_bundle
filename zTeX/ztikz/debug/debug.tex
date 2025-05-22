@@ -1,104 +1,117 @@
-% \documentclass{article}
-% \usepackage{tabularray}
-% \NewDashStyle {AAA} {on .4pt off 2pt}
-% \ExplSyntaxOn
-% % \cs_set_protected:Npn \__tblr_dash_style_make_boxes:nnn #1 #2 #3
-% %   {
-% %     \dim_set:Nn \l_tmpa_dim { #2 + #3 }
-% %     \tl_set:Nn \l__tblr_h_tl { \hbox_to_wd:nn }
-% %     \tl_put_right:Nx \l__tblr_h_tl { { \dim_use:N \l_tmpa_dim } }
-% %     \tl_put_right:Nn \l__tblr_h_tl
-% %       {
-% %         { \hss \vbox:n { \hbox_to_wd:nn {#2} {} \hrule height \rulewidth } \hss }
-% %       }
-% %     \prop_gput:NnV \g__tblr_defined_hdash_styles_prop {#1} \l__tblr_h_tl
-% %     \prop_show:N \g__tblr_defined_hdash_styles_prop
-% %     \tl_set:Nn \l__tblr_v_tl { \vbox_to_ht:nn }
-% %     \tl_put_right:Nx \l__tblr_v_tl { { \dim_use:N \l_tmpa_dim } }
-% %     \tl_put_right:Nn \l__tblr_v_tl
-% %       {
-% %         { \vss \hbox:n { \vbox_to_ht:nn {#2} {} \vrule width \rulewidth } \vss }
-% %       }
-% %     \prop_gput:NnV \g__tblr_defined_vdash_styles_prop {#1} \l__tblr_v_tl
-% %     %\prop_log:N \g__tblr_defined_vdash_styles_prop
-% %   }
-% \ExplSyntaxOff
+% ==> stop development sign
+\InputIfFileExists{ztikz-cfg.tex}{}{}
+\documentclass{../../zlatex/code/ztex}
 
-% \begin{document}
 
-% \centering
-% \begin{tblr}{colspec = {c|c|[AAA]c|c}}
-% \hline
-% \textbf{???} & \SetCell[c=2]{c}\textbf{???} && \textbf{??}\\
-% \hline
-% ?? & ?? & ?? & ??\\
-% \hline
-% \SetCell[r=3]{c}??? & ?? & ?? & \SetCell[r=3]{c}???\\
-% \hline
-% & ?? & ?? & \\
-% \hline
-% & ?? & ?? & \\
-% \hline
-% ?? & ?? & ?? & ??\\
-% \hline
-% \SetCell[r=6]{c}?? & ?? & ?? & \SetCell[r=6]{c}?? \\
-% \hline
-% & ?? & ?? & \\
-% \hline
-% & ?? & ?? & \\
-% \hline
-% & ?? & ?? & \\
-% \hline
-% & ?? & ?? & \\
-% \hline
-% & ?? & ?? & \\
-% \hline
-% ?? & ?? & ?? & ??\\
-% \hline
-% \SetCell[r=3]{c}?? & ?? & ?? & \SetCell[r=3]{c}?? \\
-% \hline
-% & ?? & ?? & \\
-% \hline
-% & ?? & ?? & \\
-% \hline
-% \end{tblr}
-% \end{document}
+\title{TEST INTERFACE}
+\author{Eureka}
+\date{\today}
+\begin{document}
+\ExplSyntaxOn
+\zpagemask[position={(0pt, .25\zph)}, anchor=l]{
+  \rlap{\color{gray!25}\rule{\zpw}{6em}}
+  \hcoffin_set:Nn \l_tmpa_coffin {\sffamily\Large\color{black!75} For some special rejal ahdj hdah cdhj chjhjahd.}
+  \coffin_typeset:Nnnnn \l_tmpa_coffin {hc}{vc}{.5\zpw}{3em}
+}
+\ExplSyntaxOff
+\maketitle
+
+Hello world
+\end{document}
 
 
 
 
+% ==> force to run and vice versa test
+\InputIfFileExists{ztikz-cfg.tex}{}{}
+\documentclass{article}
+\usepackage[margin=2.5cm]{geometry}
+\usepackage{ztikz}
+\ztikzloadlib{cache, python, wolfram}
+
+
+\begin{document}
+% \ztikzForceToRun
+% A simple TEST: $1 + 1 = \sympy{1+1}$;
+
+
+% \ztikzForceToSkip
+% A simple TEST II: $1 + 2 = \sympy{1+6}$;
+
+
+% % \ztikzForceToRun
+% \begin{pycode}{anything.pdf}
+% import matplotlib
+% matplotlib.use('Agg')
+% from matplotlib import pyplot as plt
+% import numpy as np
+% x = np.linspace(0, 2*np.pi, num = 80)
+% y = np.sin(x)*np.cos(x)+.2
+% plt.plot(x, y, 'r*')
+% plt.savefig('anything.pdf')
+% \end{pycode}
+% \begin{center}
+%   \includegraphics[width=.75\linewidth]{\pycodeOutputFile}
+% \end{center}
+
+
+% \ztikzForceToRun
+% \ztikzForceToSkip % BUG
+% \begin{pycode}{anything.pdf}
+% import matplotlib
+% matplotlib.use('Agg')
+% from matplotlib import pyplot as plt
+% import numpy as np
+% x = np.linspace(0, 2*np.pi, num = 80)
+% y = np.sin(x)*np.cos(x)+.2
+% plt.plot(x, y, 'b-o')
+% plt.savefig('anything.pdf')
+% \end{pycode}
+% \begin{center}
+%   \includegraphics[width=.75\linewidth]{\pycodeOutputFile}
+% \end{center}
+
+% \ztikzForceToRun
+\ztikzForceToSkip
+\wolfram{1+3} 
+% hash of '1+2': 2221D09747385E6860E62CD13C7727F4
+1 + 1 = \wolframResult
+\end{document}
 
 
 
-% \documentclass{article}
-% \begin{document}
-% % \newcommand{\MyFunction}[1]{#1---#1}
-% \newcommand{\MyFunction}[1]{(#1)}
 
-% \ExplSyntaxOn
 
-% \cs_new:Nn \__zpding_ii:n { \MyFunction { #1 } , }
-% \cs_new:Nn \__zpding_i:n 
-%   {{ 
-%     \clist_use:en { \clist_map_function:nN { #1 } \__zpding_ii:n  } 
-%       { & } 
-%   },}
-% \clist_set:Nn \l_tmpa_clist { { a1, a2, a3 } , { b1, b2, b3 } }
-% \cs_generate_variant:Nn \clist_use:nn { en }
-% \tl_set:Ne \l_tmpb_tl
-%   {
-%     \clist_use:en
-%       { \clist_map_function:NN \l_tmpa_clist \__zpding_i:n }
-%       { \\ }
-%   }
-% \tl_show:N \l_tmpb_tl % > \l_tmpb_tl=(a1)&(a2)&(a3)\\(b1)&(b2)&(b3).
 
-% % \begin{tabular}{ccc}
-% % \l_tmpb_tl
-% % \end{tabular}
+\documentclass{article}
+\begin{document}
+% \newcommand{\MyFunction}[1]{#1---#1}
+\newcommand{\MyFunction}[1]{(#1)}
 
-% \ExplSyntaxOff
-% \end{document}
+\ExplSyntaxOn
+
+\cs_new:Nn \__zpding_ii:n { \MyFunction { #1 } , }
+\cs_new:Nn \__zpding_i:n 
+  {{ 
+    \clist_use:en { \clist_map_function:nN { #1 } \__zpding_ii:n  } 
+      { & } 
+  },}
+\clist_set:Nn \l_tmpa_clist { { a1, a2, a3 } , { b1, b2, b3 } }
+\cs_generate_variant:Nn \clist_use:nn { en }
+\tl_set:Ne \l_tmpb_tl
+  {
+    \clist_use:en
+      { \clist_map_function:NN \l_tmpa_clist \__zpding_i:n }
+      { \\ }
+  }
+\tl_show:N \l_tmpb_tl % > \l_tmpb_tl=(a1)&(a2)&(a3)\\(b1)&(b2)&(b3).
+
+% \begin{tabular}{ccc}
+% \l_tmpb_tl
+% \end{tabular}
+
+\ExplSyntaxOff
+\end{document}
 
 
 

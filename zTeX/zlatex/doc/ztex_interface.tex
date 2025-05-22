@@ -16,6 +16,13 @@
 \begin{document}
 \thmCommandRestore
 % cover
+\ExplSyntaxOn
+\zpagemask[position={(0pt, .25\zph)}, anchor=l]{
+  \rlap{\color{gray!25}\rule{\zpw}{6em}}
+  \hcoffin_set:Nn \l_tmpa_coffin {\sffamily\Large\color{black!75} 由于本人时间有限, 目前此文档类的开发暂停.}
+  \coffin_typeset:Nnnnn \l_tmpa_coffin {hc}{vc}{.5\zpw}{3em}
+}
+\ExplSyntaxOff
 \newgeometry{hmargin=1cm, vmargin=1.5in}
   \maketitle
 \restoregeometry
@@ -252,6 +259,18 @@
     \item \texttt{lang = cn}: \pkg{fontspec}, \pkg{ctex};
   \end{itemize}
 \end{keyval}
+
+\noindent{\sffamily\color{red}\textbf{NOTE}:\cls{ztex} 文档类目前已移除如下配置依赖:}
+\begin{DocExample}
+\sys_if_engine_pdftex:T 
+  { \RequirePackage[utf8]{inputenc} }
+\RequirePackage[english]{babel}
+\ztex_hook_preamble_last:n 
+  {
+    \RequirePackage{csquotes}
+    \RequirePackage{microtype}
+  }
+\end{DocExample}
 
 \begin{keyval}[rEXP, updated=2024-11-05]{hyper}
   \begin{syntax}

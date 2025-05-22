@@ -1,4 +1,4 @@
-\usepackage{ztool}
+\usepackage[shell-escape, file-io, box, zdraw]{ztool}
 \ztexloadlib{alias, thm}
 \ztexset{
   toc={
@@ -170,25 +170,24 @@
 
 % ==> print ztex source
 \ExplSyntaxOn
-\clist_new:N \l__ztex_doc_source_clist
-\clist_clear:N \l__ztex_doc_source_clist
+\clist_new:N \l__ztool_doc_source_clist
+\clist_clear:N \l__ztool_doc_source_clist
 \cs_set:Npn \__ztex_doc_source:nn #1#2 
   {
     \clist_map_inline:nn {#2}
       {
-        \clist_put_right:Nn \l__ztex_doc_source_clist 
+        \clist_put_right:Nn \l__ztool_doc_source_clist 
           {
-            \subsubsection{##1}
-            \inputminted{latex}{../code/#1/ztex.#1.##1.tex}
+            \inputminted{latex}{../code/#1/ztool.#1.##1.tex}
           }
       }
   }
 \newcommand{\inputZTeXSource}[2][module]
   {
     \__ztex_doc_source:nn {#1}{#2}
-    \clist_use:Nn \l__ztex_doc_source_clist   
+    \clist_use:Nn \l__ztool_doc_source_clist   
       { \newpage }
-    \clist_clear:N \l__ztex_doc_source_clist
+    \clist_clear:N \l__ztool_doc_source_clist
   }
 \ExplSyntaxOff
 \newcommand{\ztexDocPrintSource}{%
@@ -200,6 +199,8 @@
       \textcolor{gray}{\small\oldstylenums{\arabic{FancyVerbLine}}}}
     \setminted{ bgcolor=, linenos=true, numbers=both, texcomments, escapeinside=«» }
     \inputminted{latex}{../../ztool/code/ztool.sty}
+    \clearpage
+    \inputZTeXSource[library]{shell-escape, file-io, box, zdraw}
   }
 }
 

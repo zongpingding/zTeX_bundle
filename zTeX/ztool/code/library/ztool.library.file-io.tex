@@ -1,4 +1,4 @@
-\ProvidesExplFile{ztool.library.file-io.tex}{2025/05/21}{1.0.1}{file-io~library~for~ztool}
+\ProvidesExplFile{ztool.library.file-io.tex}{2025/05/22}{1.0.1}{file-io~library~for~ztool}
 
 
 % ==> file IO operations \MakeLinkTarget*{file@io} \pdfbookmark[2]{File IO}{file@io}
@@ -11,6 +11,7 @@
 \tl_new:N \l_ztool_current_line
 \str_clear:N \l_ztool_file_ori_content_str
 \seq_new:N \l_ztool_file_seq
+\cs_generate_variant:Nn \seq_use:Nn { Ne }
 \cs_new_protected:Npn \ztool_read_file_as_seq:nnN #1#2#3 
   {% #1: bool(True to keep spaces, False to trim); #2: file name; #3: seq
     \seq_clear:N #3
@@ -55,16 +56,19 @@
 \cs_new_protected:Npn \ztool_append_to_file:nn #1#2 
   {% #1: file name; #2: content
     \seq_clear:N \l_ztool_file_seq
-    \file_if_exist:nF {#1}{ \ztool_file_new:nn {\c_false_bool}{#1} }
+    \file_if_exist:nF {#1}{ \ztool_file_new:nn {\c_true_bool}{#1} }
     \ior_open:Nn \g_ztool_file_append_ior {#1}
     \ior_str_map_inline:Nn \g_ztool_file_append_ior 
       {
         \seq_put_right:Nn \l_ztool_file_seq 
           { ##1 }
       }
-    \iow_open:Nn \g_ztool_file_append_iow {#1}  
-    \iow_now:Ne \g_ztool_file_append_iow 
-      { \seq_use:Nn \l_ztool_file_seq {^^J} }
+    \iow_open:Nn \g_ztool_file_append_iow {#1}
+    \seq_if_empty:NF \l_ztool_file_seq
+      {
+        \iow_now:Ne \g_ztool_file_append_iow 
+          { \seq_use:Ne \l_ztool_file_seq {\iow_newline:} }
+      }
     \iow_now:Ne \g_ztool_file_append_iow {#2}
     \iow_close:N \g_ztool_file_append_iow
   }
@@ -82,8 +86,11 @@
       \seq_set_item:Nnn \l_ztool_file_seq {#2} 
         { #3 }
       \iow_open:Nn \g_ztool_file_append_iow {#1}
-      \iow_now:Ne \g_ztool_file_append_iow 
-        { \seq_use:Nn \l_ztool_file_seq {^^J} }
+      \seq_if_empty:NF \l_ztool_file_seq
+        {
+          \iow_now:Ne \g_ztool_file_append_iow 
+            { \seq_use:Ne \l_ztool_file_seq {\iow_newline:} }
+        }
       \iow_close:N \g_ztool_file_append_iow
     }
   }
@@ -102,10 +109,10 @@
       \tl_set:No \l_ztool_current_line 
         { \seq_item:Nn \l_ztool_file_seq {#2} }
       \seq_set_item:Nne \l_ztool_file_seq {#2} 
-        { #3^^J\l_ztool_current_line }
+        { #3\iow_newline:\l_ztool_current_line }
       \iow_open:Nn \g_ztool_file_append_iow {#1}
       \iow_now:Ne \g_ztool_file_append_iow 
-        { \seq_use:Nn \l_ztool_file_seq {^^J} }
+        { \seq_use:Ne \l_ztool_file_seq {\iow_newline:} }
       \iow_close:N \g_ztool_file_append_iow
     }
   }

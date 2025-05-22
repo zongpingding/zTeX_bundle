@@ -1,11 +1,57 @@
+% ==> re-write append to file interface
 \InputIfFileExists{ztool-cfg.tex}{}{}
 \documentclass{article}
-\usepackage{ztool}
+\usepackage[file-io]{ztool}
 
 
 \begin{document}
 Hello world
 
 \ExplSyntaxOn
+\cs_generate_variant:Nn \seq_use:Nn { Ne }
+\newwrite\myoutput
+\immediate\openout\myoutput=tex_write.txt
+
+\newcommand\TexWrite[1]{
+  \write\myoutput{1: #1}
+}
+
+
+% \cs_set:Nn \__back_space: {^^08}
+\cs_set:Npn \__append_to_file:nn #1#2
+  {
+    \seq_clear:N \l_ztool_file_seq
+    % \file_if_exist:nF {#1}{ \ztool_file_new:nn {\c_true_bool}{#1} }
+    % \ior_open:Nn \g_ztool_file_append_ior {#1}
+    % \ior_str_map_inline:Nn \g_ztool_file_append_ior 
+    %   {
+    %     \seq_put_right:Nn \l_ztool_file_seq 
+    %       { ##1 }
+    %   }
+    % % \seq_show:N \l_ztool_file_seq
+    \iow_open:Nn \g_ztool_file_append_iow {#1}
+    % \seq_if_empty:NF \l_ztool_file_seq
+    %   {
+    %     \iow_now:Ne \g_ztool_file_append_iow 
+    %       { \seq_use:Ne \l_ztool_file_seq {\iow_newline:} }
+    %   }
+    \iow_now:Ne \g_ztool_file_append_iow {#2}
+    \iow_close:N \g_ztool_file_append_iow
+  }
+\ztool_append_to_file:nn {append_new.txt}{line~ 4}
+\ztool_replace_file_line:nnn {append_new.txt}{1}{new~line~ 1}
+\ztool_insert_to_file:nnn {append_new.txt}{3}{<--new~insert~line-->}
+
+
+% EXAMPLE
+\ztool_file_new:nn {\c_true_bool}{testIO.txt}
+\seq_new:N \l_ztool_tmp_seq \seq_clear:N \l_ztool_tmp_seq
+\ztool_append_to_file:nn {testIO.txt} {|APPEND-CONTENT|}
+\ztool_insert_to_file:nnn {testIO.txt} {1} {|INSERT-~-CONTENT|}
+\ztool_append_to_file:nn {testIO.txt} {|APPEND-CONTENT-II|}
+\ztool_replace_file_line:nnn {testIO.txt} {3} {|REPLACE-CONTENT|}
+\ztool_gread_file_as_seq:nnN {\c_false_bool} {testIO.txt} \l_ztool_tmp_seq
+\seq_use:Nn \l_ztool_tmp_seq {\par}
 \ExplSyntaxOff
+\TexWrite{Tex Primitive write}
 \end{document}

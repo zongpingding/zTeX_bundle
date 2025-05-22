@@ -12,6 +12,13 @@
 \date{\today}
 \begin{document}
 % cover
+\ExplSyntaxOn
+\zpagemask[position={(0pt, .25\zph)}, anchor=l]{
+  \rlap{\color{gray!25}\rule{\zpw}{6em}}
+  \hcoffin_set:Nn \l_tmpa_coffin {\sffamily\Large\color{black!75} 由于本人时间有限, 目前此宏包的开发暂停.}
+  \coffin_typeset:Nnnnn \l_tmpa_coffin {hc}{vc}{.5\zpw}{3em}
+}
+\ExplSyntaxOff
 \newgeometry{hmargin=1cm, vmargin=1.5in}
   \maketitle
 \restoregeometry
@@ -258,7 +265,7 @@ sudo ln -sf \
 上述命令中的 \meta{name} 需要替换为你自己的用户名, 同时也需要注意 Python 的版本号.\par
 
 \vskip2em
-\noindent{\sffamily\color{red} NOTE: 部分 Mathematica 中的函数 Mathsci 也许并没有支持, 具体请参考 Mathics 的文档.}
+\noindent{\sffamily\color{red} NOTE: 部分 Mathematica 中的函数 Mathics 也许并没有支持, 具体请参考 Mathics 的文档.}
 
 
 \restoregeometry
@@ -753,9 +760,9 @@ sudo ln -sf \
 \end{function}
 
 
-\begin{function}[added=2025-05-15]{\gnudata}
+\begin{function}[added=2025-05-22, EXP]{\gnudata}
   \begin{syntax}
-    \cs{gnudata}\oarg{index}
+    \cs{gnudata}\marg{index}
   \end{syntax}
   该命令会用引用当前 \env{tikzpicture} 环境中产生的绘图数据, 返回一个(数据)文件名, 从 1 开始.
   \meta{index} 接受一个整数, 表示当前环境中绘图数据的编号. 每一个已经绘制的函数都会在对应的文件夹
@@ -821,7 +828,7 @@ entering extended mode
 
 
 \begin{function}[added=2025-05-15]{\ztikzHashClean}
-  此命令用于不接受任何的参数, 用于清除之前缓存的所有 Hash 值.
+  此命令不接受任何参数, 用于清除之前缓存的所有 Hash 值.
 \end{function}
 
 
@@ -830,20 +837,22 @@ entering extended mode
     \cs{ztikzHashCurrent}*
     \cs{ztikzHashCurrent}\oarg{separator}
   \end{syntax}
-  此命令主要用于调试或与命令 \cs{ztikzHashchgNorun} 配合使用; \texttt{\cs{ztikzHashCurrent}*} 将输出最近的一次 Hash 值计算结果;
+  此命令主要用于调试或与命令 \cs{ztikzForceToSkip} 配合使用; \texttt{\cs{ztikzHashCurrent}*} 将输出最近的一次 Hash 值计算结果;
   \cs{ztikzHashCurrent}\oarg{separator} 用于输出截至目前位置所有缓存的 Hash 值, 以 \meta{separator} 分隔输出到 PDF.
   \meta{separator} 默认为 ``\texttt{,}''.
 \end{function}
 
 
-\begin{function}[added=2025-05-15]{\ztikzHashchgNorun}
-  \begin{syntax}
-    \cs{ztikzHashchgNorun}\oarg{type}\marg{hash}
-  \end{syntax}
-  此命令用于决定 Hash 值改变后是否再次调用外部程序, 作用于它之后的第一个具有 cache 机制的环境或命令; 建议配合 \cs{ztikzHashCurrent}
-  使用. \meta{type} 表示上一次缓存内容的文件类型, 默认为 ``\texttt{txt}'', 可选值有: ``\texttt{txt}, \texttt{pdf}'' 等. 
-  \meta{hash} 为该环境或命令改变之前的 Hash 值, 且后续 \cs{wolframResult} 或 \cs{wolframOuputFile} 命令都将引用该命令或环境之
-  前 Hash 值为 \meta{hash} 时的结果. \textbf{注意}: 目前该命令仅对 \pkg{wolfram} 库中的命令或环境有效.
+\begin{function}[added=2025-05-15]{\ztikzForceToSkip}
+  此命令会强制跳过(重新)运行它之后的第一个具有 cache 机制的环境或命令, 即使该环境或命令对应的 Hash 已经改变; 
+  后续的 \cs{wolframResult} 或 \cs{wolframOuputFile} 命令对应的引用结果都将受到此命令的影响. \par 
+  \textbf{注意}: 目前该命令目前很不成熟, 仅对 \pkg{python} 库中的 \cs{sympy} 命令有效; 尽量避免连续使用
+  多个 \cs{ztikzForceToSkip} 命令, 否则会导致引用的缓存结果出现较大的偏差.
+\end{function}
+
+
+\begin{function}[added=2025-05-21]{\ztikzForceToRun}
+  此命令会强制运行它之后的第一个具有 cache 机制的环境或命令, 即使该环境或命令对应的 Hash 并没有改变.
 \end{function}
 
 
@@ -920,7 +929,7 @@ entering extended mode
 \end{function}
 
 
-\begin{function}[added=2025-04-21]{\pyfigOutputFile}
+\begin{function}[added=2025-04-21, EXP]{\pyfigOutputFile}
   此命令将返回 \env{pyfig} 环境运行输出的文件名, 用户可以使用 \cs{input} 
   或 \cs{includegraphics} 之类的命令导入该文件.
 \end{function}
@@ -956,7 +965,7 @@ plt.plot(x, y, 'o')
 \end{function}
 
 
-\begin{function}[added=2025-04-21]{\pycodeOutputFile}
+\begin{function}[added=2025-04-21, EXP]{\pycodeOutputFile}
   此命令将返回 \env{pycode} 环境运行输出的文件名, 用户可以使用 \cs{input} 
   或 \cs{includegraphics} 之类的命令导入该文件.
 \end{function}
@@ -998,7 +1007,7 @@ plt.plot(x, y, 'o')
 \end{function}
 
 
-\begin{function}[added=2025-05-15]{\wolframOuputFile}
+\begin{function}[added=2025-05-15, EXP]{\wolframOuputFile}
   此命令会返回 WolframScript 上次运行结果对应的文件名; 此命令在引用一些图片结果时是十分方便的.
   此命令比之 \cs{wolframResult} 更加的灵活, 前者调用上一次的文本文件, 后者仅返回上次 WolframScript 调用
   产生的文件名.
@@ -1066,7 +1075,7 @@ plt.plot(x, y, 'o')
 \end{keyval}
 
 
-\begin{function}[added=2025-05-18]{\wolframTablePData, \wolframTableFData}
+\begin{function}[added=2025-05-18, EXP]{\wolframTablePData, \wolframTableFData}
   这两个命令表示最近一次 \cs{wolframTable} 命令的运算结果, 不含有 \cs{hline}, \cs{midrule} 等命令, 即二者仅含有纯表格数据; 
   \cs{wolframTablePData} (Part Data)返回的数据不包括表格的表头, \cs{wolframTableFData} (Full Data)返回的数据包括表格的表头; 
   此二命令可以传入 \pkg{tabularray} 等表格排版宏包的数据输入. \textbf{注意}: 命令 \cs{wolframTable} 中的 \meta{cell-cmd} 
@@ -1535,6 +1544,7 @@ with open ('pycode_table.txt', 'w') as file:
   \item 实现 \env{wolframAny} 环境, 该环境实现的功能类似 \env{pycode}.
   \item 重写缓存机制对应的函数 \cs{ztikz_hash_if_change:nn}, 目前不够灵活(或许直接使用 \href{https://github.com/leo-colisson/robust-externalize}{\pkg{robust-externalize}} 宏包).
   \item 针对 \pkg{cache} 库, 需要清除多余的 Hash 值: 例如某个环境/命令产生的原 Hash 值为 ``A'', 对应环境/命令中的参数改变后，其 Hash 值变为了 ``B'', 那么此时需要清除原始的 ``A''.
+  \item 实现 \cs{ztikzForceToSkip} 命令: 如何处理 \cs{xsim_file_write_start:nn} 环境 ? 如何处理多个 \cs{ztikzForceToRun} ? 也许使用 \cs{str_mdfive_hash:n} 会有帮助 ?
 \end{todolist}
 
 

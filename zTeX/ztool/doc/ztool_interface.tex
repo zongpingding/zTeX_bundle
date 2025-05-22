@@ -11,6 +11,13 @@
 \date{\today}
 \begin{document}
 % cover
+\ExplSyntaxOn
+\zpagemask[position={(0pt, .25\zph)}, anchor=l]{
+  \rlap{\color{gray!25}\rule{\zpw}{6em}}
+  \hcoffin_set:Nn \l_tmpa_coffin {\sffamily\Large\color{black!75} 由于本人时间有限, 目前此宏包的开发暂停.}
+  \coffin_typeset:Nnnnn \l_tmpa_coffin {hc}{vc}{.5\zpw}{3em}
+}
+\ExplSyntaxOff
 \newgeometry{hmargin=1cm, vmargin=1.5in}
   \maketitle
 \restoregeometry
@@ -41,6 +48,39 @@
 
 该仓库中包含本宏集的源码与用户手册; 当前宏集的稳定版本于半年之前发布, 最新的开发版请切换到 ``dev'' 分支; 
 本手册适用于当前最新的开发版.
+
+\clearpage
+\section{宏包选项}
+\pkg{ztool} 分为了 ``\texttt{shell-escape, file-io, box, zdraw}'' 四个库, 每一个库之间互不影响, 均可单独加载.
+默认不加载任意的 \pkg{ztool} 库.
+
+
+\begin{keyval}[added=2025-05-22, parent=ztool]{shell-escape, file-io, box, zdraw}
+  \begin{syntax}
+    shell-escape = \meta{\textbf{false}|true}>\dval{false}
+    file-io      = \meta{\textbf{false}|true}>\dval{false}
+    box          = \meta{\textbf{false}|true}>\dval{false}
+    zdraw        = \meta{\textbf{false}|true}>\dval{false}
+  \end{syntax}
+  这四个选项为 \pkg{ztool} 宏包的选项, 可以在加载 \pkg{ztool} 宏包时使用, 一个基本的使用样例如下,
+  该示例加载了 \pkg{ztool} 的 \pkg{shell-escape} 库和 \pkg{box} 库:
+\end{keyval}
+\begin{DocExample}
+\usepackage[shell-escape, box=true]{ztool}
+\end{DocExample}
+
+
+\begin{function}[added=2025-05-22]{\ztoolloadlib}
+  \begin{syntax}
+    \cs{ztoolloadlib} \marg{library}
+  \end{syntax}
+  此命令用于加载 \pkg{ztool} 库, \meta{library} 为库的名称, 可选值有: ``\texttt{shell-escape, file-io, box, zdraw}''.
+\end{function}
+一个基本的使用样例如下, 该示例加载了 \pkg{ztool} 的 \pkg{shell-escape} 库和 \pkg{box} 库:
+\begin{DocExample}
+\ztoolloadlib{shell-escape, box}
+\end{DocExample}
+
 
 
 \clearpage
@@ -187,7 +227,9 @@
 \ztool_file_new:nn {\c_true_bool}{testIO.txt}
 \seq_new:N \l_ztool_tmp_seq \seq_clear:N \l_ztool_tmp_seq
 \ztool_append_to_file:nn {testIO.txt} {|APPEND-CONTENT|}
-\ztool_insert_to_file:nnn {testIO.txt} {2} {|~~INSERT-CONTENT~~|}
+\ztool_insert_to_file:nnn {testIO.txt} {1} {|INSERT-~-CONTENT|}
+\ztool_append_to_file:nn {testIO.txt} {|APPEND-CONTENT-II|}
+\ztool_replace_file_line:nnn {testIO.txt} {3} {|REPLACE-CONTENT|}
 \ztool_gread_file_as_seq:nnN {\c_false_bool} {testIO.txt} \l_ztool_tmp_seq
 \seq_use:Nn \l_ztool_tmp_seq {\par}
 \ExplSyntaxOff
@@ -688,6 +730,7 @@ Hello,~world|
   }
 \begin{todolist}
   \item 重新实现 \pkg{xsimverb} 宏包中的 \cs{xsim_file_write_start:nn} 和 \cs{xsim_file_write_stop:} 命令, 使其和 \pkg{ztool} 宏包适配.
+  \item[2025-05-22] 修复 \cs{ztool_append_to_file:nn} 文件首行空行的问题.
 \end{todolist}
 
 

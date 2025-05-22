@@ -1,4 +1,4 @@
-\ProvidesExplFile{ztikz.library.cache.tex}{2025/05/17}{1.0.0}{cache~library~for~ztikz}
+\ProvidesExplFile{ztikz.library.cache.tex}{2025/05/22}{1.0.0}{cache~library~for~ztikz}
 
 
 
@@ -18,6 +18,8 @@
 \tl_new:N \g__ztikz_current_hash_tl
 \seq_new:N \g__ztikz_file_hash_seq
 \cs_generate_variant:Nn \ztikz_file_read_lines:n { e }
+\bool_new:N \g__ztikz_hash_nochg_run_bool
+\bool_gset_false:N \g__ztikz_hash_nochg_run_bool
 \prg_set_conditional:Npnn \ztikz_hash_if_change:nn #1#2 { p, T, F, TF }
   {% #1: true/false; #2: True for file, False for hash str
     \bool_if:nTF {#1}
@@ -35,14 +37,28 @@
       {
         \iow_newline: CURRENT~FILE's~HASH:\l__ztikz_current_hash_tl
       }
-    \seq_if_in:NVTF \g__ztikz_file_hash_seq \l__ztikz_current_hash_tl 
-      {
-        \ztikz_term_info:n {CURRENT~HASH~ALREADY~EXISTS}
-        \prg_return_false:
+    \bool_if:NTF \g__ztikz_hash_nochg_run_bool
+      { 
+        \ztikz_term_info:n {FORCE~TO~RUN~AGAIN~...}
+        \bool_gset_false:N \g__ztikz_hash_nochg_run_bool
+        \prg_return_true: 
       }{
-        \ztikz_term_info:n {CURRENT~HASH~IS~UNIQUE:RECORDING...}
-        \ztool_append_to_file:nn {ztikz_output/ztikz.hash}{\l__ztikz_current_hash_tl}
-        \prg_return_true:
+        \bool_if:NTF \g__ztikz_hashchg_norun_bool
+          { 
+            \ztikz_term_info:n {FORCE~TO~SKIP~RUN~AGAIN~...}
+            \bool_gset_false:N \g__ztikz_hashchg_norun_bool
+            \prg_return_false: 
+          }{
+            \seq_if_in:NVTF \g__ztikz_file_hash_seq \l__ztikz_current_hash_tl 
+              {
+                \ztikz_term_info:n {CURRENT~HASH~ALREADY~EXISTS}
+                \prg_return_false:
+              }{
+                \ztikz_term_info:n {CURRENT~HASH~IS~UNIQUE:RECORDING...}
+                \ztool_append_to_file:nn {ztikz_output/ztikz.hash}{\l__ztikz_current_hash_tl}
+                \prg_return_true:
+              }
+          }
       }
   }
 \prg_generate_conditional_variant:Nnn \ztikz_hash_if_change:nn { ne } { p, T, F, TF }
@@ -63,11 +79,16 @@
     { \tl_use:N \l__ztikz_current_hash_tl }
     { \seq_use:Nn \g__ztikz_file_hash_seq {#2} }
 }
-% hash changed --> NOT run again ( need to implement )
-% hash not changed --> run again ( need to implement )
-\NewDocumentCommand{\ztikzHashchgNorun}{O{txt}m}
+
+
+% ==> override the cache mechanism
+\NewDocumentCommand{\ztikzForceToSkip}{}
   {
+    \bool_gset_false:N \g__ztikz_hash_nochg_run_bool
     \bool_gset_true:N \g__ztikz_hashchg_norun_bool
-    \xdef\wolfram@tmp@file{\g__ztikz_wolfram_path_tl/#2}
-    \xdef\wolframOuputFile{\wolfram@tmp@file.#1}
+  }
+\NewDocumentCommand{\ztikzForceToRun}{}
+  {
+    \bool_gset_false:N \g__ztikz_hashchg_norun_bool
+    \bool_gset_true:N \g__ztikz_hash_nochg_run_bool
   }
