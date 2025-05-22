@@ -1,4 +1,4 @@
-\ProvidesExplFile{ztikz.library.wolfram.tex}{2025/05/19}{1.0.0}{wolfram~library~for~ztikz}
+\ProvidesExplFile{ztikz.library.wolfram.tex}{2025/05/22}{1.0.0}{wolfram~library~for~ztikz}
 
 
 
@@ -13,28 +13,38 @@
 \iow_new:N \g__ztikz_wolfram_iow
 \cs_generate_variant:Nn \xsim_file_write_start:nn {ne}
 
+% writing wolfram script to file
+\file_if_exist:nF { \g__ztikz_scripts_path_tl/wolfram_script.wls }
+  {
+    \iow_open:Ne \g__ztikz_wolfram_iow { \g__ztikz_scripts_path_tl/wolfram_script.wls }
+    \iow_now:Ne \g__ztikz_wolfram_iow 
+      {
+        TeXResult=ToString[TeXForm[1+1]]; \iow_newline:
+        Export["ztikz_output/mma_data/hash.txt",TeXResult]
+      }
+    \iow_close:N \g__ztikz_wolfram_iow
+  }
+
 
 % ==> core function
+\msg_set:nnn {ztikz}{wolfram-arg_empty}
+  { wolfram~library~error:calcualting~argument~is~empty. }
 \cs_new:Npn \__ztikz_wolfram_tmp_file_handle:n #1
   {
     \edef\@wolfram@tmp@file{\g__ztikz_wolfram_path_tl/t@mp} 
-    \tl_if_empty:eF {#1}{
-      \iow_open:Ne \g__ztikz_wolfram_iow { \@wolfram@tmp@file.wls }
-      \iow_now:Ne \g__ztikz_wolfram_iow { #1 }
-      \iow_close:N \g__ztikz_wolfram_iow
-    }
-    \file_get_mdfive_hash:nN {\@wolfram@tmp@file.wls} \l__ztikz_current_hash_tl
+    \tl_if_eq:enT {#1}{TeXResult=ToString[TeXForm[]];}
+      {
+        \msg_error:nn {ztikz}{wolfram-arg_empty}
+      }
+    \__ztikz_addto_script:en { \@wolfram@tmp@file.wls }{ #1 }
+    \file_get_mdfive_hash:nN { \@wolfram@tmp@file.wls }\l__ztikz_current_hash_tl
     \xdef\wolfram@tmp@file{\g__ztikz_wolfram_path_tl/\l__ztikz_current_hash_tl}
     \ztool_shell_mv:ee {\@wolfram@tmp@file.wls}{\wolfram@tmp@file.wls}
   }
 \cs_new_protected:Npn \__ztikz_wolfram_excute:nnn #1#2#3
   {% #1:contents(empty->not add); #2:extension; #3: output object
-    \bool_if:NT \g__ztikz_hashchg_norun_bool
-      { 
-        \prg_map_break:Nn \l__hashchg_norun_flag {} 
-      }
     \__ztikz_wolfram_tmp_file_handle:n {#1}
-    \ztool_append_to_file:ee {\wolfram@tmp@file.wls}{Export["\wolfram@tmp@file.#2", #3]}
+    \__ztikz_addto_script:ee {\wolfram@tmp@file.wls}{Export["\wolfram@tmp@file.#2", #3]}
     \ztikz_hash_if_change:neTF { \c_false_bool }{ \l__ztikz_current_hash_tl }   
       {
         \edef\wolfram@cmd
@@ -54,8 +64,6 @@
         \ztikz_term_info:e {Use~cache~result:'\wolfram@tmp@file.#2'\iow_newline:}
       }
     \xdef\wolframOuputFile{\wolfram@tmp@file.#2}
-    \prg_break_point:Nn \l__hashchg_norun_flag 
-      { \bool_gset_false:N \g__ztikz_hashchg_norun_bool }
   }
 \cs_generate_variant:Nn \__ztikz_wolfram_excute:nnn { e, o }
 

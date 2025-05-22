@@ -168,7 +168,7 @@
   {
     \int_use:N \g__tikz_env_index_int
   }
-\NewDocumentCommand\gnudata{m}
+\def\gnudata#1
   {
     \tl_use:N \g__ztikz_gnu_path_tl/gnu_data_ 
       \int_use:N \g__tikz_env_index_int _#1.table

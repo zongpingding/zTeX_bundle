@@ -1,4 +1,4 @@
-\ProvidesExplFile{ztikz.library.python.tex}{2025/05/21}{1.0.0}{python~library~for~ztikz}
+\ProvidesExplFile{ztikz.library.python.tex}{2025/05/22}{1.0.0}{python~library~for~ztikz}
 
 
 
@@ -38,7 +38,7 @@
     \xsim_file_write_stop:   
     \ztikz_hash_if_change:neTF {\c_true_bool}{\g__ztikz_python_path_tl/t@mp.py}   
       {
-        \ztool_append_to_file:nn {\g__ztikz_python_path_tl/t@mp.py} 
+        \__ztikz_addto_script:nn {\g__ztikz_python_path_tl/t@mp.py} 
           { plt.savefig('#1') }
         \ztool_shell_escape:e {python~\g__ztikz_python_path_tl/t@mp.py} 
         \ztool_shell_mv:ee

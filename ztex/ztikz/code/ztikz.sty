@@ -166,7 +166,7 @@
 
 
 % ----------------------------------------------------------------------
-%                         cache and other commands 
+%                       cache, sed file and ztikz logo 
 % ----------------------------------------------------------------------
 \cs_generate_variant:Nn \ior_open:Nn { Ne }
 \cs_generate_variant:Nn \iow_open:Nn { Ne }
@@ -185,6 +185,15 @@
       }
   }
 % sed script
+\cs_new:Npn \__ztikz_addto_script:nn #1#2 
+  {% #1: file; #2: line; #3:new
+    \bool_if:NF \g__ztikz_hashchg_norun_bool
+      {
+        \ztool_append_to_file:nn 
+          {#1}{#2}
+      }
+  }
+\cs_generate_variant:Nn \__ztikz_addto_script:nn { ne, en, ee }
 \ztikz_keys_define:nn { sed-script }
   {
     file  .tl_set:N  = \l__ztikz_sed_script_file_tl,
@@ -194,9 +203,12 @@
   }
 \cs_new:Npn \__ztikz_sed_script:nnn #1#2#3 
   {% #1: file; #2: line; #3:new
-    \ztool_replace_file_line:nnn 
-      {\g__ztikz_scripts_path_tl/#1}
-      {#2}{#3}
+    \bool_if:NF \g__ztikz_hashchg_norun_bool
+      {
+        \ztool_replace_file_line:nnn 
+          {\g__ztikz_scripts_path_tl/#1}
+          {#2}{#3}
+      }
   }
 \cs_generate_variant:Nn \__ztikz_sed_script:nnn {eee}
 \cs_generate_variant:Nn \__ztikz_sed_script:nnn {nne}
