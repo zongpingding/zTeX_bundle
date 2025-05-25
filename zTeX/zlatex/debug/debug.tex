@@ -1,45 +1,21 @@
-% ==> change zslide title box to rounded rectangle
-\InputIfFileExists{zlatex-cfg.tex}{}{}
-\documentclass[
-  layout={slide, aspect=16|9},
-]{../code/ztex}
-
-\title{Rounded corner style Title Page}
-\author{Eureka\quad and \quad \ztex{} Eureka}
-\date{\today}
-\begin{document}
-\maketitle
-
-\section{FIRST}
-The FIRST section.
-\end{document}
-
-
-
-
-
-
-
-
-
 % ==> ztex partial toc test
-\InputIfFileExists{zlatex-cfg.tex}{}{}
-\documentclass[
-  % class=l3doc,
-  class=book,
-]{../code/ztex}
-
+% \InputIfFileExists{zlatex-cfg.tex}{}{}
+% \documentclass[
+%   % class=l3doc,
+%   class=book,
+% ]{../code/ztex}
+\documentclass{book}
 
 
 \begin{document}
-\ztexptoc[1]
+% \ztexptoc[1]
 % \startcontents[sections]
 % \printcontents[sections]{}{1}{}
 
-\dotfill\par
+% \dotfill\par
 %%% book
 \chapter{A-1}
-\ztexptoc[2]
+% \ztexptoc[2]
 
 \section{A-1-1}
 \subsection{A-1-1-1}

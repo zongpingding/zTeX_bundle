@@ -1095,11 +1095,10 @@ Permissions:         Unknown (12)
   \end{syntax}
   命令 \cmd{\zpagemask} 用于给当前页面添加水印，\cmd{\zpagemask*} 用于给当前页面及其之后的所有
   页面添加水印. \meta{item} 可以为一段文字，也可以为一系列的图片(需要使用\cmd\includegraphics 进行导入). 
-  % \meta{key-value} 所有可用的选项为:
 \end{function}
 
 
-\begin{keyval}[parent=ztex/page/mask]{layer, position, label, anchor}
+\begin{keyval}[parent=ztex/page/mask]{layer, label, anchor, position}
   \begin{syntax}
     layer    = \meta{foreground|\textbf{backgroud}}>\dval{backgroud}
     label    = \marg{标签}>\dval{DEFAULT}

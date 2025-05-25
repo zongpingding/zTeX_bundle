@@ -12,6 +12,9 @@
   hmargin=1.25cm, top=.8cm, includefoot, bottom=5.5pt,
   footskip=\dim_eval:n {1.25em + 5pt}
 }
+\cs_generate_variant:Nn \dim_set:Nn { Ne }
+\dim_set:Ne \zpw {\seq_item:Nn \l_tmpa_seq {1}cm}
+\dim_set:Ne \zph {\seq_item:Nn \l_tmpa_seq {2}cm}
 
 
 % ==> marker and commands patches
@@ -368,7 +371,7 @@
     \IfValueT{#1}{\ztex_keys_set:nn { slide / logo }{#1}}
     \ztex_page_annotate:eeenn 
       {background}
-      {\exp_after:wN \__page_mask@pos_parse:w \g__ztex_slide_logo_position_tl}
+      {\exp_after:wN \__page_mask_pos_parse:w \g__ztex_slide_logo_position_tl}
       {rb}{
         \edef\current@page{\thepage}
         \clist_if_in:NVF \g__ztex_slide_logo_exclude_clist\current@page
