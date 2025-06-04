@@ -175,23 +175,21 @@
   {
     \clist_if_in:NnF \g__ztikz_library_loaded_clist {cache}
       {
-        \prg_new_conditional:Npnn \ztikz_hash_if_change:nn #1#2 {p, T, F, TF}
+        \tl_new:N \l__ztikz_current_hash_tl
+        \prg_new_conditional:Npnn \ztikz_if_run_again:nnn #1#2#3 {p, T, F, TF}
           {
             \bool_gset_true:N \g__hash_change_bool
             \prg_return_true:
           }
-        \prg_generate_conditional_variant:Nnn \ztikz_hash_if_change:nn 
-          { ne } { p, T, F, TF }
+        \prg_generate_conditional_variant:Nnn \ztikz_if_run_again:nnn 
+          { nen } { p, T, F, TF }
       }
   }
 % sed script
 \cs_new:Npn \__ztikz_addto_script:nn #1#2 
   {% #1: file; #2: line; #3:new
-    \bool_if:NF \g__ztikz_hashchg_norun_bool
-      {
-        \ztool_append_to_file:nn 
-          {#1}{#2}
-      }
+    \ztool_append_to_file:nn 
+      {#1}{#2}
   }
 \cs_generate_variant:Nn \__ztikz_addto_script:nn { ne, en, ee }
 \ztikz_keys_define:nn { sed-script }
@@ -203,18 +201,12 @@
   }
 \cs_new:Npn \__ztikz_sed_script:nnn #1#2#3 
   {% #1: file; #2: line; #3:new
-    \bool_if:NF \g__ztikz_hashchg_norun_bool
-      {
-        \ztool_replace_file_line:nnn 
-          {\g__ztikz_scripts_path_tl/#1}
-          {#2}{#3}
-      }
+    \ztool_replace_file_line:nnn 
+      {\g__ztikz_scripts_path_tl/#1}
+      {#2}{#3}
   }
 \cs_generate_variant:Nn \__ztikz_sed_script:nnn {eee}
 \cs_generate_variant:Nn \__ztikz_sed_script:nnn {nne}
-% hash change norun 
-\bool_new:N \g__ztikz_hashchg_norun_bool
-\bool_gset_false:N \g__ztikz_hashchg_norun_bool
 % ztik logo 
 \NewDocumentCommand\TikZ{}{Ti\textcolor{orange}{\textit{k}}Z}
 \NewDocumentCommand\zTikZ{}

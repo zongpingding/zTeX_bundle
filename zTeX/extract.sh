@@ -3,13 +3,15 @@
 PARENT_FOLDER=".."
 INSTALL_FOLDER="ZTEX_INSTALL"
 EXTRACT_FOLDER="$PARENT_FOLDER/$INSTALL_FOLDER"
-TARGET_FOLDER="/mnt/c/Users/PC/texmf/tex/latex/ztex"
+# TARGET_FOLDER="/mnt/c/Users/PC/texmf/tex/latex/ztex" # for Windows
+TARGET_FOLDER="/home/zpd/texmf/tex/latex/ztex"     # for Linux
 
 usage() {
-    echo "Usage: $0 [-h] [-d] [-i]"
+    echo "Usage: $0 [-h] [-d] [-r] [-i]"
     echo "Options:"
     echo "  -h  Show this help message"
     echo "  -d  Delete previous extract folder: '$EXTRACT_FOLDER'"
+    echo "  -r  Remove previous zTeX installing folder: '$TARGET_FOLDER'"
     echo "  -i  Copy '$EXTRACT_FOLDER' to '$TARGET_FOLDER'"
     exit 1
 }
@@ -33,6 +35,7 @@ extrac_source () {
     cp -r ./zslide/code/* "$EXTRACT_FOLDER"/zslide/code
     cp ./zlatex/doc/ztex_interface.pdf "$EXTRACT_FOLDER"/zlatex/doc/
     cp ./ztikz/doc/ztikz_interface.pdf "$EXTRACT_FOLDER"/ztikz/doc/
+    cp ./ztikz/doc/ztikz_examples.pdf "$EXTRACT_FOLDER"/ztikz/doc/
     cp ./ztool/doc/ztool_interface.pdf "$EXTRACT_FOLDER"/ztool/doc/
     cp ./zslide/doc/zslide_manual.pdf "$EXTRACT_FOLDER"/zslide/doc/
 
@@ -40,7 +43,7 @@ extrac_source () {
 }
 
 # handle command line arguments
-while getopts "dih" opt; do
+while getopts "hdri" opt; do
     case $opt in
         h)
             usage
@@ -49,6 +52,12 @@ while getopts "dih" opt; do
             echo "Remove folder: $EXTRACT_FOLDER"
             rm -rf "$EXTRACT_FOLDER"
             exit 0
+            ;;
+        r)
+            if [ -d "$TARGET_FOLDER" ]; then 
+                rm -rf "$TARGET_FOLDER"
+                echo "Remove previous zTeX installing folder: '$TARGET_FOLDER'"
+            fi
             ;;
         i)
             if [ ! -d "$EXTRACT_FOLDER" ]; then
@@ -61,6 +70,7 @@ while getopts "dih" opt; do
             fi
             echo "Installing zTeX to: '$TARGET_FOLDER'"
             mkdir -p "$TARGET_FOLDER"
+            ls -l "$EXTRACT_FOLDER"
             cp -r "$EXTRACT_FOLDER"/* "$TARGET_FOLDER"/
             echo "zTeX install successfully!"
             exit 0

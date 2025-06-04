@@ -168,11 +168,12 @@
 
 \begin{function}[updated=2024-12-05]{\ztool_file_new:nn}
   \begin{syntax}
-    \cs{ztool_file_new:nn} \marg{boolean}\marg{file}
+    \cs{ztool_file_new:nn} \marg{bool}\marg{file}
   \end{syntax}
   此命令用于创建一个名为 \meta{file} 的新文件, 如果 \meta{file} 不存在, 则会创建一个名为 \meta{file} 的新文件.
-  若文件已存在，那么当 \meta{boolean} 为 \cs{c_true_bool} 时，\textcolor{red}{\sffamily 会覆盖原文件}，否则不会进行任何操作.
+  若文件已存在，那么当 \meta{bool} 为 \cs{c_true_bool} 时，\textcolor{red}{\sffamily 会覆盖原文件}，否则不会进行任何操作.
 \end{function}
+
 
 \begin{function}[updated=2024-12-05]{
   \ztool_read_file_as_seq:nnN, \ztool_read_file_as_seq:neN, 
@@ -181,8 +182,8 @@
     \cs{ztool_read_file_as_seq:nnN} \marg{bool}\marg{file}\meta{seq}
   \end{syntax}
   此命令用于读取文件 \meta{file} 的内容, 并将其存放在 \meta{seq} 中, 如果 \meta{file} 不存在, 则 \meta{seq} 会被置为空.
-  \meta{bool} 用于控制是否保留行尾的空格, 可选值有:\cs{c_true_bool}, \cs{c_false_bool}, 默认为 \cs{c_true_bool}; 如果 \meta{bool} 
-  为 \cs{c_true_bool}, 则保留行尾的空格, 否则不保留. \textbf{注意}: 此命令仅在当前组生效.
+  \meta{bool} 用于控制是否保留行尾的空格, 可选值有:\cs{c_true_bool}, \cs{c_false_bool}; 如果 \meta{bool} 
+  为 \cs{c_true_bool}, 则保留行尾的空格, 否则不保留. \textbf{注意}: \meta{seq} 中的内容对应的 catcode 不变, 且此命令仅在当前组生效.
 \end{function}
 
 
@@ -191,8 +192,21 @@
     \cs{ztool_read_file_as_seq:nnN} \marg{bool}\marg{file}\meta{seq}
   \end{syntax}
   此命令用于读取文件 \meta{file} 的内容, 并将其存放在 \meta{seq} 中, 如果 \meta{file} 不存在, 则 \meta{seq} 会被置为空.
-  \meta{bool} 用于控制是否保留行尾的空格, 可选值有:\cs{c_true_bool}, \cs{c_false_bool}, 默认为 \cs{c_true_bool}; 如果 \meta{bool} 
-  为 \cs{c_true_bool}, 则保留行尾的空格, 否则不保留. \textbf{注意}: 此命令的设置是全局有效的.
+  \meta{bool} 用于控制是否保留行尾的空格, 可选值有:\cs{c_true_bool}, \cs{c_false_bool}; 如果 \meta{bool} 
+  为 \cs{c_true_bool}, 则保留行尾的空格, 否则不保留. \textbf{注意}: \meta{seq} 中的内容对应的 catcode 不变, 且此命令仅在当前组生效.
+\end{function}
+
+
+\begin{function}[added=2025-05-27]{
+  \ztool_write_seq_to_file:nNn, 
+  \ztool_write_seq_to_file:nNe, 
+  \ztool_write_seq_to_file:nNV}
+  \begin{syntax}
+    \cs{ztool_write_seq_to_file:nNn} \marg{bool}\meta{seq}\marg{file}
+  \end{syntax}
+  此命令用于将 \meta{seq} 按行写入到文件 \meta{file} 中, 如果 \meta{file} 不存在, 则会创建一个名为 \meta{file} 的
+  新文件; 若 \meta{file} 已经存在, 则可以使用 \meta{bool} 控制当前的写入模式: \meta{bool} 为 \cs{c_true_bool} 时, 
+  \textcolor{red}{\sffamily 覆盖写入}; \meta{bool} 为 \cs{c_false_bool} 时, 追加写入; 如果 \meta{seq} 为空, 则不会进行任何操作.
 \end{function}
 
 

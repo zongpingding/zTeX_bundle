@@ -1,17 +1,19 @@
-\ProvidesExplFile{ztool.library.file-io.tex}{2025/05/22}{1.0.1}{file-io~library~for~ztool}
+\ProvidesExplFile{ztool.library.file-io.tex}{2025/05/27}{1.0.1}{file-io~library~for~ztool}
 
 
 % ==> file IO operations \MakeLinkTarget*{file@io} \pdfbookmark[2]{File IO}{file@io}
 % 1. create a new file
 % 2. append to a file
-% 3. read a file
+% 3. read from file / write to file
 \ior_new:N \g_ztool_file_read_ior
 \ior_new:N \g_ztool_file_append_ior
 \iow_new:N \g_ztool_file_append_iow
 \tl_new:N \l_ztool_current_line
 \str_clear:N \l_ztool_file_ori_content_str
 \seq_new:N \l_ztool_file_seq
+\seq_new:N \l__ztool_tmp_seq
 \cs_generate_variant:Nn \seq_use:Nn { Ne }
+
 \cs_new_protected:Npn \ztool_read_file_as_seq:nnN #1#2#3 
   {% #1: bool(True to keep spaces, False to trim); #2: file name; #3: seq
     \seq_clear:N #3
@@ -22,7 +24,7 @@
           {
             \bool_if:nTF {#1}
               { \seq_put_right:Nn #3 {##1} }
-              { \seq_put_right:Nn #3 {\tl_trim_spaces:n {##1}} }
+              { \seq_put_right:Ne #3 {\tl_trim_spaces:n {##1}} }
           }
         \ior_close:N \g_ztool_file_read_ior
       }
@@ -73,6 +75,30 @@
     \iow_close:N \g_ztool_file_append_iow
   }
 \cs_generate_variant:Nn \ztool_append_to_file:nn { no, nf, ne, ee }
+
+\cs_new_protected:Npn \ztool_write_seq_to_file:nNn #1#2#3
+  {% #1:bool; #2:seq; #3:file name
+    \seq_clear:N \l__ztool_tmp_seq
+    \bool_if:nTF { #1 }
+      {
+        \seq_set_eq:NN \l_ztool_file_seq #2
+      }{ 
+        \ztool_read_file_as_seq:nnN 
+          { \c_true_bool }{ #3 } 
+          \l__ztool_tmp_seq 
+        \seq_concat:NNN \l_ztool_file_seq \l__ztool_tmp_seq #2
+      }
+    \file_if_exist:nF {#3}{ \ztool_file_new:nn {\c_true_bool}{#3} }
+    \iow_open:Nn \g_tmpa_iow { #3 }
+    \seq_if_empty:NF \l_ztool_file_seq
+      {
+        \iow_now:Ne \g_tmpa_iow 
+          { \seq_use:Ne \l_ztool_file_seq { \iow_newline: } }
+      }
+    \iow_close:N \g_tmpa_iow
+  }
+\cs_generate_variant:Nn \ztool_write_seq_to_file:nNn { nNe, nNV }
+
 \cs_new_protected:Npn \ztool_replace_file_line:nnn #1#2#3 
   {% #1:file name; #2:line index; #3:replacement
     \seq_clear:N \l_ztool_file_seq

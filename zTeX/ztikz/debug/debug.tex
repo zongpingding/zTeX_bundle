@@ -1,3 +1,241 @@
+% ==> expandable function: extract last hash str from an outside file
+\InputIfFileExists{ztikz-cfg.tex}{}{}
+\documentclass{article}
+\usepackage[file-io]{ztool}
+
+
+\begin{document}
+\ExplSyntaxOn
+% --> write to file
+% \seq_set_from_clist:Nn \l_tmpa_seq { {Label-A:111, 222}, {Label-B:333, 444} }
+% \ztool_write_seq_to_file:nNn {\c_true_bool} \l_tmpa_seq {Hash.txt}
+
+% --> read from file
+% \ztool_read_file_as_seq:nnN {\c_true_bool} {Hash.txt} \l_tmpa_seq
+% \seq_show:N \l_tmpa_seq %
+% \seq_set_split:NnV \l_tmpb_seq {:} \l_tmpa_seq % ---> not working
+% \seq_show:N \l_tmpb_seq %
+
+% --> real wolrd application
+% The sequence \l_tmpa_seq contains the items (without outer braces):
+% > {sinGraphLabel:3F174D2DE0560706B9CF812E5D220D12,16A7D3AA00F063BC9040C3D92A92A9D0,733AA52DAB26B2961D11D2218473F001}
+% > {sinGraphLabel-II:D2A6229667374E17AB5A9634534F18D2}.
+\seq_set_from_clist:Nn \l_tmpb_seq { {Label-A=111,222}, {Label-B=333,444} }
+% \seq_show:N \l_tmpb_seq 
+\prop_set_from_keyval:NN \l_tmpa_prop \l_tmpb_seq
+\prop_show:N \l_tmpa_prop
+\ExplSyntaxOff
+
+--> BUG of '@' from external file
+\ior_open:Ne \g__ztikz_wolfram_ior {\wolframOuputFile}
+\ior_get:NN  \g__ztikz_wolfram_ior \l__ztikz_wolfram_tmp_res_tl
+\makeatletter
+\tl_if_eq:VnTF \l__ztikz_wolfram_tmp_res_tl {@~}
+  {\typeout{------>Equal}}
+  {\typeout{------>NOT~Equal}}
+\typeout{EXPL3----->\the\catcode`\@}
+\typeout{FILE----->\exp_after:wN \the\exp_after:wN \catcode\exp_after:wN `\l__ztikz_wolfram_tmp_res_tl}
+\end{document}
+
+
+
+
+% ==> new cache mechanism test
+\InputIfFileExists{ztikz-cfg.tex}{}{}
+\documentclass{article}
+\usepackage[library={python, cache, wolfram}]{ztikz}
+\usepackage{xcolor}
+\usepackage{tabularray}
+\usepackage{amsmath}
+
+
+% \begin{document}
+% \sympy{aaa}{1+1}    % ---> works well when 'cache' library not load
+
+% \wolfram{bbb}{1+1}  % ---> works well when 'cache' library not load
+% \wolframResult
+% \end{document}
+
+
+% \ztikzHashClean
+\ExplSyntaxOn
+% ==> token analysis
+\seq_new:N \l__token_analysis_seq
+\seq_clear:N \l__token_analysis_seq
+\cs_set:Npn \__token_analysis:n #1 
+  {
+    \tl_map_inline:nn {#1}
+      {
+        \tl_set:Ne \l_tmpa_tl {\number`##1}
+        \tl_set:Ne \l_tmpb_tl {\the\catcode`##1}
+        \seq_put_right:Ne \l__token_analysis_seq 
+          { \exp_not:n {##1}{\l_tmpa_tl : \l_tmpb_tl} } 
+      }
+    \typeout{------->~~token~analysis~start~<--------}
+    \typeout{\seq_use:Nn \l__token_analysis_seq {}}
+    \typeout{------->~\space token~analysis~end\space\space<--------^^J}
+    \errmessage{Press~ ENTER~ to~ continue}
+  }
+\cs_set_eq:NN \__tl_debug:n \__token_analysis:n
+\cs_generate_variant:Nn \__tl_debug:n { V, e, o }
+\cs_generate_variant:Nn \__token_analysis:n { V, e, o }
+\NewDocumentCommand{\tokenAnalysis}{m}
+  {\__token_analysis:n {#1}}
+\ExplSyntaxOff
+
+\begin{document}
+% ztikz.hash
+% sinGraphLabel:3F174D2DE0560706B9CF812E5D220D12,16A7D3AA00F063BC9040C3D92A92A9D0
+% sinGraphLabel-II:D2A6229667374E17AB5A9634534F18D2
+
+\section{python module}
+% \ztikzForceToRun
+\ztikzForceToSkip
+\begin{pyfig}{sinGraphLabel}{sin_graph.pdf}
+import matplotlib
+matplotlib.use('Agg')
+from matplotlib import pyplot as plt
+import numpy as np
+x = np.linspace(0, 2*np.pi, num = 80)
+y = np.sin(x)*np.cos(x)+.2
+plt.plot(x, y, 'r-o')
+\end{pyfig}
+\begin{center}
+\includegraphics[width=.5\linewidth]{\pyfigOutputFile}
+\end{center}
+
+
+Hello world:
+\ztikzCachedHash[label=sinGraphLabel-II]
+
+
+\begin{pyfig}{sinGraphLabel-II}{sin_graph.pdf}
+import matplotlib
+matplotlib.use('Agg')
+from matplotlib import pyplot as plt
+import numpy as np
+x = np.linspace(0, 2*np.pi, num = 80)
+y = np.sin(x)*np.cos(x)+.2
+plt.plot(x, y, 'b-o')
+\end{pyfig}
+Hello world:
+\ztikzCachedHash[label=sinGraphLabel, index=-2]
+
+\ztikzForceToSkip
+% \ztikzForceToRun
+1 + 1 = \sympy{aaa}{1+10}
+
+
+\ztikzForceToSkip
+% \ztikzForceToRun
+\begin{pycode}{bbb}{pycode_table.txt}
+import numpy as np
+
+# write file
+with open ('pycode_table.txt', 'w') as file:
+  file.write("\\begin{tabular}{p{3cm}ccc}\n")
+  file.write("\\hline\n")
+  file.write("number/function & $\\sin$ & $\\cos$ & $\\tan$\\\\\n")
+  file.write("\\hline\n")
+  for i in range(1, 16):
+    file.write(
+      f"${i}$ & ${np.around(np.sin(i), decimals=4)}$ &  ${np.around(np.cos(i), decimals=4)}$ & ${np.around(np.tan(i), decimals=4)}$\\\\\n"
+    )
+
+  file.write("\\hline\n")
+  file.write("\\end{tabular}\n")
+\end{pycode}
+\begin{center}
+\input{\pycodeOutputFile}
+\end{center}
+
+
+\section{wolfram module}
+% \ztikzForceToRun
+% \ztikzForceToSkip
+\wolfram*{wolfram-1+1}{1/2}
+\[\wolframResult\]
+
+\wolfram{wolframLaplace}{LaplaceTransform[t^4 Sin[3*t], t, s]}
+\[
+  \mathcal{L}(t^4\sin(3t)) = \wolframResult
+\]
+
+\wolframTex{wolframTexInt}{\int_a^b\sin(x)\,dx}
+\[
+  \int_a^b \sin(x)\,dx = \wolframResult
+\]
+
+
+\wolframTable*{wolframTable}[
+  format=cccc, hdbt-rule,
+  header={$x$ & $x^2$ & $x^3$ & $x^4$},
+  cell-cmd={\textcolor{red}{(#1)}}
+]{Table[{i, i^2, i^3, i^4}, {i, 6}]}
+\SetTblrOuter{expand=\wolframTableFData}
+\hskip6em
+\begin{tblr}
+  {
+    colspec = {cccc}, 
+    rowspec = {
+      |[2pt,green7]Q|[2pt, teal7]Q|[green7]Q|[green6]
+      Q|[green5]Q|[green4]Q|[green3]Q|[3pt,teal7]
+    }
+  } \wolframTableFData
+\end{tblr}
+
+
+% \ztikzForceToSkip
+\wolframSolve{wolframSolve-I}[var={x, y}]{a x + y == 8 && b x - y == 1}
+\begin{align}
+  &  \wolframResult \\
+  &  \wolframResult[||] \\
+  &  \wolframResult* \\
+  &  \wolframResult*[3-1]
+\end{align}
+\wolframSolve{wolframSolve-II}
+  [var={x, y}, domain=Integers]
+  {x^2 + 2 y^3 == 3681 && x > 0 && y > 0}
+\begin{align}
+  \wolframResult
+\end{align}
+
+
+\wolframDSolve{wolframDSolve-I}{y'[x] + y[x] == a*Sin[x], y[0] == 1}
+\begin{align}
+  &\wolframResult
+\end{align}
+
+% \ztikzForceToSkip
+\wolframDSolve{wolframDSolve-II}
+  [depend={y[x], z[x]}]
+  {y'[x] == Exp[z[x]] + 1, z'[x] == y[x] - x}
+\begin{align}\left\{\begin{aligned}
+  &\wolframResult[\\&]
+\end{aligned}\right.\end{align}
+
+
+\ztikzForceToSkip
+% \ztikzForceToRun
+\begin{wolframGraphics}{wolframSinGraph}
+  FIGURE=Plot[Sin[x], {x, -Pi, Pi}]hajksdhg
+\end{wolframGraphics}
+
+\includegraphics[width=.5\linewidth]{\wolframOuputFile}
+
+
+\ExplSyntaxOn\makeatletter
+\makeatother\ExplSyntaxOff
+% \tokenAnalysis{a$@$c#|*}
+\end{document}
+
+
+
+
+
+
+
+
 % ==> stop development sign
 \InputIfFileExists{ztikz-cfg.tex}{}{}
 \documentclass{../../zlatex/code/ztex}

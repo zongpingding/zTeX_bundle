@@ -1,4 +1,4 @@
-\begin{pycode}{pycode_table.txt}
+\begin{pycode}{pycodeTable}{pycode_table.txt}
 import numpy as np
 
 # write file

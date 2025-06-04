@@ -140,8 +140,6 @@ Python 的 \pkg{matplotlib} 库, WolframScript 的绘图功能; 计算部分基�
 
 \clearpage
 \section{安装使用}
-
-
 \subsection{兼容情况}
 目前 \pkg{ztikz} 宏包兼容 Windows/Linux/MacOS 三个平台. 各个平台中不同 \TeX{}Live 版本的
 兼容性如下:
@@ -444,6 +442,10 @@ sudo ln -sf \
   么此时并不会绘制任何的刻度.
 \end{keyval}
 
+
+\begin{function}[added=2025-05-31]{\CurrentFp}
+  此命令表示当前刻度处的浮点数值, 其值在不同刻度处会自动更新.
+\end{function}
 
 
 \begin{function}[added=2025-05-15]{\xAxis}
@@ -766,12 +768,11 @@ sudo ln -sf \
   \end{syntax}
   该命令会用引用当前 \env{tikzpicture} 环境中产生的绘图数据, 返回一个(数据)文件名, 从 1 开始.
   \meta{index} 接受一个整数, 表示当前环境中绘图数据的编号. 每一个已经绘制的函数都会在对应的文件夹
-  下生成一个对应的数据文件，用户可以使用此数据文件进行后续的绘图操作.
+  下生成一个对应的数据文件，用户可以使用此数据文件进行后续的绘图操作.\par
+  \textbf{注记}(\cmd{\gnudata} 用法补充, 为后面区域填充做铺垫): 比如命令 -- \verb|\gnudata{2}|, 参数中
+  的 ``2'' 表示此数据是在当前 \env{tikzpicture} 环境中的第二个函数绘图数据; 所以在第一个 \env{tikzpicture} 环境中
+  它的返回值可能为 ``\texttt{./ztikz_output/gnuplot_data/gnu_data_1_2.table}''.
 \end{function}
-
-\cmd{\gnudata} 的用法补充说明, 为后面区域填充案例做铺垫: 比如 \verb|\gnudata{2}|, 参数中
-的 ``2'' 表示此数据是在当前 \env{tikzpicture} 环境中的第二个函数绘图数据; 所以在第一个 \env{tikzpicture} 环境中
-它的返回值可能为 ``\texttt{./ztikz_output/gnuplot_data/gnu_data_1_2.table}''.
 
 \begin{figure}[!htb]
   \centering
@@ -826,7 +827,7 @@ entering extended mode
 的代码时, 这个 Hash 值就会改变，从而 \TikZ{} 就会再次运行此环境, 重新生成图片. 这便是 \TikZ{} 的
 \pkg{external} 库所提供的缓存功能的大致描述. \zTikZ{} 中的 Cache 机制和此原理是十分类似的.
 
-
+\subsubsection{用户接口}
 \begin{function}[added=2025-05-15]{\ztikzHashClean}
   此命令不接受任何参数, 用于清除之前缓存的所有 Hash 值.
 \end{function}
@@ -843,17 +844,191 @@ entering extended mode
 \end{function}
 
 
+\begin{function}[added=2025-05-29, EXP]{\ztikzCachedHash}
+  \begin{syntax}
+    \cs{ztikzCachedHash}\oarg{keyval}
+  \end{syntax}
+  此命令用于输出当前已缓存的 Hash 值, 应用场景较之 \cs{ztikzHashCurrent} 命令更加的广泛.
+\end{function}
+
+
+\begin{keyval}[parent=ztikz/cache/hash]{index, file, label}
+  \begin{syntax}
+    index = \meta{整数}>\dval{-1}
+    file  = \meta{文件名}>\dval*{ztikz_output/ztikz.hash}
+    label = \meta{字符串}>\dval*{\cs{g__zcache_latest_cache_label_tl}}
+  \end{syntax}
+  \meta{label} 默认情况下为当前最新的缓存标签; \meta{file} 为 Hash 值对应的缓存文件;
+  \meta{index} 用于指定该 \meta{label} 所缓存的 Hash 值的索引, 默认为 -1, 即最新的 Hash 值;
+\end{keyval}
+
+
 \begin{function}[added=2025-05-15]{\ztikzForceToSkip}
   此命令会强制跳过(重新)运行它之后的第一个具有 cache 机制的环境或命令, 即使该环境或命令对应的 Hash 已经改变; 
   后续的 \cs{wolframResult} 或 \cs{wolframOuputFile} 命令对应的引用结果都将受到此命令的影响. \par 
-  \textbf{注意}: 目前该命令目前很不成熟, 仅对 \pkg{python} 库中的 \cs{sympy} 命令有效; 尽量避免连续使用
-  多个 \cs{ztikzForceToSkip} 命令, 否则会导致引用的缓存结果出现较大的偏差.
+  \textbf{注意}:当应用此命令后, 新产生的 Hash 值并不会被缓存; 该命令目前仅对 \pkg{python} 和 \pkg{wolfram}
+  库中的命令和环境有效; 该命令会删除后续与{\sffamily\color{red}新} Hash 相关的脚本与结果.
 \end{function}
 
 
 \begin{function}[added=2025-05-21]{\ztikzForceToRun}
-  此命令会强制运行它之后的第一个具有 cache 机制的环境或命令, 即使该环境或命令对应的 Hash 并没有改变.
+  此命令会强制运行它之后的第一个具有 cache 机制的环境或命令, 即使该环境或命令对应的 Hash 并没有改变.\par
+  \textbf{注意}:该命令目前仅对 \pkg{python} 和 \pkg{wolfram} 库中的命令和环境有效; 即使是该命令后续的
+  命令或环境对应的 Hash 值改变, 这个新的 Hash 值也不会被缓存.
 \end{function}
+
+
+\clearpage
+\subsubsection{编程接口}
+\pkg{ztikz} 的 \pkg{cache} 库提供了一系列的编程接口, 用户可以利用这一系列的接口来编写外部程序
+调用相关的命令或环境. 这系列的新建命令或环境将支持缓存机制, 目前 \pkg{cache} 库中提供的编程接口
+和部分其它相关命令如下:
+
+
+\begin{function}[added=2025-05-30]{\g_ztikz_file_hash_seq}
+  该序列(变量)中保存了当前所有已缓存 Hash 值, 该序列中的项(元素)为某个具有缓存机制的命令或环境
+  对应的 Hash 值.\par 
+  \textbf{注记}: 该命令由后续的 \cs{__zcache_hash_extract_all:nN} 命令设置得到.
+\end{function}
+
+
+\begin{function}[added=2025-05-30]{\g_ztikz_hash_nochg_run_bool, \g_ztikz_hashchg_norun_bool}
+  这两个 bool 值用于控制 \cs{ztikz_if_run_again:nnnTF} 命令的行为, 前者为 ``\texttt{true}'' 时:
+  \cs{ztikz_if_run_again:nnnTF} 命令的 Hash 校验会被强制跳过, 从而直接运行 \meta{true code}; 后者为 ``\texttt{true}'' 时:
+  \cs{ztikz_if_run_again:nnnTF} 命令的 Hash 校验会被强制跳过, 从而直接运行 \meta{false code}. \par
+  \textbf{注意}: 这两个 bool 值默认均为 ``\texttt{false}''; {\sffamily\color{red} 二者不能同时为
+  ``\texttt{true}'', 否则会报错}. 
+\end{function}
+
+
+\begin{function}[added=2025-05-30]{\xsim_file_write_start:nn, \xsim_file_write_start:ne}
+  \begin{syntax}
+    \cmd{\xsim_file_write_start:nn} \marg{bool}\marg{file}
+  \end{syntax}
+  此命令来自 \pkg{xsimverb} 宏包, 用于将环境内容抄录到 \meta{file} 文件中; \meta{bool} 为布尔值, 如果该抄录环境需要接受
+  参数，那么请将 \meta{bool} 置为 ``\texttt{\cs{c_true_bool}}'', 否则请置为 ``\texttt{\cs{c_false_bool}}''.\par 
+  \textbf{注意}: 该命令需配合 \cs{xsim_file_write_stop:} 命令使用, 否则会报错.
+\end{function}
+
+
+\begin{function}[added=2025-05-30]{\xsim_file_write_stop:}
+  该命令用于结束环境内容抄录, 需配合 \cs{xsim_file_write_start:nn} 命令使用.
+\end{function}
+
+
+\begin{function}[added=2025-05-30, TF]{
+  \ztikz_if_run_again:nnn,  
+  \ztikz_if_run_again:nen}
+  \begin{syntax}
+    \cmd{\ztikz_if_run_again:nnnTF}
+    ~~~~\marg{bool}\marg{file/hash}\marg{label}
+    ~~~~\marg{true code}\marg{false code}
+  \end{syntax}
+  \meta{bool} 用于控制第二个参数 \meta{file/hash} 的类型, \meta{bool} 为 ``\texttt{\cs{c_true_bool}}'' 时,
+  \meta{file/hash} 需传入文件名, 否则应传入一个 Hash 值; \meta{label} 为该 Hash 值或文件 Hash 值对应的缓存标签;
+  当该环境的 Hash 值不存在, Hash 值改变抑或该环境被置于命令 \cs{ztikzForceToRun} 后时, 将会运行 \meta{true code};
+  当该环境的 Hash 值已存在或该环境被置于命令 \cs{ztikzForceToSkip} 后时, 将会运行 \meta{false code}.
+\end{function}
+
+
+\begin{function}[added=2025-05-31]{\ztikz_term_info:n, \ztikz_term_info:e}
+  \begin{syntax}
+    \cs{ztikz_term_info:n} \marg{message}
+  \end{syntax}
+  此命令与 \TeX{} 中的 \cs{typeout} 命令类似, 用于向终端输出信息 \meta{message}.
+\end{function}
+
+
+
+\clearpage
+\subsubsection{私有接口}
+本小节将介绍 \pkg{cache} 库中的私有命令和变量, 这部分命令或变量在用户定义一些命令或环境时可能是必须的; 
+因这部分命令暂时未整理好, 所以后续可能会有较大改动, 用户应谨慎使用这部分命令或变量.
+
+
+\begin{function}[added=2025-05-30]{\l__ztikz_current_hash_tl}
+  该变量将返回当前最新的 Hash 值.
+\end{function}
+
+
+\begin{function}[added=2025-05-30]{\__zcache_hash_add:nn}
+  \begin{syntax}
+    \cs{__zcache_hash_add:nn} \marg{label}\marg{hash}
+  \end{syntax}
+  此命令用于将 \meta{hash} 添加到 \meta{label} 对应的缓存标签中.
+\end{function}
+
+
+\begin{function}[added=2025-05-30]{\__zcache_hash_extract_all:nN}
+  \begin{syntax}
+    \cs{__zcache_hash_extract_all:nN} \marg{file}\meta{seq}
+  \end{syntax}
+  该命令用于将文件 \meta{file} 中的所有 Hash 值提取后保存到到变量 \meta{seq} 中,
+  \meta{seq} 中的每一项都对应一个 Hash 值.
+\end{function}
+
+
+\begin{function}[added=2025-05-30]{\__zcache_hash_extract_by_label:nnn}
+  \begin{syntax}
+    \cs{__zcache_hash_extract_by_label:nnn} \marg{file}\marg{label}\marg{index}
+  \end{syntax}
+  该命令会从文件 \meta{file} 中提取标签为 \meta{label}, 索引为 \meta{index} 的 Hash 值.
+  该命令无返回值, 它会将 \cs{l__ztikz_current_hash_tl} 置为其提取的 Hash 值. 
+\end{function}
+
+
+\clearpage
+\subsubsection{编程接口使用案例}
+下面我们给出上述命令的一个使用样例, 该样例制作了一个支持缓存机制的 Mermaid 绘图环境(用户需要安装 ``mermaid-cli'' 这一工具):
+\begin{DocExample}*[||]
+\ExplSyntaxOn\makeatletter
+% 1. environment declaration
+\tl_new:N \g__ztikz_mmd_path_tl
+\tl_gset:Nn \g__ztikz_mmd_path_tl {ztikz_output/mmd_data}
+\ztool_shell_mkdir:e { \g__ztikz_mmd_path_tl }
+\NewDocumentEnvironment{mermaid}{ m }
+  {
+    \xsim_file_write_start:ne {\c_true_bool}{\g__ztikz_mmd_path_tl/t@mp.mmd}
+  }{
+    \xsim_file_write_stop:
+    \edef\t@mp@file{\g__ztikz_mmd_path_tl/\l__ztikz_current_hash_tl}
+    \ztool_shell_mv:ee 
+      {\g__ztikz_mmd_path_tl/t@mp.mmd}
+      {\t@mp@file.mmd}
+    \ztikz_if_run_again:nenTF {\c_true_bool}{\t@mp@file.mmd}{#1}
+      {
+        \ztool_shell_escape:e
+          {
+            mmdc 
+            \space-i\space \t@mp@file.mmd
+            \space-o\space \t@mp@file.pdf 
+            \space-f
+          }
+        \ztikz_term_info:e { Mermaid~running~on~file:'\t@mp@file.mmd'~... }
+      }{
+        \ztikz_term_info:e { Use~the~cached~Mermaid~result:'\t@mp@file.pdf'~... }
+      }
+    \xdef\mmdOutputFile{\t@mp@file.pdf}
+  }
+\makeatother\ExplSyntaxOff
+% 2. environment usage
+\begin{mermaid}{mmd-I}
+journey
+    title My working day
+    section Go to work
+      Make tea: 5: Me
+      Go upstairs: 3: Me
+      Do work: 1: Me, Cat
+    section Go home
+      Go downstairs: 5: Me
+      Sit down: 5: Me
+\end{mermaid}
+\begin{center}
+  \includegraphics[width=.85\linewidth]{\mmdOutputFile}
+\end{center}
+\end{DocExample}
+
+
 
 
 \clearpage
@@ -894,37 +1069,39 @@ entering extended mode
 \end{DocExample}
 
 
-\begin{function}[added=2025-05-15]{\sympy}
+\begin{function}[added=2025-05-29]{\sympy}
   \begin{syntax}
-    \cs{sympy}\marg{expression}
+    \cs{sympy}\marg{label}\marg{expression}
   \end{syntax}
-  此命令主要用于调用 Python 的 \pkg{sympy} 库进行符号计算, \meta{expression} 为符号表达式. \zTikZ{} 对此
-  命令提供了 cache 机制. \pkg{python} 库中预定义了一系列的符号变量, 包括: \texttt{x, y, z, u, v, t}, 这些预定义变量无需用户再次声明.
-  \par \textbf{注意}: 默认的情况下, 此命令的返回结果中包含: \verb|^, _| 等特殊字符, 所以请将此命令置于数学环境中.
+  此命令主要用于调用 Python 的 \pkg{sympy} 库进行符号计算, \zTikZ{} 对此命令提供了 cache 机制; \meta{label} 中不能包含 ``:'', 其用于指定
+  该命令的缓存标签, 该 \meta{label} 在当前文档中必须是唯一的; \meta{expression} 为符号表达式.  \pkg{python} 库中预
+  定义了一系列的符号变量, 包括: \texttt{x, y, z, u, v, t}, 这些预定义变量无需用户再次声明.\par 
+  \textbf{注意}: 默认的情况下, 此命令的返回结果中可能包含: ``\verb|^, _|'' 等数学环境中才能使用的字符, 故用户应尽量
+  将此命令置于数学环境中.
 \end{function}
 \begin{DocExample}*
 \[
   \int x^8 + \cos(7x) + 6t\,\mathrm{d}x  
-    = \sympy{integrate( x**8 + cos(7*x) + 6*t, x )}    
+    = \sympy{integral}{integrate( x**8 + cos(7*x) + 6*t, x )}    
 \]
 \[
   \mathrm{eig}(\begin{bmatrix}1 & 2\\2 & 2\end{bmatrix})
-    = \sympy{Matrix([[1, 2], [2, 2]]).eigenvals()}    
+    = \sympy{matrix}{Matrix([[1, 2], [2, 2]]).eigenvals()}    
 \]
 \end{DocExample}
 
 
-\begin{function}[updated=2025-05-21]{pyfig}
+\begin{function}[updated=2025-05-29]{pyfig}
   \begin{syntax}
-    \cs{begin}\zarg{pyfig}\marg{output file} 
+    \cs{begin}\zarg{pyfig}\marg{label}\marg{output file} 
     ~~~~\meta{plot code} 
     \cs{end}\zarg{pyfig}
   \end{syntax}
-  此环境用于调用 Python 进行绘图, 不会返回任何结果, 该环境具有缓存机制;
-  \meta{output file} 用于指定代码 \meta{plot code} 的输出文件名, \meta{output file} 中无需给出输出文件路径, 但需指定输
-  出文件的拓展名;\par 
+  此环境用于调用 Python 进行绘图, 不会返回任何结果, 该环境具有缓存机制; \meta{label} 中不能包含 ``:'', 其用于指定该环境的缓存标签, 
+  该 \meta{label} 在当前文档中必须是唯一的; \meta{output file} 用于指定代码 \meta{plot code} 的输出文件名, 
+  \meta{output file} 中无需给出输出文件路径, 但需指定输出文件的拓展名;\par 
   \textbf{注意}: 针对不同的 \env{pyfig} 环境建议使用不同的 \meta{output file} 值; 用户不需要在代码末尾添加 \verb|plt.savefig()| 命令,
-  \ztikz{} 会自动处理相关的问题. 代码在抄录过程中会保留用户的缩进格式, 从行首开始抄录, 所以请不要添加多余的行首缩进;
+  \ztikz{} 会自动处理此问题. 代码在抄录过程中会保留用户的缩进格式, 从行首开始抄录, 所以请不要添加多余的行首缩进;
   请确保 \meta{output file} 与后续环境代码中的输出文件名保持一致, 否则会报错.
 \end{function}
 
@@ -935,7 +1112,7 @@ entering extended mode
 \end{function}
 
 \begin{DocExample}*
-\begin{pyfig}{sin_graph.pdf}
+\begin{pyfig}{sinGraph}{sin_graph.pdf}
 import matplotlib
 matplotlib.use('Agg')
 from matplotlib import pyplot as plt
@@ -952,12 +1129,12 @@ plt.plot(x, y, 'o')
 
 \begin{function}[added=2025-05-21]{pycode}
   \begin{syntax}
-  \cs{begin}\zarg{pycode}\marg{output file} 
+  \cs{begin}\zarg{pycode}\marg{label}\marg{output file} 
   ~~~~\meta{any python code} 
   \cs{end}\zarg{pycode}
   \end{syntax}
-  此环境用于调用 Python 执行环境中的 \meta{any python code}, 不会返回任何结果, 该环境具有缓存机制; 
-  \meta{output file} 用于指定该环境代码的输出文件名, \meta{output file} 中无需给出输出文件路径, 但需指定输出文件的拓展名; 
+  此环境用于调用 Python 执行环境中的 \meta{any python code}, 不会返回任何结果, 该环境具有缓存机制; \meta{label} 中不能包含 ``:'', 其用于指定该环境
+  的缓存标签, 该 \meta{label} 在当前文档中必须是唯一的; \meta{output file} 用于指定该环境代码的输出文件名, \meta{output file} 中无需给出输出文件路径, 但需指定输出文件的拓展名; 
   随后 \ztikz{} 会自动调用 Python 执行该文件，该环境的运行结果保存于文件 \cs{pycodeOutputFile} 中, 用户后续仅需
   导入该文件即可;\par 
   \textbf{注意}: 针对不同的 \env{pycode} 环境建议使用不同的 \meta{output file} 值; 代码在抄录过程中会保留用户的缩进格式, 
@@ -1003,7 +1180,10 @@ plt.plot(x, y, 'o')
   \end{syntax}
   此命令用于引用前一次 WolframScript 的计算结果, \texttt{\cs{wolframResult}\oarg{separator}} 
   表示使用 \meta{separator} 进行分隔, 然后引用全部计算结果; \texttt{\cs{wolframResult}*\oarg{index}}
-  仅引用部分计算结果, \meta{index} 为整数或整数表达式, 默认为 1.
+  仅引用部分计算结果, \meta{index} 为整数或整数表达式, 默认为 1.\par
+  \vskip1em
+  \noindent{\sffamily\color{red}NOTE: 因为 \cs{wolframResult} 会根据 ``$@_{12}$'' 去划分结果, 所以请确保 ``@''
+  的 catcode 为 12, 否则可能会导致结果解析错误.}
 \end{function}
 
 
@@ -1014,46 +1194,49 @@ plt.plot(x, y, 'o')
 \end{function}
 
 
-\begin{function}[added=2025-05-15]{\wolfram}
+\begin{function}[added=2025-05-29]{\wolfram}
   \begin{syntax}
-    \cs{wolfram}\marg{code}
-    \cs{wolfram}*\marg{code}
+    \cs{wolfram}\marg{label}\marg{code}
+    \cs{wolfram}*\marg{label}\marg{code}
   \end{syntax}
-  此命令用于调用 WolframScript 中的进行计算, 具有缓存机制; \meta{code} 为合法的 WolframScript 代码;
+  此命令用于调用 WolframScript 中的进行计算, 具有缓存机制; \meta{label} 中不能包含 ``:'', 其用于指定该命令的缓存标签, 
+  该 \meta{label} 在当前文档中必须是唯一的; \meta{code} 为合法的 WolframScript 代码;
   默认计算结果为 \LaTeX{} 代码, 含有 ``\texttt{*}'' 的命令计算结果为普通的字符串(catcode 并没有改变).
 \end{function}
 \begin{DocExample}*
-\wolfram{LaplaceTransform[t^4 Sin[3*t], t, s]}
+\wolfram{wolframLaplace}{LaplaceTransform[t^4 Sin[3*t], t, s]}
 \[
   \mathcal{L}(t^4\sin(3t)) = \wolframResult
 \]
 \end{DocExample}
 
 
-\begin{function}[added=2025-05-18]{\wolframTex}
+\begin{function}[added=2025-05-29]{\wolframTex}
   \begin{syntax}
-    \cs{wolframTex}\marg{Tex code}
+    \cs{wolframTex}\marg{label}\marg{Tex code}
   \end{syntax}
   此命令和上述的 \cs{wolfram} 命令类似, 不同的是, 此命令会将 \meta{Tex code} 中的所有内容转化为对应的
-  Mathematica 代码, 返回的结果为 \LaTeX{} 代码. \par
+  Mathematica/Mathics 代码, 返回的结果为 \LaTeX{} 代码. \meta{label} 中不能包含 ``:'', 其用于指定该命令的缓存标签, 
+  该 \meta{label} 在当前文档中必须是唯一的; \par
   \vskip1em
-  \noindent{\sffamily\color{red}NOTE: 由于此命令的实现原理较为复杂与特殊, 所以 \meta{Tex code} 中不能
-  包含 ``\verb|$|'' 符号, 否则会出现解析错误.} 
+  \noindent{\sffamily\color{red}NOTE: 由于此命令的实现原理较为复杂与特殊, 所以 \meta{Tex code} 
+  和 \meta{label} 中均不能包含 ``\verb|$|'' 符号, 否则会出现解析错误.} 
 \end{function}
 \begin{DocExample}*
-\wolframTex{\int_a^b\sin(x)\,dx}
+\wolframTex{wolframTexInt}{\int_a^b\sin(x)\,dx}
 \[
   \int_a^b \sin(x)\,dx = \wolframResult
 \]
 \end{DocExample}
 
 
-\begin{function}[added=2025-05-18]{\wolframTable}
+\begin{function}[added=2025-05-29]{\wolframTable}
   \begin{syntax}
-    \cs{wolframTable}\marg{code}
-    \cs{wolframTable}*\oarg{key-value}\marg{code}
+    \cs{wolframTable}\marg{label}\marg{code}
+    \cs{wolframTable}*\marg{label}\oarg{key-value}\marg{code}
   \end{syntax}
-  此命令用于调用 Wolfram 引擎生成表格, 具有缓存机制; 前者(不带有 ``\texttt{*}'' 的命令) 不会在 PDF 
+  此命令用于调用 Wolfram 引擎生成表格, 具有缓存机制; \meta{label} 中不能包含 ``:'', 其用于指定该命令的缓存标签, 
+  该 \meta{label} 在当前文档中必须是唯一的; 前者(不带有 ``\texttt{*}'' 的命令) 不会在 PDF 
   中输出对应的表格, 此命令设置了 \cs{wolframTablePData}, \cs{wolframTableFData} 两个临时变量, 其中保存了表格数据; 
   后者(带有 ``\texttt{*}'' 的命令) 会在 PDF 中输出对应的表格, 
   表格的样式可以通过 \meta{key-value} 进行指定; \meta{code} 为合法的 WolframScript/Mathics 代码;
@@ -1082,7 +1265,7 @@ plt.plot(x, y, 'o')
   不建议与 \pkg{tabularray} 中的 \meta{cells/cmd} 混用.
 \end{function}
 \begin{DocExample}*
-\wolframTable*[
+\wolframTable*{wolframTable}[
   format=cccc, hdbt-rule,
   header={$x$ & $x^2$ & $x^3$ & $x^4$},
   cell-cmd={\textcolor{red}{(#1)}}
@@ -1101,12 +1284,13 @@ plt.plot(x, y, 'o')
 \end{DocExample}
 
 
-\begin{function}[added=2025-05-15]{\wolframSolve}
+\begin{function}[added=2025-05-29]{\wolframSolve}
   \begin{syntax}
-    \cs{wolframSolve}\oarg{key-value}\marg{equation}
-    \cs{wolframSolve}*\marg{full code}
+    \cs{wolframSolve}\marg{label}\oarg{key-value}\marg{equation}
+    \cs{wolframSolve}*\marg{label}\marg{full code}
   \end{syntax}
-  此命令用于调用 WolframScript 中的进行方程的求解, 具有缓存机制; \meta{equation} 表示方程的表达式;
+  此命令用于调用 WolframScript 中的进行方程的求解, 具有缓存机制; \meta{label} 中不能包含 ``:'', 其用于指定该命令的缓存标签, 
+  该 \meta{label} 在当前文档中必须是唯一的; \meta{equation} 为对应方程的表达式;
   \meta{key-value} 用于设置求解的自变量与定义域; \meta{full code} 为完整的方程表达式, 包含自变量, 定义域; 
 \end{function}
 
@@ -1119,29 +1303,32 @@ plt.plot(x, y, 'o')
   \meta{var} 用于设置求解的自变量, 比如 \texttt{\meta{var}=x} 表示求解 $x$ 对应的表达式(等式左边为 $x$);
 \end{keyval}
 
+
+\makeatother
 \begin{DocExample}*
-\wolframSolve[var={x, y}]{a x + y == 8 && b x - y == 1}
+\wolframSolve{wolframSolve-I}[var={x, y}]{a x + y == 8 && b x - y == 1}
 \begin{align}
   &  \wolframResult \\
   &  \wolframResult[||] \\
   &  \wolframResult* \\
   &  \wolframResult*[3-1]
 \end{align}
-\wolframSolve[
-  var={x, y}, domain=Integers
-]{x^2 + 2 y^3 == 3681 && x > 0 && y > 0}
+\wolframSolve{wolframSolve-II}
+  [var={x, y}, domain=Integers]
+  {x^2 + 2 y^3 == 3681 && x > 0 && y > 0}
 \begin{align}
   \wolframResult
 \end{align}
 \end{DocExample}
 
 
-\begin{function}[added=2025-05-15]{\wolframDSolve}
+\begin{function}[added=2025-05-29]{\wolframDSolve}
   \begin{syntax}
-    \cs{wolframDSolve}\oarg{key-value}\marg{equation}
-    \cs{wolframDSolve}*\marg{full code}
+    \cs{wolframDSolve}\marg{label}\oarg{key-value}\marg{equation}
+    \cs{wolframDSolve}*\marg{label}\marg{full code}
   \end{syntax}
-  此命令用于调用 WolframScript 中的进行微分方程的求解, 具有缓存机制; \meta{equation} 表示方程的表达式;
+  此命令用于调用 WolframScript 中的进行微分方程的求解, 具有缓存机制; \meta{label} 中不能包含 ``:'', 其用于指定该命令的缓存标签, 
+  该 \meta{label} 在当前文档中必须是唯一的; \meta{equation} 表示方程的表达式;
   \meta{key-value} 用于设置求解的自变量与定义域; \meta{full code} 为完整的微分方程表达式, 包含自变量, 因变量; 
 \end{function}
 
@@ -1155,11 +1342,13 @@ plt.plot(x, y, 'o')
   \meta{independ} 用于指定该微分方程的自变量, 比如 \texttt{\meta{independ}=x} 表示 $x$ 是自变量;
 \end{keyval}
 \begin{DocExample}*
-\wolframDSolve{y'[x] + y[x] == a*Sin[x], y[0] == 1}
+\wolframDSolve{wolframDSolve-I}{y'[x] + y[x] == a*Sin[x], y[0] == 1}
 \begin{align}
   &\wolframResult
 \end{align}
-\wolframDSolve[depend={y[x], z[x]}]{y'[x] == Exp[z[x]] + 1, z'[x] == y[x] - x}
+\wolframDSolve{wolframDSolve-II}
+  [depend={y[x], z[x]}]
+  {y'[x] == Exp[z[x]] + 1, z'[x] == y[x] - x}
 \begin{align}\left\{\begin{aligned}
   &\wolframResult[\\&]
 \end{aligned}\right.\end{align}
@@ -1167,22 +1356,23 @@ plt.plot(x, y, 'o')
 
 
 
-\begin{function}[added=2025-05-15]{wolframGraphics}
+\begin{function}[added=2025-05-29]{wolframGraphics}
   \begin{syntax}
-    \cs{begin}\zarg{wolframGraphics}\oarg{spec} 
+    \cs{begin}\zarg{wolframGraphics}\marg{label}\oarg{spec} 
     ~~~~~\meta{plot code}
     \cs{end}\zarg{wolframGraphics}
   \end{syntax}
-  此环境用于调用 WolframScript 进行绘图, 具有缓存机制; \meta{spec} 用于设置图片的的排版参数, 默认为空,
+  此环境用于调用 WolframScript 进行绘图, 具有缓存机制; \meta{label} 中不能包含 ``:'', 其用于指定该环境的缓存标签, 
+  该 \meta{label} 在当前文档中必须是唯一的; \meta{spec} 用于设置图片的的排版参数, 默认为空,
   此时该环境不会返回任何的结果, 可以通过 \cs{wolframOuputFile} 调用其产生的文件; 
-  \meta{spec} 可以设置值, 对应图片的排版参数, 比如 \verb|width=10em|; 若 \meta{spec} 非空, 则该环境会
-  返回: \texttt{\cs{includegraphics}\oarg{spec}\zarg{\meta{path}/\meta{HASH}.pdf}}, 其中 \meta{HASH} 
+  \meta{spec} 可以设置值, 对应图片的排版参数, 比如 \verb|width=10em|; 若 \meta{spec} 非空, 则该环境的
+  返回值为: \texttt{\cs{includegraphics}\oarg{spec}\zarg{\meta{path}/\meta{HASH}.pdf}}, 其中 \meta{HASH} 
   为当前 \env{wolframGraphics} 环境中代码的 Hash 值, \meta{path} 为 WolframScript 缓存文件夹对应的目录.\par
   \vskip.5em
   \noindent{\sffamily\color{red} NOTE: \meta{plot code} 中最后得到的图片名称必须为 ``\texttt{FIGURE}'', 否则会报错.}
 \end{function}
 \begin{DocExample}*
-\begin{wolframGraphics}
+\begin{wolframGraphics}{wolframSinGraph}
   FIGURE=Plot[Sin[x], {x, -Pi, Pi}]
 \end{wolframGraphics}
 
@@ -1308,11 +1498,17 @@ plt.plot(x, y, 'o')
 
 \begin{function}[added=2025-05-15]{\zscolor, \zfcolor}
   \begin{syntax}
-    \cs{zmoveto}\marg{l3color}
-    \cs{zlineto}\marg{l3color}
+    \cs{zscolor}\marg{l3color}
+    \cs{zfcolor}\marg{l3color}
   \end{syntax}
-  这两个命令用于移动当前画笔的坐标, \meta{l3color} 为 \pkg{l3draw} 中合法的颜色表达式;
-  \ztikz{} 对常见的颜色预定义了其对应的 l3color 变量, 一些常见的颜色, 用户可以直接使用.
+  \meta{l3color} 为 \pkg{l3draw} 中合法的颜色表达式; \ztikz{} 对常见的颜色预定义了其对应
+  的 ``l3color'' 变量, 用户可以直接使用这部分颜色.
+\end{function}
+
+
+\begin{function}[added=2025-05-31]{\zfevenodd, \zfnozero}
+  命令 \cs{zfevenodd} 用于指定区域内外分割规则为 -- ``奇偶规则'';
+  命令 \cs{zfnozero} 用于指定区域内外分割规则为 -- ``非零规则'', 
 \end{function}
 
 
@@ -1386,11 +1582,12 @@ plt.plot(x, y, 'o')
 \end{function}
 
 
-\begin{function}[added=2025-05-15]{\usepath}
+\begin{function}[added=2025-05-15]{\zusepath}
   \begin{syntax}
-    \cs{usepath}\marg{style}
+    \cs{zusepath}\oarg{style}
   \end{syntax}
-  此命令用于显示最终的路径, \meta{style} 的可选值有: ``\texttt{draw, stroke, fill, clip}''.
+  此命令用于显示最终的路径, \meta{style} 默认为 ``\texttt{draw}'', 其余的可选值
+  有: ``\texttt{stroke, fill, clip}''.
 \end{function}
 
 
@@ -1540,11 +1737,11 @@ with open ('pycode_table.txt', 'w') as file:
   }
 \begin{todolist}
   \item 实现类似 \pkg{tikz-3dplot} 的接口, 使用 \LaTeX3 对其进行重写.
-  \item 增加 Matlab 脚本的调用接口, 或者直接使用其开源替代 \href{https://octave.org/}{GNU Octave} ?
-  \item 实现 \env{wolframAny} 环境, 该环境实现的功能类似 \env{pycode}.
-  \item 重写缓存机制对应的函数 \cs{ztikz_hash_if_change:nn}, 目前不够灵活(或许直接使用 \href{https://github.com/leo-colisson/robust-externalize}{\pkg{robust-externalize}} 宏包).
-  \item 针对 \pkg{cache} 库, 需要清除多余的 Hash 值: 例如某个环境/命令产生的原 Hash 值为 ``A'', 对应环境/命令中的参数改变后，其 Hash 值变为了 ``B'', 那么此时需要清除原始的 ``A''.
-  \item 实现 \cs{ztikzForceToSkip} 命令: 如何处理 \cs{xsim_file_write_start:nn} 环境 ? 如何处理多个 \cs{ztikzForceToRun} ? 也许使用 \cs{str_mdfive_hash:n} 会有帮助 ?
+  \item *[参考后续 ``\env{wolframAny}'' 环境的处理方法]增加 Matlab 脚本的调用接口, 或者直接使用其开源替代 \href{https://octave.org/}{GNU Octave} ?
+  \item *[参考 \pkg{cache} 库一节中 ``\env{mermaid}'' 环境的实现]实现 \env{wolframAny} 环境, 该环境实现的功能类似 \env{pycode}.
+  \item [2025-05-29]重写缓存机制对应的函数 \cs{ztikz_hash_if_change:nn}, 目前不够灵活(或许直接使用 \href{https://github.com/leo-colisson/robust-externalize}{\pkg{robust-externalize}} 宏包).
+  \item [2025-05-29]针对 \pkg{cache} 库, 需要清除多余的 Hash 值: 例如某个环境/命令产生的原 Hash 值为 ``A'', 对应环境/命令中的参数改变后，其 Hash 值变为了 ``B'', 那么此时需要清除原始的 ``A''.
+  \item [2025-05-29]实现 \cs{ztikzForceToSkip} 命令: 如何处理 \cs{xsim_file_write_start:nn} 环境 ? 如何处理多个 \cs{ztikzForceToRun} ? 也许使用 \cs{str_mdfive_hash:n} 会有帮助 ?
 \end{todolist}
 
 
