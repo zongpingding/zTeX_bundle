@@ -1,4 +1,4 @@
-\ProvidesExplFile{ztikz.library.gnuplot.tex}{2024/12/17}{1.0.0}{gnuplot~library~for~ztikz}
+\ProvidesExplFile{ztikz.library.gnuplot.tex}{2025/05/31}{1.0.0}{gnuplot~library~for~ztikz}
 
 
 
@@ -111,7 +111,7 @@
     \group_begin:
     \ztikz_keys_set:nn { 2dplot } { #1 }
     \__ztikz_sed_script:nne {plot_plot.gp}{8}{set~xr~[\l__ztikz_plot_domain_tl]}
-    \__ztikz_sed_script:nnn {plot_plot.gp}{7}{f(x)~=~#2}
+    \__ztikz_sed_script:nne {plot_plot.gp}{7}{f(x)~=~#2}
     \__ztikz_gnu_data_plot:nee {plot}{\l__ztikz_plot_style_tl}{\l__ztikz_plot_marker_tl}
     \group_end:
   }
@@ -131,7 +131,7 @@
     \group_begin:
     \ztikz_keys_set:nn { 2dplot } { #1 }
     \__ztikz_sed_script:nne {param_plot.gp}{8}{set~trange~[\l__ztikz_plot_domain_tl]}
-    \__ztikz_sed_script:nnn {param_plot.gp}{9}{plot~#2}
+    \__ztikz_sed_script:nne {param_plot.gp}{9}{plot~#2}
     \__ztikz_gnu_data_plot:nee {param}{\l__ztikz_plot_style_tl}{\l__ztikz_plot_marker_tl}
     \group_end:
   }
@@ -140,7 +140,7 @@
     \group_begin:
     \ztikz_keys_set:nn { 2dplot } { #1 }
     \__ztikz_sed_script:nne {polar_plot.gp}{8}{set~trange~[\l__ztikz_plot_domain_tl]}
-    \__ztikz_sed_script:nnn {polar_plot.gp}{9}{plot~#2}
+    \__ztikz_sed_script:nne {polar_plot.gp}{9}{plot~#2}
     \__ztikz_gnu_data_plot:nee {polar}{\l__ztikz_plot_style_tl}{\l__ztikz_plot_marker_tl}
     \group_end:
   }

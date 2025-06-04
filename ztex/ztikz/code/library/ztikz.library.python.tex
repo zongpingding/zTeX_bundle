@@ -1,4 +1,4 @@
-\ProvidesExplFile{ztikz.library.python.tex}{2025/05/22}{1.0.0}{python~library~for~ztikz}
+\ProvidesExplFile{ztikz.library.python.tex}{2025/05/29}{1.0.0}{python~library~for~ztikz}
 
 
 
@@ -13,46 +13,55 @@
 
 % ==> core functions  
 \cs_new_protected:Npn \zlatex_Readlines_cs:nn #1#2 
-{
-  \ior_open:Nn \g__file_read_ior {#2}
-  \str_case:nnF {#1}{
-    {raw}{
-      \ior_get:NN \g__file_read_ior \g__file_content_tl
-    }
-    {str}{
-      \ior_str_get:NN \g__file_read_ior \g__file_content_tl
-    }
-  }{}
-  \tl_use:N \g__file_content_tl
-}
+  {
+    \ior_open:Nn \g__file_read_ior {#2}
+    \str_case:nnF {#1}{
+      {raw}{
+        \ior_get:NN \g__file_read_ior \g__file_content_tl
+      }
+      {str}{
+        \ior_str_get:NN \g__file_read_ior \g__file_content_tl
+      }
+    }{}
+    \tl_use:N \g__file_content_tl
+  }
 \cs_generate_variant:Nn \zlatex_Readlines_cs:nn {ee}
 \cs_generate_variant:Nn \xsim_file_write_start:nn {ne}
 
 
 % ==> users' interface
 % python-matplotlib
-\NewDocumentEnvironment{pyfig}{ m }
-  {
+\NewDocumentEnvironment{pyfig}{ mm }
+  {% #1:label; #2:file name
     \xsim_file_write_start:ne {\c_true_bool}{\g__ztikz_python_path_tl/t@mp.py}
   }{
     \xsim_file_write_stop:   
-    \ztikz_hash_if_change:neTF {\c_true_bool}{\g__ztikz_python_path_tl/t@mp.py}   
+    \ztikz_if_run_again:nenTF {\c_true_bool}{\g__ztikz_python_path_tl/t@mp.py}{#1}  
       {
         \__ztikz_addto_script:nn {\g__ztikz_python_path_tl/t@mp.py} 
-          { plt.savefig('#1') }
+          { plt.savefig('#2') }
         \ztool_shell_escape:e {python~\g__ztikz_python_path_tl/t@mp.py} 
         \ztool_shell_mv:ee
           { \g__ztikz_python_path_tl/t@mp.py } 
           { \g__ztikz_python_path_tl/pyfig_\l__ztikz_current_hash_tl.py } 
         \ztool_shell_mv:ee
-          { #1 } 
-          { \g__ztikz_python_path_tl/\l__ztikz_current_hash_tl _#1 }
-        \ztikz_term_info:e {writing~source~to~file:'\g__ztikz_python_path_tl/pyfig_\l__ztikz_current_hash_tl.py'}
+          { #2 } 
+          { \g__ztikz_python_path_tl/\l__ztikz_current_hash_tl _#2 }
+        \ztikz_term_info:e 
+          {
+            writing~source~to~file:'\g__ztikz_python_path_tl/
+              pyfig_\l__ztikz_current_hash_tl.py'
+          }
       }{
-        \ztikz_term_info:e {skip~recompile~by~python,~using~the~cache~picture:'(\l__ztikz_current_hash_tl)_#1'}
+        \ztikz_term_info:e 
+          {
+            skip~recompile~of~python,~use~the~
+            cache~picture:'\l__ztikz_current_hash_tl _#2'
+          }
       }
-    \xdef\pyfigOutputFile{ \g__ztikz_python_path_tl/\l__ztikz_current_hash_tl _#1 }
+    \xdef\pyfigOutputFile{ \g__ztikz_python_path_tl/\l__ztikz_current_hash_tl _#2 }
   }
+
 % inline python command
 \NewDocumentCommand\py{O{raw}m}
   {
@@ -64,10 +73,10 @@
     % \cs{iow_close:N} \cs{g__file_read_ior} leads to bug ??
   }
 % python-sympy
-\NewDocumentCommand\sympy{m}
+\NewDocumentCommand\sympy{ mm }
   {
-    \__ztikz_sed_script:nne {sympy_script.py}{8}{F_res~=~\tl_to_str:n {#1}}
-    \ztikz_hash_if_change:neTF {\c_true_bool}{\g__ztikz_scripts_path_tl/sympy_script.py}
+    \__ztikz_sed_script:nne {sympy_script.py}{8}{F_res~=~\tl_to_str:n {#2}}
+    \ztikz_if_run_again:nenTF {\c_true_bool}{\g__ztikz_scripts_path_tl/sympy_script.py}{#1}
       {
         \ztool_shell_escape:e {python~ \g__ztikz_scripts_path_tl/sympy_script.py}
         \ztool_shell_mv:ee
@@ -81,23 +90,31 @@
       }
   }
 % python-code-env
-\NewDocumentEnvironment{pycode}{ m }
-  {% #1:true to input result; #2:output file name (with ext)
+\NewDocumentEnvironment{pycode}{ mm }
+  {% #1:label; #2:output file name (with ext)
     \xsim_file_write_start:ne {\c_true_bool}{\g__ztikz_python_path_tl/t@mp.py}
   }{ 
     \xsim_file_write_stop: 
-    \ztikz_hash_if_change:neTF {\c_true_bool}{\g__ztikz_python_path_tl/t@mp.py}   
+    \ztikz_if_run_again:nenTF {\c_true_bool}{\g__ztikz_python_path_tl/t@mp.py}{#1}   
       {
         \ztool_shell_escape:e {python~\g__ztikz_python_path_tl/t@mp.py} 
         \ztool_shell_mv:ee
           { \g__ztikz_python_path_tl/t@mp.py } 
           { \g__ztikz_python_path_tl/pycode_\l__ztikz_current_hash_tl.py } 
         \ztool_shell_mv:ee 
-          { #1 } 
-          { \g__ztikz_python_path_tl/\l__ztikz_current_hash_tl _#1 } 
-        \ztikz_term_info:e {writing~source~to~file:'\g__ztikz_python_path_tl/pycode_\l__ztikz_current_hash_tl.py'}
+          { #2 } 
+          { \g__ztikz_python_path_tl/\l__ztikz_current_hash_tl _#2 } 
+        \ztikz_term_info:e 
+          {
+            writing~source~to~file:'\g__ztikz_python_path_tl/
+              pycode_\l__ztikz_current_hash_tl.py'
+          }
       }{
-        \ztikz_term_info:e {skip~recompile~by~python,use~the~cache~result:'(\l__ztikz_current_hash_tl)_#1'}
+        \ztikz_term_info:e 
+          {
+            skip~recompile~of~python,~use~the~cache~result:
+              '\l__ztikz_current_hash_tl _#2'
+          }
       }
-    \xdef\pycodeOutputFile{\g__ztikz_python_path_tl/\l__ztikz_current_hash_tl _#1}
+    \xdef\pycodeOutputFile{\g__ztikz_python_path_tl/\l__ztikz_current_hash_tl _#2}
   }

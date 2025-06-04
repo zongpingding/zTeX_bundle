@@ -1,4 +1,4 @@
-\ProvidesExplFile{ztikz.library.l3draw.tex}{2024/12/17}{1.0.0}{zdraw~library~for~ztikz}
+\ProvidesExplFile{ztikz.library.l3draw.tex}{2025/05/31}{1.0.0}{zdraw~library~for~ztikz}
 
 
 
@@ -62,28 +62,30 @@
   {\draw_path_scope_end:}
 %% cmd alias
 % point/line
-\cs_new_eq:NN \zmoveto \draw_path_moveto:n
-\cs_new_eq:NN \zlineto \draw_path_lineto:n
-\cs_new_eq:NN \scolor \color_stroke:n
-\cs_new_eq:NN \fcolor \color_fill:n
+\cs_new_eq:NN \zmoveto   \draw_path_moveto:n
+\cs_new_eq:NN \zlineto   \draw_path_lineto:n
+\cs_new_eq:NN \zscolor   \color_stroke:n
+\cs_new_eq:NN \zfcolor   \color_fill:n
+\cs_new_eq:NN \zfevenodd \draw_evenodd_rule:
+\cs_new_eq:NN \zfnozero  \draw_nonzero_rule:
 % base vector
-\cs_new_eq:NN \zxvec   \draw_xvec:n
-\cs_new_eq:NN \zyvec   \draw_yvec:n
+\cs_new_eq:NN \zxvec      \draw_xvec:n
+\cs_new_eq:NN \zyvec      \draw_yvec:n
 % both follows ref (0, 0)
-\cs_new_eq:NN \zpolar  \draw_point_polar:nn 
-\cs_new_eq:NN \zcoor   \draw_point_vec:nn  
+\cs_new_eq:NN \zpolar     \draw_point_polar:nn 
+\cs_new_eq:NN \zcoor      \draw_point_vec:nn  
 % shape and text
-\cs_new_eq:NN \zrect \draw_path_rectangle_corners:nn
-\cs_new_eq:NN \zcirc \draw_path_circle:nn
-\cs_new_eq:NN \znewtext    \coffin_new:N
-\cs_new_eq:NN \zsethtext   \hcoffin_set:Nn
-\cs_new_eq:NN \zsetvtext   \vcoffin_set:Nnn
-\cs_new_eq:NN \zscaletext  \coffin_scale:Nnn
-\cs_new_eq:NN \zputtext    \draw_coffin_use:Nnnn
+\cs_new_eq:NN \zrect      \draw_path_rectangle_corners:nn
+\cs_new_eq:NN \zcirc      \draw_path_circle:nn
+\cs_new_eq:NN \znewtext   \coffin_new:N
+\cs_new_eq:NN \zsethtext  \hcoffin_set:Nn
+\cs_new_eq:NN \zsetvtext  \vcoffin_set:Nnn
+\cs_new_eq:NN \zscaletext \coffin_scale:Nnn
+\cs_new_eq:NN \zputtext   \draw_coffin_use:Nnnn
 %% path operation
 % scope
-\cs_new_eq:NN \zbg \draw_path_scope_begin:
-\cs_new_eq:NN \zeg \draw_path_scope_end:
+\cs_new_eq:NN \zbg        \draw_path_scope_begin:
+\cs_new_eq:NN \zeg        \draw_path_scope_end:
 % segement connect
 \cs_new_eq:NN \zcapbutt   \draw_cap_butt:
 \cs_new_eq:NN \zcaproun   \draw_cap_round:
@@ -94,7 +96,7 @@
 \cs_new_eq:NN \zxscale    \draw_transform_xscale:n
 \cs_new_eq:NN \zyscale    \draw_transform_yscale:n
 \cs_new_eq:NN \ztrans     \draw_transform_matrix:nnnn
-\NewDocumentCommand{\usepath}{O{draw}}{
+\NewDocumentCommand{\zusepath}{O{draw}}{
   \draw_path_use_clear:n {#1}
 }
 
