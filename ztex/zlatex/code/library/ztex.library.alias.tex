@@ -1,4 +1,4 @@
-\ProvidesExplFile{ztex.library.alias.tex}{2025/04/26}{1.0.1}{alias~library~for~ztex}
+\ProvidesExplFile{ztex.library.alias.tex}{2025/06/15}{1.0.1}{alias~library~for~ztex}
 
 
 %%%%%     alias library for ztex     %%%%%
@@ -9,21 +9,77 @@
 \bool_gset_true:N \g__ztex_math_alias_bool
 \RequirePackage{amssymb, mathrsfs}
 \RequirePackage{mathtools}
-\let\oldS\S    
-\let\olddiv\div
-\let\oldhom\hom
+
+
+% ==> copy the original cs from hash table
+\cs_new:Npn \__zalias_cs_copy:NN #1#2
+  {
+    \tex_let:D #1#2
+  }
+\cs_new:Npn \__zalias_cs_gcopy:NN #1#2
+  {
+    \tex_global:D \tex_let:D #1#2
+  }
+\cs_generate_variant:Nn \__zalias_cs_copy:NN  {cc, cN, Nc}
+\cs_generate_variant:Nn \__zalias_cs_gcopy:NN {cc, cN, Nc}
+\__zalias_cs_copy:cc {z@ltx@s}{S}
+\__zalias_cs_copy:cc {z@ltx@div}{div}
+\__zalias_cs_copy:cc {z@ltx@hom}{hom}
 
 
 % ==> Alias switch on/off
-\bool_new:N \g__ztex_math_alias_switch_bool
+\bool_new:N \g__ztex_math_alias_switch_bool  % for future use
 \bool_gset_false:N \g__ztex_math_alias_switch_bool
-\NewDocumentCommand{\zaliasOn}{o}
+\seq_new:N \g__ztex_mathalias_user_seq
+\seq_new:N \g__ztex_mathalias_internal_seq
+\seq_new:N \g__ztex_mathalias_protected_seq
+\seq_gclear:N \g__ztex_mathalias_user_seq
+\seq_gclear:N \g__ztex_mathalias_internal_seq
+\seq_gclear:N \g__ztex_mathalias_protected_seq
+\NewDocumentCommand{\zaliasOn}{O{OLD}}
   {
     \group_begin:
+    \__zalias_init:
+    \__zalias_cmd_create:n {#1}
+  }
+\cs_set_protected:Npn \__zalias_init: 
+  {
+    \char_set_mathcode:nn {"2F}{"413D} % for '/' in 'fixdif'
     \bool_gset_true:N \g__ztex_math_alias_switch_bool
+    \seq_gset_from_clist:NN \g__ztex_mathalias_user_seq 
+      \g__ztex_mathalias_user_clist
+    \seq_gset_from_clist:NN \g__ztex_mathalias_internal_seq 
+      \g__ztex_mathalias_internal_clist
+  }
+\cs_set_protected:Npn \__zalias_cmd_create:n #1
+  {
+    \seq_map_indexed_inline:Nn \g__ztex_mathalias_user_seq 
+      {
+        \cs_if_exist:NT ##2 
+          {
+            \seq_gput_right:Nn \g__ztex_mathalias_protected_seq {##2}
+            \__zalias_cs_copy:cN {z@ltx@\cs_to_str:N ##2} ##2 % store the original
+            \__zalias_cs_copy:cN {#1\cs_to_str:N ##2} ##2 % for tmp usage
+          }
+        \cs_set_protected:Npe ##2
+          {
+            \seq_item:Nn \g__ztex_mathalias_internal_seq {##1}
+          }
+      }
+  }
+\cs_set_protected:Nn \__zalias_delete:
+  {
+    \seq_map_inline:Nn \g__ztex_mathalias_user_seq 
+      {
+        \seq_if_in:NnF \g__ztex_mathalias_protected_seq {##1}
+          {
+            \cs_undefine:N ##1
+          }
+      }
   }
 \NewDocumentCommand{\zaliasOff}{o}
   {
+    % \cs{__zalias_delete:} % for future use
     \bool_gset_false:N \g__ztex_math_alias_switch_bool
     \group_end:
   }
@@ -36,9 +92,11 @@
     }
     \ztex_msg_error:n {math-alias-cmd}
   }
-\NewDocumentEnvironment{zalias}{}
-  { \group_begin:
+\NewDocumentEnvironment{zalias}{O{OLD}}
+  { 
+    \group_begin:
     \bool_gset_true:N \g__ztex_math_alias_switch_bool
+    \__zalias_cmd_create:n { #1 }
   }{
     \bool_gset_false:N \g__ztex_math_alias_switch_bool
     \group_end:
@@ -52,33 +110,19 @@
 \clist_gclear:N \g__ztex_mathalias_internal_clist
 \cs_new:Npn \ztex_mathalias_set:nn #1#2
   {% #1:the users' interface; #2: the internal interface
-    \clist_push:Nn \g__ztex_mathalias_user_clist {#1}
-    \clist_push:Nn \g__ztex_mathalias_internal_clist {#2}
-    \seq_set_from_clist:Nn \l_tmpa_seq {#1}
-    \seq_set_from_clist:Nn \l_tmpb_seq {#2}
-    \seq_map_pairwise_function:NNN 
-      \l_tmpa_seq \l_tmpb_seq 
-      \__ztex_math_alias_set:nn
-  }
-\cs_set:Npn \__ztex_math_alias_set:nn #1#2 
-  {
-    \cs_set:Npn #1 
-      {
-        \bool_if:NTF \g__ztex_math_alias_switch_bool
-          { #2 }
-          { \zaliasError }
-      }
+    \clist_put_right:Nn \g__ztex_mathalias_user_clist     {#1}
+    \clist_put_right:Nn \g__ztex_mathalias_internal_clist {#2}
   }
 
 
 % ==> Math Font 
-\newcommand{\z@R}[1]{\ensuremath{\mathrm{#1}}}
-\newcommand{\z@K}[1]{\ensuremath{\mathfrak{#1}}}
-\newcommand{\z@C}[1]{\ensuremath{\mathcal{#1}}}
-\newcommand{\z@B}[1]{\ensuremath{\mathbb{#1}}}
-\newcommand{\z@S}[1]{\ensuremath{\mathscr{#1}}}
-\newcommand{\z@F}[1]{\ensuremath{\boldsymbol{#1}}}
-\newcommand{\z@FF}[1]{\ensuremath{\mathbf{#1}}}
+\DeclareRobustCommand{\z@R}[1]{\ensuremath{\mathrm{#1}}}
+\DeclareRobustCommand{\z@K}[1]{\ensuremath{\mathfrak{#1}}}
+\DeclareRobustCommand{\z@C}[1]{\ensuremath{\mathcal{#1}}}
+\DeclareRobustCommand{\z@B}[1]{\ensuremath{\mathbb{#1}}}
+\DeclareRobustCommand{\z@S}[1]{\ensuremath{\mathscr{#1}}}
+\DeclareRobustCommand{\z@F}[1]{\ensuremath{\boldsymbol{#1}}}
+\DeclareRobustCommand{\z@FF}[1]{\ensuremath{\mathbf{#1}}}
 \ztex_mathalias_set:nn
   { \R,   \K,   \C,   \B,   \S,   \F,   \FF   }
   { \z@R, \z@K, \z@C, \z@B, \z@S, \z@F, \z@FF }
@@ -116,7 +160,7 @@
   }
 \prop_map_inline:Nn \g_ztex_math_simple_arrow_prop 
   {
-    \cs_new:cpn {z@#1}{#2}
+    \cs_new_protected:cpn {z@#1}{#2}
   }
 \ztex_mathalias_set:nn 
   { \ma,  \mma, \la, \La, \nla, \Nla, 
@@ -155,22 +199,21 @@
 % ==> Math Operator and symbols
 % REF: 1. https://en.wikipedia.org/wiki/List\_of\_mathematical\_abbreviations
 %      2. https://tex.stackexchange.com/a/289946/294585
-\newcommand{\z@A}{\ensuremath{\forall}}
-\newcommand{\z@E}{\ensuremath{\exists}}
-\newcommand{\z@ns}{\ensuremath{\varnothing}}
-\newcommand{\z@se}{\ensuremath{\backsimeq}}
-\newcommand{\z@sse}{\ensuremath{\cong}}
-\newcommand{\z@CC}{\ensuremath{\mathbb{C}}}
-\newcommand{\z@RR}{\ensuremath{\mathbb{R}}}
-\newcommand{\z@ZZ}{\ensuremath{\mathbb{Z}}}
-\newcommand{\z@NN}{\ensuremath{\mathbb{N}}}
-\newcommand{\z@dd}{\ensuremath{\mathchoice{\:}{\mspace{1.5mu}}{}{}\mathrm{d}}}
+\DeclareRobustCommand{\z@A}{\ensuremath{\forall}}
+\DeclareRobustCommand{\z@E}{\ensuremath{\exists}}
+\DeclareRobustCommand{\z@ns}{\ensuremath{\varnothing}}
+\DeclareRobustCommand{\z@se}{\ensuremath{\backsimeq}}
+\DeclareRobustCommand{\z@sse}{\ensuremath{\cong}}
+\DeclareRobustCommand{\z@CC}{\ensuremath{\mathbb{C}}}
+\DeclareRobustCommand{\z@RR}{\ensuremath{\mathbb{R}}}
+\DeclareRobustCommand{\z@ZZ}{\ensuremath{\mathbb{Z}}}
+\DeclareRobustCommand{\z@NN}{\ensuremath{\mathbb{N}}}
+\DeclareRobustCommand{\z@dd}{\mathinner{\mathrm{d}}\zalias@mu@p}
+\def\zalias@mu@p{\mathchoice{\mskip-\thinmuskip}{\mskip-\thinmuskip}{}{}{}}
 \ztex_mathalias_set:nn 
-  { \A, \E, \ns, \se, \sse, \CC, \RR, \ZZ, \NN, \dd }
+  { \A,   \E,   \ns,   \se,   \sse,   \CC,   \RR,   \ZZ,   \NN,   \dd   }
   { \z@A, \z@E, \z@ns, \z@se, \z@sse, \z@CC, \z@RR, \z@ZZ, \z@NN, \z@dd }
 % math operator alias setup
-\cs_set_protected:Npn \ztex_op_name_set:nn #1#2 
-  { \exp_args:Nee \DeclareMathOperator{\use:c {z@#1}}{\exp_not:n {#2}} }
 \prop_set_from_keyval:Nn \g_ztex_math_op_prop 
   {
     alt   = alt,
@@ -189,24 +232,23 @@
   }
 \prop_map_inline:Nn \g_ztex_math_op_prop 
   {
-    \ztex_op_name_set:nn {#1}
-      { \prop_item:Nn \g_ztex_math_op_prop {#1} }
+    \exp_args:Ne \DeclareRobustCommand{\use:c {z@#1}}
+      { 
+        \operatorname{\prop_item:Nn \g_ztex_math_op_prop {#1}}
+        \peek_after:Nw \ztex_op_check: 
+      }
   }
-\ztex_mathalias_set:nn 
-  { \alt, \rot, \div, \curl, \grad, \id, 
-    \im,  \ker, \cok, \hom, \supp, \sign, \trace }
-  { \z@alt, \z@rot, \z@div, \z@curl, \z@grad, \z@id, 
-    \z@im,  \z@ker, \z@cok, \z@hom, \z@supp, \z@sign, \z@trace }
-% additional math spacing spec
 \tl_const:Nn \c_ztex_math_ops_tl { \cdot \wedge \times \oplus \otimes }
-\clist_map_inline:nn 
-  { alt, rot, div, curl, grad, id, im, ker, cok, hom, sign, trace }
-  { \cs_set_protected_nopar:cpn {#1}{\use:c {z@#1} \peek_after:Nw \ztex_op_check:} }
 \cs_new_protected:Nn \ztex_op_check: { 
   \tl_map_inline:Nn \c_ztex_math_ops_tl {
     \token_if_eq_meaning:NNT \l_peek_token ##1 { \tl_map_break:n {{\!}} }
   }
 }
+\ztex_mathalias_set:nn 
+  { \alt, \rot, \div, \curl, \grad, \id, 
+    \im,  \ker, \cok, \hom, \supp, \sign, \trace }
+  { \z@alt, \z@rot, \z@div, \z@curl, \z@grad, \z@id, 
+    \z@im,  \z@ker, \z@cok, \z@hom, \z@supp, \z@sign, \z@trace }
 \NewDocumentCommand\zaliasopset{m}
   {
     \prop_put_from_keyval:Nn \g_ztex_math_op_prop {#1}
