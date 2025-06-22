@@ -1,0 +1,346 @@
+\ProvidesExplFile{ztex.module.sclist.tex}{2025/06/21}{1.0.1}{cmd~module~for~ztex}
+
+
+%%%%%     semicolon list interface for ztex     %%%%%
+% NOTE: the purpose of the 'sclist' module is to
+%       support extensibility for semicolon list.
+% REF: https://github.com/latex3/latex3/blob/develop/l3kernel/l3clist.dtx
+% ==> scan marks, sclist map break
+\scan_new:N \s__sclist_mark
+\scan_new:N \s__sclist_stop
+\cs_new:Npn \__sclist_use_none_delimit_by_s_mark:w #1 \s__sclist_mark { }
+\cs_new:Npn \__sclist_use_none_delimit_by_s_stop:w #1 \s__sclist_stop { }
+\cs_new:Npn \__sclist_use_i_delimit_by_s_stop:nw #1 #2 \s__sclist_stop {#1}
+\cs_new_protected:Npn \__sclist_tmp:w { }
+
+
+% ==> '\__sclist_sanitize:n' and '\sclist_if_empty:n(N)(pTF)'
+\prg_new_eq_conditional:NNn \sclist_if_empty:N \tl_if_empty:N
+  { p , T , F , TF }
+\prg_new_eq_conditional:NNn \sclist_if_empty:c \tl_if_empty:c
+  { p , T , F , TF }
+\prg_new_conditional:Npnn \sclist_if_empty:n #1 { p , T , F , TF }
+  {
+    \__sclist_if_empty_n:w ? #1
+    ; \s__sclist_mark \prg_return_false:
+    ; \s__sclist_mark \prg_return_true:
+    \s__sclist_stop
+  }
+\cs_new:Npn \__sclist_if_empty_n:w #1 ,
+  {
+    \tl_if_empty:oTF { \use_none:nn #1 ? }
+      { \__sclist_if_empty_n:w ? }
+      { \__sclist_if_empty_n:wNw }
+  }
+\cs_new:Npn \__sclist_if_empty_n:wNw #1 \s__sclist_mark #2#3 \s__sclist_stop {#2}
+\cs_new:Npn \__sclist_trim_next:w #1 ;
+  {
+    \tl_if_empty:oTF { \use_none:nn #1 ? }
+      { \__sclist_trim_next:w \prg_do_nothing: }
+      { \tl_trim_spaces_apply:oN {#1} \exp_end: }
+  }
+\cs_new:Npn \__sclist_sanitize:n #1
+  {
+    \exp_after:wN \__sclist_sanitize:Nn \exp_after:wN \c_empty_tl
+    \exp:w \__sclist_trim_next:w \prg_do_nothing:
+    #1 ; \s__sclist_stop \prg_break: ; \prg_break_point:
+  }
+\cs_new:Npn \__sclist_sanitize:Nn #1#2
+  {
+    \__sclist_use_none_delimit_by_s_stop:w #2 \s__sclist_stop
+    #1 \__sclist_wrap_item:w #2 ;
+    \exp_after:wN \__sclist_sanitize:Nn \exp_after:wN ;
+    \exp:w \__sclist_trim_next:w \prg_do_nothing:
+  }
+\prg_new_conditional:Npnn \__sclist_if_wrap:n #1 { TF }
+  {
+    \tl_if_empty:oTF
+      {
+        \__sclist_if_wrap:w
+          \s__sclist_mark ? #1 ~ \s__sclist_mark ? ~ #1
+          \s__sclist_mark ; ~ \s__sclist_mark #1 ;
+      }
+      {
+        \tl_if_head_is_group:nTF { #1 { } }
+          {
+            \tl_if_empty:nTF {#1}
+              { \prg_return_true: }
+              {
+                \tl_if_empty:oTF { \use_none:n #1}
+                  { \prg_return_true: }
+                  { \prg_return_false: }
+              }
+          }
+          { \prg_return_false: }
+      }
+      { \prg_return_true: }
+  }
+\cs_new:Npn \__sclist_if_wrap:w #1 \s__sclist_mark ? ~ #2 ~ \s__sclist_mark #3 ; { }
+\cs_new:Npn \__sclist_wrap_item:w #1 ;
+  { \__sclist_if_wrap:nTF {#1} { \exp_not:n { {#1} } } { \exp_not:n {#1} } }
+
+
+% ==> '\sclist_new:N' and '\sclist_(g)set:Nn'
+\cs_new_eq:NN \sclist_new:N \tl_new:N
+\cs_new_eq:NN \sclist_new:c \tl_new:c
+\cs_new_eq:NN \sclist_set_eq:NN  \tl_set_eq:NN
+\cs_new_eq:NN \sclist_set_eq:Nc  \tl_set_eq:Nc
+\cs_new_eq:NN \sclist_set_eq:cN  \tl_set_eq:cN
+\cs_new_eq:NN \sclist_set_eq:cc  \tl_set_eq:cc
+\cs_new_eq:NN \sclist_gset_eq:NN \tl_gset_eq:NN
+\cs_new_eq:NN \sclist_gset_eq:Nc \tl_gset_eq:Nc
+\cs_new_eq:NN \sclist_gset_eq:cN \tl_gset_eq:cN
+\cs_new_eq:NN \sclist_gset_eq:cc \tl_gset_eq:cc
+\cs_new_protected:Npn \sclist_const:Nn #1#2
+  { \tl_const:Ne #1 { \__sclist_sanitize:n {#2} } }
+\cs_new_protected:Npn \sclist_set:Nn #1#2
+  { \__kernel_tl_set:Nx #1 { \__sclist_sanitize:n {#2} } }
+\cs_new_protected:Npn \sclist_gset:Nn #1#2
+  { \__kernel_tl_gset:Nx #1 { \__sclist_sanitize:n {#2} } }
+\cs_generate_variant:Nn \sclist_const:Nn { Ne , c , ce }
+\cs_generate_variant:Nn \sclist_const:Nn { Nx , cx }
+\cs_generate_variant:Nn \sclist_set:Nn  { NV , Ne , c , cV , ce }
+\cs_generate_variant:Nn \sclist_set:Nn  { No , Nx , co , cx }
+\cs_generate_variant:Nn \sclist_gset:Nn { NV , Ne , c , cV , ce }
+\cs_generate_variant:Nn \sclist_gset:Nn { No , Nx , co , cx }
+\cs_new_eq:NN \sclist_clear:N \tl_clear:N
+\cs_new_eq:NN \sclist_clear:c \tl_clear:c
+\cs_new_eq:NN \sclist_gclear:N \tl_gclear:N
+\cs_new_eq:NN \sclist_gclear:c \tl_gclear:c
+\cs_new_eq:NN \sclist_clear_new:N  \tl_clear_new:N
+\cs_new_eq:NN \sclist_clear_new:c  \tl_clear_new:c
+\cs_new_eq:NN \sclist_gclear_new:N \tl_gclear_new:N
+\cs_new_eq:NN \sclist_gclear_new:c \tl_gclear_new:c
+
+
+
+% ==> '\sclist_map_function:NN' and '\sclist_map_function:nN'
+\cs_new:Npn \sclist_map_function:NN #1#2
+  {
+    \sclist_if_empty:NF #1
+      {
+        \exp_after:wN \__sclist_map_function:Nw \exp_after:wN #2 #1 ;
+          \s__sclist_stop ; \s__sclist_stop ; \s__sclist_stop ; \s__sclist_stop ;
+          \s__sclist_stop ; \s__sclist_stop ; \s__sclist_stop ; \s__sclist_stop ;
+        \prg_break_point:Nn \sclist_map_break: { }
+      }
+  }
+\cs_new:Npn \__sclist_map_function:Nw #1 #2; #3; #4; #5; #6; #7; #8; #9;
+  {
+    \__sclist_use_none_delimit_by_s_stop:w
+      #9 \__sclist_map_function_end:w \s__sclist_stop
+    #1 {#2} #1 {#3} #1 {#4} #1 {#5} #1 {#6} #1 {#7} #1 {#8} #1 {#9}
+    \__sclist_map_function:Nw #1
+  }
+\cs_new:Npn \__sclist_map_function_end:w \s__sclist_stop #1#2
+  {
+    \__sclist_use_none_delimit_by_s_stop:w #2 \sclist_map_break: \s__sclist_stop
+    #1 {#2}
+    \__sclist_map_function_end:w \s__sclist_stop
+  }
+\cs_generate_variant:Nn \sclist_map_function:NN { c }
+\cs_new:Npn \sclist_map_function:nN #1#2
+  {
+    \exp_after:wN \__sclist_map_function_n:Nn \exp_after:wN #2
+    \exp:w \__sclist_trim_next:w \prg_do_nothing: #1 ;
+      \s__sclist_stop \sclist_map_break: ;
+    \prg_break_point:Nn \sclist_map_break: { }
+  }
+\cs_new:Npn \__sclist_map_function_n:Nn #1 #2
+  {
+    \__sclist_use_none_delimit_by_s_stop:w #2 \s__sclist_stop
+    \__sclist_map_unbrace:wn #2 ; #1
+    \exp_after:wN \__sclist_map_function_n:Nn \exp_after:wN #1
+    \exp:w \__sclist_trim_next:w \prg_do_nothing:
+  }
+\cs_new:Npn \__sclist_map_unbrace:wn #1; #2 { #2 {#1} }
+\cs_generate_variant:Nn \sclist_map_function:nN { e }
+
+% '\sclist_map_tokens:Nn' and '\sclist_map_tokens:nn'
+\cs_new:Npn \sclist_map_tokens:Nn #1#2
+  {
+    \sclist_if_empty:NF #1
+      {
+        \exp_last_unbraced:Nno \__sclist_map_tokens:nw {#2} #1 ;
+          \s__sclist_stop ; \s__sclist_stop ; \s__sclist_stop ; \s__sclist_stop ;
+          \s__sclist_stop ; \s__sclist_stop ; \s__sclist_stop ; \s__sclist_stop ;
+        \prg_break_point:Nn \sclist_map_break: { }
+      }
+  }
+\cs_new:Npn \__sclist_map_tokens:nw #1 #2; #3; #4; #5; #6; #7; #8; #9;
+  {
+    \__sclist_use_none_delimit_by_s_stop:w
+      #9 \__sclist_map_tokens_end:w \s__sclist_stop
+    \use:n {#1} {#2} \use:n {#1} {#3} \use:n {#1} {#4} \use:n {#1} {#5}
+    \use:n {#1} {#6} \use:n {#1} {#7} \use:n {#1} {#8} \use:n {#1} {#9}
+    \__sclist_map_tokens:nw {#1}
+  }
+\cs_new:Npn \__sclist_map_tokens_end:w \s__sclist_stop \use:n #1#2
+  {
+    \__sclist_use_none_delimit_by_s_stop:w #2 \sclist_map_break: \s__sclist_stop
+    #1 {#2}
+    \__sclist_map_tokens_end:w \s__sclist_stop
+  }
+\cs_generate_variant:Nn \sclist_map_tokens:Nn { c }
+\cs_new:Npn \sclist_map_tokens:nn #1#2
+  {
+    \__sclist_map_tokens_n:nw {#2}
+    \prg_do_nothing: #1 ; \s__sclist_stop \sclist_map_break: ;
+    \prg_break_point:Nn \sclist_map_break: { }
+  }
+\cs_new:Npn \__sclist_map_tokens_n:nw #1#2 ;
+  {
+    \tl_if_empty:oF { \use_none:nn #2 ? }
+      {
+        \__sclist_use_none_delimit_by_s_stop:w #2 \s__sclist_stop
+        \tl_trim_spaces_apply:oN {#2} \use_ii_i:nn
+        \__sclist_map_unbrace:wn ; {#1}
+      }
+    \__sclist_map_tokens_n:nw {#1} \prg_do_nothing:
+  }
+\cs_new:Npn \sclist_map_break:
+  { \prg_map_break:Nn \sclist_map_break: { } }
+\cs_new:Npn \sclist_map_break:n
+  { \prg_map_break:Nn \sclist_map_break: }
+
+
+% ==> '\sclist_count:n' and '\sclist_count:N'
+\cs_new:Npn \sclist_count:N #1
+  {
+    \int_eval:n
+      {
+        0
+        \sclist_map_function:NN #1 \__sclist_count:n 
+      }
+  }
+\cs_generate_variant:Nn \sclist_count:N { c }
+\cs_new:Npn \__sclist_count:n #1 { + 1 }
+\cs_set_protected:Npn \__sclist_tmp:w #1
+  {
+    \cs_new:Npn \sclist_count:n ##1
+      {
+        \int_eval:n
+          {
+            0
+            \__sclist_count:w #1
+            ##1 ; \s__sclist_stop \prg_break: ; \prg_break_point:
+          }
+      }
+    \cs_new:Npn \__sclist_count:w ##1 ;
+      {
+        \__sclist_use_none_delimit_by_s_stop:w ##1 \s__sclist_stop
+        \tl_if_blank:nF {##1} { + 1 }
+        \__sclist_count:w #1
+      }
+  }
+\exp_args:No \__sclist_tmp:w \c_space_tl
+\cs_generate_variant:Nn \sclist_count:n { e }
+
+
+% ==> '\sclist_item:nn' and '\sclist_item:Nn'
+\cs_new:Npn \sclist_item:Nn #1#2
+  {
+    \__sclist_item:ffoN
+      { \sclist_count:N #1 }
+      { \int_eval:n {#2} }
+      #1
+      \__sclist_item_N_loop:nw
+  }
+\cs_new:Npn \__sclist_item:nnnN #1#2#3#4
+  {
+    \int_compare:nNnTF {#2} < 0
+      {
+        \int_compare:nNnTF {#2} < { - #1 }
+          { \__sclist_use_none_delimit_by_s_stop:w }
+          { \exp_args:Nf #4 { \int_eval:n { #2 + 1 + #1 } } }
+      }
+      {
+        \int_compare:nNnTF {#2} > {#1}
+          { \__sclist_use_none_delimit_by_s_stop:w }
+          { #4 {#2} }
+      }
+    { } ; #3 ; \s__sclist_stop
+  }
+\cs_generate_variant:Nn \__sclist_item:nnnN { ffo, ff }
+\cs_new:Npn \__sclist_item_N_loop:nw #1 #2;
+  {
+    \int_compare:nNnTF {#1} = 0
+      { \__sclist_use_i_delimit_by_s_stop:nw { \exp_not:n {#2} } }
+      { \exp_args:Nf \__sclist_item_N_loop:nw { \int_eval:n { #1 - 1 } } }
+  }
+\cs_generate_variant:Nn \sclist_item:Nn { c }
+\cs_new:Npn \sclist_item:nn #1#2
+  {
+    \__sclist_item:ffnN
+      { \sclist_count:n {#1} }
+      { \int_eval:n {#2} }
+      { #1 }
+      \__sclist_item_n:nw
+  }
+\cs_generate_variant:Nn \sclist_item:nn { e }
+\cs_new:Npn \__sclist_item_n:nw #1
+  { \__sclist_item_n_loop:nw {#1} \prg_do_nothing: }
+\cs_new:Npn \__sclist_item_n_loop:nw #1 #2;
+  {
+    \exp_args:No \tl_if_blank:nTF {#2}
+      { \__sclist_item_n_loop:nw {#1} \prg_do_nothing: }
+      {
+        \int_compare:nNnTF {#1} = 0
+          { \exp_args:No \__sclist_item_n_end:n {#2} }
+          {
+            \exp_args:Nf \__sclist_item_n_loop:nw
+              { \int_eval:n { #1 - 1 } }
+              \prg_do_nothing:
+          }
+      }
+  }
+\cs_new:Npn \__sclist_item_n_end:n #1 #2 \s__sclist_stop
+  { \tl_trim_spaces_apply:nN {#1} \__sclist_item_n_strip:n }
+\cs_new:Npn \__sclist_item_n_strip:n #1 { \__sclist_item_n_strip:w #1 ; }
+\cs_new:Npn \__sclist_item_n_strip:w #1 ; { \exp_not:n {#1} }
+
+
+% ==> debug sclist
+\msg_new:nnn { sclist } { show }
+  {
+    The~semicolon~list~ \tl_if_empty:nF {#1} { #1 ~ }
+    \tl_if_empty:nTF {#2}
+      { is~empty \\>~ . }
+      { contains~the~items~(without~outer~braces): #2 . }
+  }
+\cs_new_protected:Npn \sclist_show:N { \__sclist_show:NN \msg_show:nneeee }
+\cs_generate_variant:Nn \sclist_show:N { c }
+\cs_new_protected:Npn \sclist_log:N { \__sclist_show:NN \msg_log:nneeee }
+\cs_generate_variant:Nn \sclist_log:N { c }
+\cs_new_protected:Npn \__sclist_show:NN #1#2
+  {
+    \__kernel_chk_tl_type:NnnT #2 { sclist } { \exp_not:o #2 }
+      {
+        \int_compare:nNnTF { \sclist_count:N #2 }
+          = { \exp_args:No \sclist_count:n #2 }
+          {
+            #1 { sclist } { show }
+              { \token_to_str:N #2 }
+              { \sclist_map_function:NN #2 \msg_show_item:n }
+              { } { }
+          }
+          {
+            \msg_error:nnee { sclist } { non-sclist }
+              { \token_to_str:N #2 } { \tl_to_str:N #2 }
+          }
+      }
+  }
+\cs_new_protected:Npn \sclist_show:n { \__sclist_show:Nn \msg_show:nneeee }
+\cs_new_protected:Npn \sclist_log:n { \__sclist_show:Nn \msg_log:nneeee }
+\cs_new_protected:Npn \__sclist_show:Nn #1#2
+  {
+    #1 { sclist } { show }
+      { } { \sclist_map_function:nN {#2} \msg_show_item:n } { } { }
+  }
+
+
+% ==> scratch variables
+\sclist_new:N \l_tmpa_sclist
+\sclist_new:N \l_tmpb_sclist
+\sclist_new:N \g_tmpa_sclist
+\sclist_new:N \g_tmpb_sclist

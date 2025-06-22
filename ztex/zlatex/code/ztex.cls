@@ -31,7 +31,7 @@
 \clist_const:Nn \c__ztex_lang_support_clist    {en, cn}
 \tl_const:Nn \c__ztex_class_name_tl            {ztex}
 \tl_const:Nn \c__ztex_class_version_tl         {1.0.1}
-\tl_const:Nn \c__ztex_class_date_tl            {2025/05/20}
+\tl_const:Nn \c__ztex_class_date_tl            {2025/06/19}
 \tl_const:Nn \c__ztex_class_description_tl     {A~pre-release~latex3~document~class~for~article,~book,~or~slides;
                                                 Support~languages:\clist_use:Nn \c__ztex_lang_support_clist{,~}}
 
@@ -435,6 +435,8 @@
 % NOTE: 
 % 1.'slide' lib need before 'fancy' or 'titlesec' to avoid 
 %   'titlesec' package's option clash conflict.
+\__ztex_load_module_library:nn {module}{sclist}
+\__ztex_load_module_library:nn {module}{cmd}
 \__ztex_load_module_library:nn {module}{box}
 \__ztex_load_module_library:nn {module}{page}
 \__ztex_load_module_library:nn {module}{thm}
