@@ -1,0 +1,26 @@
+% key-value setup
+\keys_define:nn { ztikz / polygon }
+  {
+    radius       .fp_set:N  = \l__polygon_radius_fp,
+    radius       .initial:n = { 1 },
+    edgeColor    .tl_set:N  = \l__polygon_edge_color_tl,
+    edgeColor    .initial:n = { black },
+    fillColor    .tl_set:N  = \l__polygon_fill_color_tl,
+    fillColor    .initial:n = { white },
+    fillOpacity  .fp_set:N  = \l__polygon_fill_opacity_fp,
+    fillOpacity  .initial:n = { 0 },
+    rotate       .fp_set:N  = \l__polygon_rotate_angle,
+    rotate       .initial:n = { 0 },
+    shift        .tl_set:N  = \l__polygon_shift_tl,
+    shift        .initial:n = { (0,0) },
+    marker       .tl_set:N  = \l__polygon_marker_option_tl,
+    marker       .initial:n = { },
+  }
+% command
+\NewDocumentCommand\Polygon{ O{}m }
+  {
+    \group_begin:
+    \keys_set:nn { ztikz / polygon } { #1 }
+    ...
+    \group_end:
+  }

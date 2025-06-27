@@ -1,0 +1,36 @@
+% ==> print expl3-code using texhigh
+\documentclass[zihao=-4, fontset=fandol]{ctexart}
+\usepackage[left=.5in, top=0pt, right=.35in, bottom=0pt]{geometry}
+\usepackage[color, tikz]{texhigh}
+\texhighloadstyle{texhigh-expl3-code}
+
+
+%%%%%%    cli commands      %%%%%%
+% texhigh --no-banner high --enhanced --current-ctab latex3 \
+%         --config-file texhigh.cfg --file expl3-code-source.tex \ 
+%         > expl3-code-tmp.tex
+% sed 's/^/\\THsl/' expl3-code-tmp.tex > expl3-code-res.tex
+\ExplSyntaxOn\makeatletter
+\RenewDocumentCommand\texhighfile{+O{}m}
+  {
+    \par \group_begin:
+    \__texhigh_env_init:
+    \tl_clear:N \l__texhigh_output_tl
+    \tl_set:Nn \l__texhigh_command_tl { high }
+    \keys_set:nn { texhigh/high }
+      {
+        use-ctab=latex3,
+        font+={\linespread{1.2}\selectfont},
+        lexer-catcode*={0}{}{@=11},
+        config-file=texhigh.cfg
+      }
+    \__texhigh_options:
+    \file_input:n {#2}
+    \par \group_end:
+  }
+\makeatother\ExplSyntaxOff
+
+\begin{document}
+\THlinenumtrue
+\texhighfile{expl3-code-res.tex}
+\end{document}

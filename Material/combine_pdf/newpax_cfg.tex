@@ -1,0 +1,11 @@
+\documentclass{article}
+% load the lua code
+\directlua{require("newpax")}
+% write .newpax files for newpax.sty
+\directlua
+  {
+    newpax.writenewpax("1")
+    newpax.writenewpax("2")
+  }
+\begin{document}
+\end{document}

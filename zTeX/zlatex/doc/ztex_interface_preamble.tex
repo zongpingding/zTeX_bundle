@@ -4,7 +4,7 @@
   toc={
     column  = 2,
     title   = 总目录,
-    stretch = 1.3
+    stretch = 1.25
   }
 }
 \zcolorset{ link=purple } 
@@ -21,6 +21,7 @@
 \usepackage{hologo}
 \usepackage[bottom]{footmisc}
 \usepackage{transparent}
+\usepackage{ascii}
 
 
 % ==> l3doc patches
@@ -135,21 +136,29 @@
   ]
 \definecolor{bg}{rgb}{0.95,0.95,0.95}
 \setminted{
-  bgcolor=bg,
+  autogobble,
   breaklines=true, 
   tabsize=2,
   breakanywhere=true,
   breaksymbolright=$\swarrow$,
   breakanywheresymbolpre=,
   breaksymbolleft=,
+  escapeinside=@@,
+  bgcolor=,
+  fontsize=\small,
 }
 % \usepackage[most]{tcolorbox}
 % \tcbuselibrary{listings, minted, breakable, skins}
+\tcbuselibrary{minted}
 \newcounter{DocExample}
 \def\exampleUR{\stepcounter{DocExample}\textbf{例\ \theDocExample}}
 \def\resetExampleUR{\def\exampleUR{\stepcounter{DocExample}\textbf{例\ \theDocExample}}}
-\tcbuselibrary{minted}
-\tcbset{listing engine=minted}
+\usepackage{texhigh}
+\texhighloadstyle{texhigh}
+\SetKeys[texhigh/high]{config-file=texhigh.cfg}
+\SetKeys[texhigh/high]{use-ctab=latex3, lexer-catcode*={0}{}{@=11}}
+\SetKeys[texhigh/high]{gobble=auto, before-text+={\catcode`\ =10 \catcode`\"=12 }}
+\tcbset{listing engine=texhigh}%, listing file=\jobname.listing}
 \DeclareTCBListing{DocExample}{!s!O{//}}{
   enhanced, 
   breakable,
@@ -163,19 +172,11 @@
   \IfBooleanTF{#1} 
     {listing and text}
     {listing only},
-  minted language=tex, 
-  minted options = {  
-    autogobble,
-    escapeinside=#2,
-    bgcolor=,
-    fontsize=\small,
-  },
   overlay unbroken and first = {
     \node[anchor=north east, outer sep=0pt, text=red] 
-      at (frame.north east) {\exampleUR};
+      at (frame.north east) { \stepcounter{DocExample}\textbf{例\ \theDocExample}};
   }
 }
-
 
 % ==> lipsum text
 \usepackage{comment}
@@ -235,7 +236,7 @@ representation of, as far as I know, the things in themselves;}
         \clist_put_right:Nn \l__ztex_doc_source_clist 
           {
             \subsubsection{##1}
-            \inputminted{latex}{../code/#1/ztex.#1.##1.tex}
+            \texhighfile{../code/#1/ztex.#1.##1.tex}
           }
       }
   }
@@ -248,20 +249,21 @@ representation of, as far as I know, the things in themselves;}
   }
 \ExplSyntaxOff
 \newcommand{\ztexDocPrintSource}{%
+  \THlinenumtrue
   \ztexslideTF{}{
     \section{\texorpdfstring{\zTeX{}}{zTeX} 源码}
     \pagestyle{empty}
     \zpagemask*[anchor=mr, position={(\zpw, .5\zph)}]{{\sffamily\color{gray}\scalebox{5}{\thepage}}}
     \renewcommand{\theFancyVerbLine}{\sffamily
       \textcolor{gray}{\small\oldstylenums{\arabic{FancyVerbLine}}}}
-    \setminted{ bgcolor=, linenos=true, numbers=both, texcomments, escapeinside=«» }
+    % \setminted{ bgcolor=, linenos=true, numbers=both, texcomments, escapeinside=«» }
 
     \subsection{ztex.cls}
-    \inputminted{latex}{../code/ztex.cls}
+    \texhighfile{../code/ztex.cls}
 
     \newpage
     \subsection{Module}
-    \inputZTeXSource{box, font, ref, page, color, thm, sect}
+    \inputZTeXSource{box, font, ref, page, color, thm, sect, sclist, cmd}
 
     \newpage
     \subsection{Library}

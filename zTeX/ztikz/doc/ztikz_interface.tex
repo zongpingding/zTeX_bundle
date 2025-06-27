@@ -154,6 +154,7 @@ Python 的 \pkg{matplotlib} 库, WolframScript 的绘图功能; 计算部分基�
 \ztikz{} 在 Windows 下的表现可能没有在 Linux/MacOS 下的那么好, 建议用户在 Linux/MacOS 下使用本宏包.
 
 
+\tcbset{listing engine=minted}
 \subsection{环境配置}
 如果用户需要使用 \zTikZ{} 提供的调用外部程序的库, 用户不仅需要配置文档的导言区, 还需在系统中安装
 对应的应用程序; 应用程序安装后需要将其添加到环境变量，使得该应用可以在命令行被调用. 最后在编译文档
@@ -266,6 +267,7 @@ sudo ln -sf \
 \noindent{\sffamily\color{red} NOTE: 部分 Mathematica 中的函数 Mathics 也许并没有支持, 具体请参考 Mathics 的文档.}
 
 
+\tcbset{listing engine=texhigh}
 \restoregeometry
 \clearpage
 \section{宏包选项}
@@ -333,7 +335,7 @@ sudo ln -sf \
 \noindent\textbf{注意}: 只有当用户加载对应的库后, 该库的脚本文件才会被写入项目文件夹下.
 
 
-
+\tcbset{listing engine=minted}
 \clearpage
 \subsection{basic 库}
 \pkg{basic} 库主要包含一些和坐标系统相关的部分命令: 包括点，线，面和规则多边形的绘制以及交点的求解
@@ -341,9 +343,10 @@ sudo ln -sf \
 的封装:
 \def\exampleUR{}
 \begin{DocExample}
-  \draw/\oarg{key-value} plot [ycomb, \meta{other style}] file\marg{data};/ 
+  \draw@\oarg{key-value} plot [ycomb, \meta{other style}] file\marg{data};@ 
 \end{DocExample}
 \resetExampleUR
+\tcbset{listing engine=texhigh}
 
 
 \vskip1em
@@ -569,13 +572,15 @@ sudo ln -sf \
 
 
 \clearpage
+\tcbset{listing engine=minted}
 \subsection{gnuplot 库}
 需要说明的是: \TikZ{} 宏包内部已经提供了直接调用 gnuplot 程序的命令(需启用 \texttt{-shell-escape} 参数), 
 其调用格式如下:
 \def\exampleUR{}
 \begin{DocExample}
-  \draw/\oarg{key-value} plot\oarg{id} function\marg{function};/
+  \draw@\oarg{key-value} plot\oarg{id} function\marg{function};@
 \end{DocExample}
+
 
 上述命令中 \meta{id} 用于区分不同的数据文件, 在 \texttt{\meta{file}.tex} 文件(不妨设文件名为 \meta{file})的根路径
 下会产生两个文件:一个是 gnuplot 用于绘图的样式文件 \texttt{\meta{file}.\meta{id}.gnuplot}; 第二个是 gnuplot 产生的数据文件
@@ -585,10 +590,12 @@ sudo ln -sf \
 绘制参数方程, 第二个参数表示直接在文档中使用 gnuplot 的原始绘图命令(比如 ``\texttt{set samples 25; plot sin(x)}''). 
 两者的调用格式如下：
 \begin{DocExample}
-  \draw/\oarg{key-value} plot [parametric,  \meta{id}]\marg{function};/
-  \draw/\oarg{key-value} plot [raw gnuplot, \meta{id}]\marg{gnuplot code};/
+  \draw@\oarg{key-value} plot [parametric,  \meta{id}]\marg{function};@
+  \draw@\oarg{key-value} plot [raw gnuplot, \meta{id}]\marg{gnuplot code};@
 \end{DocExample}
 \resetExampleUR
+\tcbset{listing engine=texhigh}
+
 \begin{DocExample}*
 \begin{tikzpicture}[domain=0:4, scale=.85]
   \draw[very thin,color=gray] (-0.1,-1.1) grid (3.9,3.9);

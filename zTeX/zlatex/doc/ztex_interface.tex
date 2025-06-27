@@ -10,7 +10,8 @@
 \input{ztex_interface_preamble.tex}
 
 
-\title{\texorpdfstring{\vspace{-4pt}z\TeX{} 接口文档}{zTeX 接口文档}}
+% \title{\texorpdfstring{\vspace{-4pt}z\TeX{} 接口文档}{zTeX 接口文档}} % for luatex
+\title{\texorpdfstring{z\TeX{} 接口文档}{zTeX 接口文档}}   % for xetex
 \author{Eureka}
 \date{\today}
 \begin{document}
@@ -115,9 +116,9 @@
 
 \hspace*{12em}\parbox{8cm}{
 \begin{itemize}
-  \item[Windows]: \TeX{}Live 最低版本 2022
-  \item[Linux]: \TeX{}Live 最低版本 2022
-  \item[MacOS]: Mac{}\TeX{} 最低版本 2024 
+  \item[Windows]: \TeX{}Live 最低版本 2025
+  \item[Linux]: \TeX{}Live 最低版本 2025
+  \item[MacOS]: Mac{}\TeX{} 还未测试
 \end{itemize}}
 
 因 \ztex{} 还未传入 CTAN(未来可能会考虑), 所以想要使用此文档类，只有如下两种方法:
@@ -130,7 +131,11 @@
 
 在本手册后续，我们使用 \meta{z\TeX} 表示本宏集的根目录.
 
+\vskip1.5em
+\noindent{\color{red}\sffamily NOTE: 如果用户不需要使用 \pkg{alias} 库, 那么一些比较老 \TeX{}Live 也能运行此宏集.}
 
+
+\clearpage
 \subsection{快速开始}\label{mwe}
 \ztex{} 的最小工作示例如下\Footnote{导言区的配置可能需要根据自己的实际情况加以调整，详细配置请参见后文}.
 首先是中文写作示例，默认加载 \cls{article} 文档类, 如果用户偏好使用 \cls{book} 文档类，可以在加载文档类时
@@ -155,9 +160,9 @@
 % !TeX program = pdfLaTeX 
 \documentclass[class=book]{ztex}
 
-\title{/\meta{title}/}
-\author{/\meta{author}/}
-\date{/\meta{date}/}
+\title{Title}
+\author{Author}
+\date{\today}
 \begin{document}
 \maketitle
 \frontmatter
@@ -209,6 +214,7 @@
 \end{itemize}
 
 
+\clearpage
 \begin{function}[updated=2024-11-05]{\zTeX, \zTeX*, \ztex, \ztex*}
   用于输出本宏集对应的 logo, 可以不区分大小写, 即 \cs{ztex}, \cs{zTeX}, \cs{zLaTeX}, \cs{zlatex} 
   表示同一个宏, 并且他们都有一个 \texttt{*} 变体.\par
@@ -260,7 +266,7 @@
   \end{itemize}
 \end{keyval}
 
-\noindent{\sffamily\color{red}\textbf{NOTE}:\cls{ztex} 文档类目前已移除如下配置依赖:}
+\noindent{\sffamily\color{red}NOTE: \cls{ztex} 文档类目前已移除如下配置:}
 \begin{DocExample}
 \sys_if_engine_pdftex:T 
   { \RequirePackage[utf8]{inputenc} }
@@ -329,7 +335,7 @@
     title-vspace = \meta{长度}>\dval{-2em}
   \end{syntax}
   此选项用于设置目录的样式. 若上述的 $\meta{column} \ge 2$, 那么 \ztex{} 会自动加载\pkg{multicol}宏包. \textbf{注意}: 
-  因在 l3keys 中，当键为控制序列时，其不会自动展开; 故如果上述 \meta{toc} 的某一个子项内含有控制序列，那么务必通过
+  因在 \pkg{l3keys} 中，当键为控制序列时，其不会自动展开; 故如果上述 \meta{toc} 的某一个子项内含有控制序列，那么务必通过
   命令 \cmd{\ztexset} 进行设置, 一个简单的示例为: \ztexverb{title=\large CONTENTS{\sffamily\small NEW}}.
 \end{keyval}
 
@@ -478,6 +484,22 @@
 \end{function}
 
 
+\begin{function}[updated=2025-04-25]{\ztextitle, \ztexauthor, \ztexdate}
+  此三个命令用于分别保存导言区 \cmd{\@title}, \cmd{\@author}, \cmd{\@date} 三个变量的值, 
+  用户可以在正文部分使用此三个变量. 一个基本的使用样例如下:
+\end{function}
+\begin{DocExample}*
+  \ztextitle\par
+  \ztexauthor\par
+  \ztexdate
+\end{DocExample}
+
+
+\begin{function}[added=2024-12-05]{\zpw, \zph}
+  此二命令表示当前纸张的宽和高, 命令原型为 \cs{paperwidth} 和 \cs{paperheight}.
+\end{function}
+
+
 \begin{function}[updated=2025-04-25]{ztex:titlepage, ztex:lastpage}
   \begin{syntax}
     \cmd{\pageref}\zarg{ztex:titlepage}
@@ -500,22 +522,6 @@
 
   \textbf{注意}:普通用户不应该直接使用这两个 Targets，此二 Targets 主要提供给模板的开发者, 用户应使用位于首页和尾页的 \texttt{ztex:titlepage} 
   和 \texttt{ztex:lastpage} 两 label.
-\end{function}
-
-
-\begin{function}[updated=2025-04-25]{\ztextitle, \ztexauthor, \ztexdate}
-  此三个命令用于分别保存导言区 \cmd{\@title}, \cmd{\@author}, \cmd{\@date} 三个变量的值, 
-  用户可以在正文部分使用此三个变量. 一个基本的使用样例如下:
-\end{function}
-\begin{DocExample}*
-  \ztextitle\par
-  \ztexauthor\par
-  \ztexdate
-\end{DocExample}
-
-
-\begin{function}[added=2024-12-05]{\zpw, \zph}
-  此二命令表示当前纸张的宽和高, 命令原型为 \cs{paperwidth} 和 \cs{paperheight}.
 \end{function}
 
 
@@ -563,11 +569,14 @@
 用户也可以编写你自己的 module, 不妨假设其名称为 \meta{moduleA}; 将此文件命名为 \texttt{ztex.module.\meta{moduleA}.tex}, 
 然后将其放入路径 \meta{z\TeX}\file{/module/} 下，最后使用 \cs{ztexloadmod}\texttt{\marg{moduleA}} 即可加载此 module. 
 \meta{moduleA} 中程序的基本框架如下:
+
+\tcbset{listing engine=minted}
 \begin{DocExample}[@@]
-\ProvidesExplFile{ztex.module.@\meta{moduleA}@.tex}{2025/04/26}{1.0.0}{@\meta{moduleA}@~module~for~ztex}
+\ProvidesExplFile{ztex.module.@\meta{moduleA}@.tex}{2025/04/26}{1.0.0}{@\meta{discreption}@}
 
 \newcommand\@\meta{YourCmd}\marg{def}@
 \end{DocExample}
+\tcbset{listing engine=texhigh}
 
 
 \clearpage
@@ -577,7 +586,7 @@
 \LaTeX{} 用户也能够方便的配置字体, 用上自己喜欢的字体. 
 
 
-\subsubsection{字体选择简介}
+\subsubsection{字体选择机制简介}
 我到底是应该使用 font name 还是 file name ? 在 \pkg{fontspec} 中有着详细的说明:
 \begin{itemize}
   \item 当通过 font name(字体名) 调用系统字体时: 诸如 \verb|~/Library/Fonts|(MacOS), \verb|C:\Windows\Fonts|(Windows)
@@ -593,7 +602,13 @@
     % 其余情况下请给出对应的字体格式(通过 \texttt{Extension} 参数进行指定). 
 \end{itemize}
 
+本节中所有命令参数中的 \meta{font} 既可以是字体名(font name), 也可以是字体文件名(file name), 用户需要根据自己的实际情况
+选择适合自己的方式.\par
+\vskip1.5em
+\noindent{\sffamily\color{red}NOTE: 请尊重字体版权, 不要随意发布和传播商用字体 !!!}
 
+
+\clearpage
 怎么查看 font name ? \TeX{}Live 提供了 \texttt{otfinfo} 这一命令行工具, 比如我们想要查看 Latin Modern Roman 字体, 其对应的
 命令为: \texttt{otfinfo -i `kpsewhich lmroman10-regular.otf`}. 命令的运行结果如下(Linux 下):
 \def\exampleUR{}
@@ -626,10 +641,6 @@ Permissions:         Unknown (12)
 \end{DocExample}
 \resetExampleUR
 
-本节中所有命令参数中的 \meta{font} 既可以是字体名(font name), 也可以是字体文件名(file name), 用户需要根据自己的实际情况
-选择适合自己的方式.\par
-\vskip3em
-\noindent{\sffamily\color{red}NOTE: 请尊重字体版权 !!!} 
 
 
 \newpage
@@ -766,6 +777,7 @@ Permissions:         Unknown (12)
 \end{function}
 
 
+\clearpage
 \subsubsection{\texorpdfstring{\zTeX{}}{zTeX} 接口}
 \begin{function}[added=2025-04-26]{\zfontfamilynew}
   \begin{syntax}
@@ -924,11 +936,12 @@ Permissions:         Unknown (12)
     \cs{zfontsetfamily}\oarg{lang}\marg{key-value}
   \end{syntax}
   此命令用于设置整个文档的字体族, 其整合了西文字体族和中日韩字体族设置的接口.
-  目前此命令还未整合完成, 暂时不要使用此命令.
+  \textbf{注意}: 目前此命令还未整合完成, 暂时不要使用此命令.
 \end{function}
 
 
 
+\clearpage
 \subsubsection{杂项}
 \begin{function}[updated=2025-04-25]{\cinzel}
   \begin{syntax}
@@ -1040,19 +1053,19 @@ Permissions:         Unknown (12)
   \begin{syntax}
     \cs{zsetHcnt}\marg{counter}\marg{content}
   \end{syntax}
-  此命令用于设置 \texttt{theH\meta{counter}} 的值为 \meta{content}, 其在制作一些附录相关的
+  此命令用于设置 \cs{theH\meta{counter}} 的值为 \meta{content}, 其在制作一些附录相关的
   内容时是十分有用的.
 \end{function}
 
 
+\clearpage
 \subsubsection{cleveref}
 \begin{function}[added=2025-04-21]{\cref}
   \begin{syntax}
     \cs{cref}\marg{labels}
     \cs{cref}\oarg{options}\marg{labels}
   \end{syntax}
-  \zLaTeX{} 基于 \pkg{cleveref} 和 \pkg{zref-clever} 宏包提供 ``聪明引用'' 命令 \cs{cref}. (\textcolor{red}{\sffamily 目前% 
-  \pkg{cleveref} 宏包的维护情况不太明朗, 且和新版的 \TeX{}Live 中的部分宏集冲突, 这便是 \zLaTeX{} 同时提供二者的原因}). 为统一命令, 
+  \zLaTeX{} 基于 \pkg{cleveref} 和 \pkg{zref-clever} 宏包提供 ``聪明引用'' 命令 \cs{cref}. 为统一命令, 
   \zLaTeX{} (仅)将 \pkg{zref-clever} 中的 \cmd{\zcref} 重定义为 \cmd{\cref}, 方便用户的使用. \textbf{注意:} 尽管二者名称相同但各命令的
   需要的参数格式是不同的，其余命令同理, 详情请参考对应的手册. 用户可以通过本文档类的 \meta{cref-backend} 选项进行后端的设置, 默认后端为 
   \pkg{zref-clever} 一个简单的设置样例如下:
@@ -1060,6 +1073,10 @@ Permissions:         Unknown (12)
 \begin{DocExample}
 \documentclass[cref-backend=zref-clever]{ztex}
 \end{DocExample}
+
+\vskip1.5em
+\noindent{\color{red}\sffamily NOTE: 目前\pkg{cleveref} 宏包的维护情况不太明朗, 且和新版的 \TeX{}Live %
+中的部分命令冲突, 这便是 \zLaTeX{} 同时提供二者的原因}
 
 
 \clearpage
@@ -1143,8 +1160,8 @@ Permissions:         Unknown (12)
   此命令为 \cmd{\zpagemask} 的底层命令, 用户可以依据此命令创建更加具有针对性的水印命令.
 \end{function}
 
-\vskip2em
-\noindent\textcolor{red}{\sffamily NOTE:目前可以使用 \CusTeX{} 提供的接口进行水印定制, 请参见其 \pkg{bgfg} 模块.}
+\vskip1.5em
+\noindent\textcolor{red}{\sffamily NOTE:目前可以使用 \CusTeX{} 提供的接口进行水印的添加, 详细用法请参见其 \pkg{bgfg} 模块.}
 
 
 \subsubsection{杂项}
@@ -1200,6 +1217,7 @@ Permissions:         Unknown (12)
 \end{table}
 
 
+\clearpage
 \begin{function}[updated=2025-04-25]{\zcolorset}
   \begin{syntax}
     \cs{zcolorset}\marg{key-value}
@@ -1356,7 +1374,7 @@ Hook, 方便用户直接对环境进行操作.
 \noindent\fbox{\parbox{1\linewidth}{下面我们采用键值队的方式对 \meta{key-value} 这一项参数进行描述: \texttt{zthmnameset/} 
 表示它是此 \meta{key-value} 参数的父级命令; 后续为了行文的方便，我们在描述一个(父级)命令之后，使用 \texttt{../} 
 来表示其缩写形式(\texttt{../} 有时也用于表示任意的键名, 即由用户定义的键名).\par
-\textbf{注意}:虽然它的设置方法和 \texttt{key-value} 这样的数据结构类似, 但是用户不能将\cs{keys_define:nn} 这样的
+\textbf{注意}:虽然它的设置方法和 \texttt{key-value} 这样的数据结构类似, 但是用户不能将 \cs{keys_define:nn} 这样的
 命令应用于这类键值对, 而应使用其父级命令 \cs{zthmnameset} 对其进行设置.}}
 
 \begin{keyval}[parent=zthmnameset]{axiom, definition, theorem, lemma, corollary, proposition, remark}
@@ -1526,6 +1544,7 @@ Hook, 方便用户直接对环境进行操作.
 
 
 
+\clearpage
 \subsubsection{定理目录}
 \begin{function}[updated=2025-04-25]{\zthmtoc}
   \begin{syntax}
@@ -1628,6 +1647,7 @@ Hook, 方便用户直接对环境进行操作.
 
 
 
+\clearpage
 \subsubsection{高级接口}
 \begin{function}[EXP, updated=2024-11-05]{\zthmnumber}
   此命令表示对应环境的编号, 类似于 \pkg{amsthm} 中的 \cmd{\thmnumber}. 用户不应在除 \cmd{\zthmtitleformat} 外的
@@ -1764,26 +1784,29 @@ Hook, 方便用户直接对环境进行操作.
   会被 \ztex{} 置于文档的导言区, 常用于放置一些用于定理类环境标题格式化的代码.\par
   当用户声明对应的 \meta{style} 后, 可以在导言区使用命令: \cmd{\zthmstyle}\texttt{\marg{style}} 进行加载.
 \end{keyval}
+\tcbset{listing engine=minted}
 此命令的一个基本调用格式如下:
 \begin{DocExample}
   \zthmstylenew{
-    /\meta{style A}/={
-      begin=/\meta{begin code 1}/, 
-      end=/\meta{end code 1}/, 
-      option=/\meta{option 1}/,
-      preamble=/\meta{preamble code 1}/
+    @\meta{style A}@={
+      begin=@\meta{begin code 1}@, 
+      end=@\meta{end code 1}@, 
+      option=@\meta{option 1}@,
+      preamble=@\meta{preamble code 1}@
     },
-    /\meta{style B}/={
-      begin=/\meta{begin code 2}/, 
-      end=/\meta{end code 2}/, 
-      option=/\meta{option 2}/,
-      preamble=/\meta{preamble code 2}/
+    @\meta{style B}@={
+      begin=@\meta{begin code 2}@, 
+      end=@\meta{end code 2}@, 
+      option=@\meta{option 2}@,
+      preamble=@\meta{preamble code 2}@
     },
     ...
   }
 \end{DocExample}
+\tcbset{listing engine=texhigh}
 
 
+\clearpage
 \subsubsection{环境钩子}
 \begin{function}[updated=2025-04-25]{\zthmhook, \zthmhook*}
   \begin{syntax}
@@ -2069,10 +2092,611 @@ Image Test: \rule{2em}{2em}~\ztoolboxaffine{\rule{2em}{2em}}{1, 0, .5, 1}
   此命令用于结束子目录的搜集, \meta{index} 为一个整数;  \textbf{注意}: 一般情况下，用户不应该使用此命令.
 \end{function}
 
+\vskip1.5em
+\noindent\textcolor{red}{\sffamily NOTE:目前可以使用 \CusTeX{} 提供的接口进行定制, 详细使用方法请参见其 \pkg{struct} 模块.}
 
 
-\vskip3em
-\noindent\textcolor{red}{\sffamily NOTE:目前可以使用 \CusTeX{} 提供的接口进行定制, 请参见其 \pkg{struct} 模块.}
+
+\clearpage
+\subsection{sclist 模块}
+Semicolon list(简称为 \texttt{sclist}) 与 \pkg{expl3} 中的 ``\texttt{clist}'' 类似, 只不过其分隔符为 ``\texttt{;}'';
+\ztex{} 创建此模块是为了更好的处理以 ``\texttt{;}'' 划分的数据, 主要是为了``\textbf{可展性}''; \ztex{} 的 \pkg{sclist}
+库提供了以下的一些命令:
+
+
+\begin{function}[added=2025-06-20, EXP]{\zcmd_sclist_patch:nn, \zcmd_sclist_patch:ne, \zcmd_sclist_patch:no}
+  \begin{syntax}
+    \cmd{\zcmd_sclist_patch:nn} \Arg{replace}\{\meta{item_1}; ... ;\meta{item_n}\}
+  \end{syntax}
+  该命令会自动将空的 \meta{item} 替换为 ``\meta{replace}''.
+\end{function}
+\begin{DocExample}*
+\ExplSyntaxOn
+\def\clistA{\zcmd_sclist_patch:nn {\scan_stop:}{; a; 2; 3; ; }}
+\detokenize\expandafter{\expanded{\clistA}}
+\ExplSyntaxOff
+\end{DocExample}
+
+
+\begin{function}[added=2025-06-20]{\sclist_new:N, \sclist_new:c}
+  \begin{syntax}
+    \cs{sclist_new:N} \meta{sclist~var}
+  \end{syntax}
+  该命令与原始的 \cs{clist_new:N} 命令类似.
+\end{function}
+
+\begin{function}[added=2025-06-20]
+  {
+    \sclist_const:Nn, \sclist_const:Ne,
+    \sclist_const:cn, \sclist_const:ce
+  }
+  \begin{syntax}
+    \cs{sclist_const:Nn} \meta{sclist~var} \Arg{semicolon list}
+  \end{syntax}
+  该命令与原始的 \cs{clist_cont:Nn} 命令类似.
+\end{function}
+
+\begin{function}[added=2025-06-20]
+  {\sclist_clear:N, \sclist_clear:c, \sclist_gclear:N, \sclist_gclear:c}
+  \begin{syntax}
+    \cs{sclist_clear:N} \meta{sclist~var}
+  \end{syntax}
+  该命令与原始的 \cs{clist_clear:N} 命令类似.
+\end{function}
+
+\begin{function}[added=2025-06-20]
+  {
+    \sclist_clear_new:N,  \sclist_clear_new:c,
+    \sclist_gclear_new:N, \sclist_gclear_new:c
+  }
+  \begin{syntax}
+    \cs{sclist_clear_new:N} \meta{sclist~var}
+  \end{syntax}
+  该命令与原始的 \cs{clist_clear_new:N} 命令类似.
+\end{function}
+
+
+\begin{function}[added=2025-06-20]
+  {
+    \sclist_set_eq:NN,  \sclist_set_eq:cN,
+    \sclist_set_eq:Nc,  \sclist_set_eq:cc,
+    \sclist_gset_eq:NN, \sclist_gset_eq:cN,
+    \sclist_gset_eq:Nc, \sclist_gset_eq:cc
+  }
+  \begin{syntax}
+    \cs{sclist_set_eq:NN} \meta{sclist~var_1} \meta{sclist~var_2}
+  \end{syntax}
+  该命令与原始的 \cs{clist_set_eq:NN} 命令类似.
+\end{function}
+
+
+\begin{function}[added=2025-06-20]
+  {
+    \sclist_set:Nn,  \sclist_set:NV, \sclist_set:Ne,
+    \sclist_set:No,
+    \sclist_set:cn,  \sclist_set:cV, \sclist_set:ce,
+    \sclist_set:co,
+    \sclist_gset:Nn, \sclist_gset:NV, \sclist_gset:Ne,
+    \sclist_gset:No,
+    \sclist_gset:cn, \sclist_gset:cV, \sclist_gset:ce,
+    \sclist_gset:co
+  }
+  \begin{syntax}
+    \cs{sclist_set:Nn} \meta{sclist~var} \{\meta{item_1}; ...; \meta{item_n}\}
+  \end{syntax}
+  该命令与原始的 \cs{clist_set:Nn} 命令类似.
+\end{function}
+
+
+\begin{function}[added=2025-06-20, EXP, pTF]
+  { 
+    \sclist_if_empty:N,
+    \sclist_if_empty:c,
+  }
+  \begin{syntax}
+    \cs{sclist_if_empty_p:N} \meta{sclist~var}
+    \cs{sclist_if_empty:NTF} \meta{sclist~var} \Arg{true code} \Arg{false code}
+  \end{syntax}
+  该命令与原始的 \cs{clist_if_empty:NTF} 命令类似.
+\end{function}
+
+
+\begin{function}[added=2025-06-20, EXP, pTF]
+  { 
+    \sclist_if_empty:N,
+    \sclist_if_empty:c,
+  }
+  \begin{syntax}
+    \cs{sclist_if_empty_p:n} \meta{sclist~var}
+    \cs{sclist_if_empty:nTF} \Arg{semicolon list} \Arg{true code} \Arg{false code}
+  \end{syntax}
+  该命令与原始的 \cs{clist_if_empty:nTF} 命令类似.
+\end{function}
+
+
+\begin{function}[rEXP, added=2025-06-20]
+  {
+    \sclist_map_function:NN, \sclist_map_function:cN, 
+    \sclist_map_function:nN, \sclist_map_function:eN
+  }
+  \begin{syntax}
+    \cs{sclist_map_function:NN} \meta{sclist~var} \meta{function}
+  \end{syntax}
+  此系列命令与原始的 \cs{clist_map_function:NN} 命令类似.
+\end{function}
+
+
+\begin{function}[rEXP, added=2025-06-20]
+  {
+    \sclist_map_tokens:Nn, 
+    \sclist_map_tokens:cn, 
+    \sclist_map_tokens:nn, 
+  }
+  \begin{syntax}
+    \cs{sclist_map_tokens:Nn} \meta{sclist~var} \Arg{code}
+  \end{syntax}
+  此系列命令与原始的 \cs{clist_map_tokens:Nn} 命令类似.
+\end{function}
+
+
+\begin{function}[EXP, added = 2025-06-20]
+  {
+    \sclist_count:N, \sclist_count:c, 
+    \sclist_count:n, \sclist_count:e
+  }
+  \begin{syntax}
+    \cs{sclist_count:N} \meta{sclist~var}
+  \end{syntax}
+  该命令与原始的 \cs{clist_count:N} 命令类似.
+\end{function}
+
+
+\begin{function}[added = 2025-06-20, EXP]
+  {
+    \sclist_item:Nn, \sclist_item:cn, 
+    \sclist_item:nn, \sclist_item:en
+  }
+  \begin{syntax}
+    \cs{sclist_item:Nn} \meta{sclist~var} \Arg{int expr}
+  \end{syntax}
+  该命令与原始的 \cs{clist_item:Nn} 命令类似.
+\end{function}
+
+
+\begin{function}[added = 2025-06-20]{\sclist_show:N, \sclist_show:c}
+  \begin{syntax}
+    \cs{sclist_show:N} \meta{sclist~var}
+  \end{syntax}
+  该命令与原始的 \cs{clist_show:N} 命令类似.
+\end{function}
+
+
+\begin{function}[added = 2025-06-20]{\sclist_show:n}
+  \begin{syntax}
+    \cs{sclist_show:n} \Arg{tokens}
+  \end{syntax}
+  该命令与原始的 \cs{clist_show:n} 命令类似.
+\end{function}
+
+
+\begin{function}[added = 2025-06-20]{\sclist_log:N, \sclist_log:c}
+  \begin{syntax}
+    \cs{sclist_log:N} \meta{sclist~var}
+  \end{syntax}
+  该命令与原始的 \cs{clist_log:N} 命令类似.
+\end{function}
+
+
+\begin{function}[added = 2025-06-20]{\sclist_log:n}
+  \begin{syntax}
+    \cs{sclist_log:n} \Arg{tokens}
+  \end{syntax}
+  该命令与原始的 \cs{clist_log:n} 命令类似.
+\end{function}
+
+
+下面这个案例展示了如何使用 \pkg{sclist} 中的 \cs{sclist_map_tokens:nn} 和 \cs{sclist_map_tokens:Nn} 
+两个命令:
+\begin{DocExample}*
+\ExplSyntaxOn
+\sclist_new:N \l_tmpc_sclist 
+\sclist_set:Nn \l_tmpc_sclist {1;23;456;} 
+\cs_set:Npn \__test_sclist_map:nn #1#2 {[#1](#2)|}
+\def\TTTa{
+  \sclist_map_tokens:nn {a;bc;def}
+    { \__test_sclist_map:nn {XX} }
+}
+\def\TTTb{
+  \sclist_map_tokens:Nn \l_tmpc_sclist
+    { \__test_sclist_map:nn {YY} }
+}
+\detokenize\expandafter{\expanded{\TTTa}}\par
+\detokenize\expandafter{\expanded{\TTTb}}
+\ExplSyntaxOff
+\end{DocExample}
+
+
+
+\clearpage
+\subsection{cmd 模块}
+\ztex{} 的 \pkg{cmd} 模块主要提供自定义命令接口, 其语法类似 Python 中的 \texttt{def(\meta{arg-spec}) \marg{code}};
+该模块还提供了针对部分内核命令的 Patch, 比如 \pkg{clist} 模块. 该模块目前很不成熟, 请谨慎使用.
+
+
+\begin{function}[added=2025-06-22]{
+    \zcmd_cs_copy:NN, \zcmd_cs_copy:Nc, 
+    \zcmd_cs_copy:cN, \zcmd_cs_copy:cc,
+  }
+  \begin{syntax}
+    \cmd{\zcmd_cs_copy:NN} \meta{cmd_1}\meta{cmd_2}
+  \end{syntax}
+  此命令为 \TeX{} 中 \cs{let} 这一原语的封装, 它的作用是局部的.
+\end{function}
+
+
+\begin{function}[added=2025-06-22]{
+    \zcmd_cs_gcopy:NN, \zcmd_cs_gcopy:Nc, 
+    \zcmd_cs_gcopy:cN, \zcmd_cs_gcopy:cc,
+  }
+  \begin{syntax}
+    \cmd{\zcmd_cs_gcopy:NN} \meta{cmd_1}\meta{cmd_2}
+  \end{syntax}
+  此命令为 \TeX{} 中 \cs{let} 和 \cs{global} 这两个原语的封装, 它的作用是全局的.
+\end{function}
+
+
+
+\clearpage
+\subsubsection{clist patch}
+本小节将介绍 \pkg{cmd} 模块提供的一系列 Patch, 它们往往和 \pkg{clist} 中的命令配合使用;\par
+\vskip2em 
+\noindent{\color{red}\sffamily NOTE: 普通用户不应该使用此小节的系列命令, 这系列的命令主要提供给模板的开发者.}
+
+
+\begin{function}[added=2025-06-20, EXP]{\zcmd_clist_patch:nn, \zcmd_clist_patch:ne, \zcmd_clist_patch:no}
+  \begin{syntax}
+    \cmd{\zcmd_clist_patch:nn} \Arg{replace}\{\meta{item_1}, ... ,\meta{item_n}\}
+  \end{syntax}
+  该命令会自动将空的 \meta{item} 替换为 ``\meta{replace}''.
+\end{function}
+\begin{DocExample}*
+\ExplSyntaxOn
+\def\clistA{\zcmd_clist_patch:nn {\scan_stop:}{, a, 2, 3, }}
+\detokenize\expandafter{\expanded{\clistA}}
+\ExplSyntaxOff
+\end{DocExample}
+
+
+\begin{function}[added=2025-06-21, EXP]
+  {
+    \zclist_count:n, \zclist_count:o, 
+    \zclist_count:e, \zclist_count:f,
+  }
+  \begin{syntax}
+    \cmd{\zclist_count:n} \{\meta{item_1}; ...; \meta{item_n}\}
+  \end{syntax}
+  命令 \cmd{\zclist_count:n} 与 \cs{clist_count:n} 类似, 但此命令会将空的 \meta{item}
+  考虑在内.
+\end{function}
+
+
+\begin{function}[added=2025-06-21, EXP]
+  {
+    \zclist_item:nn, \zclist_item:on,
+    \zclist_item:en, \zclist_item:ee,
+  }
+  \begin{syntax}
+    \cmd{\zclist_item:nn} \{\meta{item_1}; ...; \meta{item_n}\} \marg{index}
+  \end{syntax}
+  命令 \cmd{\zclist_item:nn} 与 \cs{clist_item:nn} 类似, 但此命令会将空的 \meta{item}
+  考虑在内.
+\end{function}
+
+
+\begin{function}[added=2025-06-21, EXP]
+  {
+    \zclist_range:nnn, \zclist_range:enn,
+    \zclist_range:onn,
+  }
+  \begin{syntax}
+    \cmd{\zclist_range:nnn} \{\meta{item_1}; ...; \meta{item_n}\}\marg{start}\marg{end}
+  \end{syntax}
+  命令 \cmd{\zclist_range:nnn} 与 \cs{tl_range:nnn} 类似, 但此命令会将空的 \meta{item}
+  考虑在内.
+\end{function}
+
+下面给出上述 \verb|\zclist_count:n, \zclist_item:nn, \zclist_range:nnn| 这几个命令的使用案例:
+\begin{DocExample}*
+\ExplSyntaxOn
+\setlength{\fboxsep}{3pt}
+\def\clistA {, 1, 2, }
+\zclist_count:o { \clistA };
+\fbox{\zclist_item:on { \clistA }{2}}, \fbox{\zclist_item:on { \clistA }{-1}}; 
+\detokenize\expandafter{\expanded{\zclist_range:onn { \clistA }{1}{3}}}
+\ExplSyntaxOff
+\end{DocExample}
+
+
+\clearpage
+\subsubsection{token 相关}
+本小节主要介绍 \ztex{} 的 \pkg{cmd} 模块中与 token 判断相关的命令, 它们均是完全可展的.
+
+
+\begin{function}[added=2025-06-25, pTF, rEXP]{\ztex_tl_if_eq:nn, \ztex_tl_if_eq:ne, \ztex_tl_if_eq:ee}
+  \begin{syntax}
+    \cs{ztex_tl_if_eq:nnTF} \Arg{tl-1}\Arg{tl-2}\Arg{true code}\Arg{false code}
+  \end{syntax}
+  此命令与 \textsf{l3tl} 中默认的 \cs{tl_if_eq:nnTF} 含义相同, 但 \ztex{} 中的 \cs{ztex_tl_if_eq:nnTF}
+  是完全可展的. \textbf{注意}: 该命令目前还有缺陷(此缺陷也存在于 \textsf{l3tl} 的 \cs{tl_if_eq:nnTF} 命令中), 
+  当 \meta{tl-1} 与 \meta{tl-2} 中的 token 数量不一致时, \cs{ztex_tl_if_eq:nnTF} 会直接返回 \texttt{\Arg{false code}}, 
+  比如 ``\verb|\ztex_tl_if_eq:nnTF {a{aa}}{aaa}| \verb|{true}{false}|'' 的返回结果为 ``\texttt{false}''.\par
+  \vskip1em
+  \noindent{\color{red}\sffamily NOTE: 此函数基于 \cs{int_step_tokens:nn}, 所以请确保你的 \textsf{l3kernel}% 
+  版本在 2025-01-15 之后.}
+\end{function}
+\begin{DocExample}*
+\ExplSyntaxOn
+\NewDocumentCommand{\tlifeq}{mmmm}
+  { \ztex_tl_if_eq:nnTF {#1}{#2}{#3}{#4} }
+\edef\TTTa{\ztex_tl_if_eq:nnTF {abcdefg}{abcdefh}{EQ}{NOT~EQ}}
+\detokenize\expandafter{\expanded{\TTTa}},~
+\edef\TTTb{\ztex_tl_if_eq:nnTF {ab\c_colon_str cd}{ab:cd}{EQ}{NOT~EQ}}
+\detokenize\expandafter{\expanded{\TTTb}},~
+\str_set:Nn \l_tmpa_str {:}
+\edef\TTTc{\ztex_tl_if_eq:nnTF {ab\c_colon_str cd}{ab\l_tmpa_str cd}{EQ}{NOT~EQ}}
+\detokenize\expandafter{\expanded{\TTTc}}.\par
+\ExplSyntaxOff
+\tlifeq{a}{a}{EQ}{NOT~EQ},
+\tlifeq{a}{b}{EQ}{NOT~EQ},
+\tlifeq{aa}{aa}{EQ}{NOT~EQ}, 
+\tlifeq{aa}{ab}{EQ}{NOT~EQ}.\par
+
+\tlifeq{a{a}}{aa}{EQ}{NOT~EQ},
+\tlifeq{aaa}{a{aa}}{EQ}{NOT~EQ},
+\tlifeq{aaa}{aaa}{EQ}{NOT~EQ}.\par
+\end{DocExample}
+
+
+\begin{function}[added=2025-06-25, pTF, rEXP]{\ztex_tl_if_in:nn, \ztex_tl_if_in:no, \ztex_tl_if_in:ne, \ztex_tl_if_in:ee}
+  \begin{syntax}
+    \cs{ztex_tl_if_in:nnTF} \Arg{tl-1}\Arg{tl-2}\Arg{true code}\Arg{false code}
+  \end{syntax}
+  此命令与 \textsf{l3tl} 中默认的 \cs{tl_if_in:nnTF} 含义、用法均相同(用于测试 \meta{tl-2} 能否在 \meta{tl-1} 中找到),
+  但 \ztex{} 中的 \cs{ztex_tl_if_in:nnTF} 是完全可展的. \textbf{注意}: 因为此命令基于上述的 \cs{ztex_tl_if_eq:nn} 命令, 
+  所以该命令目前有缺陷, 该缺陷的详细描述请参见命令 \cs{ztex_tl_if_eq:nnTF} 的说明.
+  \vskip1em
+  \noindent{\color{red}\sffamily NOTE: 1. 在 \hologo{LuaTeX} 下, 此命令暂时没有发现任何的明显缺陷; \\ 
+    \hphantom{NOTE:} 2. 目前该函数内部采用的字符串匹配算法比较低效, 后续也许会采用 KMP \\
+      \hphantom{NOTE: 2.} 算法进行重写; \\
+    \hphantom{NOTE:} 3. 此函数基于 \cs{int_step_tokens:nn}, 所以请确保你的 \textsf{l3kernel} 版本在 2025-\\ 
+      \hphantom{NOTE: 2.} 01-15 之后.}
+\end{function}
+\begin{DocExample}*
+\ExplSyntaxOn
+\ztex_tl_if_in:nnTF {123456789}{123}{FIND}{NOT~FIND},   
+\ztex_tl_if_in:nnTF {12x34567x89}{7x89}{FIND}{NOT~FIND},
+\edef\TTT{\ztex_tl_if_in:nnTF {1234567x89}{78x9}{FOUND}{NOT~FOUND}}
+\detokenize\expandafter{\expanded{\TTT}}
+\ExplSyntaxOff
+\end{DocExample}
+
+
+\begin{function}[added=2025-06-21, EXP, pTF]{\ztex_colon_if_in:n, \ztex_colon_if_in:e, \ztex_colon_if_in:V}
+  \begin{syntax}
+    \cmd{\ztex_colon_if_in:nTF} \marg{tl}\Arg{true code}\Arg{false code}
+  \end{syntax}
+  此命令用于检测 \meta{tl} 中是否含有 ``\texttt{:}''.
+\end{function}
+
+
+\begin{function}[added=2025-06-21, rEXP, pTF]
+  {
+    \ztex_head_tail_if_eq:nnn,
+    \ztex_head_tail_if_eq:enn,
+    \ztex_head_tail_if_eq:eee,
+  }
+  \begin{syntax}
+    \cmd{\ztex_head_tail_if_eq:nnnTF} \marg{tl}\marg{head}\marg{tail}
+    ~~~~~~\Arg{true code}\Arg{false code}
+  \end{syntax}
+  该命令用于检测 \meta{tl} 的首尾 Token 是否与 \meta{head}, \meta{tail} 相同;
+  若均相等, 则执行 \meta{true code} 对应分支, 反之, 则执行\meta{false code} 对应分支.
+\end{function}
+
+
+\begin{function}[added=2025-06-21, rEXP, pTF]{
+    \ztex_index_token_if_eq:nnn,
+    \ztex_index_token_if_eq:enn,
+    \ztex_index_token_if_eq:eee,
+  }
+  \begin{syntax}
+    \cmd{\ztex_head_tail_if_eq:nnnTF} \marg{tl}\marg{index}\marg{token}
+    ~~~~~~\Arg{true code}\Arg{false code}
+  \end{syntax}
+  该命令用于检测 \meta{tl} 内 index 为 \meta{index} 的 Token 是否与 \meta{token} 相等;
+  若相等, 则执行 \meta{true code} 对应分支, 反之, 则执行\meta{false code} 对应分支.
+\end{function}
+
+
+\begin{function}[added=2025-06-25, rEXP]
+  {
+    \ztex_tl_replace_once:nnn, 
+    \ztex_tl_replace_once:onn,
+    \ztex_tl_replace_once:enn,
+    \ztex_tl_replace_once:noo,
+    \ztex_tl_replace_once:nee,
+    \ztex_tl_replace_once:eee,
+  }
+  \begin{syntax}
+    \cs{ztex_tl_replace_once:nnn} \meta{tl} \Arg{old tokens} \Arg{new tokens}
+  \end{syntax}
+  此命令与 \textsf{l3tl} 中默认的 \cs{tl_replace_once:nnn} 含义、用法均相同
+  (用于把 \meta{tl} 中第一个匹配到的 \meta{old tokens} 替换为 \meta{new tokens}),
+  但 \ztex{} 中的 \cs{ztex_tl_replace_once:nnn} 是完全可展的.\par
+  \vskip1em
+  \noindent{\color{red}\sffamily NOTE: 目前该函数内部采用的字符串匹配算法比较低效, 后续也许会采用 KMP 算法进行重写.}
+\end{function}
+
+
+\begin{function}[added=2025-06-25, rEXP]
+  {
+    \ztex_tl_replace_all:nnn, 
+    \ztex_tl_replace_all:onn,
+    \ztex_tl_replace_all:enn,
+    \ztex_tl_replace_all:noo,
+    \ztex_tl_replace_all:nee,
+    \ztex_tl_replace_all:eee,
+  }
+  \begin{syntax}
+    \cs{ztex_tl_replace_all:nnn} \meta{tl} \Arg{old tokens} \Arg{new tokens}
+  \end{syntax}
+  此命令与 \textsf{l3tl} 中默认的 \cs{tl_replace_all:nnn} 含义、用法均相同
+  (用于把 \meta{tl} 中所有的 \meta{old tokens} 替换为 \meta{new tokens}),
+  但 \ztex{} 中的 \cs{ztex_tl_replace_all:nnn} 是完全可展的.\par
+  \vskip1em
+  \noindent{\color{red}\sffamily NOTE: 目前该函数内部采用的字符串匹配算法比较低效, 后续也许会采用 KMP 算法进行重写.}
+\end{function}
+
+\begin{DocExample}*
+\ExplSyntaxOn
+\edef\TTTa{
+    \ztex_tl_replace_once:nnn 
+      {xxxxabc123def123123fgh123xxx123asdwzzz}
+      {123}{|XXX|}
+  }
+\edef\TTTb{
+    \ztex_tl_replace_all:nnn 
+      {xxxxabc123def123123fgh123xxx123asdwzzz}
+      {123}{|XXX|}
+  }
+\ExplSyntaxOff
+Replace Once:\detokenize\expandafter{\expanded{\TTTa}}\par
+Replace All :\detokenize\expandafter{\expanded{\TTTb}}
+\end{DocExample}
+
+
+\begin{function}[added=2025-06-21, EXP]{
+    \ztex_token_strip_both:n, 
+    \ztex_token_strip_both:e, 
+    \ztex_token_strip_both:V,
+  }
+  \begin{syntax}
+    \cmd{\ztex_token_strip_both:n} \Arg{tl}
+  \end{syntax}
+  此命令会将 \meta{tl} 两侧的 Token 去掉.
+\end{function}
+
+
+\begin{function}[added=2025-06-21, EXP]{
+    \ztex_token_strip_left:n, 
+    \ztex_token_strip_left:e, 
+    \ztex_token_strip_left:V, 
+  }
+  \begin{syntax}
+    \cmd{\ztex_token_strip_left:n} \Arg{tl}
+  \end{syntax}
+  此命令会将 \meta{tl} 左侧的 Token 去掉.
+\end{function}
+
+
+\begin{function}[added=2025-06-21, EXP]{ 
+    \ztex_token_strip_right:n,
+    \ztex_token_strip_right:e,
+    \ztex_token_strip_right:V,
+  }
+  \begin{syntax}
+    \cmd{\ztex_token_strip_right:n} \Arg{tl}
+  \end{syntax}
+  此命令会将 \meta{tl} 右侧的 Token 去掉.
+\end{function}
+
+
+\clearpage
+\subsubsection{命令定义}
+\begin{function}[added=2025-06-19]{\znewcmd, \zsetcmd, \zgsetcmd}
+  \begin{syntax}
+    \cs{znewcmd}\marg{arg-spec}\marg{code}
+  \end{syntax}
+  用户可以使用这三个命令创建控制序列, \meta{arg-spec} 的格式为: \texttt{\meta{var}:\meta{type}=\meta{default}};
+  其中 \meta{var} 为\textbf{局部}变量的名称, 可以使用数字, 下划线(但此时需使用 \cs{zcmdvar} 命令进行引用); \meta{type} 用于
+  指定变量 \meta{var} 的类型, 可以省略; 目前 \meta{type} 的可选值有 ``\texttt{tl, str, int, fp, clist, dim, \oarg{type}}'',  
+  其中 ``\texttt{tl}'' 为默认类型, \texttt{\oarg{type}} 用于表示数组, 数组中元素的类型均为(元素类型必须相同) \meta{type}; \meta{default} 
+  用于指定变量 \meta{var} 的默认值, 可以省略; \meta{code} 即为函数体. \par
+  \textbf{注意}: 在函数体中, 所有的局部变量均为完全可展的.
+\end{function}
+
+
+\begin{function}[added=2025-06-19, EXP]{\fpuse, \intuse, \dimuse, \clistuse}
+  \begin{syntax}
+    \cs{fpuse}\marg{var}
+    \cs{intuse}\marg{var}
+    \cs{dimuse}\marg{var}
+    \cs{clistuse}\meta{var}\marg{index}
+  \end{syntax}
+  在 \cs{znewcmd}, \cs{zsetcmd}, \cs{zgsetcmd} 所定义控制序列对应的 \meta{code} 中, 部分的变量并不能直接使用,
+  需要使用 \cs{fpuse}, \cs{dimuse} 等命令进行引用.
+\end{function}
+
+
+\begin{function}[added=2025-06-19, EXP]{\cmdvar}
+  \begin{syntax}
+    \cs{zcmdvar}\marg{var}
+  \end{syntax}
+  此命令用于引用声明的变量, 被引用的变量一般含有数字, 横线, 下划线等特殊字符.
+\end{function}
+
+
+\begin{DocExample}*
+\ExplSyntaxOn
+\cs_set_eq:NN \tlEQNnTF \tl_if_eq:NnTF
+\ExplSyntaxOff
+% new command
+\znewcmd\CMDA{argA=argA-val, argB:str=argB-val, argC}
+  { 
+    \tlEQNnTF \argA {argA-val}{argA~EQUALS}{argA~not~EQUALS}\par
+    \tlEQNnTF \argB {argB-val}{argB~EQUALS}{argB~not~EQUALS}\par
+    \string\argC=\argC\par
+  }
+\CMDA{argB=argB-val-new}
+
+% set command
+\dotfill\par
+\zsetcmd\CMDB{
+  argA = {``Group variable range Test''},
+  argF:fp = 3.1415926,
+  argG:int = 100,
+  argH:dim = 12pt+1em,
+  argI:clist = {AA, BB, CC},
+}{
+  \fpuse\argF=\fpuse{\argF}\par
+  \string\argG=\intuse\argG\par
+  \string\argH=\dimuse\argH\par
+  \string\argI=\clistuse\argI{2}\par
+
+  \dotfill\par
+  Argument of \string\CMDA(local variable test):
+  \string\argA=\argA\par
+}
+\CMDB{argF=6.2830178, argG=200}
+
+% group test
+\dotfill\par
+\begingroup
+\zsetcmd\CMDA{arg-1=aaa}{CODE=\cmdvar{arg-1}}
+INNER: \CMDA{};
+\endgroup
+OUTER: \CMDA{}
+
+% vector type
+\dotfill\par
+\znewcmd\CMDD{argA:[int]={1, 2, 3, 4}, argB:[str], argC:[tl]}
+  { 
+    CODE 1=(\argA{1}), (\argA{4})\par
+    CODE 2=(\argB{1}), (\argB{-1})\par
+    CODE 3=(\argC{1})
+  }
+\CMDD{argA={5.55, 6, 7, 8}, argB={AAA, BBB, CCC}}
+\end{DocExample}
 
 
 \clearpage
@@ -2099,18 +2723,18 @@ Image Test: \rule{2em}{2em}~\ztoolboxaffine{\rule{2em}{2em}}{1, 0, .5, 1}
   \pkg{analysis, bnf, box, counter, datetime, doc, index, logo, math, pdf, pgf, ref, tcb};
   各个库的作用请参见 \CusTeX{} 的文档.
   \zLaTeX{} 在融入此宏集时，把 \CusTeX{} 的所有库(libray) 也做了一定的适配. 但目前很不稳定, 即有可能
-  出现加载 \CusTeX{} 的库后与 \zLaTeX{} 原本设置冲突的问题, 所以在 \zLaTeX{} 中谨慎使用 \CusTeX{} 的库.
+  出现加载 \CusTeX{} 的库后与 \zLaTeX{} 原本设置冲突的问题, 所以在 \zLaTeX{} 中应当谨慎使用 \CusTeX{} 的库.
 \end{function}
 
 
 
 \clearpage
 \section{\texorpdfstring{\zTeX{}}{zTeX} 库}
-本节主要介绍 \ztex{} 中提供的各类 library，这些 library 用于优化用户 \LaTeX{} 的文档书写和阅读体验。
-部分 library 是对 \ztex{} 中原始功能的增强，但与此同时，文档的编译速度势必会稍微减慢，所以请酌情加载这部分
-library. 
+本节主要介绍 \ztex{} 中提供的各类库(library), 这些 library 用于优化用户 \LaTeX{} 的文档书写和阅读体验。
+部分 library 是对 \ztex{} 中原始功能的增强，但与此同时，文档的编译速度势必会稍微减慢，所以请酌情加载 \ztex{}
+中的库.
 
-所有的 library 均不默认加载，用户需要使用 \cmd{\ztexloadlib}\texttt{\marg{library name}} 手动加载, 
+\ztex{} 中所有的库均不会自动加载，用户需要使用 \cmd{\ztexloadlib}\texttt{\marg{library name}} 手动加载, 
 详细的 \meta{library name} 列表如下:
 
 \begin{multicols}{2}
@@ -2122,13 +2746,13 @@ library.
   \end{itemize}
 \end{multicols}
 
-Library 的加载方式如下:
+下面这个案列展示了 \ztex{} 中 library 的加载方式:
 \begin{DocExample}
 % \documentclass{ztex}
-\ztexloadlib/\zarg{fancy}/
-\ztexloadlib/\zarg{alias}/
-\ztexloadlib/\zarg{slide}/
-\ztexloadlib/\zarg{thm}/
+\ztexloadlib{fancy}
+\ztexloadlib{alias}
+\ztexloadlib{slide}
+\ztexloadlib{thm}
 \end{DocExample}
 
 
@@ -2193,42 +2817,55 @@ Library 的加载方式如下:
 
 \clearpage
 \subsection{alias 库}
-本模块主要为一系列命令的别名定义, 后文称此为 alias, 用于简化用户在数学环境中的命令输入. 此 libray 建立了以下几个
-方面的 alias:
+\pkg{alias} 库为一系列命令定义了别名, 用于简化用户在数学环境中的命令输入, 后文称此为 alias. 此 libray 默认加载 
+\pkg{amssymb}, \pkg{mathrsfs}, \pkg{mathtools} 三个宏包; \pkg{alias} 库建立了以下几个方面的 alias:
 \begin{itemize}
   \item 数学字体命令
   \item 各类箭头
   \item 各类数学算符
   \item 其余常见符号
   \item 自动括号命令(试验阶段)
+  \item (偏)微分算子
+  \item 矩阵
 \end{itemize}
 
-对于自动括号命令，目前还很不成熟，如果不清楚对应的命令原理请勿使用。针对此特性，推荐用于使用 \pkg{pyhsics2} 
-宏包.
+对于自动括号命令，目前还很不成熟，如果不清楚该命令的原理, 还请不要使用. 针对此特性, 推荐用户使用 \pkg{pyhsics2} 
+宏包. 除此之外, \pkg{alias} 库并没有对 \pkg{mathtools} 中的 \cs{mathclap}, \cs{mathllap} 等命令进行封装.
 
 \vskip2em
 \noindent\textcolor{red}{\sffamily WARNING: 尽管 \zLaTeX{} 已经可以把所有的 alias 限制于一个局部组内, 但由于%
-此 library 加载自定义命令数量实在庞大, 所以仍然可能会与部分已有命令冲突, 请谨慎加载此 library.}
+\pkg{alias} 库自定义的命令数量实在庞大, 所以仍然可能会与部分已有命令冲突.}
 
 
 \begin{function}[updated=2025-04-25]{\zaliasOn, \zaliasOff}
-  此二命令用于启用以及关闭 \ztex{} 中的数学命令别名, 当你加载 \pkg{alias} 库后, 默认不加载所有的预定义命令别名.
-  如果在此二命令之外使用 \pkg{alias} 库中的别名命令, 那么 \zLaTeX{} 会抛出错误. 在正文中可以多次或嵌套使用此二命令, 但必须
-  成对出现, 否则将会导致编组不匹配, 从而无法编译得到最终的文档.
+  \begin{syntax}
+    \cs{zaliasOn}\oarg{prefix}>\dval{OLD}
+  \end{syntax}
+  此二命令用于临时启用或关闭 \ztex{} 的 \pkg{alias} 库中的命令别名; \meta{prefix} 用于设置当前文档中已存在的(外部)
+  命令前缀, 默认为 ``OLD'';
+  如果在此二命令之外使用 \pkg{alias} 库中的别名命令, 那么 \zLaTeX{} 会抛出错误.\par
+  \textbf{注意}: 在正文中可以多次或嵌套使用此二命令, 但必须成对出现, 否则将会导致编组不匹配, 从而无法编译得到最终的文档.
 \end{function}
-\begin{DocExample}*
-\zaliasOn
-$\B{Q} \cong \B{Z}$
+\begin{DocExample}*[@@]
+% \usepackage{ascii} % for \FF{} 
+\FF{} from `ascii' package, \S{} from \LaTeX{};
+\zaliasOn[XXX]
+Inline math $\B{Q} \cong \B{Z}$;
+\begin{align*}
+  \int \FF{o(x)}\cdot a^{h(x)\dd x}\cdot\XXXhom(\S{F}(x))\XXXdiv g(x)\dd x\\
+  \dd y/\dd x
+\end{align*}
 \zaliasOff
 \end{DocExample}
 
 
 \begin{function}[updated=2025-04-25]{zalias}
   \begin{syntax}
-    \cs{begin}\zarg{zalias} ... \cs{end}\zarg{zalias}
+    \cs{begin}\zarg{zalias}\oarg{prefix} ... \cs{end}\zarg{zalias}
   \end{syntax}
-  此环境等价于上述的 \cs{zaliasOn} 和 \cs{zaliasOff} 命令, 此环境形成的局部组中所有的 alias 均有效. 
-  在正文中可以多次使用此环境, 且可以嵌套使用.
+  此环境等价于上述的 \cs{zaliasOn} 和 \cs{zaliasOff} 命令, 此环境形成的局部组中所有的 alias 均有效;
+  \meta{prefix} 用于设置当前文档中已存在的(外部)命令前缀,  默认为 ``OLD''; \par
+  \textbf{注意}: 在正文中可以多次使用此环境, 且可以嵌套使用.
 \end{function}
 \begin{DocExample}*
 \begin{zalias}
@@ -2237,13 +2874,16 @@ $\B{Q} \cong \B{Z}$
 \end{DocExample}
 
 \vskip1em
-\noindent\textcolor{red}{\sffamily Note:为了本节后续行文的简洁性, 我们默认所有示例代码中的别名命令均位于上述
+\noindent\textcolor{red}{\sffamily NOTE:为了本节后续行文的简洁性, 我们默认所有示例代码中的别名命令均位于上述
 的 \cs{zaliasOn} 和 \cs{zaliasOff} 命令之间亦或者是 \env{zalias} 环境中.}
 \ExplSyntaxOn
 \bool_gset_true:N \g__ztex_math_alias_switch_bool
+\__zalias_cmd_create:n {OLD}
+\char_set_mathcode:nn {"2F}{"413D}
 \ExplSyntaxOff
 
-\subsubsection{数学字体类}
+
+\subsubsection{数学字体}
 \begin{function}[updated=2024-12-05]{\F, \R, \K, \C, \B, \S, \FF}
   \begin{syntax}
     \cs{F}\marg{tokens}
@@ -2264,7 +2904,7 @@ Alias Version: $\F{A} + \R{A} + \K{a} + \C{A} + \B{A} + \S{A} + \FF{A}$
 \end{DocExample}
 
 
-\subsubsection{数学箭头类}
+\subsubsection{数学箭头}
 \noindent 此 library 定义的一系列箭头命令遵循如下的规则:
 \begin{itemize}
   \item 首字母重复表示对应箭头的加长,
@@ -2358,9 +2998,11 @@ Alias Text Version: $\hla*[a](b) + \hra*[a](b)$
 \end{DocExample}
 
 
-\subsubsection{其它数学符号}
+
+\clearpage
+\subsubsection{其它符号}
 \begin{function}[updated=2024-12-05]{\A, \E}
-  以上两个命令分别表示任意和存在符号.
+  以上两个命令分别表示``任意 ($\forall$)'' 和 ``存在 ($\exists$)'' 符号.
 \end{function}
 \begin{DocExample}*
 Normal Version: $\forall \varepsilon>0, \exists \delta$ \\
@@ -2379,9 +3021,14 @@ Alias Version: $\ns, \se, \sse$
 \begin{function}[updated=2024-12-05]{\dd}
   此命令主要用于替代默认的 \ztexverb{\mathrm{d}}, 与此同时，其会自动处理左右间隔, 更加规范的处理可以参见 \pkg{fixdiff}.
 \end{function}
-\begin{DocExample}*
+\begin{DocExample}*[@@]
 Normal Version: $\displaystyle\int x\;\mathrm{d}x = x^{\int x\mathrm{d} x } = \frac12x^2 + \mathrm{C}$ \\
-Alias Version: $\displaystyle\int x\dd x = x^{\int x\dd x } = \frac12x^2 + \R{C}$
+Alias Version: $\displaystyle\int x\dd x = x^{\int x\dd x } = \frac12x^2 + \R{C}$.
+
+\begin{align*}
+  \int \FF{o(x)}\cdot a^{h(x)\dd x}\cdot\OLDhom(\S{F}(x))\OLDdiv g(x)\dd x\\
+  \dd y/\dd x
+\end{align*}
 \end{DocExample}
 
 
@@ -2445,6 +3092,8 @@ Alias Version: $\alt, \rot, \div, \curl, \grad, \id, \im, \ker, \cok, \hom, \sup
 \end{DocExample}
 
 
+
+\clearpage
 \subsubsection{自动括号}
 \begin{function}[updated=2024-12-05]{\zab}
   \begin{syntax}
@@ -2459,24 +3108,357 @@ Alias Version: $\displaystyle \zab(\frac12), \zab[\frac12], \zab\{\frac12\}$
 \end{DocExample}
 
 
+\clearpage
+\subsubsection{微分算子}
+\begin{function}[added=2025-06-19]{\dv, \pdv, \dv*, \pdv*}
+  \begin{syntax}
+    \cs{dv}\{\meta{fun}, \meta{var-1}, \meta{var-2}, ...\}
+    ~~~[\meta{ord-1}, \meta{ord-2}, ...]
+  \end{syntax}
+  \cs{pdv} 命令的用法与 \cs{dv} 命令相同, 含有 ``\texttt{*}'' 的命令将采用 ``$a/b$'' 的格式排版.
+\end{function}
+
+\begin{DocExample}*
+% \dv exampels:
+\begin{align*}
+\dv{, xx, y, \textsf{ww}}[zz, \mathbf{g}, \B{X}]
+  & = \dv{, x, y, z}[, +++\alpha+1, +\xi+3+, \eta+2] \\
+\dv{, x} + \dv{, t}[2] = \dv*{f, \xi}
+  & = \dv{\varphi, x, y, z, \tau}[2, 2, 2, 1] \\
+\dv{, x, y, z}[1, \xi, \eta+2]
+  & = \dv{, (x^1), (x^2), (x^3)}[1, 3, 1]
+\end{align*}
+
+% \pdv exampels:
+\begin{align*}
+\pdv{, x} + \pdv{, t}[2] = \pdv*{f, \xi}
+  & = \pdv{\varphi, x, y, z, \tau}[2, 2, 2, 1] \\
+\pdv{, x, y, z}[1, \xi, \eta+2]
+  & = \pdv{, (x^1), (x^2), (x^3)}[1, 3, 1]
+\end{align*}
+\end{DocExample}
+
+
+\subsubsection{矩阵}
+和矩阵相关的命令使用起来有一定的限制, 具体来说就是: 你的 l3kernel 的版本日期必须在 2025-01-15 之后.
+因为 \pkg{alias} 中与这一部分相关的命令依赖于 \cs{int_step_tokens:nn}, 而这个命令在 2025-01-15 之后
+才正式被添加到 l3kernel 中.
+
+
+\begin{function}[added=2025-06-20]{\mat, \pmat, \bmat, \Bmat, \vmat, \Vmat}
+  \begin{syntax}
+    \cs{mat}\{
+      ~~\meta{item-11}, ..., \meta{item-1n};
+      ~~~~...
+      ~~\meta{item-m1}, ..., \meta{item-mn};
+    \}
+  \end{syntax}
+  这系列命令用于输出排版矩阵, 其维度为 $m\times n$; ``\texttt{p}'' 的含义与 \pkg{amsmath} 宏包
+  中 \verb|\pmatrix| 命令内的 ``\texttt{p}'' 含义相同, ``\texttt{b}, \texttt{v}'' 等参数的含义同理.
+\end{function}
+\begin{DocExample}*
+\begin{align*}
+  \text{mat-1} = \mat { 1, , 3; 4, 5, ; , 7, 8 } \qquad
+& \text{mat-2} = \begin{Vmatrix}\mat{1, , 3; 4,5,; ,7,8}\end{Vmatrix} \\
+  \text{pmat} = \pmat { 1, , 3; 4, 5, ; , 7, 8 } \qquad
+& \text{bmat} = \bmat { 1, , 3; 4, 5, ; , 7, 8 } \\
+  \text{Bmat} = \Bmat { 1, , 3; 4, 5, ; , 7, 8 } \qquad
+& \text{vmat} = \vmat { 1, , 3; 4, 5, ; , 7, 8 } \\
+  \text{Vmat-1} = \Vmat { 1, , 3; 40.102, 55, ; , 7, 8 } \qquad
+& \text{Vmat-2} = \Vmat { 1, , 3; \textsf{xxx}, \mathbb{XX},; ,7,8}
+\end{align*}
+\end{DocExample}
+
+
+\begin{function}[added=2025-06-20]{\imat, \admat}
+  \begin{syntax}
+    \cs{imat} ~\Arg{filler}\{\meta{item-1}, ..., \meta{item-n}\}
+    \cs{admat} \Arg{filler}\{\meta{item-1}, ..., \meta{item-n}\}
+  \end{syntax}
+  此二命令用于生成对角矩阵或反对角矩阵, 其维度为 $n\times n$; \meta{filler} 用于指定
+  非对角线元素, \meta{item} 中空值默认为 ``1''; \textbf{注意:} 此命令需结合上面的 \cs{mat}, \cs{pmat} 
+  等命令使用.
+\end{function}
+\begin{DocExample}*
+\begin{align*}
+  \mat{\imat{0}{1, ,3}} =
+  \pmat{\admat{}{1, 2, , 4, 5}} =
+  \vmat{\imat{\cdot}{1,,,2}}
+\end{align*}
+\end{DocExample}
+
+
+\begin{function}[added=2025-06-20]{\zmat}
+  \begin{syntax}
+    \cs{zmat}\oarg{type}\marg{n}
+  \end{syntax}
+  此命令用于输入零矩阵, 其维度为 $n\times n$; \meta{type} 用于设置该矩阵的样式, 默认为 ``\texttt{i}'',
+  可选值有 ``\texttt{i, a, z}''. \textbf{注意:} 此命令不能单独使用, 用户需要将此命令置于一个矩阵环境中,
+  或置于上面的 \cs{mat}, \cs{pmat} 等命令中.
+\end{function}
+\begin{DocExample}*
+\begin{align*}
+  \mat{\zmat{4}} = 
+  \vmat{\zmat[z]{5}} = 
+  \pmat{\zmat[a]{4}}
+\end{align*}
+\end{DocExample}
+
+
+
+\begin{function}[added=2025-06-20]{\jmat, \hmat}
+  \begin{syntax}
+    \cs{jmat}\oarg{keyval}\{
+    ~~\meta{dep-1},   ..., \meta{dep-m};
+    ~~\meta{indep-2}, ..., \meta{indep-n}
+    \}
+    \cs{hmat}\oarg{keyval}\{
+    ~~\meta{dep-1};
+    ~~\meta{indep-1}, ..., \meta{inde-n}
+    \}
+  \end{syntax}
+  此二命令分别用于输入 Jacobian 和 Hessian 矩阵, 前者是 $m\times n$ 的, 后者是 $1\times n$ 的; 
+  \meta{keyval} 用于指定(矩阵的) 的排版样式; \meta{dep-i} 表示第 $i$ 个自变量, \meta{indep-i} 表示
+  第 $i$ 个因变量.
+\end{function}
+
+
+\begin{keyval}[parent=ztex/zalias/jhmat]{b, c, s}
+  \begin{syntax}
+    b = \Arg{border}>\dval{空}
+    c = \Arg{command}>\dval{textstyle}
+    s = \Arg{float}>\dval{1.25}
+  \end{syntax}
+  \meta{b} 用于指定矩阵的 delimiter 样式, 可选值有: ``\texttt{b, p, B, v, V}'';
+  \meta{c} 用于设置矩阵中每个公式的显示方式, 默认为 ``\cs{textstyle}'';
+  \meta{s} 用于设置 \cs{arraystretch} 这个值, 默认为 ``\texttt{1.25}''.
+\end{keyval}
+
+\begin{DocExample}*
+% \jmat examples:
+\begin{align*}
+  \jmat{f_1, f_2; x, y} = 
+  \jmat[c=displaystyle, b=V, s=2]{f, g, h; \textsf{x}, \mathbb{Y}, \F{z}} =
+  \jmat[b=b]{f, g; x, y, z}
+\end{align*}
+
+% \hmat examples:
+\begin{align*}
+  \hmat[c=displaystyle, s=2.5]{;x,y,z, {w\textbf{w}}} =
+  \hmat[b=v, s=1.5]{g;\textsf{x},\mathbb{K},z}
+\end{align*}
+\end{DocExample}
+
+
+
+\begin{function}[added=2025-06-20]{\gmat}
+  \begin{syntax}
+    \cs{gmat} \{\meta{v-1}, ..., \meta{v-n}\}
+  \end{syntax}
+  此命令用于生成 Gram 矩阵, 其维度为 $n\times n$; 此命令仅为后续 \cs{xmat} 命令的一个特例. 
+  \textbf{注意}:此命令仅返回矩阵对应的数据, 用户应将此命令置于一个合法的矩阵环境中.\par
+  \vskip1.5em
+  \noindent{\color{red}\sffamily NOTE: 请不要将此命令置于 \cs{mat}, \cs{pmat} 等命令中. }
+\end{function}
+
+
+
+\begin{function}[added=2025-06-20]{\xmat}
+  \begin{syntax}
+    \cs{xmat} \{m, n, \cs{\meta{matcmd}}\}
+  \end{syntax}
+  此命令用于自定义矩阵的生成方式, 其维度为 $m\times n$; 矩阵元素由 \cs{\meta{matcmd}} 指定, 
+  \cs{\meta{matcmd}} 接受两个参数, 分别表示该元素的横坐标与纵坐标. \textbf{注意}:此命令仅返回
+  矩阵对应的数据, 用户应将此命令置于一个合法的矩阵环境中; 同时也应确保 \cs{\meta{matcmd}} 是 Robust 的.
+  \par \vskip1.5em
+  \noindent{\color{red}\sffamily NOTE: 1. 此处的 \cs{xmat} 命令与 \pkg{pyhsics2} 宏包中的 \cs{xmat} 命令不同;\\
+  \hphantom{NOTE:} 2. 请不要将此命令置于 \cs{mat}, \cs{pmat} 等命令中.}
+\end{function}
+\begin{DocExample}*
+\protected\def\cmdA#1#2{g^{#1#2}}
+\begin{align*}
+  \begin{bmatrix}
+    \xmat{3, 4, \cmdA}
+  \end{bmatrix} = 
+  \begin{bmatrix}
+    \gmat{v_1, v_2, v_3, v_4}
+  \end{bmatrix}
+\end{align*}
+\end{DocExample}
+
+
+
+
+\clearpage
+\subsubsection{编程接口}
+\ztex{} 的 \pkg{alias} 库除了给普通用户提供一系列的命令(接口)外, 还为熟悉 \hologo{LaTeX} 
+编程的用户提供了编程接口.
+
+
+
+\begin{function}[added=2025-06-22]{
+    \zalias_make_cmd_robust:n,
+    \zalias_make_cmd_robust:e,
+    \zalias_make_cmd_robust:o,
+    \zalias_make_cmd_robust:f,
+  }
+  \begin{syntax}
+    \cs{zalias_make_cmd_robust:n} \Arg{command}
+  \end{syntax}
+  此命令用于将命令 \cs{\meta{command}} 变为一个 Robust 命令, \meta{command} 为该命令的名称, 不包含 ``\verb|\|''.
+  \textbf{注意}: 原始的 \cs{\meta{command}} 仅在 \env{zalias} 环境或 \cs{zaliasOn} 与 \cs{zaliasOff} 内
+  被重定义为 Robust, 在此范围之外, 该命令将恢复为其原始定义.
+\end{function}
+
+
+\begin{function}[added=2025-06-22]{\ztex_mathalias_set:nn, \ztex_mathalias_set:ee, \ztex_mathalias_set:oo}
+  \begin{syntax}
+    \cs{ztex_mathalias_set} \Arg{inner}\Arg{outer}
+  \end{syntax}
+  此命令用于设置 \env{zalias} 环境, 或 \cs{zaliasOn} 与 \cs{zaliasOff} 内命令的别名;
+  \meta{outer} 是用户在外部声明的命令, \meta{inner}  为用户在内部使用的命令, 二者均不包含 ``\verb|\|'';
+  在此范围之外, \meta{outer} 将恢复为其原始定义.
+\end{function}
+
+
+\begin{function}[added=2025-06-22, EXP]{
+    \zalias_matrix_from_list:n, 
+    \zalias_matrix_from_list:e, 
+    \zalias_matrix_from_list:o, 
+    \zalias_matrix_from_list:f, 
+  }
+  \begin{syntax}
+    \cs{zalias_matrix_from_list:n} \Arg{list}
+  \end{syntax}
+  此命令会根据 \meta{list} 生成对应的矩阵数据, 是上述 \cs{mat}, \cs{pamt} 等命令的基础; 
+  且此命令完全可展, 所以该命令可以与 \pkg{tabularray} 之类的宏包结合使用.
+\end{function}
+
+
+\begin{function}[added=2025-06-22]{\z@mat@plain}
+  \begin{syntax}
+    \cmd{\z@mat@plain} \Arg{list}
+  \end{syntax}
+  此命令即为上述的 \cs{zalias_matrix_from_list:n} 命令.
+\end{function}
+
+
+\begin{DocExample}*
+\ExplSyntaxOn
+\edef\MatDataA{\zalias_matrix_from_list:n {1, 2.00, , 4, ; , 6, 7.00, 9, 10 ; , 12, 13.00, , }}
+\ExplSyntaxOff
+\SetTblrOuter{expand=\MatDataA}
+\begin{tblr}
+  {
+    rowspec = {
+      |[2pt,green7]Q|[teal7]Q|[green7]Q|[2pt, green6]
+      Q|[green5]Q|[green4]Q|[green3]Q|[3pt,teal7]
+    }
+  }
+  \MatDataA
+\end{tblr}
+\end{DocExample}
+
+
+
+\begin{function}[added=2025-06-22, EXP]{\zalias_diag_mat_data:nnnn, \zalias_diag_mat_data:nnne}
+  \begin{syntax}
+    \cmd{\zalias_diag_mat_data:nnnn} \Arg{bool}\Arg{other default}
+    ~~~~\Arg{diag default}\Arg{list}
+  \end{syntax}
+  此命令会根据 \meta{list} 生成对应的矩阵数据, 是上述 \cs{imat}, \cs{adamt}, \cs{zmat} 三个命令的基础;
+  \meta{bool} 用于指定对角矩阵的类型, \meta{bool} 为 \cs{c_false_bool} 时, 为反对角矩阵;
+  \meta{other default} 用于指定非对角元素的默认值, \meta{diag default} 用于指定对角线上元素的默认值;
+  且此命令完全可展, 所以该命令可以与 \pkg{tabularray} 之类的宏包结合使用.
+\end{function}
+\begin{DocExample}*
+\ExplSyntaxOn
+\edef\MatDataB{\zalias_diag_mat_data:nnnn {\c_true_bool}{?}{*}{1.00, , 2, 3, , 5}}
+\edef\MatDataC{\zalias_diag_mat_data:nnnn {\c_false_bool}{@}{*}{1.00, , 2, 3, , 5}}
+\ExplSyntaxOff
+\SetTblrOuter{expand={\MatDataB, \MatDataC}}
+\begin{tblr}{ hlines, vlines }
+  \MatDataB
+\end{tblr}
+\quad = \quad 
+\begin{tblr}{ hlines, vlines }
+  \MatDataC
+\end{tblr}
+\end{DocExample}
+
+
+\begin{function}[added=2025-06-22, EXP]{
+    \zalias_jmat_data:nn, 
+    \zalias_jmat_data:ne,
+    \zalias_jmat_data:no, 
+    \zalias_hmat_data:nn,
+    \zalias_hmat_data:ne,
+    \zalias_hmat_data:no,
+  }
+  \begin{syntax}
+    \cmd{\zalias_jmat_data:nn} \Arg{style}\Arg{list}
+    \cmd{\zalias_hmat_data:nn} \Arg{style}\Arg{list}
+  \end{syntax}
+  此二命令会根据 \meta{list} 生成对应的 Jacobian 或 Hessian 矩阵数据, 是上述 \cs{jmat}, 
+  \cs{hmat} 两个命令的基础; \meta{style} 用于指定 Hessian 矩阵中每一项的排版样式, \meta{style} 中
+  不包含 ``\verb|\|''; 且此命令完全可展, 所以该命令可以与 \pkg{tabularray} 之类的宏包结合使用.
+\end{function}
+\begin{DocExample}*
+\ExplSyntaxOn
+\edef\MatDataD{\zalias_jmat_data:nn {displaystyle}{f, g; x, y, z}}
+\edef\MatDataE{\zalias_hmat_data:nn {textstyle}{g; \textsf{x},\mathbb{K},z}}
+\ExplSyntaxOff
+\SetTblrOuter{expand={\MatDataD, \MatDataE}}
+jmat =
+\begin{tblr}{ hlines, vlines, cells={mode=math} }
+  \MatDataD
+\end{tblr}, \qquad 
+hmat =
+\begin{tblr}{ hlines, vlines, cells={mode=math} }
+  \MatDataE
+\end{tblr}
+\end{DocExample}
+
+
+\begin{function}[added=2025-06-22, EXP]{\zalias_xmat_data:nn, \zalias_xmat_data:ne, \zalias_xmat_data:no }
+  \begin{syntax}
+    \cs{zalias_xmat_data:nn} \{\cs{\meta{cmd}}\}\{m, n\}
+  \end{syntax}
+  此命令会根据 \cs{\meta{cmd}} 自动生成对应的矩阵数据, 其维度为 $m\times n$; 该命令是上
+  述 \cs{gmat}, \cs{xmat} 两个命令的基础; \cs{\meta{cmd}} 接受两个参数, 分别代表矩阵中该元素
+  的横坐标与纵坐标; \texttt{m} 为矩阵的行数, \texttt{n} 为矩阵的列数; 且此命令完全可展, 所以
+  该命令可以与 \pkg{tabularray} 之类的宏包结合使用.
+\end{function}
+\begin{DocExample}*
+\ExplSyntaxOn
+\protected\def\cmdA#1#2{g^{#1#2}}
+\edef\MatDataF{\zalias_xmat_data:nn {\cmdA}{3, 4}}
+\ExplSyntaxOff
+\SetTblrOuter{expand=\MatDataF}
+xmat =
+\begin{tblr}{ hlines, vlines, cells={mode=math} }
+  \MatDataF
+\end{tblr}
+\end{DocExample}
+
+
 
 \clearpage
 \subsection{slide 库}
-此 library 用于从文档模式切换到 slide 模式，无需用户对文档源码进行任何的更改，仅需在导言区加载此 library 即可.
-\ztex{} 会自动处理文档的分页. 
+此 library 用于将文档切换到 slide 模式, 无需用户对文档源码进行大的改动, 仅需在导言区加载此 library 即可,
+\ztex{} 会自动处理文档的分页, 浮动体等细节.
 
 由于此 library 内部 patch 了很多的 \LaTeX{} 内部命令, 所以请谨慎加载. 另外, 加载此 library 并不会牺牲太多的编译速度. 
 
 zslide 中的坐标系统:在不另加说明的情况下, zslide 中的坐标系统均以当前页面的左上角为原点，取向上向右为正方向. 这就意味着你的纵坐标
 往往为负值，横坐标往往为正值.
 
-\vskip2em
+\vskip1em
 \noindent\textcolor{red}{\sffamily WARNING: 此 library Patch 了大量的原始命令, 在 slide 模式下使用 \cs{zthmtoc} 或
 \cs{ztexptoc} 可能会导致一些奇怪的报错, 比如:\texttt{! LaTeX Error:Something's wrong -- perhaps a missing \string\item.};
 目前定位到 \cs{titlecontents}\texttt{\{subsection\}}, 如果后续自己实现了 \pkg{titletoc} 和 \pkg{titlesec} 两个宏包，那么这个问题就比较方便解决了}
+\vskip1em
 
-
-\subsubsection{使用方法}
 \pkg{slide} 库的使用方法是非常简单的, 一个基本的使用样例如下:
 \begin{DocExample}
 \documentclass[
@@ -2787,8 +3769,8 @@ Subsection Icon: \rule[2pt]{3pt}{3pt}
 \ExplSyntaxOff
 \end{DocExample}
 
-\cs{zslidetoc@labelset} 用于设置 slide 模式下目录中各条目的格式. \meta{extra width} 表示 \cs{thecontentslabel}
-右侧额外的间距. \meta{item} 可以选择使用 \cs{thecontentslabel}, \cs{zslidesecIcon}, \cs{zslidesubsecIcon} 或
+\cs{zslidetoc@labelset} 用于设置 slide 模式下目录条目的格式. \meta{extra width} 表示 \cs{thecontentslabel}
+右侧额外的间距. \meta{item} 可以使用 \cs{thecontentslabel}, \cs{zslidesecIcon}, \cs{zslidesubsecIcon} 或
 其它用户自定义符号.
 
 
@@ -2806,6 +3788,7 @@ Subsection Icon: \rule[2pt]{3pt}{3pt}
 \end{DocExample}
 
 
+\clearpage
 \subsubsection{编程接口}
 \begin{function}[updated=2025-04-25]{\zslide_framecnt_aux:nn}
   \begin{syntax}
@@ -2907,9 +3890,9 @@ Subsection Icon: \rule[2pt]{3pt}{3pt}
 library.
 
 \vskip2em
-\noindent\textcolor{red}{\sffamily NOTE: 若用户在自定义定理类环境样式时需要更改 \ztex{} 的默认配色, 请将 \cs{ztex_keys_set:nn} 或其它基于 \cs{keys_set:nn} 的命令放置于%
-命令 \cs{zthmstylenew} 对应样式 \meta{preamble} 中而非 \meta{option} 中, 否则 \ztex{} 中的一系列与 \cs{zcolorset} 相关的函数将失去%
-对新定义数学类环境样式的色彩控制能力.}
+\noindent\textcolor{red}{\sffamily NOTE: 若用户在自定义定理类环境样式时需要更改 \ztex{} 的默认配色, 请将 \cs{ztex_keys_set:nn} 或
+其它基于 \cs{keys_set:nn} 的命令放置于命令 \cs{zthmstylenew} 对应样式的 \meta{preamble} 中而非 \meta{option} 中, 
+否则 \ztex{} 中的一系列与 \cs{zcolorset} 相关的函数将失去对新定义数学类环境样式的色彩控制能力.}
 
 
 \begin{function}[updated=2025-04-25]{\zthmiconset}
@@ -3228,6 +4211,8 @@ reason is a representation of, as far as I know, the things in themselves;%
   \item 实现 \cs{hyper@icon} 接口, 用于设置文档中的超链接图标. (没有 icon 的超链接未免过于单调)
   \item [2025-02-05] 优化 module 和 library 的加载检测机制, 完善相关变量的检测设置, 如在 \pkg{alias} 这一 library 中将变量 \cs{g__ztex_math_alias_bool} 显示的设置为 \texttt{true}.
   \item [2025-04-20] 创建 \cs{zaliasOn}, \cs{zaliasOff} 两命令用于限制 \pkg{alias} library 中命令的使用范围.
+  \item [2025-06-15] 修复 \pkg{alias} 库中别名与已知命令冲突的问题.
+  \item [2025-06-15] 参考 \pkg{fixdif} 宏包, 修复了 \pkg{alias} 库中 \cs{dd} 命令的一系列间距问题.
   \item [2025-05-12] 在部分 \ztex{} 内置命令的实现中增加 \cs{__ztex_plus_key_aux:nnn} 命令，用于在保留原内容的基础上增加内容.
   \item [2025-05-12] 修复 \cs{zthmtocadd} 增加的定理条目超链接跳转异常这一问题.
   \item [2025-04-28] 增加分散对齐命令 \cmd{\zboxitemalign}.
@@ -3249,9 +4234,17 @@ reason is a representation of, as far as I know, the things in themselves;%
   \item [2025-05-15] \texttt{.initial:n} 在 \texttt{.inherit:n} 后会报错, 需要修复.
   \item 部分引擎对应的 primitive 的封装, 比如 \hologo{pdfTeX} 中的 \cmd{\pdfsetmatrix}, \hologo{XeTeX} 中的 \cmd{\ifprimitive} 等.
   \item \cmd{\special} 命令的介绍(或者是封装) ?
-  \item 能否定义一个完全可展的 token replace 命令, 在文件读写过程中可能会有用.
-  \item 实现类似 Python 中那样的自定义命令接口 -- 关键点为参数类型标注以及默认值标注, 似乎用 \pkg{xtemplate} 也能做 ?
+  \item [2025-06-25] 能否定义一个完全可展的 token replace 命令, 在文件读写过程中可能会有用.
+  \item [2025-06-25] 实现类似 Python 中那样的自定义命令接口 -- 关键点为参数类型标注以及默认值标注, 似乎用 \pkg{xtemplate} 也能做 ?
   \item 实现类似 \pkg{luacode} 或 \pkg{pythontex} 宏包所提供命令类似的接口, 统一管理这一系列的 shell escape. 
+  \item \pkg{alias} 库中与矩阵相关的 ``\cs{mat}, \cs{pmat}, ...'' 命令并没有很好的实现内容(数据)和(排版)格式的分离, 它们这几个命令应该
+    仅用于矩阵的排版, 而非数据的生成.
+  \item \pkg{alias} 库中矩阵相关的命令, 能否实现自动设置 \cs{arraystretch} 的值 ??
+  \item 把原始的 \pkg{framed} 宏包替换为 \textsf{CUS} 宏集中的 \pkg{framedmulticol} 宏包.
+  \item 修复 \cs{qedsymbol} 位置不正的问题, 或者参考 \pkg{amsthm} 宏包直接写一个新的 \cs{zqedhare} 命令.
+  \item 把原始的 \hologo{LaTeX2e} 中的 \cs{label}, \cs{ref} 和 \cs{pageref} 命令使用 \pkg{ltproperty} 进行重写;(这样或许还能解决页面元素绝对定位的问题 ?)
+  \item 修复 \hologo{LuaTeX} 和 \hologo{XeTeX} 下中文字体高度不一致的问题.
+  \item 使用 KMP 算法重写 \cs{ztex_tl_if_in:nnTF} 函数, 同时需保证其是完全可展的.
 \end{todolist}
 
 

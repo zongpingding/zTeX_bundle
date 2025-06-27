@@ -1,274 +1,429 @@
+\InputIfFileExists{ztex_intro-cfg.tex}{}{}
 \documentclass[
-  hyper,    
-  lang=cn,
-  class=book,
-  mathSpec={envStyle=leftbar, alias},
-  toc={redef}
-]{zlatex}
+  hyper, lang=cn,
+  mathSpec={envStyle=leftbar},
+]{../../zlatex/code/ztex}
+\ztexset{
+  toc={
+    column  = 2,
+    title   = 总目录,
+    stretch = 1.3
+  }
+}
 \zcolorset{
   % link        = teal,
   definition  = blue
 }
+\usepackage{enumerate}
 \usepackage[bottom]{footmisc}
-% minted setup
-\usepackage{minted}
-\definecolor{bg}{rgb}{0.95,0.95,0.95}
-\setminted{
-  fontsize=\small,
-  bgcolor=bg, 
-  breaklines=true, 
-  tabsize=2,
-  breakanywhere=true,
-  breakanywheresymbolpre=,
-  breaksymbolleft=,
-}
+\usepackage{texhigh}
+% \SetKeys[texhigh/high]{config-file=texhigh.cfg}
+\SetKeys[texhigh/high]{use-ctab=latex3, lexer-catcode*={0}{}{@=11}}
+\ExplSyntaxOn\makeatletter
+\cs_set_protected:Npn \__texhigh_env_init:
+  {
+    \sloppy \hbadness\@M
+    \dim_set:Nn \parindent { 0pt }
+    \linespread{1.3} \selectfont
+  }
+\NewDocumentCommand\TikZ{}{Ti\textcolor{orange}{\textit{k}}Z}
+\NewDocumentCommand\zTikZ{}
+  {
+    \ztool_scale_to_wd_and_ht:nnn {.9ex}{1.3ex}{
+      \ztool_rotate:nn {89}{\(\aleph\)}
+    }\kern-0.3423ex\hbox{\TikZ}
+  }
+\let\ztikz\zTikZ
+\newcommand{\file}[1]{\texttt{\tl_to_str:n {#1}}}
+\makeatother\ExplSyntaxOff
 % print macro
 \let\cmd\ztexverb
 \newcommand{\Footnote}[1]{\stepcounter{footnote}\footnote[\thefootnote]{#1}}
-\ztexframe{leftbar}[gray]
-\newcommand{\zkey}[1]{\texttt{<#1>}}
+\ztexframe[gray]{leftbar}
+\def\meta#1{\ensuremath \langle #1\ensuremath \rangle}
+\newcommand{\zkey}[1]{\texttt{\meta{#1}}}
+\newcommand{\pkg}[1]{\textsf{#1}}
+\newcommand{\cls}[1]{\textsf{#1}}
+\def\lrr#1{\ensuremath{\Rightarrow}}
+\AddToHook{cmd/section/before}{\thispagestyle{plain}}
 
 
-\title{z\TeX{} Introduction}
+\title{z\TeX{} Bundle}
 \author{Eureka}
 \date{\today}
 
 \begin{document}
+% cover
+\ExplSyntaxOn
+\zpagemask[position={(0pt, .25\zph)}, anchor=l]{
+  \rlap{\color{gray!25}\rule{\zpw}{6em}}
+  \hcoffin_set:Nn \l_tmpa_coffin {\sffamily\Large\color{black!75} 由于本人时间有限, 目前此宏集的开发暂停.}
+  \coffin_typeset:Nnnnn \l_tmpa_coffin {hc}{vc}{.5\zpw}{3em}
+}
+\ExplSyntaxOff
 \maketitle
-\frontmatter
+\thispagestyle{empty}
 \tableofcontents
-\mainmatter
-\part{Document}
-\chapter{Introduction}
+\clearpage
+
+
 \section{简介}
-\subsection{为何叫z\TeX{}?}
-% 也不知道为什么这个系列名称要加以`z'的前缀，可能是因为个人爱好，或是因为觉得这个字母对自己而言有着一些别的意味。
-% 最开始此系列中此包含一个基本的文档类，叫做 $\pi$\LaTeX{}, 但是后面自己想开发一个用于绘图的宏包，主要基于TiKZ.
-% 用于常见平面图形的绘制以及外部程序的交互. 也许是看到了\cmd{tikz}库名称中的``z''，于是便以`z'为前缀，产生了
-% z\LaTeX{}系列。
+\subsection{为何叫 z\TeX{}?}
+为什么宏集名称里面有 `z' 这个前缀, 这也许应是许多用户想知道的问题 ? 下面是可能的几点原因:
 
+\begin{enumerate}[(1)]
+  \item 看到 \LaTeX3 开发团队用 ``x'' 来作为他们开发的一系列宏包前缀,比如 \pkg{xparse}, \pkg{xcoffins}, \pkg{xfp} 等。
+    我便不能再使用 ``x'' 这一前缀了. 这个时候, 突然想到了一个字母 -- ``z''. 一方面 ``x → y → z'', 有了``x'', 才有 ``z''
+    (\zTeX{} 全部基于 \LaTeX3 进行开发; 可以说,没有 \LaTeX3, 就没有今天的 \zTeX{}). 那么 ``y'' 去哪里了 ? 当作为用户的你 (you) 
+    加入 \zTeX{} 使用者阵营后, 就有 ``y'' 了.
+  \item 你将 `z' 逆时针旋转 90$^\circ$, 就可以得到 ``阿列夫 -- $\aleph$'': 我希望 \zTeX{} 宏集能够有进一步(无限)拓展的可能;
+    这个宏集在设计之初, 便一直坚持可拓展性这一原则. 普通用户可以使用用户层面的命令, 模板制作者可以使用 \ztex{} 提供的编程
+    接口. 尽管 ``$\aleph$\TeX'' 这个目标有些不切实际, 但是万一实现了呢 ?
+  \item 也许是看到了 \TikZ{} 中的 ``z'', 于是便以 `z' 为本系列宏集的前缀了 .
+\end{enumerate}
 
-初看本系列的命名 z\TeX{} 可能会给使用者以某些滑稽的感觉. 为何要加以前缀以字母 ``z'', 也许应是许多用户想知道的问题.
-下面就是可能的几点原因:
-
-(1) 看到 \LaTeX3 开发团队挺喜欢用 ``x'' 来作为他们开发的一系列宏包的，比如 xparse, xcoffins, xfp等。我自然不能直接抄袭，
-所以就用冠以字母 ``z''. 一方面 ``x→y→z''，有了``x'', 才有 ``z''(z\TeX{} 全程基于\LaTeX3 进行开发，
-可以说，没有\LaTeX3, 就没有今天的z\TeX{}). 所以 ``y'' 去哪里了? 当你加入 z\TeX{} 的开发后, 就有 ``y'' 了.
-
-(2) 如果你旋转一下字母 `z` 其实就得到 ``阿列夫 - $\aleph$''了，其实就是希望 z\TeX{} 系列能够有一些能够拓展的可能
-(当初在设计这个系列之初便一直坚持模版的可拓展性)。所以用户如果想要深入使用本系列，那么可以在目前提供的基础接口(如缓存，
-外部交互，内置utils)上可以拓展自己喜欢的功能, 一起把 Z\TeX{}, 打造成 ``$\aleph$ TeX''. 这也是我在本系列设计之初就有的
-一个比较美好的，宏大的，不切实际的愿望，尽管可能性很低，但如果它实现了呢？ 
-
-(3) 最后可能还是因自己有想要打造一个类似 C\TeX{} 宏集的目标:尽管我知道以我目前我的水平还是远远不够的，所以现在我把这个``Z\TeX{}''就交给社区了，
-希望在将来的某一天，人们在谈到 ``C\TeX'' 时也会想到有一个和它类似的宏集 -- ``Z\TeX{}''.
+最开始的 \ztex{} 宏集仅包含一个基本的 \cls{zlatex.cls} 文档类, 而且原来的名称叫做 ``$\pi$\LaTeX{}"; 后面我又想基于 \TikZ{} 
+开发一个绘图宏包, 用于实现常见平面图形的绘制以及外部程序的交互; 再后来发现 beamer 用起来很不方便, 便开发了 \pkg{slide} 库;
+随着开发的不断深入, 我发现我已经在 \cls{ztex.cls} 中写了很多十分有用的宏了, 于是我把这些宏分化了出来, 得到了 \pkg{ztool} 宏包,
+得到了 \pkg{thm}, \pkg{cmd}, \pkg{font}, ... 这些模块, 以及 \pkg{slide}, \pkg{alias}, \pkg{thm} ... 这些库; 最终, 
+\ztex{} bundle 诞生了.
 
 
 \subsection{为何用 z\TeX{}?}
-为什么要用我的工具/模板？现在ztikz的几个外部交互模块其实是处于一种比较尴尬的境地的，我如果会用这些程序，
-那么我单独使用这些程序可以调整图片的所有细节，然后输出图片，最后在 \LaTeX{} 中插入。如果我不会使用这些程序，
-那么在正常使用这些模块前，我还需要自行安装对应的程序，那我为何不自己花时间去学学这个应用/程序，从而像第一种方法
-那样直接在外部把图片(生成)处理好，然后再插入呢？
+为什么要用我这个 \ztex{} 宏集 ? \zTikZ{} 中负责和外部程序交互的那几个模块现在处于一种比较尴尬的境地, 用户如果会用
+这些程序, 那么你可以单独使用这些程序调整图片的所有细节, 最后在 \LaTeX{} 中插入该图片. 如果用户不会使用这些外部拓展程序,
+那么用户不仅需要先学习该程序的用法, 还需要学习 \zTikZ{} 宏集中对应命令的 \LaTeX{} 语法; 这无疑是增加了用户的负担 !
 
-所以现在又回到这个问题了：我会用 \LaTeX{} 自己写模板，那我为什么还要用你的模版呢？我如果不会用 \LaTeX{} 写模板，
-花费同样多的时间去了解你这个模板的使用细节，为何我不把这时间用在我自己去学习 \LaTeX{}, 这样反而能做出更加满足自己需求的模板 ? 
-最终还可以得出：我为什么一定要用 \LaTeX{} 呢? 难道用成熟的软件，如 Word, Indesign 甚至是手写就不能写一篇工整规范的论文/笔记 ? 
-所以为什么 Knuth 老爷子要花费十年的时间去开发 \TeX{} 呢? 
+用户可以再思考这样一个问题: 我已经会用 \LaTeX{} 自己写模板了, 为什么还要用别人的模版 ? 我如果不会用 \LaTeX{} 写模板,
+花费了大量的时间去了解一个庞大且复杂的模板的使用细节, 那么我为何不花费这些时间自己去学习 \LaTeX{}, 这样更能做出满足自己需求的模板 ? 
+最后还可以进一步推出: 我为什么一定要用 \TeX{} 或 \LaTeX{} 呢 ? 用 Word, Indesign 这些成熟的软件, 甚至是手写, 难道就不能写一篇
+规范的论文/笔记吗 ? 
 
-上述的一系列推论正确吗？稍微仔细去想，你会发现上面的推导确实不都是正确的。前一个条件并不一定是充分的，或者说我们使用了一个
-假命题(关系)去得到了另一个命题(关系)。根据基础的逻辑知识:定义汇集 $\text R \vee \text S$ 为两关系 R, S 的逻辑析取，定义
-汇集 $\lnot \text R$ 为关系 R 的逻辑否定。从而我们就可以定义我们所谓的 ``逻辑蕴含'' 关系 $\lrr{}$, 即记号 $\text R\lrr{} \text S$ 
-其实是如下的关系汇集:
+所以为什么 Knuth 老爷子要花费十年的时间去开发 \TeX{} 呢 ? 
+
+上述的一系列推论正确吗 ? 仔细想一想, 上面的推导其实不都是正确的. 前一个条件并不一定是充分的, 或者说我们使用了一个
+假命题(关系)去得到了另一个命题(关系). 
+
+根据基础的逻辑知识: 定义汇集 $\text R \vee \text S$ 为两关系 R, S 的逻辑析取, 定义汇集 $\lnot \text R$ 为关系 R 的逻辑否定. 
+从而我们就可以定义所谓的 ``逻辑蕴含'' 关系 $\lrr{}$, 即记号 $\text R\lrr{} \text S$, 前者其实是如下的关系汇集:
 \[
   \text S \vee (\lnot \text R)
 \]
 
-在我们定义了关系 ``真'' 后，如果关系 $\text R\lrr{}\text S$ 是真的, 那么:
-\begin{itemize}
-  \item 如果关系 R 时真的，那么关系 S 必然是真的,也就是我们得到了一个 ``真'' 的结论
-  \item 但是如果 R, S 同时为假，那么关系 $\text R\lrr{}\text S$ 也是真的.但是此时我们的结论并不是``真的''，也就是结论并不成立.
-\end{itemize}
-
 \begin{remark}
-其实有 $\lnot, \vee$ 这两个基础的符号就已经能表示出很多的关系了, 比如逻辑合取记号: $\text R\wedge \text S$ 其实就是:
-$ \lnot [(\lnot \text R)\vee (\lnot \text S)]$. 在规定逻辑公理后其实就可以用来说明我们常用的 ``三段论，双重否定''等
-常见逻辑推理了. 比如我们常用的逆否命题就是说: 关系 $(\text R\lrr{}\text S) \lrr{} ((\lnot\text S)\lrr{}(\lnot\text R))$
+其实有 $\lnot, \vee$ 这两个基础的符号就已经能表示出很多的关系了; 比如逻辑合取记号: $\text R\wedge \text S$, 它其实就是:
+$ \lnot [(\lnot \text R)\vee (\lnot \text S)]$. 在规定逻辑公理后, 就可以用它们来说明常用的 ``三段论, 双重否定'' 等
+逻辑推理了. 比如我们常用的逆否命题就是说: 关系 $(\text R\lrr{}\text S) \lrr{} ((\lnot\text S)\lrr{}(\lnot\text R))$
 是真的.
 \end{remark}
 
-可以认为我们用一个假命题导出了另一个假命题, 下面以此来说明z\TeX{}值得你用，我要如何说服你去使用我的模板呢? 当然就是
-让 ``R\; \lrr{} S''中的命题 ``R'' 为假就好了。比如，我可以让我的模板上手难度相较于默认的 \LaTeX{} 低一点，那么要达到
-同样的效果，你所花费的时间就少一点。所以上述``花费同样时间''这一个命题就为假, 所以``z\TeX{}值得你用'' 这一命题论证完毕。
-你也许可以找到其他的论据来反驳我，但是至少我找到了一个论据来说服你，也找到了我开发这个系列的初心.
-
-\subsection{项目地址}
-目前本项目已经在GitHub, Gitlab, Gitee上开源，地址如下:
+在我们定义了关系 ``真'' 后, 如果关系 $\text R\lrr{}\text S$ 是真的, 那么:
 \begin{itemize}
-    \item GitHub: \href{https://github.com/zongpingding/ZLaTeX_ZTikZ}{https://github.com/zongpingding/ZLaTeX\_ZTikZ}
-    \item Gitlab: \href{https://gitlab.com/zongpingding/ZLaTeX_ZTikZ}{https://gitlab.com/zongpingding/ZLaTeX\_ZTikZ}
-    \item Gitee:  \href{https://gitee.com/zongpingding/ZLaTeX_ZTikZ}{https://gitee.com/zongpingding/ZLaTeX\_ZTikZ}
+  \item 当关系 R 为真的, 关系 S 必然是真的, 也就是我们得到了一个 ``真'' 的结论;
+  \item 但如果 R, S 同时为假, 关系 $\text R\lrr{}\text S$ 也是真的. 而此时我们的结论并不是 ``真的'', 
+    也就是结论并不成立.
 \end{itemize}
 
-项目中包含z\LaTeX{}文档类源码\cmd{zlatex.cls}，zTikZ宏包源码\cmd{ztikz.sty}，以及二者的说明文档. 后续在开发过程中，
-可能会保证Github的同步更新，至于Gitlab与Gitee则不一定会同步本系列的最新版.
+可以认为我们用一个假命题导出了另一个假命题, 下面说明 \zTeX{} 值得你去用, 我将要如何去说服你呢 ? 
 
-z\LaTeX{}系列源代码完全开放，欢迎各位对源代码的修改以及二次分发. 如果想要和我一同改进此模板，请在
-Github提Issue或者是PR. 不要在Gitee或者是Gitlab上提问，本人只维护Github上的仓库，尽管有时可能会为了
-国内用户下载方便，把Github上的仓库同步到这两处. 
 
-作为一个完全免费(为爱发电)的项目，我不对任何本模板的使用者负责，如果使用者在使用后遇到任何的严重后果，我不负
-任何责任. 我很乐意给大家解决问题，但是在提问前请先了解\LaTeX{}提问规范，一起营造一个愉快的讨论氛围. 
+让 ``R\; \lrr{} S'' 中的命题 ``R'' 为假就好了. \ztex{} 的上手难度相较于默认的 \LaTeX{} 要低一点, 达到
+同样的排版效果, 你所花费的时间更少. 故上述 ``花费同样时间'' 这一个命题为假, 即 ``z\TeX{}值得你用'' 这一命题成立.
+你也许可以用其它的方式来反驳我, 但至少我找到了一个论据来说服我自己, 也找到了我开发这个宏集的初心.
 
-想要体验本模板请到Github仓库:\href{https://github.com/zongpingding/ZLaTeX_ZTikZ/releases}{Release界面}下载 
-对应的最新模板. 由于本模板现在正处于早期开发阶段，所以很多的接口并不稳定，不保证模板的向后兼容性,请各位见谅.
+\subsection{项目维护}
+目前本项目已经在GitHub, Gitlab, Gitee上开源, 地址如下:
 
+\hspace*{6em}\parbox{\textwidth}{
+\begin{itemize}
+  \item [GitHub]: \href{https://github.com/zongpingding/zTeX_bundle}{https://github.com/zongpingding/zTeX\_bundle}
+  \item [Gitlab]: \href{https://gitlab.com/zongpingding/zTeX_bundle}{https://gitlab.com/zongpingding/zTeX\_bundle}
+  \item [Gitee] : \href{https://gitee.com/zongpingding/zTeX_bundle}{https://gitee.com/zongpingding/zTeX\_bundle}
+\end{itemize}}
+
+项目中包含: \cls{ztex} 文档类, \zTikZ{} 宏包, 以及 \pkg{ztool} 宏包的源码与用户手册. \ztex{} 宏集以 lppl 协议开源, 欢迎各位
+对源代码进行修改与二次分发. 若用户在使用此宏集的过程中发现任何的 Bug, 或想提出改进意见, 请在 Github 上提 Issue 或直接提交 PR. 
+
+
+请不要在 Gitee 或者是 Gitlab 上提问, 本人只维护 Github 上的仓库; 尽管有时可能会为了国内用户下载方便, 把 Github 仓库中的内容同步到
+这两处. 后续的开发过程中, 三者不会同步更新, 请以 Github 仓库为准.
+
+本项目为完全免费、纯属兴趣驱动（为爱发电）之作。对于任何使用本模板所引发的严重后果，我概不负责。
+我非常乐意帮助大家解决问题，但在提问之前，请务必先了解 \LaTeX{} 的提问规范，让我们共同营造一个友好、愉快的交流氛围.
+
+当前宏集的稳定版本于半年之前发布, 最新的开发版请切换到 ``dev'' 分支; 本手册适用于当前最新的开发版.
+请到: \href{https://github.com/zongpingding/zTeX_bundle/releases}{Release 界面} 下载.
+
+
+\clearpage
 \subsection{基本组成}
-本系列目前包含以下的三个组成部分，一个文档类，一个beamer宏包以及一个绘图库:
+\ztex{} 宏集包含如下内容:
+\begin{multicols}{2}
+  \begin{itemize}
+  \item \cls{ztex} 文档类;
+  \item \pkg{ztool} 宏包;
+  \item \pkg{ztikz} 宏包;
+  \item \pkg{zslide} 宏包(不推荐使用).
+\end{itemize}
+\end{multicols}
+
+\ztex{} 宏集独立实现了一个 \pkg{ztool} 宏包, 它是 \ztex{} 宏集中各文档类或宏包的基础. 此宏包中包含原来已被废弃
+的 \pkg{l3sys-shell} 中的所有命令. 除此之外, \pkg{ztool} 提供了 box 操作, 文件 IO 以及基本图形绘制相关的函数. 
+在 \pkg{ztool} 的协助下，\ztex{} 能够避免或减少命令行 \cmd{-shell-escape} 参数或其它相关宏包的调
+用(如 \pkg{robust-externalize} 宏包).
+
+\cls{ztex} 文档类对标 \cls{memoir}, \cls{koma-script} 宏集, 用于生成书籍或演示文稿.
+尽管在 \ztex{} 中, 直接将 \cmd{layout/slide} 选项置为 \texttt{true} 即可生成演示文档, 但该库目前很不成熟荐使, 
+所以在严肃场合中, 推荐使用原始的 \cls{beamer} 或 \cls{ctexbeamer} 文档类.
+
+\zTikZ{} 宏包提供了绘制平面图形以及调用外部程序的接口\Footnote{众所周知的, 在 \LaTeX{} 中绘图是一件十分痛苦的事情,
+于是乎你会看到很多书籍或笔记中的图形都是手绘或截图, 并非矢量图}. \pkg{zslide} 宏包是自己临时设计的一套 beamer 主题, 还未进行常规测试, 
+请谨慎使用.
+
+
+从本介绍文档即可看出，本模板整体风格较为朴素，未采用华丽的配色方案或精致的页面设计。然而，在长时间尝试和调试 \LaTeX{} 模板的过程中，
+我逐渐发现这种简洁质朴的风格最符合广大 \LaTeX{} 用户的使用习惯与审美偏好. 若你更倾向于精美的排版风格，亦可参考其他的模板，如 
+\href{https://github.com/ElegantLaTeX}{Elegant\LaTeX{}}、
+\href{https://github.com/BeautyLaTeX/Beautybook}{Beauty\LaTeX{}} 等.
+
+
+\subsection{用户手册}
+普通 \LaTeX{} 用户可跳过本文档的 ``\cref{模板设计}''. 该部分主要记录了我对本模板设计思路的说明，以及个人
+在编写 \LaTeX{} 过程中的一些体会，对模板或宏包的实际使用并无直接帮助。若你希望了解 \cls{ztex} 文档类的具体用法，
+请参阅 \file{zlatex_interface.pdf}; 若需了解 \pkg{ztikz} 宏包的使用方法，请参阅 \file{ztikz_interface.pdf}.
+目前 \pkg{zslide} 宏包尚无详细文档，仅提供了示例文件 \file{zslide_manual.pdf} 供用户参考. \pkg{ztool} 宏包 
+主要为模板的开发者准备, 普通用户无需阅读.
+
+
+\newpage
+\section{安装使用}
+\subsection{在线模板}
+为了让部分用户可以直接使用到 \ztex{}，免去``繁杂''的环境配置. 我已将本模板部署在 \TeX{}Page 上，
+地址为: \href{https://www.texpage.com/share/e420ac8364a640b78231d65c9d5d7090}{TeXPgae \ztex{}  Project}，
+直接打开此地址即可体验. 由于技术原因，\zTikZ{} 请在本地体验.
+
+
+\subsection{本地安装}
+\ztex{} 宏集目前还未上传 CTAN, 因为还没有开发完成. 本文档类使用的部分
+\LaTeX3 命令在老版本的 \TeX{}Live 下并不存在, 若用户的 \TeX{}Live 版本过低，则可能无法正常使用本宏集. 
+目前 \ztex{} 文档类在各平台的兼容情况为:
+
+\hspace*{12em}\parbox{8cm}{
 \begin{itemize}
-    \item z\LaTeX{} 文档类
-    \item zTikZ 宏包
-    \item zSlide 宏包
+  \item[Windows]: \TeX{}Live 最低版本 2025
+  \item[Linux]: \TeX{}Live 最低版本 2025
+  \item[MacOS]: Mac{}\TeX{} 还未测试
+\end{itemize}}
+
+因 \ztex{} 还未传入 CTAN(未来可能会考虑), 所以想要使用此文档类，只有如下两种方法:
+\begin{itemize}
+    \item 把此宏集 -- \file{ztex} 目录中的所有内容放入当前项目文件夹下;
+    \item 在命令行运行命令: \file{kpsewhich -var-value=TEXMFHOME}, 在 Windows 上这个路径一般是: \texttt{C:/Users/\meta{name}/texmf/}, 
+      在Linux下一般是: \file{~/texmf/}; 具体路径以自己的实际情况为准. 在此路径下新建文件夹 \file{tex/latex/ztex}; 此文件夹对应的路径
+      我们记为 \meta{z\TeX}, 随后把 \file{ztex} 目录中的所有内容放入 \meta{z\TeX} 下即可.
 \end{itemize}
 
-其中前者主要用于指定排版文档的基本属性，zTikZ宏包主要用于绘图\Footnote{众所周知的，在\LaTeX{}中绘图是一件十分痛苦的事情，
-于是乎你会看到很多书籍或笔记中的图形都是手绘或者是截图，并非矢量图}，最后一个 zslide bemaer 宏包是自己设计的一套 beamer 主题。
-尽管 z\LaTeX{} 本身也可以在加上 \cmd{layout/slide} 选项后称为一个演示文档，但是在严肃的场景下，还是推荐使用 beamer 文档类.
+在本手册后续，我们使用 \meta{z\TeX} 表示本宏集的根目录.
 
-其实从这个介绍文档就可以看出，本模板是十分的朴素的，没有十分华丽的色彩和精美的页面布局，但是在折腾了许久的\LaTeX{}之后，现在这个
-模板才是最对我胃口的；至于，是否适合你，那就不得而知了。你可以去使用更加精美的模板，比如 \href{https://github.com/ElegantLaTeX}{Elegant\LaTeX{}}, 
-\href{https://github.com/BeautyLaTeX/Beautybook}{Beauty\LaTeX{}} 等优秀的模板. 
-
-\begin{remark}
-后续可能还会开发一个 zTool 宏包,作为 z\LaTeX{} 系列的补充.
-\end{remark}
-
-\subsection{使用手册}
-本文档中的\cref{模板设计}一般的使用者可以跳过，这一部分主要是我自己对本模板的设计思路和关于写\LaTeX{}的个人感受,
-对于使用模板和宏包而言，没有任何的帮助.如果要了解\cmd{zlatex.cls}文档类的使用,请直接跳转到``z\LaTeX{}文档类教程''
-文档:zlatex\_manual.pdf. 如果要了解\cmd{ztikz.sty}宏包的使用，请跳转到zTikZ宏包教程文档:ztikz\_manual.pdf.
-目前 zslie 还没有对应的文档说明，仅有一个示例: zslide\_manual.pdf.
+\vskip1.5em
+\noindent{\color{red}\sffamily NOTE: 如果用户不需要使用 \pkg{alias} 库, 那么一些比较老 \TeX{}Live 也能运行此宏集.}
 
 
 
-\chapter{模板设计}\label{模板设计}
-\section{设计历程}
-本模板的设计经历了相当长的一个周期，从最开始的初始\LaTeX{},我把自己常用的宏扔到了一个\cmd{.sty}文件中，以为这就是
-一个宏包了；之后了解到了 \href{https://github.com/ElegantLaTeX}{Elegant\LaTeX{}} 系列模板，也使用这个系列中的 eleganbook 
-文档类写了一点自己的笔记，但是用了一段时间之后总归是不满意，很多地方都想要自己定制，不喜欢模板默认的样式；奈何自己当时的水平不够，
-打开模板，映入眼帘的源码对于我来说和一堆乱码无异。后面自己看了一些文章后，慢慢积累，渐渐对\LaTeX{}熟悉了一些，这才开始着手设计模板。
+\clearpage
+\section{开发过程}\label{模板设计}
+本模板的设计经历了较长时间的积累与迭代。最初接触 \LaTeX{} 时，我只是将常用的宏整理进一个 \file{.sty} 文件中，误以为这便是一个宏包
+(实际上它称得上是一个宏包). 随后接触到了 \href{https://github.com/ElegantLaTeX}{Elegant\LaTeX{}} 系列模板，并曾使用其中的 
+\cls{elegantbook} 文档类撰写笔记。然而，随着使用深入，我逐渐发现模板默认的样式并不完全符合个人需求，许多细节希望能够自行定制。
+遗憾的是，当时对 \LaTeX{} 的理解尚浅，面对复杂的模板源码无从下手(打开任何一个模板, 映入眼帘的源码对于我来说与一堆乱码无异)。
+后续通过查阅资料、阅读相关文章，逐步积累经验，渐渐熟悉了 \LaTeX{} 中的各种命令与机制，才最终开始着手本模板的独立设计.
 
-第一版的 z\LaTeX{} 可以说完全是照抄的 elegantbook 文档类，但是自己又加了一些东西，进行了一些简单的修改，比如字体，颜色等等。
-但是写到后面，发现这个模板变得十分的混乱了, 代码的结构不好控制了\Footnote{其实最开始这个zTikZ宏包和z\LaTeX{}是一体的，当时代码极其混乱}.
-其中的选项配置接口写起来是极其痛苦的, 以其中的模板语言切换为例，下面就是当初写的那个\cmd{\ifdefstring}对应的代码片段:
+\ztex{} 的第一版基本是在 \cls{elegantbook} 文档类的基础上修改而成，仅在字体、配色等方面做了一些简单调整。然而，
+随着功能的不断叠加，模板逐渐变得混乱，代码结构也变得难以维护\Footnote{事实上，最初 \ztex{} 与 \pkg{ztikz} 
+宏包是写在一起的，整体结构非常凌乱.}。其中，键值对接口的实现对于我来说尤为困难。以文档类语言切换功能为例, 当时通过 \cmd{\ifdefstring} 
+实现，以下是当初的相关代码片段：
 
-\begin{minted}{latex}
+
+\begin{texhigh}[]
 \DeclareVoidOption{cn}{\kvs{lang=cn}}
 \DeclareVoidOption{en}{\kvs{lang=en}}
 \DeclareStringOption[cn]{lang}
-\end{minted}
+\end{texhigh}
 
-感觉很麻烦，有没有? 加之, 当时基本文档类为\cmd{article},很多\cmd{book}文档类的内部计数器和章节命令都没有,需要自己去声明；
-但是结果往往是：自己设计的命令和别的宏包不兼容. 其中的\cmd{hyperref}宏包折腾了我许久，初代模板中由于自己定义的计数器不正确，
-所以跳转功能不正常. 比如在使用\cmd{\label}命令时，激活的章节元素(跳转位置)不对。当初的目录也有着同样的跳转问题.
+代码的书写过程颇为繁琐。当时模板仍以 \cls{article} 文档类为基础，缺乏许多 \cls{book} 文档类中内置的计数器与章节结构，不得不自行声明相关命令。
+然而，自定义的命令常与其他宏包不兼容，尤其是在集成 \pkg{hyperref} 宏包时问题频出。由于计数器定义不规范，导致跳转功能异常。例如，
+使用 \cmd{\label} 时，所激活的跳转目标往往并非正确的章节位置，目录中的链接也存在类似问题，使用体验大打折扣。
 
-另一方面，初代 z\LaTeX{} 文档类全采用 \LaTeX{}2$\varepsilon$ 进行构建，很多涉及到宏展开的地方写的很繁琐不直观。且由于当时水平所限,
-模板中大部分的实现方案都是抄袭的 \TeX-StackExchange 上的回答。这就导致，很多时候这个模板都是处于一种能跑的状态，但是我并不知道具体命令的
-作用. 
+另一方面，初代 \ztex{} 文档类完全基于 \LaTeX{}2$\varepsilon$ 构建，许多宏展开相关的代码写的不仅繁琐，逻辑
+也很混乱。当时经验有限，模板中的大多数解决方案都借鉴(抄袭)自 \href{https://tex.stackexchange.com/}{\TeX-StackExchange} 
+上的回答，导致整个模板虽然 ``能跑''，但对其中许多命令的具体作用并不真正理解, 并不清楚这些 ``解决方法'' 会不会产生一些不为人
+知的副作用.
 
-\subsection{z\LaTeX{}}
-后来自己把zTiKZ从中 z\LaTeX{} 文档类中剥离出来，同时使用 \LaTeX{}3 对原始文档类和 zTikZ 进行重构.其中z\LaTeX{}文档类默认加载\cmd{book}
-文档类，也可以加载其余的文档类. 之后几乎所有命令都先去了解原理，知道它们的具体作用，对其他的宏包的影响, 然后自己构建。于是 z\TeX{} 系列就诞生了.
-果然,在使用\LaTeX3对原始项目进行重构之后，整个项目的代码清爽了许多, 整个项目的开发效率也提高了许多. 比如下面 z\LaTeX{} 文档类的加载选项声明:
 
-\begin{minted}{latex}
+
+\clearpage
+\subsection{\texorpdfstring{\zTeX{}}{zTeX} }
+后来，我将 \pkg{ztikz} 宏包从原有的 \cls{ztex} 文档类中剥离出来，并使用 \LaTeX{}3 对原始文档类和 \pkg{ztikz} 进行了重构。
+\ztex{} 文档类默认基于 \cls{article} 文档类构建，同时也支持加载其他文档类。此阶段的开发理念发生了显著变化: 在添加任何的配置前,
+我都会事先明确其提供的功能, 了解该配置需要的依赖, 这一配置对已有的代码或宏包有无影响, ..., 然后再自行编写代码实现。由此，z\TeX{} 的开发正式开始了.
+事实证明，基于 \LaTeX3 的重构极大提升了代码的清晰度和整体开发效率。以下为当时 \pkg{ztex} 文档类选项的相关声明：
+
+\begin{texhigh}[]
 \zlatex_define_option:n {
-    % language
-    lang                  .str_gset:N   =  \g__zlatex_lang_str,
-    lang                  .initial:n    =  { en },
-    % page layout
-    layout                .str_gset:N   =  \g__zlatex_layout_str,
-    layout                .initial:n    =  { twoside },
-    % margin option
-    margin                .bool_gset:N  =  \g__zlatex_margin_bool,
-    margin                .initial:n    =  { true },
+  % language
+  lang             .str_gset:N  = \g__zlatex_lang_str,
+  lang             .initial:n   = { en },
+  % page layout
+  layout           .str_gset:N  = \g__zlatex_layout_str,
+  layout           .initial:n   = { twoside },
+  % margin option
+  margin           .bool_gset:N = \g__zlatex_margin_bool,
+  margin           .initial:n   = { true },
 }
 \ProcessKeysOptions {zlatex / option}
-\end{minted}
+\end{texhigh}
 
-看着是否清爽了许多? 但是后面发现这样还是不够的方便，问题在于：如果你需要加载的子文档类的选项比较多时，你需要声明许多这样的
-key-value,当整个文档类的 key-value 声明过多时，模板便会变得难以维护。所以这是引入了 l3keys2e 中\textbf{元键}(\cmd{.meta:nn})。
-作用便是: 用于将所有的 key-value 根据模块进行层级划分, 在指定时也按照模块进行指定. 下面就是目前的 z\LaTeX{} 文档类的键值对接口:
+看起来确实清爽了许多，但很快我意识到，这样的实现方式在实际使用中仍不够灵活。问题在于：当需传递给子文档类的选项较多时，
+必须逐一声明大量键值对；而当整个文档类中键值对数量庞大时，维护成本显著增加。
+为了解决这一问题，我引入了 \pkg{l3keys} 提供的元键机制（\cmd{.meta:nn}）。其核心作用在于：通过模块化管理各类键值对，
+实现层级式组织与调用，从而提升代码的可读性与扩展性。以下是当时 \pkg{ztex} 文档类中键值接口的实现代码：
 
-\begin{minted}{latex}
+
+\begin{texhigh}[]
 \zlatex_define_option:n {
-    % zlatex language
-    lang            .str_gset:N   =  \g__zlatex_lang_str,
-    lang            .initial:n    =  { en },
-    % class and options
-    class           .str_gset:N   = \g__zlatex_subclass_type_str,
-    class           .initial:n    = { book },
-    classOption     .clist_gset:N = \g__zlatex_subclass_option_clist,
-    classOption     .initial:n    = { oneside, 10pt },
-    % zlatex options meta key 
-    layout          .meta:nn      = {zlatex / layout}{#1},
-    mathSpec        .meta:nn      = {zlatex / mathSpec}{#1},
-    font            .meta:nn      = {zlatex / font}{#1},
-    bib             .meta:nn      = {zlatex / bib}{#1},
-    ...
+  % zlatex language
+  lang            .str_gset:N   =  \g__zlatex_lang_str,
+  lang            .initial:n    =  { en },
+  % class and options
+  class           .str_gset:N   = \g__zlatex_subclass_type_str,
+  class           .initial:n    = { book },
+  classOption     .clist_gset:N = \g__zlatex_subclass_option_clist,
+  classOption     .initial:n    = { oneside, 10pt },
+  % zlatex options meta key 
+  layout          .meta:nn      = {zlatex / layout}{#1},
+  mathSpec        .meta:nn      = {zlatex / mathSpec}{#1},
+  font            .meta:nn      = {zlatex / font}{#1},
 }
-\end{minted}
+\end{texhigh}
 
-同时声明的 \texttt{<classOption>} 可以轻松简单的处理子文档类的加载选项问题.
+为了轻松处理子文档类选项的加载问题, 我引入了 \zkey{classOption} 这个键. 
 
-\subsection{zTikZ}
-对于宏包 ztikz.sty，其开发也经历了也很长的时间. zTikZ 也从最开始的一个大宏包变成了一个个的小的子模块:
-cache, python, gnuplot, wolfram 和 zdraw. 这些模块通过如下命令:
 
-\begin{minted}{latex}
+\clearpage
+\subsection{\texorpdfstring{\zTikZ}{zTikZ}}
+开发宏包 \pkg{ztikz} 也花了我很多的时间, \pkg{ztikz} 从最开始的一个小宏包变成了一个拥有众多拓展库的庞然大物.
+这段时间, 我为 \pkg{ztikz} 宏包开发了 \pkg{cache}, \pkg{python}, \pkg{gnuplot}, \pkg{wolfram} 和 \pkg{l3draw} 库. 
+这些库可以先通过下面的命令进行声明:
+
+\begin{texhigh}[]
 \ProvidesExplFile{ztikzmodule.cache.tex}{2024/06/15}{1.0.0}{cache~module~for~ztikz}
-\end{minted}
+\end{texhigh}
 
-进行声明, 然后在主宏包 ztikz.sty 中声明如下命令来进行模块的调用:
-\begin{minted}{latex}
-\cs_new_nopar:Npn \g__ztikz_load_module:n #1 {
-  \clist_map_inline:nn {#1} {
-    \file_if_exist_input:nF {modules/ztikzmodule.##1.tex} {}
+\noindent 然后在主宏包 \pkg{ztikz} 中使用如下命令进行调用:
+\begin{texhigh}[]
+\cs_new_nopar:Npn \g__ztikz_load_module:n #1 
+  {
+    \clist_map_inline:nn {#1} 
+      { \file_if_exist_input:nF {modules/ztikzmodule.##1.tex}{} }
   }
-}
-\NewDocumentCommand\ztikzLoadModule{m}{
-  \g__ztikz_load_module:n {#1}
-}
-\end{minted}
+\NewDocumentCommand\ztikzLoadModule{m}
+  {
+    \g__ztikz_load_module:n {#1}
+  }
+\end{texhigh}
 
-在处理好上述的模块划分以及接口声明后，对应的宏包使用者便只需通过:
-\begin{minted}{latex}
+\noindent 划分出 \pkg{ztikz} 的库后, 宏包使用者只需通过如下的命令就可以轻松调用:
+\begin{texhigh}[]
 \ztikzLoadModule{cache, python}
-\end{minted}
+\end{texhigh}
 
-进行相应的模块的单独调用.而且,在划分好模块后，不但可以方便宏包的使用者，更让我可以对不同的模块进行单独开发，我认
-为这大大的提高了开发效率.
+而且, 将一个宏包划分为一个个的库来开发这一行为, 不仅可以方便宏包的使用者, 更让宏包的开发
+者可以聚焦于单个库的开发, 这极大地提高了我的开发效率.
 
-\section{设计参考}
-本系列从诞生之初便由我一个人一直开发，在开发过程中参考了诸多优秀文档类/模板，参考最多的{C\TeX{}art}文档类，几乎是
-本项目的大部分代码思路来源。此文档类完全采用\LaTeX3语法写成，本文档类中的\textbf{选项配置}模块主要参见\TeX-StackExchange上
-的讨论，采用了\LaTeX3的l3keys2e模块；这样的好处有:选项配置简洁，符合用户习惯，模板维护方便.
+在开发 \pkg{ztikz} 的 \pkg{cache} 库时, 我遇到了数不清的困难, 包括但不限于:
+\begin{itemize}
+  \item 怎么将一个环境中的内容不加改变地输出到外部文件中 ?
+  \item 怎么为每一个需要缓存的内容 ``打'' 上一个唯一的 ``身份标签'' ?
+  \item 为什么同样都是字符串, 但是 string 和 token list 在 \cmd{\tl_if_eq:nn} 中就是判断为不相等 ?
+  \item 怎么调用上一次的缓存结果 ?
+  \item 怎么临时忽略缓存机制, 或强制调用上一次的缓存结果 ?
+  \item 怎么提供对应的编程接口 ?
+  \item ...
+\end{itemize}
+
+\noindent 虽然, 上述的问题目前均已解决, 但目前的 \pkg{cache} 库仍有缺陷:
+\begin{itemize}
+  \item 无法去除 \pkg{tikz} 的 \pkg{externalize} 库依赖, 我自己还没有能力自己写一个 \pkg{externalize} 库出来.
+  \item 无法提供与 Matlab 的交互接口 .
+  \item \pkg{cache} 库提供的普通用户接口仍然过于复杂 .
+  \item ...
+\end{itemize}
 
 
-\section{设计原则}
-其实这个标题有一点太大了，什么是设计原则，我也不知道，但是我想让我的模板看着舒服。怎么才能让自己的模板看着舒服呢 ?
-我也不知道，但是至少，应该，大概和页边距，字体大小，字体样式等有关吧。并且这三者之间也不一定时是独立的，
-应该是相互影响的. 比如你的页边距变大，压缩了你的版心大小，那此时正文字体一定得做相应改变. 
+\subsection{ztool}
+大概是开发到中后期的时候, 我发现我在 \cls{ztex} 或 \pkg{ztikz} 中定义了大量与此宏包无关的宏, 
+比如 ``\TeX{} 盒子操作'', ``shell-escape'', ``文件 IO 操作''; 然后我便把这些宏分离到了 \pkg{ztool} 
+宏包中. 上面的这些功能几乎时没有什么关联的, 后面我更是在 \pkg{ztool} 宏包内将它们划分为了下面的这几个部分:
+\begin{itemize}
+  \item shell-escape,
+  \item file-io,
+  \item box,
+  \item zdraw;
+\end{itemize}
 
-现在的具体问题为:一行多少个字合适呢? 去查了一下\TeX.SE, 针对于英文,一行的字母个数在 65-90 是比较合适的，并且字体尺寸
-一般为\cmd{10pt,11pt,12pt}；页边距到底设置多少呢? 自己去比对了如 Elegantbook 和其它模板的页边距也发现了一些东西. 
-当时测量各种距离很不方便，就差用尺子量了，但是后来我发现了一个宏包 fgruler. 它可以在生成的 PDF 中直接打印输出页面布局尺寸,
-使用方法也很简单:
+它们之间互不干扰, 用户在使用时仅需加载其需要的部分即可; 比如用户需要使用 \pkg{file-io} 中的一个宏,
+他只需要使用如下的命令:
+\begin{texhigh}[]
+\ztoolloadlib{file-io}
+\end{texhigh}
 
-\begin{minted}{latex}
+\noindent 此时, \pkg{ztool} 仅会加载 \pkg{file-io} 相关的宏, 其它部分的宏则不会被加载. \pkg{ztool}
+实现这一机制同样是使用了上述方法 -- 将 \pkg{ztool} 划分为一个个的库.
+
+
+\clearpage
+\subsection{l3build}
+我之前完全没有接触过 ``代码测试'' 相关的内容, 一个偶然的时间，我发现了 \pkg{l3build}. 我们写的代码是需要测试的:
+你需要确保后续开发的代码不会影响之前的代码, 怎么保证呢 ? 写好单元测试, 每次添加新功能后就跑一跑单元测试, 如果全部的
+测试都通过了, 那么你后续的开发是没问题的. 当然, 你的单元测试必须得写全面了.
+
+最开始的自己很懒, 不想写测试, 觉得费时间, 多写一点代码不好吗 ? 但若你后续写的代码破坏了前面已有的功能, 这段代码就是
+没有意义的. 所以要勤于写单元测试 !
+
+
+\clearpage
+\section{宏集设计}
+\subsection{设计参考}
+本系列自诞生以来始终由我个人独立开发，过程中借鉴了诸多优秀的文档类与宏包。其中，参考最多的是 {C\TeX{}art} 文档类，它为本项目提供了
+主要的设计思路, 该文档类完全基于 \LaTeX3 编写，在选项配置模块方面，它给了我很多启发。
+
+\ztex{} 宏集中的文档类或宏包的 Key-Value 接口先是参考了 \TeX-StackExchange 上的相关讨论, 然后再采用了 \LaTeX3 的 \pkg{l3keys} 模块实现。
+此方案的优点是显而易见的: 配置接口简洁明了、符合用户习惯、同时也便于模板的后续维护与扩展.
+
+在后续的开发过程中，\cls{CUSTeX} 宏集也为我带来了诸多启发，我参考了其中许多优秀的设计方案。尤其值得一提的是该项目将
+``用户接口'' 与 ``编程接口'' 进行区分的思想，对此宏集后续的开发影响颇深.
+
+
+\clearpage
+\subsection{设计原则}
+说实话，这个标题可能有些夸大了 -- ``设计原则'' 究竟指的是什么，我自己也不清楚。我只是希望我的模板看起来足够舒服而已。
+那怎样才能让一个模板 ``看着舒服'' 呢 ? 我也无法给出明确答案。但至少，它应该与页边距、字体大小、字体样式等因素有关系。
+更进一步地说，这些因素并非彼此独立，而是相互制约、共同作用的。举例而言，当页边距增大、版心变小时，正文字体的大小也应随之调整，
+以维持整体的视觉平衡和可读性。
+
+当时遇到了一个问题: 一行设置多少个字符才合适 ? 在查阅 \TeX{} StackExchange 相关讨论后发现，对于英文文本来说，一行包含 65–90 
+个字母被认为是较为理想的范围，且常见的正文字体尺寸为 \cmd{10pt}、\cmd{11pt} 或 \cmd{12pt}。
+
+至于页边距应如何设置，我参考了 \cls{elegantbook}, \cls{ctexart} 等文档类的设计，也逐渐总结出一些经验。起初, 测量页面
+布局中的各项距离是非常不方便的，我都是动用尺子手动测量的。后来我发现了一个非常实用的宏包 —— \pkg{fgruler}，它可以在生成的 PDF 中直接显示
+页面布局的尺寸信息，且使用方法也非常简便:
+
+\begin{texhigh}[]
 \usepackage[hshift=0mm,vshift=0mm]{fgruler}
-\end{minted}
+\end{texhigh}
 
-当你在导言区引入之后，便可以在你的每一个页面上看到如\cref{fig:fgruler-example}的输出, 这样就不用你用尺子量了.
+\noindent 当你在导言区加入上述配置后, 生成 PDF 的每页都能看到如 \cref{fig:fgruler-example} 这样的输出. 
+我终于摆脱使用尺子手动量这一方法了 !
 
 \begin{figure}[!htb]
     \centering
@@ -278,83 +433,91 @@ cache, python, gnuplot, wolfram 和 zdraw. 这些模块通过如下命令:
     \label{fig:fgruler-example}
 \end{figure}
 
-在设计本模板的时，我也一直在纠结字体的问题，我应该把字体打包进入模板吗? 或者是我应该在模板中给用户进行默认的字体设置吗?
-在这个系列的上一版中我就去找了一些免费的中文字体和西文字体，直接放在模板的文件夹下，但是这样产生的问题就很多了:
+在设计本宏集时，我始终在字体配置上有所犹豫：是否应将字体打包进模板 ? 是否应在模板中为用户设置默认字体 ?
+在本宏集的最初版本中，我尝试收集了一些免费的中英文字体，并直接放置在模板的文件夹中。然而，这种做法也带来了不少问题：
 
 \begin{itemize}
-    \item 用户需要这个字体吗, 增加的字体会变成这个模板的负担吗 ?
-    \item 这个字体真的免费吗 ?
-    \item 中文字体的字形往往是不全的,怎么解决 ? 
+    \item 部分用户真的需要该字体吗 ? 增加的字体会变成模板或用户的负担吗 ?
+    \item 该字体可以随意传播吗 ? 万一某个用户将该字体进行了商用 ?
+    \item 部分中文字体包含的字形往往是不全的, 怎么解决 ? 
+    \item ...
 \end{itemize}
 
-于是最终的办法就是，我的模板不负责字体的设置，不添加任何和字体相关的配置，所有的字体由用户指定. 但是，毕竟是作为了一个模板，
-所以我还是提供了部分有关数学字体的配置，可以供用户选用，如果用户确实需要这个字体。
+最终的处理办法: 本宏集不打包任何的字体, 但添加部分 \TeX{}Live 内置字体配置; 宏集本身提供字体设置的接口, 但所有的字体定义
+与样式由用户指定. 除此之外, \ztex{} 还提供了数学字体配置接口, 以供用户选用.
 
-在设计这个模板时，行距等各种元素的设置也难倒了我一段时间。所以设计一个模板，你考虑的东西是很多的。但是自己也得到了一个规律:如果某些配置你不会，
-那么就让它们保持默认. \textcolor{red}{Be simple, Be fool}.
+在开发 \ztex{} 宏集的过程中，行距等排版细节也曾让我困扰许久。实际上，设计一个模板需要考虑的因素远比预期复杂，几乎每一个
+参数的设置都会相互影响。不过，在反复尝试与调整的过程中，我也逐渐总结出一条经验：对于一时把握不准的配置，就保留默认设置。
 
-Anyway, 尽管有着种种的困难，z\TeX{} 还是没有烂尾, 最终出现在了大家的面前. 
+\textcolor{red}{Be simple, be fool} -- 保持简单，反而更容易达到稳定和谐的效果。
 
-\section{无题}
-时至今日，再次回头来看我的这个模板，我反而有了一些其他的感受. 一个模板到底需要给用户定制什么东西 ? 到底需要给用户
-多大的自由空间(配置选项)? 如果你的配置选项过多，像 \href{https://www.ctan.org/pkg/koma-script}{koma-script}, 
-\href{https://ctan.org/pkg/memoir}{Memoir} 那样, 模板作者给用户处理了很多的细节，提供了种类繁多的接口. 或者像部分简单
-的模板仅提供几个必要的设置和命令; 而且，如果一个模板的说明文档都达到了上百页,那么我作为一个用户为什么不自己学习做模板，写一个
-适合自己的模板，反而要话这部分时间来学习使用你的模板? 如果模板的配置选项过少，那么用户又会觉得这个模板不够灵活. 所以，
-到底什么样的一个模板设计才能够称得上是:\textcolor{red}{简单,灵活,易用}? 遗憾的是，现在我也没有办法回答这个问题,所以这个问题作为习题，
+尽管在开发过程中遇到了诸多困难，\zTeX{} 最终仍未烂尾，顺利完成并呈现在了大家面前。
+
+
+\clearpage
+\subsection{无题}
+时至今日,再次回头来看我的这个模板,我反而有了一些其他的感受. 一个模板到底需要给用户定制什么东西 ? 到底需要给用户
+多大的自由空间(配置选项)? 如果你的配置选项过多,像 \href{https://www.ctan.org/pkg/koma-script}{koma-script}, 
+\href{https://ctan.org/pkg/memoir}{Memoir} 那样, 模板作者给用户处理了很多的细节,提供了种类繁多的接口. 或者像部分简单
+的模板仅提供几个必要的设置和命令; 而且,如果一个模板的说明文档都达到了上百页,那么我作为一个用户为什么不自己学习做模板,写一个
+适合自己的模板,反而要话这部分时间来学习使用你的模板? 如果模板的配置选项过少,那么用户又会觉得这个模板不够灵活. 所以,
+到底什么样的一个模板设计才能够称得上是:\textcolor{red}{\sffamily 简单,灵活,易用}? 遗憾的是,现在我也没有办法回答这个问题,所以这个问题作为习题,
 留给使用者回答了 ...
 
-z\LaTeX{} 系列写到今天，它已经不再是一个简单的``文档类+绘图库+slide''了，所以这个系列可能并不适合新手. 同时我也意识到，很多时候
-其实我们并没有必要非得写一个模板出来，你需要什么样的功能，你就去找什么样的宏包，然后调用它，根据它提供的命令实现自己的需求.这样才会更加
-符合自己的需求，而且你也不用去考虑太多的兼容性问题, 更没有必要去花费那个你在使用别人模板时阅读模板细节的时间. 似乎，有了基础文档类 
-article, book 以及各种功能性宏包之后，\LaTeX{}就已经足够好了, 并不需要我们这些闲来无事的人写来写所谓的模板 ? 反而我是觉得:应该把更多的时间
-花在基础宏包的开发上，就像 pgf, l3draw 等宏包那样:我只提供基础的几组底层绘制命令，至于上层的封装，那就交给用户去实现吧. \texttt{>\_<}
+
+发展至今，\ztex{} 宏集早已不再是一个简单的 ``文档类 + 绘图库 + 幻灯片'' 集合，这也使得它并不适合 \LaTeX{} 初学者使用。
+在开发的过程中，我也逐渐意识到：很多时候，我们并不一定需要亲自设计一个模板。更合理的做法或许是 -- 根据自己的需求，选择合适的
+功能性宏包，并通过它们提供的接口实现所需的功能。这种方式不仅更贴合实际使用场景，也减少了与其他宏包的兼容性问题，更无需投入
+大量时间去理解第三方模板的结构与细节.
+
+实际上，\cls{article}、\cls{book} 等基础文档类，加上丰富的功能宏包，已经足以满足绝大多数排版需求。也许我们并不需要再去重复造
+一个模板的 ``轮子''。相比之下，我更认同将精力投入到基础性宏包的开发上，就如 \pkg{pgf}、\pkg{l3draw} 等优秀项目所做的那样 -- 它们
+专注于提供一组底层的绘图或功能接口，将更高层的封装留给用户根据自身需求自行实现。
+
+\vskip1em
+\hfill\begin{tabular}{r}
+  Happy \LaTeX{}ing ! \\
+  \texttt{>\_<} \\
+\end{tabular}
 
 
-\chapter{敬告}
-\section{兼容性}
-目前本系列已经实现Windows和Linux下的兼容; 但是MacOS下:目前仅支持z\LaTeX{}文档类.
-zTikZ还未进行适配(参见下文了解具体原因)，所以不保证本系列中的zTikZ文档类可以在MacOS下正常运行.
-具体的兼容情况请参见后续的兼容性章节.
 
-\section{说明文档}
+
+
+\clearpage
+\section{文档指南}
 \subsection{记号说明}
-本系列宏集的所有手册均遵守如下规范:
+本宏集的所有用户手册均遵守如下规范:
 \begin{itemize}
-  \item 命令或者部分的专业术语采用打字机字体进行给出
-  \item 所有的命令均使用格式 \cmd{\cmd}进行标注
-  \item 所有的键值对均使用\zkey{key}进行标注,或者采用打字机字体强调.
+  \item 命令和键值对采用打字机字体;
+  \item 键的默认值通过加粗标明, 并且与右侧蓝色文本一致;
+  \item 所有命令排版格式为: \texttt {\textbackslash cmd [oArg]\{pArg\}};
+  \item 所有键值排版格式为: \texttt{\zkey{key} = value};
 \end{itemize}
 
-
-
-\subsection{手册编译}
-本系列的所有文档类或者是宏包的使用手册对应的\TeX{}源文件均可以在Github仓库下载，但是如果你想要编译此文档，
-那么还请参看如下的编译环境配置:
-
-\begin{itemize}
-    \item 首先清除之前的编译文件，比如\cmd{.aux}, \cmd{.log}, \cmd{.toc}等文件以及
-        \cmd{ztikz_output/}文件夹。
-    \item 使用\cmd{xelatex}编译此文档，编译两次。(如果第一次编译报错\cmd{missing \begin{document}...})
-        那么请注释掉主文件\cmd{zlatex_ztikz_doc.tex}中和\cmd{indextool}相关的两行语句:\cmd{\makeindex[]{}},
-        \cmd{\printindex[]{}},然后再次编译. 如果你想要生成索引，请取消注释上一步中的两行语句，
-        然后再次编译.
-    \item Want Build From Scratch? 那么需要本地环境中有配置好的: WolframScript, gnuplot, Python, Sed.
-\end{itemize}
 
 \subsection{复制样例}
-本文档中给出了相当部分的样例及其对应的代码，在书写本文当时为了读者的阅读体验，对代码抄录环境中的部分符号进行了
-重写。比如你会在代码中看到换行符为:$\hookrightarrow$,那么在复制此环境代码时，请删掉此符号。亦或者是源代码中有行号，
-那么在复制后，请删掉多余的行号. 亦或者是，后续的 Implement 节中部分的代码换行，请把不必要的换行符删掉再进行编译.
+\ztex{} 宏集的所有用户手册均提供了大量示例及其对应的代码。为提升阅读体验，在排版过程中对部分代
+码抄录环境中的符号进行了格式上的调整。例如：
 
+\begin{itemize}
+  \item 在示例代码中，换行符可能以 ``$\swarrow$'' 表示，复制代码时请将该符号删除；
+  \item 若示例中包含行号，请在复制后手动去除多余的行号；
+  \item 此外，在后续的 Implementation 节中，部分代码因排版原因进行了换行，使用时请根据实际情况去除不必要的换行符，
+    以确保代码能够正确编译。 
+\end{itemize}
+
+
+\clearpage
 \subsection{键值指定}
-本系列中的大部分命令均采用键值对的形式进行调用, 使用 \zkey{key}的形式给出. 所以如果一个命令的可用键太多，那么此时我并不
-一定会在正文中全部说明其可用键。我会在对应的命令下方插入一个源代码抄录，用于说明此命令对应的声明原型，其中就包含了此命令可用的键值以及不同键
-的默认值. 下面以一个具体命令 \cmd{\Polygon} 来说明怎么使用键值对接口:
+本系列中的大多数命令均采用键值对形式调用，因此，如果某个命令的可用键较多，而用户手册中的说明又较为模糊，用户可参考手
+册末尾 Implementation 部分中该命令的声明原型。该部分列出了该命令所支持的所有键及其默认值，有助于进一步理解和正确
+使用命令。下面以具体命令 \cmd{\Polygon} 为例，说明如何使用键值对接口：
 
-\begin{minted}{latex}
+\begin{texhigh}[]
 % key-value setup
-\keys_define:nn { ztikz / polygon }{
+\keys_define:nn { ztikz / polygon }
+  {
     radius       .fp_set:N  = \l__polygon_radius_fp,
     radius       .initial:n = { 1 },
     edgeColor    .tl_set:N  = \l__polygon_edge_color_tl,
@@ -369,20 +532,21 @@ zTikZ还未进行适配(参见下文了解具体原因)，所以不保证本系�
     shift        .initial:n = { (0,0) },
     marker       .tl_set:N  = \l__polygon_marker_option_tl,
     marker       .initial:n = { },
-}
+  }
 % command
-\NewDocumentCommand\Polygon{ O{}m }{
+\NewDocumentCommand\Polygon{ O{}m }
+  {
     \group_begin:
     \keys_set:nn { ztikz / polygon } { #1 }
     ... 
-}
-\end{minted}
+    \group_end:
+  }
+\end{texhigh}
 
-上述的\cmd{\Polygon}命令即表示：此命令的第一个参数为一个可选参数(\cmd{O}类型)，对应的选项指定方式为键值对.
-可用的键有:\zkey{radius}, \zkey{edgeColor}, \zkey{fillColor}, \zkey{fillOpacity}, \zkey{rotate}, 
-\zkey{shift}, \zkey{marker}等. 其中键\zkey{radius}可以接受一个浮点数(\cmd{\fp_set:N}), 默认值为
-1(\cmd{.initial:n = { 1 }}); 再比如, 键\zkey{edgeColor}表示可以接受一个 tokenlist(\cmd{\tl_set:N}), 默认值为
-黑色(\cmd{.initial:n = { black }}). 其余类似的键的选项指定方式类似，这里不再说明.
-
+上述 \cmd{\Polygon}命令解读：它的第一个参数为一个可选参数(\cmd{O}类型), 通过键值对进行指定.
+可用的键有: \zkey{radius}, \zkey{edgeColor}, \zkey{fillColor}, \zkey{fillOpacity}, \zkey{rotate}, 
+\zkey{shift}, \zkey{marker}等. 其中键 \zkey{radius} 接受一个浮点数 (参考后面的:``\cmd{\fp_set:N}''), 默认值为
+1(参考后面的:``\cmd{.initial:n = { 1 }}''); 再比如, 键 \zkey{edgeColor} 可以接受一个 tokenlist(参考后面的:``\cmd{\tl_set:N}''), 
+默认值为 ``black'' (参考后面的:``\cmd{.initial:n = { black }}'').
 
 \end{document}

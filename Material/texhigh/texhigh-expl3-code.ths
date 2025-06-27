@@ -1,0 +1,20 @@
+\ProcessKeyOptions[texhigh/prelude]
+\THSaveStyle{basic}{%
+  \THSetClassBP{?}
+    {\ifhmode\discretionary
+      {\rlap{{\ \THcolor{gray8}$\swarrow$\ }}}
+      {}
+      {}\fi}%
+}
+\THUseSavedStyle{basic}
+
+\ExplSyntaxOn\makeatletter
+% add line number to 'sl' and 'nl'
+\newif\ifTHlinenum
+\THlinenumfalse
+\newcounter{TH@line@index}
+\gdef\TH@line@num{\textsf{\color{gray}\theTH@line@index}}
+\long\def\TH@nl{\ifTHlinenum\hfill\rlap{\TH@line@num}\fi\par}
+\cs_new_protected:Npn \THsl {\leavevmode\llap{\TH@sl\quad} }
+\long\def\TH@sl{\ifTHlinenum\stepcounter{TH@line@index}\TH@line@num\fi}
+\makeatother\ExplSyntaxOff

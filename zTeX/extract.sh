@@ -30,14 +30,15 @@ extrac_source () {
 
     # copy source and doc files
     cp -r ./zlatex/code/* "$EXTRACT_FOLDER"/zlatex/code
-    cp -r ./ztikz/code/* "$EXTRACT_FOLDER"/ztikz/code
-    cp -r ./ztool/code/* "$EXTRACT_FOLDER"/ztool/code
+    cp -r ./ztikz/code/*  "$EXTRACT_FOLDER"/ztikz/code
+    cp -r ./ztool/code/*  "$EXTRACT_FOLDER"/ztool/code
     cp -r ./zslide/code/* "$EXTRACT_FOLDER"/zslide/code
+    cp ./zTeX_bundle.pdf               "$EXTRACT_FOLDER"/
     cp ./zlatex/doc/ztex_interface.pdf "$EXTRACT_FOLDER"/zlatex/doc/
     cp ./ztikz/doc/ztikz_interface.pdf "$EXTRACT_FOLDER"/ztikz/doc/
-    cp ./ztikz/doc/ztikz_examples.pdf "$EXTRACT_FOLDER"/ztikz/doc/
+    cp ./ztikz/doc/ztikz_examples.pdf  "$EXTRACT_FOLDER"/ztikz/doc/
     cp ./ztool/doc/ztool_interface.pdf "$EXTRACT_FOLDER"/ztool/doc/
-    cp ./zslide/doc/zslide_manual.pdf "$EXTRACT_FOLDER"/zslide/doc/
+    cp ./zslide/doc/zslide_manual.pdf  "$EXTRACT_FOLDER"/zslide/doc/
 
     echo "Extract success, see folder: $EXTRACT_FOLDER"
 }

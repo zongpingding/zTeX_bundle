@@ -15,12 +15,15 @@
 % The Current Maintainer of this work is Zongping Ding.                       %
 %                                                                             %
 % This work consists of the files ztex.cls,                                   %
-%       the modules: ztex.module.font.tex,                                    %
-%                    ztex.module.ref.tex,                                     %
-%                    ztex.module.page.tex,                                    %
+%       the modules: ztex.module.box.tex,                                     %
+%                    ztex.module.cmd.tex,                                     %
 %                    ztex.module.color.tex,                                   %
-%                    ztex.module.thm.tex,                                     %
+%                    ztex.module.font.tex,                                    %
+%                    ztex.module.page.tex,                                    %
+%                    ztex.module.ref.tex,                                     %
+%                    ztex.module.sclist.tex,                                  %
 %                    ztex.module.sect.tex,                                    %
+%                    ztex.module.thm.tex,                                     %
 % and the libraries: ztex.library.alias.tex,                                  %
 %                    ztex.library.slide.tex,                                  %
 %                    ztex.library.thm.tex,                                    %
@@ -28,13 +31,15 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \ExplSyntaxOn
 \NeedsTeXFormat{LaTeX2e}
-\clist_const:Nn \c__ztex_lang_support_clist    {en, cn}
-\tl_const:Nn \c__ztex_class_name_tl            {ztex}
-\tl_const:Nn \c__ztex_class_version_tl         {1.0.1}
-\tl_const:Nn \c__ztex_class_date_tl            {2025/05/20}
-\tl_const:Nn \c__ztex_class_description_tl     {A~pre-release~latex3~document~class~for~article,~book,~or~slides;
-                                                Support~languages:\clist_use:Nn \c__ztex_lang_support_clist{,~}}
-
+\tl_const:Nn \c__ztex_class_name_tl           {ztex}
+\tl_const:Nn \c__ztex_class_version_tl        {1.0.1}
+\tl_const:Nn \c__ztex_class_date_tl           {2025/06/22}
+\clist_const:Nn \c__ztex_lang_support_clist   {en, cn}
+\tl_const:Nn    \c__ztex_class_description_tl  
+  {
+    A~pre-release~latex3~document~class~for~article,~book,~or~slides;~
+    Support~languages:\clist_use:Nn \c__ztex_lang_support_clist{,~}
+  }
 \ProvidesExplClass{\c__ztex_class_name_tl}         % Class name
                   {\c__ztex_class_date_tl}         % Class Date updated
                   {\c__ztex_class_version_tl}      % Class Version latest
@@ -50,7 +55,10 @@
 \cs_new_nopar:Npn \__ztex_load_module_library:nn #1#2 {
   \clist_map_inline:nn {#2} {
     \clist_if_in:NnTF \g__ztex_module_library_loaded_clist {#1:##1} {
-      \msg_set:nnn {ztex} {#1-loaded} {ztex~#1~"##1"~already~loaded,ignored~loading~\msg_line_context:}
+      \msg_set:nnn {ztex} {#1-loaded} {
+        ztex~#1~"##1"~already~loaded,ignored~loading
+        ~\msg_line_context:
+      }
       \msg_warning:nnn {ztex} {#1-loaded} {##1}
     }{
       \file_if_exist:nTF {#1/ztex.#1.##1.tex}{
@@ -63,12 +71,16 @@
     }
   }
 }
-\NewDocumentCommand\ztexloadmod{m}{
-  \__ztex_load_module_library:nn {module}{#1}\ExplSyntaxOff
-}
-\NewDocumentCommand\ztexloadlib{m}{
-  \__ztex_load_module_library:nn {library}{#1}\ExplSyntaxOff
-}
+\NewDocumentCommand\ztexloadmod{m}
+  {
+    \__ztex_load_module_library:nn {module}{#1}
+    \ExplSyntaxOff
+  }
+\NewDocumentCommand\ztexloadlib{m}
+  {
+    \__ztex_load_module_library:nn {library}{#1}
+    \ExplSyntaxOff
+  }
 
 
 
@@ -103,7 +115,7 @@
 
 % ----------------------------------------------------------------------
 %                   ztex Message system
-% ----------------------------------------------------------------------                 
+% ----------------------------------------------------------------------
 \prop_gput:Nnn \g_msg_module_type_prop { ztex } { Class }
 \cs_new_protected:Npn \ztex_msg_set:nn #1#2 { 
   \msg_if_exist:nnTF { ztex }{#1} 
@@ -435,6 +447,8 @@
 % NOTE: 
 % 1.'slide' lib need before 'fancy' or 'titlesec' to avoid 
 %   'titlesec' package's option clash conflict.
+\__ztex_load_module_library:nn {module}{sclist}
+\__ztex_load_module_library:nn {module}{cmd}
 \__ztex_load_module_library:nn {module}{box}
 \__ztex_load_module_library:nn {module}{page}
 \__ztex_load_module_library:nn {module}{thm}

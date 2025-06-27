@@ -10,6 +10,8 @@ TARGET = ztex_interface
 MODULES = ../code/module/
 LIBS    = ../code/library/
 CLASS   = ../code/ztex
+ENGINE  = xelatex
+SHELL_ESCAPE  = --shell-escape
 SOURCE_FILES  = $(shell find $(MODULES) -name '*.tex') \
 				$(shell find $(LIBS) -name '*.tex') \
 				$(SOURCE).tex \
@@ -17,17 +19,17 @@ SOURCE_FILES  = $(shell find $(MODULES) -name '*.tex') \
 
 # build doc
 $(TARGET).pdf: $(SOURCE_FILES)
-	lualatex $(SOURCE).tex
+	$(ENGINE) $(SHELL_ESCAPE) $(SOURCE).tex
 	makeindex -s gind.ist $(SOURCE) 
-	lualatex $(SOURCE).tex
-	lualatex $(SOURCE).tex
+	$(ENGINE) $(SHELL_ESCAPE) $(SOURCE).tex
+	$(ENGINE) $(SHELL_ESCAPE) $(SOURCE).tex
 	rm -rf ./*.hd
 
 # build slide
 $(TARGET)_slide.pdf: $(SOURCE_FILES)
-	lualatex $(SOURCE).tex
+	$(ENGINE) $(SHELL_ESCAPE) $(SOURCE).tex
 	makeindex -s gind.ist $(SOURCE) 
-	lualatex $(SOURCE).tex
-	lualatex $(SOURCE).tex
+	$(ENGINE) $(SHELL_ESCAPE) $(SOURCE).tex
+	$(ENGINE) $(SHELL_ESCAPE) $(SOURCE).tex
 	mv $(SOURCE).pdf $(TARGET)_slide.pdf
 

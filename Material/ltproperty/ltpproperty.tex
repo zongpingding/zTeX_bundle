@@ -1,0 +1,19 @@
+\documentclass{article}
+\usepackage{lipsum}
+\usepackage[hshift=0mm,vshift=0mm]{fgruler}
+% \pdfsavepos <--> \tex_savepos:D 
+
+
+\begin{document}
+Hello world\pdfsavepos\RecordProperties{POS}{xpos, ypos}\pdfsavepos
+
+
+\lipsum[1][1-3] XXX(\RefProperty{POS}{xpos})(\RefProperty{POS}{ypos})\lipsum[1][4-5]
+
+\ExplSyntaxOn
+% \dim_to_decimal_in_sp {\pdflastxpos}
+(\the\pdflastxpos)\fp_eval:n {\the\pdflastxpos/65536/28.346} =
+\fp_eval:n {\RefProperty{POS}{xpos}/65536/28.346}
+\ExplSyntaxOff
+
+\end{document}

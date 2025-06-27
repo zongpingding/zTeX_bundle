@@ -1,0 +1,30 @@
+\ProvidesExplPackage{texhigh}{2024-04-16}{0.2.2}{highlight TeX string}
+\int_new:N \l__texhigh_tmp_int
+\def\texhigh@style@ext{ths}
+\cs_new_protected:Npn \texhigh@inputstyle #1#2#3 % style, options, date
+  { \@onefilewithoptions {#1}[{#2}][{#3}]\texhigh@style@ext }
+\NewDocumentCommand \texhighloadstyle { O{} O{} m }
+  { \clist_map_inline:nn {#3} { \texhigh@inputstyle {##1}{#1}{#2} } }
+
+\cs_new_eq:NN \THPASS \scan_stop:
+\cs_new_protected:Npn \THnl { \TH@nl } %: new line;
+\cs_new_protected:Npn \THnlPlain { \TH@nl }
+\cs_new_protected:Npn \THin #1 { \TH@in {#1} } %: indent;
+\cs_new_protected:Npn \THinPlain #1 { \TH@in {#1} } %: indent;
+\cs_new:Npn \THcr #1 { \TH@cr {#1} } % char replacement;
+\cs_new:Npn \THcrPlain #1 { \char_generate:nn { #1 } { 12 } }
+\cs_new:Npn \TH@cr #1
+  { \cs_if_exist_use:cF { l__texhigh_cr-#1_tl } { \char_generate:nn { #1 } { 12 } } }
+\cs_new_protected:Npn \THbp #1 { \use:c { TH@bp@\texhigh@fallback{bp}{#1} } } %: break point;
+\cs_new_protected:Npn \THbpPlain #1 { \TH@bp@PLAIN } %: break point;
+\cs_new_protected:Npn \THcs #1#2#3 %: control sequence;
+  {
+    \exp_last_unbraced:Ne \use:c
+      { { TH@cs@\texhigh@fallback{cs}{#1} } { \texhigh@normalize@cs {#2} } { \texhigh@normalize@cs {#3} } }
+  }
+\cs_new_protected:Npn \THcsPlain #1#2#3
+  { \exp_args:Nee \TH@cs@PLAIN { \texhigh@normalize@cs {#2} } { \texhigh@normalize@cs {#3} } }
+\cs_new_protected:Npn \THch #1#2 %: character;
+  { \exp_args:Nee \use:c { TH@ch@\texhigh@fallback{ch}{#1} } { \texhigh@normalize@cs {#2} } }
+\cs_new_protected:Npn \THchPlain #1#2
+  { \exp_args:Ne \TH@ch@PLAIN { \texhigh@normalize@cs {#2} } } %: character;

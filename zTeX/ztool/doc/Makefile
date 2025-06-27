@@ -14,9 +14,9 @@ SOURCE_FILES  = $(shell find $(MODULES) -name '*.tex') \
 
 # build doc
 $(TARGET).pdf: $(SOURCE_FILES)
-	xelatex $(SOURCE).tex
+	xelatex --shell-escape $(SOURCE).tex
 	makeindex -s gind.ist $(SOURCE) 
-	xelatex $(SOURCE).tex
-	xelatex $(SOURCE).tex
+	xelatex --shell-escape $(SOURCE).tex
+	xelatex --shell-escape $(SOURCE).tex
 	rm -rf ./*.hd
 

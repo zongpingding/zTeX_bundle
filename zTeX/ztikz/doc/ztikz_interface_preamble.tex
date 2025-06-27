@@ -139,13 +139,16 @@
   ]
 \definecolor{bg}{rgb}{0.95,0.95,0.95}
 \setminted{
-  bgcolor=bg,
+  autogobble,
   breaklines=true, 
   tabsize=2,
   breakanywhere=true,
   breaksymbolright=$\swarrow$,
   breakanywheresymbolpre=,
   breaksymbolleft=,
+  escapeinside=@@,
+  bgcolor=,
+  fontsize=\small,
 }
 % important: avoid conflict with tikz externalize 'prefix' settings
 \tcbuselibrary{external}
@@ -154,7 +157,12 @@
 \def\exampleUR{\stepcounter{DocExample}\textbf{例\ \theDocExample}}
 \def\resetExampleUR{\def\exampleUR{\stepcounter{DocExample}\textbf{例\ \theDocExample}}}
 \tcbuselibrary{minted}
-\tcbset{listing engine=minted}
+\usepackage{texhigh}
+\texhighloadstyle{texhigh}
+\SetKeys[texhigh/high]{config-file=texhigh.cfg}
+\SetKeys[texhigh/high]{use-ctab=latex3, lexer-catcode*={0}{}{@=11}}
+\SetKeys[texhigh/high]{gobble=auto, before-text+={\catcode`\ =10 \catcode`\"=12 }}
+\tcbset{listing engine=texhigh}%, listing file=\jobname.listing}
 \DeclareTCBListing{DocExample}{!s!O{//}}{
   enhanced, 
   breakable,
@@ -168,16 +176,9 @@
   \IfBooleanTF{#1} 
     {listing and text}
     {listing only},
-  minted language=tex, 
-  minted options = {  
-    autogobble,
-    escapeinside=#2,
-    bgcolor=,
-    fontsize=\small,
-  },
   overlay unbroken and first = {
     \node[anchor=north east, outer sep=0pt, text=red] 
-      at (frame.north east) {\exampleUR};
+      at (frame.north east) { \stepcounter{DocExample}\textbf{例\ \theDocExample}};
   }
 }
 
@@ -193,7 +194,12 @@
         \clist_put_right:Nn \l__ztex_doc_source_clist 
           {
             \subsubsection{##1}
-            \inputminted{latex}{../code/#1/ztikz.#1.##1.tex}
+            \tl_if_eq:nnTF {##1}{wolfram}
+              {
+                \texhighfile[lexer-catcode*={128}{151}{\$=0}]{../code/#1/ztikz.#1.##1.tex}
+              }{
+                \texhighfile{../code/#1/ztikz.#1.##1.tex}
+              }
           }
       }
   }
@@ -206,6 +212,7 @@
   }
 \ExplSyntaxOff
 \newcommand{\ztexDocPrintSource}{%
+  \THlinenumtrue
   \ztexslideTF{}{
     \section{\texorpdfstring{\textcolor{black}{\ztikz}}{zTikZ} 源码}
     \pagestyle{empty}
@@ -214,7 +221,7 @@
       \textcolor{gray}{\small\oldstylenums{\arabic{FancyVerbLine}}}}
     \setminted{ bgcolor=, linenos=true, numbers=both, texcomments, escapeinside=«» }
     \subsection{ztikz.sty}
-    \inputminted{latex}{../code/ztikz.sty}
+    \texhighfile{../code/ztikz.sty}
     \clearpage
     \subsection{Library}
     \inputZTeXSource[library]{basic, gnuplot, cache, python, wolfram}

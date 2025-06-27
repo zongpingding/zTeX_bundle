@@ -1,0 +1,480 @@
+% ==> print expl3-code using texhigh
+\documentclass[zihao=-4, fontset=fandol]{ctexart}
+\usepackage[left=.5in, top=0pt, right=.35in, bottom=0pt]{geometry}
+\usepackage[color, tikz]{texhigh}
+\texhighloadstyle{texhigh-expl3-code}
+
+%%%%%%    cli commands      %%%%%%
+% texhigh --no-banner high --enhanced --current-ctab latex3 \
+%         --config-file texhigh.cfg --file expl3-code.tex \ 
+%         > expl3-code-tmp.res
+% sed 's/^/\\THsl/' expl3-code-tmp.res > expl3-code-res.tex
+\ExplSyntaxOn\makeatletter
+\RenewDocumentCommand\texhighfile{ +O{} m }
+  {
+    \par \group_begin:
+    \__texhigh_env_init:
+    \tl_clear:N \l__texhigh_output_tl
+    \tl_set:Nn \l__texhigh_command_tl { high }
+    \keys_set:nn { texhigh/high }
+      {
+        font+={\linespread{1.2}\selectfont},
+        use-ctab=latex3, 
+        lexer-catcode*={0}{}{@=11},
+        config-file=texhigh.cfg
+      }
+    \__texhigh_options:
+    % \tl_set:Nn \l__texhigh_fn_tl {#2}
+    % \__texhigh_get_last: 
+    % \tl_put_left:NV \l__texhigh_output_tl \l__texhigh_cache_dir_tl
+    % \sys_shell_now:e { \__texhigh_args_with_file:n \l__texhigh_fn_tl }
+    % \file_input:V \l__texhigh_output_tl
+    \file_input:n {#2}
+    \par \group_end:
+  }
+\makeatother\ExplSyntaxOff
+
+\begin{document}
+\THlinenumtrue
+\texhighfile{expl3-code-res.tex}
+\end{document}
+
+
+
+
+
+
+% ==> texhigh test
+\documentclass[zihao=-4,fontset=fandol]{ctexart}
+\usepackage[hmargin=2cm, vmargin=2.4cm]{geometry}
+\usepackage[most]{tcolorbox}
+\usepackage[color,tikz]{texhigh}
+\texhighloadstyle{texhigh_old}
+
+
+\begin{document}
+\begin{texhigh}[use-ctab=latex3, lexer-catcode*={0}{}{@=11}]
+\ProvidesExplPackage{texhigh}{2024-04-16}{0.2.2}{highlight TeX string}
+\int_new:N \l__texhigh_tmp_int
+\def\texhigh@style@ext{ths}
+\cs_new_protected:Npn \texhigh@inputstyle #1#2#3 % style, options, date
+  { \@onefilewithoptions {#1}[{#2}][{#3}]\texhigh@style@ext }
+\NewDocumentCommand \texhighloadstyle { O{} O{} m }
+  { \clist_map_inline:nn {#3} { \texhigh@inputstyle {##1}{#1}{#2} } }
+
+\cs_new_eq:NN \THPASS \scan_stop:
+\cs_new_protected:Npn \THnl { \TH@nl } %: new line;
+\cs_new_protected:Npn \THnlPlain { \TH@nl }
+\cs_new_protected:Npn \THin #1 { \TH@in {#1} } %: indent;
+\cs_new_protected:Npn \THinPlain #1 { \TH@in {#1} } %: indent;
+\cs_new:Npn \THcr #1 { \TH@cr {#1} } % char replacement;
+\cs_new:Npn \THcrPlain #1 { \char_generate:nn { #1 } { 12 } }
+\cs_new:Npn \TH@cr #1 
+  { \cs_if_exist_use:cF { l__texhigh_cr-#1_tl } { \char_generate:nn { #1 } { 12 } } }
+\cs_new_protected:Npn \THbp #1 { \use:c { TH@bp@\texhigh@fallback{bp}{#1} } } %: break point;
+\cs_new_protected:Npn \THbpPlain #1 { \TH@bp@PLAIN } %: break point;
+\cs_new_protected:Npn \THcs #1#2#3 %: control sequence;
+  { 
+    \exp_last_unbraced:Ne \use:c 
+      { { TH@cs@\texhigh@fallback{cs}{#1} } { \texhigh@normalize@cs {#2} } { \texhigh@normalize@cs {#3} } } 
+  }
+\cs_new_protected:Npn \THcsPlain #1#2#3
+  { \exp_args:Nee \TH@cs@PLAIN { \texhigh@normalize@cs {#2} } { \texhigh@normalize@cs {#3} } }
+\cs_new_protected:Npn \THch #1#2 %: character;
+  { \exp_args:Nee \use:c { TH@ch@\texhigh@fallback{ch}{#1} } { \texhigh@normalize@cs {#2} } }
+\cs_new_protected:Npn \THchPlain #1#2 
+  { \exp_args:Ne \TH@ch@PLAIN { \texhigh@normalize@cs {#2} } } %: character;
+\end{texhigh}
+\end{document}
+
+
+
+
+
+
+% github issue: discuss
+\documentclass[zihao=-4,fontset=fandol]{ctexart}
+\usepackage[hmargin=2cm, vmargin=2.4cm]{geometry}
+\usepackage[most]{tcolorbox}
+\usepackage[color,tikz]{texhigh}
+
+% --> discretionary
+% file 'texhigh.ths'
+\begin{filecontents}[overwrite, noheader]{texhigh.ths}
+\ProcessKeyOptions[texhigh/prelude]
+\THSaveStyle{basic}{%
+  \THSetClassBP{?}
+    {\ifhmode\discretionary
+      {\rlap{{\ \THcolor{gray8}$\swarrow$\ }}}
+      {}
+      {}\fi}%
+  % escape char
+  % \THes{«}
+  % \THSetClassRS{comment}{\begingroup\THcolor{red}\THSetPlainStyle{cs,color}}%
+  \THSetClassES{comment}{«}
+  % \THSetClassEE{comment}{»}
+  % \THee{»}
+}
+\THUseSavedStyle{basic}
+
+\ExplSyntaxOn\makeatletter
+% --> add line number to 'bol' and 'nl'
+\newcounter{TH@line@index}
+\gdef\TH@line@num{\textsf{\color{blue}\theTH@line@index}}
+\long\def\TH@nl{\hfill\rlap{\TH@line@num}\par}
+\cs_new_protected:Npn \THbol { \TH@bol } % begin of the line;
+\long\def\TH@bol{\stepcounter{TH@line@index}\TH@line@num}
+
+% --> texhigh result handle
+\cs_set_protected:Npn \__texhigh_env_init:
+  {
+    \sloppy \hbadness\@M
+    \setcounter{TH@line@index}{0}
+    \dim_set:Nn \parindent { 0pt }
+    \linespread{1} \selectfont
+  }
+\seq_new:N \g__texhigh_output_seq
+\cs_set_protected:Npn \__texhigh_get_last:
+  {
+    \tl_if_empty:NTF \l__texhigh_output_tl
+      {
+        \group_begin:
+        \tex_everyeof:D { \exp_not:N }
+        \int_set:Nn \tex_endlinechar:D { 44 }
+        \seq_gset_split:Nne \g__texhigh_output_seq 
+          {,}
+          {\tex_input:D | "\__texhigh_args_with_file:n \l__texhigh_fn_tl"~}
+        \group_end:
+        % \seq_show:N \g__texhigh_output_seq
+        \seq_map_inline:Nn \g__texhigh_output_seq
+          {
+            \tl_if_empty:eF {##1}
+              { \leavevmode\llap{\THbol\quad} ##1 }
+          }
+      }
+      {
+        %%% NOT handle this branch yet !!!
+        \tl_put_left:NV \l__texhigh_output_tl \l__texhigh_cache_dir_tl
+        \sys_shell_now:e { \__texhigh_args_with_file:n \l__texhigh_fn_tl }
+        \file_input:V \l__texhigh_output_tl
+      }
+  }
+\makeatother\ExplSyntaxOff
+\end{filecontents}
+\texhighloadstyle{texhigh}
+
+
+
+\begin{document}
+\begin{texhigh}[use-ctab=latex3, lexer-catcode*={0}{}{@=11}, config-file=texhigh.cfg]
+\ProvidesExplPackage{texhigh}{2024-04-16}{0.2.2}{highlight TeX string}
+\int_new:N \l__texhigh_tmp_int
+\def\texhigh@style@ext{ths}
+\cs_new_protected:Npn \texhigh@inputstyle #1#2#3 % style, options, date
+  { \@onefilewithoptions {#1}[{#2}][{#3}]\texhigh@style@ext }
+\NewDocumentCommand \texhighloadstyle { O{} O{} m }
+  { \clist_map_inline:nn {#3} { \texhigh@inputstyle {##1}{#1}{#2} } }
+
+\cs_new_eq:NN \THPASS \scan_stop:
+\cs_new_protected:Npn \THnl { \TH@nl } %: new line;
+\cs_new_protected:Npn \THnlPlain { \TH@nl }
+\cs_new_protected:Npn \THin #1 { \TH@in {#1} } %: indent;
+\cs_new_protected:Npn \THinPlain #1 { \TH@in {#1} } %: indent;
+\cs_new:Npn \THcr #1 { \TH@cr {#1} } % char replacement;
+\cs_new:Npn \THcrPlain #1 { \char_generate:nn { #1 } { 12 } }
+\cs_new:Npn \TH@cr #1 
+  { \cs_if_exist_use:cF { l__texhigh_cr-#1_tl } { \char_generate:nn { #1 } { 12 } } }
+\cs_new_protected:Npn \THbp #1 { \use:c { TH@bp@\texhigh@fallback{bp}{#1} } } %: break point;
+\cs_new_protected:Npn \THbpPlain #1 { \TH@bp@PLAIN } %: break point;
+\cs_new_protected:Npn \THcs #1#2#3 %: control sequence;
+  { 
+    \exp_last_unbraced:Ne \use:c 
+      { { TH@cs@\texhigh@fallback{cs}{#1} } { \texhigh@normalize@cs {#2} } { \texhigh@normalize@cs {#3} } } 
+  }
+\cs_new_protected:Npn \THcsPlain #1#2#3
+  { \exp_args:Nee \TH@cs@PLAIN { \texhigh@normalize@cs {#2} } { \texhigh@normalize@cs {#3} } }
+\cs_new_protected:Npn \THch #1#2 %: character;
+  { \exp_args:Nee \use:c { TH@ch@\texhigh@fallback{ch}{#1} } { \texhigh@normalize@cs {#2} } }
+\cs_new_protected:Npn \THchPlain #1#2 
+  { \exp_args:Ne \TH@ch@PLAIN { \texhigh@normalize@cs {#2} } } %: character;
+
+
+% escape inside 
+% «$\alpah + \beta = \gamma$»
+\end{texhigh}
+
+
+% \ExplSyntaxOn
+% \seq_show:N \g__texhigh_output_seq
+% \seq_count:N \g__texhigh_output_seq
+% \ExplSyntaxOff
+\end{document}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+\documentclass[zihao=-4,fontset=fandol]{ctexart}
+\usepackage[hmargin=2cm, vmargin=2.4cm]{geometry}
+\usepackage[most]{tcolorbox}
+\setlength{\fboxsep}{0pt}
+\usepackage[color,tikz]{texhigh}
+\usepackage[colorlinks]{hyperref}
+% \SetKeys[texhigh/layout]{fontsize*=5pt}
+\texhighloadstyle{texhigh}
+\usepackage[file-io]{ztool}
+\usepackage{minted}
+\ExplSyntaxOn\makeatletter
+\newcounter{TH@line@index}
+\gdef\TH@line@num{\textsf{\color{blue}\theTH@line@index}}
+\gdef\TH@nl{\hfill\rlap{\TH@line@num}\par}
+\SetKeys[texhigh/high]{use-ctab=latex3}%, before-text+=\llap{\TH@line@num}}
+% discretionary
+% file 'texhigh.ths'
+
+% re-define
+\cs_new_protected:Npn \THbol { \TH@bol } %: begin of the line;
+\long\def\TH@bol{\stepcounter{TH@line@index}\TH@line@num}
+\cs_set_protected:Npn \__texhigh_env_init:
+  {
+    \sloppy \hbadness\@M
+    \setcounter{TH@line@index}{0}
+    \dim_set:Nn \parindent { 0pt }
+    \linespread{1} \selectfont
+  }
+\seq_new:N \l__texhigh_output_seq
+\seq_new:N \g__texhigh_output_seq
+\cs_set_protected:Npn \__texhigh_get_last:
+  {
+    % \show\__texhigh_args:
+    % \l__texhigh_output_tl --> the output file's name
+    \tl_if_empty:NTF \l__texhigh_output_tl
+      {
+        % \tl_show:N \l__texhigh_fn_tl
+        % \show\kvtcb@listingfile
+        % \tex_input:D | " \__texhigh_args_with_file:n \l__texhigh_fn_tl "
+        % --> Solution I
+        % REF: https://tex.stackexchange.com/a/53489/294585
+        \group_begin:
+        \tex_everyeof:D { \exp_not:N }
+        \int_set:Nn \tex_endlinechar:D { 44 }
+        \seq_gset_split:Nne \g__texhigh_output_seq 
+          {,}
+          {\tex_input:D | "\__texhigh_args_with_file:n \l__texhigh_fn_tl"~}
+        \group_end:
+        % \seq_show:N \g__texhigh_output_seq % --> works
+        \seq_map_inline:Nn \g__texhigh_output_seq
+          {
+            \leavevmode\llap{\THbol\quad} ##1
+          }
+
+
+        % --> Solution II
+        % \sys_shell_now:e { \__texhigh_args_with_file:n \l__texhigh_fn_tl }
+        % \ztool_read_file_as_seq:neN {\c_false_bool}{\l__texhigh_output_fn_tl} \l__texhigh_output_seq
+        % % \seq_show:N \l__texhigh_output_seq % --> works
+        % \seq_map_inline:Nn \l__texhigh_output_seq
+        %   {
+        %     \leavevmode\llap{\THbol\quad} ##1
+        %     % \hb@xt@0pt{\hss\THbol\ } ##1 
+        %   }
+      }
+      {
+        % NOT handle this branch yet !!!
+        \tl_put_left:NV \l__texhigh_output_tl \l__texhigh_cache_dir_tl
+        \sys_shell_now:e { \__texhigh_args_with_file:n \l__texhigh_fn_tl }
+        \file_input:V \l__texhigh_output_tl
+      }
+  }
+\tl_new:N \l__texhigh_output_fn_tl
+\tl_set:Nn \l__texhigh_output_fn_tl {\jobname.texhigh.res}
+\cs_set:Npn \__texhigh_args_with_file:n #1
+  {
+    texhigh \c_space_tl
+    \__texhigh_args:
+    --file \c_space_tl #1 
+    % > \l__texhigh_output_fn_tl 
+  }
+% texhigh --no-banner high --enhanced --current-ctab latex3 
+%         --config-file texhigh.cfg --file ./texhigh_test.texhigh.verb
+\makeatother\ExplSyntaxOff
+
+
+
+\tcbset{listing engine=texhigh}%, listing file=\jobname.listing}
+\DeclareTCBListing{DocExample}{!s}{
+  enhanced, 
+  breakable,
+  % frame hidden, arc=2pt,
+  enhanced jigsaw,
+  opacityback=0, 
+  sharp corners, 
+  colframe=black, boxrule=.4pt,
+  left=.5mm, right=1mm,
+  top=0mm, bottom=0mm, 
+  \IfBooleanTF{#1} 
+    {listing and text}
+    {listing only},
+}
+
+
+\begin{document}
+\section{discretionary}
+Here you find a st\discretionary{ra-}{ng}{rang}e word.
+
+
+
+\section{First}
+\begin{DocExample}*
+\ExplSyntaxOn
+\ztool_file_new:nn {\c_true_bool}{testIO.txt}
+\seq_new:N \l_ztool_tmp_seq \seq_clear:N \l_ztool_tmp_seq
+\ztool_append_to_file:nn {testIO.txt} {|APPEND-CONTENT|}
+\ztool_insert_to_file:nnn {testIO.txt} {1} {|INSERT-~-CONTENT|}
+\ztool_append_to_file:nn {testIO.txt} {|APPEND-CONTENT-II|}
+\ztool_replace_file_line:nnn {testIO.txt} {3} {|REPLACE-CONTENT|}
+\ztool_gread_file_as_seq:nnN {\c_false_bool} {testIO.txt} \l_ztool_tmp_seq
+\seq_use:Nn \l_ztool_tmp_seq {\par}
+\ExplSyntaxOff
+
+
+% \inputminted{text}{testIO.txt}
+\texhighfile{testIO.txt}
+\end{DocExample}
+
+
+\section{Variables Check}
+Check Result:\\
+1. \verb|\THbp{char}|    = \fbox{\THbp{char}}\\
+2. \verb|\THch{?}{"20 }| = \fbox{\THch{?}{"20 }}
+
+
+\leavevmode\llap{XXX}-Hello world
+
+
+\section{Second}
+% \small
+\begin{texhigh}[use-ctab=latex3,config-file=texhigh.cfg]
+\def\好好好{中文 Good}
+\好好好\relax
+
+
+\ExplSyntaxOn
+\ztool_file_new:nn {\c_true_bool}{testIO.txt}
+\seq_new:N \l_ztool_tmp_seq \seq_clear:N \l_ztool_tmp_seq
+\ztool_append_to_file:nn {testIO.txt} {|APPEND-CONTENT|}
+\ztool_insert_to_file:nnn {testIO.txt} {1} {|INSERT-~-CONTENT|}
+\ztool_append_to_file:nn {testIO.txt} {|APPEND-CONTENT-II|}
+\ztool_replace_file_line:nnn {testIO.txt} {3} {|REPLACE-CONTENT|}
+\ztool_gread_file_as_seq:nnN {\c_false_bool} {testIO.txt} \l_ztool_tmp_seq
+\seq_use:Nn \l_ztool_tmp_seq {\par}
+\ExplSyntaxOff
+\inputminted{text}{testIO.txt}
+
+
+\tl_set_rescan:NnV \l_tmpa_tl {\cctab_select:N \c_code_cctab} \g__ztex_lang_str
+\clist_if_in:NVF \c__ztex_lang_support_clist \l_tmpa_tl
+  {\ztex_msg_error:n {option-language}}
+\str_case:VnF \g__ztex_lang_str {
+  {en} { 
+    \sys_if_engine_xetex:T 
+      {
+        \ztex_hook_preamble_last:n {
+          \bool_if:NF \g__ztex_sysfont_cfg_bool {
+            \ztex_msg_set:nn {compile-engine-pdftex}
+              {Current~compile~engine~is~XETEX,~For~better~output,~use~PDFTEX~instead.}
+            \ztex_msg_warn:n {compile-engine-pdftex}
+          }
+        }
+      }
+    \RequirePackage[T1]{fontenc}
+  }
+  {cn} {
+    \sys_if_engine_pdftex:T {
+      \ztex_msg_set:nn {compile-engine-xetex}
+        {Current~compile~engine~is~PDFTEX,~For~chinese~material,~use~XETEX~instead.}
+      \ztex_msg_error:n {compile-engine-xetex}
+    }
+    \PassOptionsToPackage{quiet}{fontspec}
+    \PassOptionsToPackage{no-math}{fontspec}
+    \str_if_eq:VnF \g__ztex_subclass_type_str {ctexbook}{
+      \RequirePackage[UTF8, heading]{ctex}
+      \linespread{1.3}
+    }
+  }
+}{\ztex_msg_error:n {option-language}}
+\end{texhigh}
+\end{document}
+
+\cs_new_protected:Npn \__texhigh_env_init:
+  {
+    \sloppy \hbadness\@M
+    \dim_set:Nn \parindent { 0pt }
+    \linespread{1} \selectfont
+  }
+
+\NewDocumentEnvironment{texhigh}{+O{}}
+  { 
+    \par \__texhigh_env_init: 
+    \tl_set:Nn \l__texhigh_command_tl { high }
+    \keys_set:nn { texhigh/high } {#1} 
+    \group_begin: \__texhigh_verb_start:n \l__texhigh_fn_tl 
+  }
+  { 
+    \__texhigh_verb_end: \group_end:
+    \__texhigh_options: \__texhigh_get_last: \par 
+  }
+
+\keys_define:nn { texhigh/high }
+  {
+    enhanced .bool_set:N = \l__texhigh_enhanced_bool ,
+    filename .tl_set:N = \l__texhigh_fn_tl ,
+    filename .initial:n = { \l__texhigh_cache_dir_tl \jobname.texhigh.verb } ,
+  }
+
+\cs_new_protected:Npn \__texhigh_options:
+  {
+    \l__texhigh_font_tl \l__texhigh_before_text_tl
+  }
+
+\cs_new_protected:Npn \__texhigh_get_last:
+  {
+    \tl_if_empty:NTF \l__texhigh_output_tl
+      {
+        \tex_input:D | " \__texhigh_args_with_file:n \l__texhigh_fn_tl "
+      }
+      {
+        \tl_put_left:NV \l__texhigh_output_tl \l__texhigh_cache_dir_tl
+        \sys_shell_now:e { \__texhigh_args_with_file:n \l__texhigh_fn_tl }
+        \file_input:V \l__texhigh_output_tl
+      }
+  }
+\cs_new:Npn \__texhigh_args_with_file:n #1
+  {
+    texhigh \c_space_tl
+    \__texhigh_args:
+    --file \c_space_tl #1
+  }
+texhigh --no-banner high --enhanced --current-ctab latex3 
+        --config-file texhigh.cfg --file ./texhigh_test.texhigh.verb
+
+\cs_new_protected:Npn \THbp #1 { \use:c { TH@bp@\texhigh@fallback{bp}{#1} } } %: break point;
+\cs_new_protected:Npn \THbpPlain #1 { \TH@bp@PLAIN } %: break point;
+\cs_new:Npn \texhigh@fallback #1#2
+  {
+    \cs_if_exist:cTF { TH@#1@#2 } {#2} %\TH@bp@char
+      {
+        \seq_if_exist:cT { l__texhigh_#1/#2_seq }
+          { \seq_map_tokens:cn { l__texhigh_#1/#2_seq } { \__texhigh_find:nn {#1} } }
+        \use:n { \__texhigh_dotted_fallback:nn {#1} {#2} }
+      }
+  }

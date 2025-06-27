@@ -1,0 +1,59 @@
+\ProcessKeyOptions[texhigh/prelude]
+\THSaveStyle{basic}{%
+  \THSetClassBP{?}
+    {\ifhmode\discretionary
+      {\rlap{{\ \THcolor{gray8}$\swarrow$\ }}}
+      {}
+      {}\fi}%
+  % escape char
+  % \THes{«}
+  % \THSetClassRS{comment}{\begingroup\THcolor{red}\THSetPlainStyle{cs,color}}%
+  \THSetClassES{comment}{«}
+  % \THSetClassEE{comment}{»}
+  % \THee{»}
+}
+\THUseSavedStyle{basic}
+
+\ExplSyntaxOn\makeatletter
+% --> add line number to 'bol' and 'nl'
+\newcounter{TH@line@index}
+\gdef\TH@line@num{\textsf{\color{gray}\theTH@line@index}}
+\long\def\TH@nl{\hfill\rlap{\TH@line@num}\par}
+\cs_new_protected:Npn \THbol { \TH@bol } % begin of the line;
+\long\def\TH@bol{\stepcounter{TH@line@index}\TH@line@num}
+
+% --> texhigh result handle
+\cs_set_protected:Npn \__texhigh_env_init:
+  {
+    \sloppy \hbadness\@M
+    \setcounter{TH@line@index}{0}
+    \dim_set:Nn \parindent { 0pt }
+    \linespread{1} \selectfont
+  }
+\seq_new:N \g__texhigh_output_seq
+\cs_set_protected:Npn \__texhigh_get_last:
+  {
+    \tl_if_empty:NTF \l__texhigh_output_tl
+      {
+        \group_begin:
+        \tex_everyeof:D { \exp_not:N }
+        \int_set:Nn \tex_endlinechar:D { 44 }
+        \seq_gset_split:Nne \g__texhigh_output_seq
+          {,}
+          {\tex_input:D | "\__texhigh_args_with_file:n \l__texhigh_fn_tl"~}
+        \group_end:
+        % \seq_show:N \g__texhigh_output_seq
+        \seq_map_inline:Nn \g__texhigh_output_seq
+          {
+            \tl_if_empty:eF {##1}
+              { \leavevmode\llap{\THbol\quad} ##1 }
+          }
+      }
+      {
+        %%% NOT handle this branch yet !!!
+        \tl_put_left:NV \l__texhigh_output_tl \l__texhigh_cache_dir_tl
+        \sys_shell_now:e { \__texhigh_args_with_file:n \l__texhigh_fn_tl }
+        \file_input:V \l__texhigh_output_tl
+      }
+  }
+\makeatother\ExplSyntaxOff

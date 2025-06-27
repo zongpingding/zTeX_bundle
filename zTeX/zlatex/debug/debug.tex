@@ -1,3 +1,1238 @@
+% ==>  expandable tl replace
+\InputIfFileExists{zlatex-cfg.tex}{}{}
+\documentclass[
+  % layout=margin
+]{../code/ztex}
+\usepackage[T1]{fontenc}
+\parindent0pt
+
+
+\begin{document}
+\ExplSyntaxOn
+% \cs_new:Npn \ztex_tl_pattern_range:nn #1#2
+%   {
+%     \exp_args:Ne \int_step_tokens:nn { \tl_count:n {#1}-\tl_count:n {#2}+1 }
+%       {
+%         \__ztex_tl_pattern_range:nnn { #1 }{ #2 }
+%       };
+%   }
+% \cs_new:Npn \__ztex_tl_pattern_range:nnn #1#2#3
+%   {
+%     \exp_args:Ne \ztex_tl_if_eq:nnTF 
+%       { \tl_range:nnn {#1}{#3}{#3+\tl_count:n {#2}-1} }{ #2 }
+%       { ;#3, \int_eval:n {#3+\tl_count:n {#2}-1} }
+%       { }
+%   } 
+% \cs_generate_variant:Nn \tl_range:nnn {nee, nne, nen}
+% \cs_new:Npn \__ztex_gen_token_in_range:nnnn #1#2#3#4
+%   {
+%     \int_case:nnF {#4}
+%       {
+%         {1}{
+%           \tl_range:nne {#1}{1}
+%             {
+%               \clist_item:en { \sclist_item:nn {#2}{#4} }{1} - 1
+%             }
+%         }
+%         {\sclist_count:n {#2}}{
+%           \tl_range:nen {#1}
+%             {
+%               \clist_item:en { \sclist_item:nn {#2}{#4} }{2} + 1
+%             }{-1}
+%         }
+%       }{ #3
+%         \int_compare:nNnTF 
+%           {\clist_item:en { \sclist_item:nn {#2}{#4-1} }{2} + 1}
+%           =
+%           {\clist_item:en { \sclist_item:nn {#2}{#4} }{1}}
+%         {}{
+%           \tl_range:nee {#1}
+%             {
+%               \clist_item:en { \sclist_item:nn {#2}{#4-1} }{2} + 1
+%             }{
+%               \clist_item:en { \sclist_item:nn {#2}{#4} }{1} - 1
+%             }
+%         }
+%       }
+%   }
+
+
+xxxxabc123def123123fgh123xxx123asdwzzz\par
+
+\ztex_tl_pattern_range:nn 
+  {xxxxabc123def123123fgh123xxx123asdwzzz}{123}\par % ';8,10;14,16;17,19;23,25;29,31;'
+
+% syntax is the same as \tl_replace_<>:Nnn 
+% ⟨tl var⟩ {⟨old tokens⟩} {⟨new tokens⟩}
+\cs_new:Npn \ztex_tl_replace:nnn #1#2#3 
+  {
+    \int_step_tokens:nn 
+      {
+        \sclist_count:e {\ztex_tl_pattern_range:nn {#1}{#2}}
+      }{
+        \exp_args:Nee \__ztex_gen_token_in_range:nnnn {#1}
+          {
+            \ztex_tl_pattern_range:nn {#1}{#2}
+          }{ #3 }
+      }
+  }
+
+% \cs_new:Npn \ztex_tl_replace_once:nnn #1#2#3 
+%   {
+%     \exp_args:Nee \__ztex_gen_token_in_range:nnnn {#1}
+%       {
+%         \sclist_item:en { \ztex_tl_pattern_range:nn {#1}{#2} }
+%           { 1 }
+%       }{ #3 }{ 1 }
+%   }
+\ztex_tl_replace:nnn {xxxxabc123def123123fgh123xxx123asdwzzz}{123}{|XXX|}\par
+
+\ztex_tl_replace_once:nnn {xxxxabc123def123123fgh123xxx123asdwzzz}{123}{|XXX|}\par
+% \__ztex_gen_token_in_range:nnnn {xxxxabc123def123123fgh123xxx123asdwzzz}{8,10;}{|XXX|}{1}
+
+
+% \edef\TTTa{\ztex_tl_replace_once:nnn {xxxxabc123def123123fgh123xxx123asdwzzz}{123}{|XXX|}}
+% \show\TTTa % ---> ''
+% \edef\TTTb{\ztex_tl_replace:nnn {xxxxabc123def123123fgh123xxx123asdwzzz}{123}{|XXX|}}
+% \show\TTTb % ---> 'xxxxabc|XXX|def|XXX||XXX|fghasdwzzz'
+
+
+% \exp_args:NNf \def\TTTc{\ztex_tl_replace:nnn {xxxxabc123def123123fgh123xxx123asdwzzz}{123}{|XXX|}} % does NOT works
+\exp_args:NNe \def\TTTc{\ztex_tl_replace:nnn {xxxxabc123def123123fgh123xxx123asdwzzz}{123}{|XXX|}}
+\show\TTTc
+\ExplSyntaxOff
+\end{document}
+
+
+
+
+
+% ===> expandable '\tl_if_eq:nnTF' and '\tl_if_in:nnTF'
+\InputIfFileExists{zlatex-cfg.tex}{}{}
+\documentclass[
+  % layout=margin
+]{../code/ztex}
+\ExplSyntaxOn
+\NewDocumentCommand{\tlifeq}{mmmm}
+  {
+    \ztex_tl_if_eq:nnTF {#1}{#2}{#3}{#4}
+  }
+
+
+% \prg_new_conditional:Npnn \ztex_tl_if_eq:nn #1#2 {p, T, F, TF}
+%   {
+%     \exp_args:Ne \int_compare:nTF {\tl_count:n {#1} = \tl_count:n {#2}}
+%       {
+%         \exp_args:Ne \int_compare:nTF {
+%           \exp_not:N \int_from_bin:n { \__ztex_tl_if_eq_aux:nn {#1}{#2} } 
+%           = 
+%           \exp_not:N \int_from_bin:n { \prg_replicate:nn {\tl_count:n {#1}}{1} }
+%         }{ \prg_return_true: }{ \prg_return_false: }
+%       }{ \prg_return_false: }
+%   }
+% \cs_new:Npn \__ztex_tl_if_eq_aux:nn #1#2
+%   {
+%     \exp_args:Ne \int_compare:nTF {\tl_count:n {#1} = \tl_count:n {#2}}
+%       {
+%         \int_step_tokens:nn {\tl_count:n {#1}}
+%           {
+%             \__ztex_tl_if_eq_aux_iii:nnnnn {#1}{#2} % '{ab}' will raise error
+%               { 1 } { 0 } 
+%           }
+%       }{ 0 }
+%   }
+% \prg_new_conditional:Npnn \__ztex_tl_if_eq_aux_ii:nnn #1#2#3 {T, F, TF}
+%   {
+%     \exp_args:Nee \__ztex_token_if_eq:nnTF 
+%       {\tl_item:nn {#1}{#3}}{\tl_item:nn {#2}{#3}}
+%       { \prg_return_true:  }
+%       { \prg_return_false: }
+%   }
+% \cs_new:Npn \__ztex_tl_if_eq_aux_iii:nnnnn #1#2#3#4#5
+%   {
+%     \__ztex_tl_if_eq_aux_ii:nnnTF {#1}{#2}{#5}{#3}{#4}
+%   }
+\ExplSyntaxOff
+
+
+
+\begin{document}
+\tlifeq{a}{a}{EQ}{NOT~EQ},   % EQ 
+\tlifeq{a}{b}{EQ}{NOT~EQ},   % NOT EQ
+\tlifeq{aa}{aa}{EQ}{NOT~EQ}, % EQ
+\tlifeq{aa}{ab}{EQ}{NOT~EQ}.\par % NOT EQ
+
+
+\ExplSyntaxOn
+\edef\TTTa{\ztex_tl_if_eq:nnTF {abcdefg}{abcdefh}{EQ}{NOT~EQ}}
+% \show\TTTa  % NOT EQ
+\detokenize\expandafter{\expanded{\TTTa}},~
+
+\edef\TTTb{\ztex_tl_if_eq:nnTF {ab\c_colon_str cd}{ab:cd}{EQ}{NOT~EQ}}
+% \show\TTTb % NOT EQ
+\detokenize\expandafter{\expanded{\TTTb}},~
+
+\str_set:Nn \l_tmpa_str {:}
+\edef\TTTc{\ztex_tl_if_eq:nnTF {ab\c_colon_str cd}{ab\l_tmpa_str cd}{EQ}{NOT~EQ}}
+% \show\TTTc % EQ
+\detokenize\expandafter{\expanded{\TTTc}}.\par
+\ExplSyntaxOff
+
+
+\tlifeq{a{a}}{aa}{EQ}{NOT~EQ},   % EQ
+\tlifeq{aaa}{a{aa}}{EQ}{NOT~EQ}, % NOT EQ
+\tlifeq{aaa}{aaa}{EQ}{NOT~EQ}.\par   % EQ 
+\end{document}
+
+
+
+
+
+
+
+
+% ==> test minus order in \pdv
+% NOTE: many bugs when excute symbolic calculation
+\InputIfFileExists{zlatex-cfg.tex}{}{}
+\documentclass[
+  % layout=margin
+]{../code/ztex}
+\ztexloadlib{alias}
+
+\begin{document}
+\zaliasOn
+Hello world.
+
+\begin{align}
+  1 + 1 & = \dv{\varphi, x, y, z_e, \tau}
+            [-2, ++3, -4.125, x, +z] \\
+  1 + 1 & = \dv{\varphi, x, y, z_e, \tau}
+        [--2, ++3, -4.125, x] \\
+  1 + 1 & = \dv{\varphi, x, y, z_e, \tau}
+          [{--}2, ++3, -4.125, x, \textsf{z--z}]
+\end{align}
+\zaliasOff
+\end{document}
+
+
+
+
+
+% ==> tabularray compatiblity test
+\InputIfFileExists{zlatex-cfg.tex}{}{}
+\documentclass[
+  % layout=margin
+]{../code/ztex}
+\ztexloadlib{alias}
+\parindent0pt
+\setlength{\fboxsep}{0pt}
+\ExplSyntaxOn
+\edef\MatDataA{\zalias_matrix_from_list:n {1, 2.00, , 4, ; , 6, 7.00, 9, 10 ; , 12, 13.00, , }}
+\edef\MatDataB{\zalias_diag_mat_data:nnnn {\c_false_bool}{?}{*}{1.00, , 2, 3, , 5}}
+\edef\MatDataC{\zalias_diag_mat_data:nnnn {\c_true_bool}{@}{*}{1.00, , 2, 3, , 5}}
+\edef\MatDataD{\zalias_jmat_data:nn {textstyle}{f, g; x, y, z}}
+\protected\def\cmdA#1#2{g^{#1#2}}
+\edef\MatDataF{\zalias_xmat_data:nn {\cmdA}{3, 4}}
+\ExplSyntaxOff
+\usepackage{tabularray}
+
+
+
+\begin{document}
+% \edef\TTT{\MatData}
+% \show\TTT
+
+\SetTblrOuter{expand={\TTT, \MatDataA, \MatDataB, \MatDataC, \MatDataD, \MatDataF}}
+\hskip6em
+\begin{tblr}
+  {
+    rowspec = {
+      |[2pt,green7]Q|[teal7]Q|[green7]Q|[2pt, green6]
+      Q|[green5]Q|[green4]Q|[green3]Q|[3pt,teal7]
+    }
+  }
+  \MatDataA
+\end{tblr}
+
+Anti-Diagnoal = 
+\begin{tblr}{ hlines, vlines }
+  \MatDataB
+\end{tblr}
+
+Diagnoal = 
+\begin{tblr}{ hlines, vlines }
+  \MatDataC
+\end{tblr}
+
+jmat =
+\begin{tblr}{ hlines, vlines, cells={mode=math} }
+  \MatDataD
+\end{tblr}
+
+xmat =
+\begin{tblr}{ hlines, vlines, cells={mode=math} }
+  \MatDataF
+\end{tblr}
+
+\zaliasOn
+Hello world: $\dd x/\dd y$ = $\mathrm{d}x / \mathrm{d}y$.
+
+\begin{align}
+  \dd x/\dd y = \mathrm{d}x / \mathrm{d}y
+\end{align}
+\zaliasOff
+\end{document}
+
+
+
+
+
+
+
+% ==> create matrix-relatex alias 
+\InputIfFileExists{zlatex-cfg.tex}{}{}
+\documentclass[
+  % layout=margin
+]{../code/ztex}
+\ztexloadlib{alias}
+\parindent0pt
+\setlength{\fboxsep}{0pt}
+\ExplSyntaxOn
+\ExplSyntaxOff
+
+
+\begin{document}
+\zaliasOn
+\section{TEST}
+Hello world:
+
+\begin{align}
+  \begin{Bmatrix}
+    1 & 2 & 3 \\
+    4 & 5 &  \\
+    6 & 7 & 8 %\\ % this '\\' is optional
+  \end{Bmatrix} & 
+  % \begin{Vmatrix}
+  %   \mat { 1, , 3;   4, 5, ; , 7, 8 }
+  % \end{Vmatrix}
+  % \text{mat-1}  = \mat  { 1, , 3;   4, 5, ; , 7, 8 } \qquad
+  %   & \text{mat-2} = \begin{Vmatrix}\mat{1, , 3; 4, 5, ; , 7, 8 }\end{Vmatrix} \\
+  % \text{pmat} = \pmat { 1, , 3;   4, 5, ; , 7, 8 } \qquad
+  %   & \text{bmat}   = \bmat { 1, , 3;   4, 5, ; , 7, 8 } \\
+  % \text{Bmat} = \Bmat { 1, , 3;   4, 5, ; , 7, 8 } \qquad
+  %   & \text{vmat}   = \vmat { 1, , 3;   4, 5, ; , 7, 8 } \\
+  % \text{Vmat-1} = \Vmat { 1, , 3;   40.102, 55, ; , 7, 8 } \qquad
+  %   & \text{Vmat-2}   = \Vmat { 1, , 3;   \textsf{xxx}, \mathbb{XX}, ; , 7, 8 }
+\end{align}
+
+
+% \begin{align}
+%   \text{mat}  = & \mat  { 1, , 3;   4, 5, ; , 7, 8 }\\
+%   \text{pmat} = & \pmat { 1, , 3;   4, 5, ; , 7, 8 }\\
+%   \text{bmat} = & \bmat { 1, , 3;   4, 5, ; , 7, 8 }\\
+%   \text{Bmat} = & \Bmat { 1, , 3;   4, 5, ; , 7, 8 }\\
+%   \text{vmat} = & \vmat { 1, , 3;   4, 5, ; , 7, 8 }\\
+%   \text{Vmat-1} = & \Vmat { 1, , 3;   40.102, 55, ; , 7, 8 } \\
+%   \text{Vmat-2} = & \Vmat { 1, , 3;   \textsf{xxx}, \mathbb{XX}, ; , 7, 8 }
+% \end{align}
+
+
+
+% \begin{align}
+%   % \imat{x}{1, ,3}
+%   % \mat{\imat{}{}} =
+%   \mat{\zmat{5}} = 
+%   \mat{\zmat[z]{5}} = 
+%   \mat{\zmat[a]{5}} = 
+%   \mat{\imat{x}{1, ,3}} =
+%   \pmat{\admat{}{1, 2, , 4, 5}} =
+%   \vmat{\imat{\cdot}{1,,,2}}
+% \end{align}
+
+% \begin{align}
+%   \begin{bmatrix}
+%     \frac {\partial f_1}{\partial x}&\frac {\partial f_1}{\partial y}\\
+%     \frac {\partial f_2}{\partial x}&\frac {\partial f_2}{\partial y}\\
+%   \end{bmatrix}
+% \end{align}
+
+\begin{align}
+  \jmat{f_1, f_2; x, y} = 
+  \jmat[c=displaystyle, b=V, s=2]{f, g, h; \textsf{x}, \mathbb{Y}, \F{z}} =
+  \jmat[b=b]{f, g; x, y, z} =
+\end{align}
+
+
+% \hmat{f;x,y,z}
+\begin{align}
+  \pdv{,x}[2] = \pdv{,x,x}[1, 1] \\
+  \pdv{,x}[2] = \pdv{h,x,y}[1, 1] 
+\end{align}
+% 'f' --> 'x': loop 'x', 'y', 'z';
+% 'f' --> 'y': loop 'x', 'y', 'z';
+% 'f' --> 'z': loop 'x', 'y', 'z';
+\begin{align}
+  \hmat{f;x,y}  = 
+  \hmat[c=displaystyle, s=2.5]{;x,y,z, {w\textbf{w}}} =
+  \hmat[b=v, s=1.5]{g;\textsf{x},\mathbb{K},z}
+\end{align}
+
+
+\protected\def\cmdA#1#2{g^{#1#2}}
+\begin{align}
+  \begin{bmatrix}
+    \xmat{3, 4, \cmdA}
+  \end{bmatrix} = 
+  \begin{bmatrix}
+    \gmat{v_1, v_2, v_3, v_4}
+  \end{bmatrix}
+\end{align}
+
+
+\ExplSyntaxOn\makeatletter
+% \zclistpatch {, 1, , 3, }
+% \edef\TTTa{\zclistpatch {, 1, , 3, }} % \scan_stop: ,1,\scan_stop: ,3,\scan_stop:,
+% \show\TTTa
+
+% \edef\TTT{\__zalias_matrix_from_list:n { 1, , 3; 4, 5,; 6, 7, 8 }}
+% \show\TTT
+% \begin{align}
+%   \begin{bmatrix}
+%     % \__zalias_matrix_from_list:n { 1, , 3; 4, 5, ; 6, 7, 8 }
+%     \mat { 1, , 3; 4, 5, ; 6, 7, 8 }
+%   \end{bmatrix}
+% \end{align}
+
+
+% --> '\zcmd_clist_patch:n' fails when enter list '1, ,3'
+% 1. turn '1, ,3' ---> '1, ,3,'  (add a trim ',')
+% 2. add a scan mark and ',' to end the Recursion 
+%    ---> '1, ,3  ,\s__clist_patch_stop,'
+% \scan_new:N \s__clist_patch_stop
+% \cs_new:Npn \__zzcmd_clist_patch:w #1, 
+%   { 
+%     \tl_if_empty:eTF { #1 } 
+%       {
+%         (FILLER)\__zzcmd_clist_patch:w
+%       }{
+%         \tl_if_eq:NNTF #1\s__clist_patch_stop
+%           {[END]}
+%           {
+%             % \typeout{------->\#1=#1}
+%             (#1)\__zzcmd_clist_patch:w
+%           }
+%       }
+%   }
+% % \__zcmd_clist_patch:w  1, ,3  ,\s__clist_patch_stop,\par % output is: '(1)(FILLER)(3)[END]'
+% % \__zcmd_clist_patch:w ,1, ,3, ,\s__clist_patch_stop,\par
+%%%% then just add ',\s__clist_patch_stop,' is enough 
+% \cs_new:Npn \z_clist_patch:n #1 
+%   { 
+%     \__zzcmd_clist_patch:w #1 
+%       ,\s__clist_patch_stop, 
+%   }
+% \z_clist_patch:n {  1, 2, 3}\par
+% \z_clist_patch:n {, 1, 2, 3}\par
+% \z_clist_patch:n {  1, 2, 3, }\par
+% \z_clist_patch:n {, 1, 2, 3, }\par
+
+% \edef\TTT{\z_clist_patch:n {, 1, 2, 3, }}
+% \edef\TTTa{\zcmd_clist_patch:n {, 1, , 3, }}
+% \show\TTTa
+% \edef\TTTb{\zcmd_sclist_patch:n {; 1; ; 3; }}
+% \show\TTTb
+
+
+% ---> space check:
+% \tl_if_empty:nTF {~}{\show\def}{\show\xdef} % log is:> \xdef=\xdef.
+% \tl_if_blank:nTF {~}{\show\def}{\show\xdef} % log is:> \def=\def.
+% \tl_if_blank:nTF {}{\show\def}{\show\xdef} % log is:> \def=\def.
+
+
+% ---> \mat { 1, , 3;   400, 555, ; , 7, 8 } ERROR
+% \zcmd_clist_patch:n {1, 2, , 3} % works
+% \zcmd_clist_patch:n {1, 2, , 33} % ERROR
+% \zcmd_clist_patch:n {11} % ERROR
+% \__zcmd_clist_patch:w 11 ,\s__clist_patch_stop, % ERROR
+% \tl_count:n {{11}} + \tl_count:n {\use:n{11}} + \tl_count:n {11}
+% \__zcmd_clist_patch:w 11 ,\s__clist_patch_stop,
+% \edef\TTT{\zcmd_clist_patch:n {1, 2, , 3,}}
+% \zcmd_clist_patch:n {1, 2, , 3,}
+% \edef\TTT{\zcmd_clist_patch:n {1, 2, , 33, \textsf{xxx}, \mathbb{ZZ},,}} 
+% \show\TTTa  % 1,2,\scan_stop: ,33,\textsf {xxx},\mathbb {ZZ},\scan_stop: ,\scan_stop: ,
+% \edef\TTTb{\zcmd_sclist_patch:n {1; 2; ; 33; \textsf{xxx}; \mathbb{ZZ};}}
+% \show\TTTb  % 1;2;\scan_stop: ;33;\textsf {xxx};\mathbb {ZZ};\scan_stop: ;
+
+
+% ---> general list patch
+% \__zcmd_sclist_patch:nw {X} 111; \textbf{2}   ;\s__sclist_patch_stop;
+% \edef\TTT{\zcmd_clist_patch:nn {\scan_stop:}{1, 222, ,\textbf{333}, , }}
+% \edef\TTT{\zcmd_sclist_patch:nn {\scan_stop:}{1; 222; ;\textbf{333}; ; }}
+% \show\TTT
+
+
+% \cs_new:
+% \typeout{-------->:\zclist_count:n {1, , 2, 3, }}
+% \edef\TTT{\zcmd_clist_patch:nn {\scan_stop:}{1, , 2, 3, }} % 5
+% \cs_new:Npn \__zalias_imat:nn #1#2 
+%   {
+%     % \def\TTT{#1} % 1,0,2,3,0,
+%     % \show\def
+%     \typeout{----->\#1=(#1), \#2=(#2)}
+%     \prg_replicate:nn { #2-1 }{ 0 }
+%       [\clist_item:nn { #1 }{#2}]
+%     \prg_replicate:nn { \clist_count:n {#1} - #2 }{ 0 }
+%     \par
+%   }
+% \exp_args:Ne \int_step_tokens:nn {\zclist_count:n {1, , 2, 3, }}
+%   { 
+%     \exp_args:Ne \__zalias_imat:nn {\zcmd_clist_patch:nn {0}{1, , 2, 3, }} 
+%   }
+% \show\TTT
+
+% \edef\TTT{\z@imat{1, 2}}
+% \edef\TTT{\imat{0}{1, , 3}}
+% \imat{FILLER}{1, ,3}
+% \show\TTT % [1]&0&0\\0&[0]&0\\0&0&[3]
+
+
+% --> jmat and hmat test
+% \__zalias_jmat_data:nn {frac}{f_1, f_2; x, y}
+% \edef\TTT{\__zalias_jmat_data:nn {frac}{f_1, f_2; x, y}}
+% \edef\TTT{\__zalias_jmat_data:n {f_1, f_2; x, y}}
+% \show\TTT
+% \frac {\partial f_1}{\partial x}&\frac {\partial f_1}{\partial y}\\
+% \frac {\partial f_2}{\partial x}&\frac {\partial f_2}{\partial y}\\
+
+% \edef\TTT{\__zalias_hmat_data:nn {}{f; x, y}}
+% \show\TTT
+% \z@pdv {f,x,x}[1,1]&\z@pdv {f,x,y}[1,1]\\
+% \z@pdv {f,y,x}[1,1]&\z@pdv {f,y,y}[1,1]\\
+
+
+% ---> \hmat bug
+% \__zalias_hmat_data:nn {}{;x,y,z}
+% \__zalias_hmat_data:nn {}{; x, y, z}
+% \edef\TTT{\__zalias_hmat_data:nn {}{; x, y, z}}
+% \show\TTT
+% \[
+% \begin{Vmatrix}
+%   \z@pdv {~,x}[2]&\z@pdv {,x,y}[1,1]&\z@pdv {\mbox{},x,z}[1,1]\\
+%   \z@pdv {\scan_stop: ,y,x}[1,1]&\z@pdv {\scan_stop: ,y}[2]&\z@pdv {\scan_stop: ,y,z}[1,1]\\
+%   \z@pdv {\scan_stop: ,z,x}[1,1]&\z@pdv {\scan_stop: ,z,y}[1,1]&\z@pdv {\scan_stop: ,z}[2]\\
+% \end{Vmatrix} \]
+% TODO: '\z@pdv {\scan_stop: ,z,x}' will raise bug !!!
+% \__zalias_hmat_data:nn {}{; \textsf{x}, y, z}
+
+
+% ---> \xmat test
+% \cs_set_protected:Npn \__cmdA:nn #1#2 {(#1)-[#2]}
+% \edef\TTTa{\z@xmat{2, 3, \__cmdA:nn}}
+% \show\TTTa
+% \[
+%   \begin{bmatrix}
+%     \TTTa
+%   \end{bmatrix}
+% \]
+\makeatother\ExplSyntaxOff
+\zaliasOff
+\end{document}
+
+
+
+
+
+
+
+
+% ==> semicolon list implementation
+\InputIfFileExists{zlatex-cfg.tex}{}{}
+\documentclass[
+  % layout=margin
+]{../code/ztex}
+\ztexloadlib{alias}
+\setlength{\fboxsep}{0pt}
+\usepackage{expl3}
+\begin{document}
+\section{TEST}
+
+
+\ExplSyntaxOn\makeatletter
+% \__ztex_token_if_eq:nnTF {12}{12}{}{}
+% \edef\TTT{\sclist_item:nn {a; b; c; d}{-1}}
+% \show\TTT
+
+% \edef\XXX{\sclist_count:n {a; b; c;}}
+% \show\XXX
+
+
+% \sclist_set:Nn \l_tmpa_sclist {a; b; c; d; e}
+% \sclist_show:N \l_tmpa_sclist
+% \group_begin:
+% \sclist_gset:Nn \l_tmpa_sclist {a; b; c; d;}
+% \group_end:
+% \sclist_show:N \l_tmpa_sclist
+
+% \edef\AAA{\sclist_item:cn {l_tmpa_sclist}{-2}}
+% \show\AAA
+
+% % expandable test
+\cs_set:Npn \__test_sclist:n #1 {(#1)|}
+% \edef\YYY{
+%   \sclist_map_function:NN \l_tmpa_sclist
+%     \__test_sclist:n
+% }
+% \edef\YYY{
+%   \sclist_map_function:nN {1;2;3;4}
+%     \__test_sclist:n
+% }
+% \detokenize\expandafter{\expanded{Hello \YYY\space #}} % 'Hello (1)|(2)|(3)|(4)| ##'
+% \show\YYY
+
+
+% \edef\TTT{\zcmd_clist_patch:n {,1,2,}}
+% \show\TTT
+% \setlength{\fboxsep}{3pt}
+% \def \clistA {,1,2,}
+% \zclist_count:o { \clistA };
+% \fbox{\zclist_item:on { \clistA }{2}}, \fbox{\zclist_item:on { \clistA }{-1}}; 
+% \detokenize\expandafter{\expanded{\zclist_range:onn { \clistA }{1}{3}}}
+
+
+% \sclist_new:N \l_tmpc_sclist 
+% \sclist_set:Nn \l_tmpc_sclist {1;23;456;} 
+% \cs_set:Npn \__test_sclist_map:nn #1#2 {[#1](#2)|}
+% \edef\TTTa{
+%   \sclist_map_tokens:nn {a;bc;def}
+%     { \__test_sclist_map:nn {XX} }
+% }
+% \edef\TTTb{
+%   \sclist_map_tokens:Nn \l_tmpc_sclist
+%     { \__test_sclist_map:nn {YY} }
+% }
+% \show\TTTa
+% \show\TTTb
+
+% --> test sclist clear
+% \sclist_new:N \l_tmpc_sclist 
+% \sclist_show:c {l_tmpc_sclist}
+% \sclist_set:Nn \l_tmpc_sclist {1;23;456;} 
+% \sclist_show:c {l_tmpc_sclist}
+% \sclist_clear:c {l_tmpc_sclist}
+% \sclist_show:c {l_tmpc_sclist}
+\makeatother\ExplSyntaxOff
+\end{document}
+
+
+
+
+
+% ==> create commands from physics package
+\InputIfFileExists{zlatex-cfg.tex}{}{}
+\documentclass[
+  % layout=margin
+]{../code/ztex}
+\ztexloadlib{alias}
+\setlength{\fboxsep}{0pt}
+\NewDocumentCommand{\TTT}{m}{\mathsf{#1}}
+
+
+
+\begin{document}
+\section{TEST}
+% \ExplSyntaxOn
+% $\cs:w mathbb \cs_end:{a}$
+% \ExplSyntaxOff
+
+% \show\def
+\zaliasOn
+% \ExplSyntaxOn
+% \seq_show:N \g__ztex_mathalias_internal_seq
+% \ExplSyntaxOff
+% % Hello world: $\dv*{\TTT{h}, \alpha}[2]$ is excellent.
+
+% % Hello world: $\dv*{\FF{h}, \alpha}[2]$ is excellent.
+% \show\F
+% \show\R
+% \begin{align}
+%   \F{A} = \R{A}
+% \end{align}
+% \zaliasOff
+% \end{document}
+% \show\mathbf
+% Hello world: $\dv*{\mathbf{h}, \alpha, \textit{zz}}[2, \F{x}]$ is excellent.
+% Hello world: $\dv*{\mathbb{H}, \alpha, \textsf{x}}[\textrm{x}, \textbf{x}]$ is excellent.
+
+
+\begin{align}
+  % \dv{, x}\\
+  \dv{, xx, y, \textsf{ww}}[zz, \mathbf{g}, \B{X}] & = 
+  % \dv{, x}[\textsf{z}]\\
+  % \dv{, x, y}[1, x+2]\\
+  \dv{, x, y, z}[, +++\alpha+1, +\xi+3+, \eta+2]\\
+  \dv{, x} & + \dv{, t}[2] = \dv*{f, \xi}\\
+  1 + 1 & = \dv{\varphi, x, y, z_e, \tau}
+                [2, 3, 4.125, x] \\
+  1 + 1 & = \dv{, x, y, z}
+                [1, \xi, \eta+2] \\
+  1 + 1 & = \dv{, (x^1), (x^2), (x^3)}
+                [1, 3, 1]
+\end{align}
+
+
+\begin{align}
+  \pdv{, x} & + \pdv{, t}[2] = \pdv*{f, \xi}\\
+  1 + 1 & = \pdv{\varphi, x, y, z, \tau}
+                [2, 2, 2, 1] \\
+  1 + 1 & = \pdv{, x, y, z}
+                [1, \xi, \eta+2] \\
+  1 + 1 & = \pdv{, (x^1), (x^2), (x^3)}
+                [1, 3, 1]
+\end{align}
+% \zaliasOff
+% \show\mathbf
+
+\ExplSyntaxOn
+% ---> clist patch
+% \clist_item:nn {, 1, 2, 3}{1}\par
+% \__zalias_item_first:w x,1, 2, 3\scan_stop:\par
+% \clist_clist_tail:n {x, y, z, w}
+% \seq_set_from_clist:Nn \l_tmpa_seq {, 2, 3, }
+% \zcmd_clist_tail:n {,2,3,}
+% \edef\TTT{2, 3, \scan_stop:}
+% \show\TTT % --> 2, 3, \scan_stop:
+% \zcmd_clist_patch:n {, 2, 3, }
+% \exp_args:NNe \seq_set_from_clist:Nn \l_tmpa_seq {\zcmd_clist_patch:n {, 2, 3, }}
+% \seq_show:N \l_tmpa_seq
+% \fbox{\seq_item:Nn \l_tmpa_seq {1}}
+% \fbox{\seq_item:Nn \l_tmpa_seq {-1}}
+
+% ---> zclist empty item test
+% \zclist_item:nn {xxx, yyy}{1} % --> works 
+% \zclist_item:nn {xxx, yyy}{0} % --> works 
+% \zclist_item:nn {xxx, yyy}{3} % --> works 
+% \zclist_item:en {}{3}   % --> works
+% \zclist_item:en {,1,}{2} % --> works
+% \zclist_item:en {2}{2} % --> ERROR: ! Argument of \__zcmd_clist_head:w has an extra }.
+% \zclist_item:nn {2}{2} % --> ERROR: ! Argument of \__zcmd_clist_head:w has an extra }.
+% \zclist_item:nn {2}{1}
+
+% ---> zclist count
+% \zclist_count:n {, x}
+
+% ---> clist range
+% \edef\TTT{"\zclist_range:nnn {, 2, 3, 4, }{2}{4}"}
+% \show\TTT % --> "2,3,4"
+
+% --> extract all valid numbers using l3regex
+% \tl_new:N \l_extract_tl
+% \regex_set:Nn \l_extract_tl { -?(?:\d+\.\d*|\.\d+|\d+) }
+% \seq_new:N \l_extract_seq
+% \regex_extract_all:NnN \l_extract_tl 
+%   {-8.0162$abc_+1.234$-23.9235} \l_extract_seq
+% \seq_show:N \l_extract_seq
+% >  {-8.0162}
+% >  {1.234}
+% >  {-23.9235}.
+
+% ---> apply \exp_not:n to clist item
+% \edef\TTT{\exp_not:n {\textsf{aaa}}, bbb, ccc,}
+% \edef\TTT{\textsf{aaa}, bbb, ccc,}
+% \edef\TTT{\zcmd_clist_patch:n {, aaa, $\alpha$, }}
+% \edef\TTT{\__zcmd_make_robust:n {\textsf{1}, aaa, $\alpha$}}
+% \show\TTT
+
+
+% --> empty token test
+% \ztex_index_token_if_eq:ennTF {}{1}{+}
+%   {XXX}{YYY}
+
+
+% ----> \zclist_item: bug 
+% \zclist_item:nn {, xx, y, \textsf {ww}}{1} % ---> ERROR
+% \zclist_item:nn {xx, y, \textsf {ww}}{1} % ---> ERROR
+% \clist_item:en {\zcmd_clist_patch:n {xx, y, \textsf {ww}}}
+%   { 1 } % ---> ERROR
+% \zcmd_clist_patch:n {xx, y, \textsf{ww}} % ----> ERROR
+% \clist_item:nn {xx, y, \textsf{ww}}{-1} % ----> works
+% \zcmd_clist_patch:n {xx, y, \textsf{w}} % ----> works
+% \zcmd_clist_patch:n {xx, y, \textsf{ww}} % ----> BUG: ! Missing number, treated as zero
+% \zcmd_clist_tail:n {1, 2, 33} % ---> works
+% \zcmd_clist_tail:n {1, 2, \textsf{a}} % ---> ERROR: ! Missing } inserted.
+%%%%% BUG lies in '\tl_reverse:n': '\textbf{ab}' --> '{ba}\textbf'
+% \zcmd_clist_tail:n {1, 2, \textsf{a}} % --> works
+% \zcmd_clist_tail:n {1, 2, \textsf{aa}} 
+% \zcmd_clist_tail:n {1, 2, \textsf{aa}, } 
+% \zcmd_clist_tail:n {1, 2, \textsf{aa}, x} 
+
+% \[
+%   \dv{, xx, y, \textsf{ww}}[zz, \mathbf{g}]
+% \]
+% \zclist_item:nn {, xx, y, \textsf{ww}}{1}   % ----> ERROR:! Missing number, treated as zero
+% \zcmd_clist_patch:n {, xx, y, \textsf{ww}}  % ----> ERROR:! Missing number, treated as zero
+% \zcmd_clist_tail:n {, xx, y, \textsf{ww}}   % ----> works
+% \zcmd_clist_head:n {, xx, y, \textsf{ww}}   % ----> works
+% \zcmd_clist_head:n {f, xx, y, \textsf{ww}}     % ----> works
+% \zclist_item:nn {, xx, y, \textsf{ww}}{1}
+% \edef\TTT{\zcmd_clist_patch:n {f,xx, y, \textsf{ww},}}
+% \show\TTT
+\zaliasOff
+% \clist_item:nn {xx, y, \textsf{ww}}{1}
+\ExplSyntaxOff
+\end{document}
+
+
+
+
+% TODO: map multiple tokens in '\<>_map_function:nnN'
+% \tl_map_function:nN {abcd}
+%   \my_function:nn {arg} % ---> fails 
+% But the following works:
+% \cs_set:Npn \my_product:nn #1#2
+%   { $#1 \times #2 = \int_eval:n { #1 * #2 }$, \quad }
+% \int_step_tokens:nnnn { 1 } { 1 } { 4 } 
+%   { \my_product:nn { 2 } }
+% output:2 × 1 = 2, 2 × 2 = 4, 2 × 3 = 6, 2 × 4 = 8
+
+
+
+
+\InputIfFileExists{zlatex-cfg.tex}{}{}
+\documentclass[
+  % layout=margin
+]{../code/ztex}
+\parindent0pt
+\usepackage[T1]{fontenc}
+\ExplSyntaxOn\makeatletter
+\cs_set_eq:NN \tlEQNnTF \tl_if_eq:NnTF
+\makeatother\ExplSyntaxOff
+
+\begin{document}
+\znewcmd\cmda
+  {
+    argA = Hello world,
+    argB:str = Hello world,
+    argC:int = 100,
+    argD:clist = {item-1, item-2, item-3},
+    arg-4:[fp] = {0.1, 0.22, 0.333},
+  }{
+    \argA = \expandafter\uppercase\expandafter{\argB} ??\par
+    \tlEQNnTF \argB {Hello world}{Equal}{Not Equal};\par
+    Integer = \intuse\argC;\par 
+    Clist use = \clistuse\argD{-1};\par
+    Token list = \cmdvar{arg-4}{3}
+  }
+\cmda{argC = 500}
+\end{document}
+
+
+
+
+
+
+
+% ==> update \znewcmd interface: '\znewcmd[arg-spec]{code}'
+\InputIfFileExists{zlatex-cfg.tex}{}{}
+\documentclass[
+  % layout=margin
+]{../code/ztex}
+\parindent0pt
+\usepackage[T1]{fontenc}
+\ExplSyntaxOn\makeatletter
+\cs_set_eq:NN \tlEQNnTF \tl_if_eq:NnTF
+
+\def\ZCMDNEW#1
+  {
+    parent=#1;
+    \peek_meaning:NTF {[}
+      {\fullcmdTMP}
+      {\shortcmd}
+  }
+\def\shortcmd#1{\#1=#1}
+\def\fullcmd#1#2{(\#1=#1), (\#2=#2)}
+\def\fullcmdTMP[#1]#2{\fullcmd {#1}{#2}}
+\makeatother\ExplSyntaxOff
+
+
+
+\begin{document}
+\section{DEBUG}
+
+\ZCMDNEW{short}{ARG}\par
+\ZCMDNEW{long}[ARG-1]{ARG-2}
+
+
+
+\end{document}
+
+
+
+
+
+
+
+
+
+
+
+% Python-like command setup syntax
+% DEF:
+% \ztexdef\<cmd>{<arg-1>:str=<val-1>, <arg-2>:int=<val-2>}
+%   {
+%      \<arg-1> % --> similar to #1
+%      \<arg-2> % --> similar to #2
+%   }
+% USE:
+% \<cmd>{<arg-1>=hello world, <arg-2>=100}
+\InputIfFileExists{zlatex-cfg.tex}{}{}
+\documentclass[
+  % layout=margin
+]{../code/ztex}
+\parindent0pt
+\usepackage[T1]{fontenc}
+\ExplSyntaxOn\makeatletter
+\cs_set_eq:NN \tlEQNnTF \tl_if_eq:NnTF
+\makeatother\ExplSyntaxOff
+
+
+\begin{document}
+\section{DEBUG section}
+\znewcmd\CMDA{argA=argA-val, argB:str=argB-val, argC}
+  { 
+    \tlEQNnTF \argA {argA-val}{argA~EQUALS}{argA~not~EQUALS}\par
+    \argA{} = \argB = \argC\par
+  }
+% \ExplSyntaxOn
+% \ztex_cmd_create:nnn {CMDA}
+%   {argA=argA-val, argB=argB-val}
+%   {\argA{} = \argB}
+% \keys_show:nn {ztex/cmd/CMDA}{argA}
+% \keys_show:nn {ztex/cmd/CMDA}{argB}
+% \keys_show:nn {ztex/cmd/CMDA}{argC}
+% \ExplSyntaxOff
+% \show\CMDA
+\CMDA{argB=argB-val-new} % --> works
+% \CMDA{argB=argB-val-new, argC} % --> works
+% \CMDA{argB=argB-val-new, argC=ARG-C} % --> works
+\dotfill\par
+
+
+% TODO:
+% 1. argX:[int]} --> use '\argX[1]' to get the first item, '\argX' will get the whole items
+% 2. argX:clist  --> use '\argX[1]' to get the first item
+\znewcmd\CMDB{
+  argD:str=argD-val, 
+  argE:tl=argE-val, 
+  argF:fp=3.1415926,
+  argG:int = 100,
+  argH:dim = 12pt+1em,
+  argI:clist = {AA, BB, CC},
+  argA = "Group variable range Test"
+}{
+  \tlEQNnTF \argD {argD-val}{argD~EQUALS}{argD~not~EQUALS}\par
+  \tlEQNnTF \argE {argE-val}{argE~EQUALS}{argE~not~EQUALS}\par
+  \fpuse\argF=\fpuse{\argF}\par
+  \string\argG=\intuse\argG\par
+  \string\argH=\dimuse\argH\par
+  \string\argI=\clistuse\argI{2}\par
+  argument of \string\CMDA{} TEST:
+  \string\argA=\argA\par
+}
+% \show\CMDB
+\CMDB{argF=6.2830178, argG=200,}
+% \CMDB{argF=aabb} % --> raise error
+\dotfill\par
+
+% \znewcmd\CMDA{}{}
+\begingroup
+\zsetcmd\CMDA{arg-1=aaa}{CODE=\cmdvar{arg-1}\par}
+INNER: \CMDA{};
+\endgroup
+OUTER: \CMDA{}
+
+
+
+
+\section{L3 TEST}
+% ==> list syntax
+\znewcmd\CMDD{argA:[int]={1, 2, 3, 4}, argB:[str]}
+  { 
+    CODE 1=(\argA{1}), (\argA{4})\par
+    CODE 2=(\argB{1}), (\argB{-1})
+  }
+\CMDD{argA={5.55, 6, 7, 8}, argB={AAA, BBB, CCC}}
+
+
+
+%%%%%%%     debug section   %%%%%%
+\dotfill\par
+\ExplSyntaxOn
+% ==> expandable token if in check
+% REF: https://tex.stackexchange.com/a/690186/294585
+% \long\def\isinlist#1#2{
+%   \immediateassignment\long\def\isinlistA##1#2##2\end/
+%   {\if\relax\detokenize{##2}\relax \expandafter\unless\fi}
+%   \expandafter\isinlistA#1\endlistsep#2\end/
+% }
+% \ztex_token_if_in:nNTF {abxc}x{IN}{NOT~IN}
+% \tl_set:Ne \l_tmpa_tl {\ztex_tl_if_in:nnTF {abcdef}{abc}{IN}{NOT~IN}}
+% \tl_show:N \l_tmpa_tl
+% \tl_set:Ne \l_tmpb_tl {\ztex_colon_if_in:nTF {abxx==cd}{IN}{NOT~IN}}
+% \tl_show:N \l_tmpb_tl
+
+
+% ==> keys group limit
+\def\XXX{
+  \group_begin:
+  \keys_define:nn {XXX}
+    {
+      xxx .tl_set:c  = {xxx},
+      xxx .initial:n = {XXX}
+    }
+  \keys_set:nn {XXX}{xxx=xxx-new}
+  \tl_new:N \xxxtl
+  \tl_set:Nn \xxxtl {xxx-tl}
+  \xxx
+  \group_end:
+}
+\def\YYY{
+  \group_begin:
+  \keys_define:nn {YYY}
+    {
+      yyy .tl_set:c  = {yyy},
+      yyy .initial:n = {YYY}
+    }
+  \keys_set:nn {YYY}{yyy=yyy-new}
+  |\yyy|=|\xxx|
+  \group_end:
+}
+(\XXX)|\xxxtl|(\YYY)
+
+% ==> expandable of \ztexdef
+\znewcmd\CMDC{arg-1=aaa}{CODE=\cmdvar{arg-1}}
+\tl_set:Ne \l_tmpa_tl {\CMDC{}}\par
+% \tl_show:N \l_tmpa_tl
+% NOTE: all of the commands defined by `\ztexdef' is robust.
+
+
+
+% <list> syntax for \znewcmd
+\dotfill\par
+% <type> = int for example:
+\keys_define:nn {ZZZ}
+  {
+    % zzz .clist_set:c = {__zzz_clist},
+    zzz .code:n      = {
+      \cs_set:Npn \zzz ##1
+        {
+          \clist_item:en
+            {
+              \clist_map_function:nN {#1}
+              % \clist_map_function:eN {\l_keys_value_tl}
+                \__zcmd_list_arg_str:n 
+            }{##1}
+        }
+    }
+  }
+\keys_set:nn {ZZZ}{zzz={zzz-1, zzz-2, zzz-3, zzz-4, zzz-5}}
+LIST~ITEM~TEST:(\zzz{1}), (\zzz{1}), (\zzz{3}), (\zzz{5})
+% \edef\TTT{\zzz{1}}
+% \show\TTT % zzz-1 ---> OK!
+
+% head and tail check in ztex
+% \ztex_head_tail_if_eq:nnnTF {[abc]}{[}{]}{EQUAL}{NOT~EQUAL}
+% \tl_if_eq:NNTF \tl_item:nn {xyz}z{EQUAL}{NOT~EQUAL}
+
+
+% \edef\TTT{\__ztex_tl_if_eq:eeTF {x}{\tl_item:nn {xyz}{2}}{EQUAL}{NOT~EQUAL}}
+% \edef\TTT{\ztex_head_tail_if_eq:nnnTF {xyz}{c}{z}{EQUAL}{NOT~EQUAL}} % works
+% \show\TTT % NOT EQUAL. --> works
+
+\edef\TTT{\ztex_token_strip_right:n {XabcZ}}
+% \show\TTT % works
+\ExplSyntaxOff
+\end{document}
+
+
+
+
+
+
+
+% ==> QED symbol position: --> BUG
+\InputIfFileExists{zlatex-cfg.tex}{}{}
+\documentclass[
+  % layout=margin
+]{../code/ztex}
+\zthmtitleformat*[proof]{\textsc{\color{blue}\zthmname}:\;}
+\usepackage{lipsum}
+\usepackage[hshift=0mm,vshift=0mm]{fgruler}
+% \usepackage{amsthm}
+\ExplSyntaxOn\makeatletter
+% \tex_lastxpos:D
+% \tex_lastypos:D
+% NOTE: you can use '\if@eqsw'(which lies in 'amsmath') to check if current equation env will be numbered !!!
+\newcommand{\zqedhere}
+  {
+    \tex_savepos:D
+    \property_record:nn {zqed@pos}{xpos, ypos}
+    \tex_savepos:D
+  }
+\ztex_msg_set:nn {zthm@qed@pos}
+  {
+    Compile~twice~to~ensure~the~QED~symbol~is~positioned~correctly
+  }
+\newcommand{\zshowqed}
+  {
+    \__ztex_get_qed_coor:
+    % \dim_show:N \l__ztex_qed_x_dim
+    \dim_compare:nNnTF {\l__ztex_qed_y_dim} = {0pt}
+      {
+        \ztex_msg_warn:n {zthm@qed@pos}
+      }{
+        \zpagemask[
+          anchor=br, 
+          % position={(\dim_eval:n {\l__ztex_qed_x_dim+3em}, \l__ztex_qed_y_dim)}
+          position={(\dim_eval:n {\Gm@lmargin+\textwidth}, \l__ztex_qed_y_dim)}
+        ]{
+          \qedsymbol
+        }
+      }
+  }
+\dim_new:N \l__ztex_qed_x_dim
+\dim_new:N \l__ztex_qed_y_dim
+\cs_set:Nn \__ztex_get_qed_coor:
+  {
+    \dim_set:Nn \l__ztex_qed_x_dim 
+      {
+        \fp_eval:n {
+          \property_ref:nn {zqed@pos}{xpos}
+            /65536
+        } pt
+      }
+    \dim_set:Nn \l__ztex_qed_y_dim 
+      {
+        \fp_eval:n {
+          \property_ref:nn {zqed@pos}{ypos}
+            /65536
+        } pt
+      }
+  }
+\cs_set:Nn \__ztex_clear_qed_coor: 
+  {
+    \dim_set:Nn \l__ztex_qed_x_dim {0pt}
+    \dim_set:Nn \l__ztex_qed_y_dim {0pt}
+  }
+\makeatother\ExplSyntaxOff
+
+
+
+\begin{document}
+\lipsum[1] 
+
+\fpeval{\textwidth/28}
+
+\begin{proof}
+\lipsum[2][1-5]
+\begin{align}
+  1 + 1 = 3\\
+  \alpha + \beta = \gamma\zqedhere
+\end{align}
+\lipsum[2][6-7]
+\end{proof}
+\zshowqed\par
+\dotfill\vskip3em
+
+\begin{proof}
+\lipsum[2][1-5]
+\begin{align}
+  1 + 1 = 3\\
+  \alpha + \beta = \gamma\zqedhere\notag
+\end{align}
+\end{proof}
+\zshowqed\par % the post QED position will be overide by the following QED position
+\dotfill\vskip3em
+
+
+\begin{proof}
+\lipsum[2][1-5]
+\begin{align}
+  1 + 1 = 3\\
+  \alpha + \beta = \gamma
+\end{align}
+\end{proof}
+\end{document}
+
+
+
+% ==> ztex 'fixdif' implementation
+\InputIfFileExists{zlatex-cfg.tex}{}{}
+\documentclass[
+  % layout=margin
+]{../code/ztex}
+\usepackage{amsmath}
+\usepackage{ascii}
+\ztexloadlib{alias}
+\ExplSyntaxOn\makeatletter
+% \char_set_mathcode:nn {"2F}{"413D}
+% \DeclareRobustCommand\dd{\mathinner{\mathrm{d}}\fd@mu@p}
+% \def\fd@mu@p{\mathchoice{\mskip-\thinmuskip}{\mskip-\thinmuskip}{}{}{}}
+\def\aaa{AAA}
+\def\aaabbb{AAABBB}
+\cs_set_eq:Nc \xxx{aaa\cs_to_str:N\bbb}
+% \show\xxx
+\makeatother\ExplSyntaxOff
+
+
+\begin{document}
+Hello, \S ~~ \FF ~~\xxx
+\def\grad{New Grad}
+test existing math command: $\grad, \div$;
+
+
+\zaliasOn[XXX]
+Hello world: $\div f = \dd y/\dd x$;
+
+Hello world: $a^{f(x)\dd x}$;
+
+
+\begin{align}
+  \int \FF{o(x)}\cdot a^{h(x)\dd x}\cdot\XXXhom(\S{F}(x))\XXXdiv g(x)\dd x\\
+  \dd y/\dd x
+\end{align}
+\zaliasOff
+
+
+test existing math command: $\grad, \div$
+
+
+\begin{zalias}[ZZZ]
+\begin{align}
+  \int \FF{o(x)}\cdot a^{h(x)\dd x} f(x)\ZZZdiv g(x)\dd x\\
+  \dd y/\dd x
+\end{align}
+
+
+\[ \alt, \im \]
+\zaliasopset{alt=ALT, im=IM} % only preamble, just for test
+\[ \alt, \im \]
+\end{zalias}
+
+\ExplSyntaxOn
+\seq_show:N \g__ztex_mathalias_protected_seq
+% >  {\S }
+% >  {\FF }
+% >  {\div }
+% >  {\grad }
+% >  {\ker }
+% >  {\hom }.
+\ExplSyntaxOff
+\end{document}
+
+
+
+
+
 % ==> ztex partial toc test
 % \InputIfFileExists{zlatex-cfg.tex}{}{}
 % \documentclass[
