@@ -1,4 +1,4 @@
-\ProvidesExplFile{ztex.module.cmd.tex}{2025/06/22}{1.0.1}{cmd~module~for~ztex}
+\ProvidesExplFile{ztex.module.cmd.tex}{2025/06/25}{1.0.1}{cmd~module~for~ztex}
 
 
 %%%%%     cmd module for ztex     %%%%%
@@ -183,6 +183,7 @@
     \prg_generate_conditional_variant:Nnn \ztex_colon_if_in:n 
       {e, V}{T, F, TF}
   }{
+    % --> NOTE:
     % \prop_new:N \l__ztex_colon_check_prop
     % \prop_set_from_keyval:Nn \l__ztex_colon_check_prop
     %   {
@@ -191,6 +192,28 @@
     %   }
     % NOTE: '\prop_if_in:NnTF' is expandable
     % \prop_if_in:NnTF \l__ztex_colon_check_prop {abc}{IN}{NOT~IN} % --> IN
+
+    % --> '\ztex_tl_if_in:nnTF' is expandable
+    \cs_new:Npn \int_step_break:
+      { \prg_map_break:Nn \int_step_break: { } }
+    \prg_new_conditional:Npnn \ztex_tl_if_in:nn #1#2 {p, T, F, TF}
+      {
+        \exp_args:Ne \int_step_tokens:nn { \tl_count:n {#1}-\tl_count:n {#2}+1 }
+          {
+            \__ztex_tl_if_in_aux:nnnn { #1 }{ #2 }
+              { \prg_map_break:Nn \int_step_break: { \prg_return_true: } }
+          }
+        \prg_return_false:
+        \prg_break_point:Nn \int_step_break: { }
+      }
+    \cs_new:Npn \__ztex_tl_if_in_aux:nnnn #1#2#3#4 
+      {
+        \exp_args:Ne \ztex_tl_if_eq:nnTF 
+          { \tl_range:nnn {#1}{#4}{#4+\tl_count:n {#2}-1} }{ #2 }
+          { #3 }{  }
+      } 
+
+    % --> ':' token check
     \cs_set:Npn \__ztex_colon_if_in:n #1
       {
         \tl_map_function:nN {#1}
@@ -213,15 +236,19 @@
         { \prg_return_true:  }
       }
     \prg_generate_conditional_variant:Nnn \ztex_colon_if_in:n 
-      { e, V }{ T, F, TF }
+      { e, V }{ p, T, F, TF }
   }
-% tl head/tail check
+\prg_generate_conditional_variant:Nnn \ztex_tl_if_in:nn
+  { no, ne, ee }{ p, T, F, TF }
+
+% tl if eq check
 \prg_new_conditional:Npnn \__ztex_token_if_eq:nn #1#2 {T, F, TF}
   {
     \bool_xor:nnT
       { \tl_if_empty_p:n {#1} }
       { \tl_if_empty_p:n {#2} }
       { \prg_return_false: }
+    % or use '\tl_if_single:nTF', which is expandable ??
     \exp_args:Ne \bool_lazy_any:nT
       {
         { \int_compare_p:n {\tl_count:n {#1}>1} }
@@ -231,8 +258,8 @@
           {
             Either~of~the~tokens~is~not~single,
             ~input~tokens~are(without~outer~brace):
-            \iow_newline:\#1(target)={#1},
-            \iow_newline:\#2(test)={#2}.
+            \iow_newline:\#1(target)={\exp_not:n {#1}},
+            \iow_newline:\#2(test)={\exp_not:n {#2}}.
           }
         \ztex_msg_error:n {zcmd@token@check}
       }
@@ -242,6 +269,46 @@
   }
 \prg_generate_conditional_variant:Nnn \__ztex_token_if_eq:nn 
   { e, ne, ee }{ T, F, TF }
+
+% NOTE: \ztex_tl_if_eq:nn(TF) is expandable
+\prg_new_conditional:Npnn \ztex_tl_if_eq:nn #1#2 {p, T, F, TF}
+  {
+    \exp_args:Ne \int_compare:nTF {\tl_count:n {#1} = \tl_count:n {#2}}
+      {
+        \exp_args:Ne \int_compare:nTF {
+          \exp_not:N \int_from_bin:n { \__ztex_tl_if_eq_aux:nn {#1}{#2} } 
+          = 
+          \exp_not:N \int_from_bin:n { \prg_replicate:nn {\tl_count:n {#1}}{1} }
+        }{ \prg_return_true: }{ \prg_return_false: }
+      }{ \prg_return_false: }
+  }
+\cs_new:Npn \__ztex_tl_if_eq_aux:nn #1#2
+  {
+    \exp_args:Ne \int_compare:nTF {\tl_count:n {#1} = \tl_count:n {#2}}
+      {
+        \int_step_tokens:nn {\tl_count:n {#1}}
+          {
+            \__ztex_tl_if_eq_aux_iii:nnnnn {#1}{#2} 
+              { 1 } { 0 } 
+          }
+      }{ 0 }
+  }
+\prg_new_conditional:Npnn \__ztex_tl_if_eq_aux_ii:nnn #1#2#3 {T, F, TF}
+  {
+    \exp_args:Nee \__ztex_token_if_eq:nnTF 
+      {\tl_item:nn {#1}{#3}}{\tl_item:nn {#2}{#3}}
+      { \prg_return_true:  }
+      { \prg_return_false: }
+  }
+\cs_new:Npn \__ztex_tl_if_eq_aux_iii:nnnnn #1#2#3#4#5
+  {
+    \__ztex_tl_if_eq_aux_ii:nnnTF {#1}{#2}{#5}{#3}{#4}
+  }
+\prg_generate_conditional_variant:Nnn \ztex_tl_if_eq:nn 
+  { e, ne, ee }{ p, T, F, TF }
+
+
+% token of index if eq
 \prg_new_conditional:Npnn \ztex_index_token_if_eq:nnn #1#2#3 {p, T, F, TF}
   {% #1:tl; #2:index; #3:token
     \__ztex_token_if_eq:neTF {#3}{\tl_item:nn {#1}{#2}}
@@ -251,6 +318,8 @@
         \prg_return_false: 
       }
   }
+
+% tl head/tail check
 \prg_new_conditional:Npnn \ztex_head_tail_if_eq:nnn #1#2#3 {p, T, F, TF}
   {% #1:tl; #2:head; #3:tail
     \__ztex_token_if_eq:neTF {#2}{\tl_item:nn {#1}{1}}
@@ -262,9 +331,92 @@
       { \prg_return_false: }
   }
 \prg_generate_conditional_variant:Nnn \ztex_head_tail_if_eq:nnn 
-  { e, nee, eee }{ T, F, TF }
+  { e, nee, eee }{ p, T, F, TF }
 \prg_generate_conditional_variant:Nnn \ztex_index_token_if_eq:nnn 
-  { e, nee, eee }{ T, F, TF }
+  { e, nee, eee }{ p, T, F, TF }
+
+% tl replace (which is expandable)
+\cs_new:Npn \ztex_tl_pattern_range:nn #1#2
+  {
+    \exp_args:Ne \int_step_tokens:nn { \tl_count:n {#1}-\tl_count:n {#2}+1 }
+      {
+        \__ztex_tl_pattern_range:nnn { #1 }{ #2 }
+      };
+  }
+\cs_new:Npn \__ztex_tl_pattern_range:nnn #1#2#3
+  {
+    \exp_args:Ne \ztex_tl_if_eq:nnTF 
+      { \tl_range:nnn {#1}{#3}{#3+\tl_count:n {#2}-1} }{ #2 }
+      { ;#3, \int_eval:n {#3+\tl_count:n {#2}-1} }
+      { }
+  } 
+\cs_generate_variant:Nn \tl_range:nnn { nne, nen, nee }
+\cs_new:Npn \__ztex_gen_token_in_range:nnnn #1#2#3#4
+  {
+    \int_case:nnF {#4}
+      {
+        {1}
+          {
+            \tl_range:nne {#1}{1}
+              {
+                \clist_item:en { \sclist_item:nn {#2}{#4} }{1} - 1
+              }
+            \int_compare:nNnT 
+              { \sclist_count:n { #2 } } = {1}
+              { #3
+                \tl_range:nen {#1}
+                  {
+                    \clist_item:en { \sclist_item:nn {#2}{#4} }{2} + 1
+                  }{ -1 }
+              }
+          }
+        {\sclist_count:n {#2}}
+          {
+            \tl_range:nen {#1}
+              {
+                \clist_item:en { \sclist_item:nn {#2}{#4} }{2} + 1
+              }{ -1 }
+          }
+      }{ #3
+        \int_compare:nNnTF 
+          {\clist_item:en { \sclist_item:nn {#2}{#4-1} }{2} + 1}
+          =
+          {\clist_item:en { \sclist_item:nn {#2}{#4} }{1}}
+        {}{
+          \tl_range:nee {#1}
+            {
+              \clist_item:en { \sclist_item:nn {#2}{#4-1} }{2} + 1
+            }{
+              \clist_item:en { \sclist_item:nn {#2}{#4} }{1} - 1
+            }
+        }
+      }
+  }
+\cs_new:Npn \ztex_tl_replace_once:nnn #1#2#3 
+  {
+    \exp_args:Nee \__ztex_gen_token_in_range:nnnn { #1 }
+      {
+        \sclist_item:en { \ztex_tl_pattern_range:nn {#1}{#2} }
+          { 1 }
+      }{ #3 }{ 1 }
+  }
+\cs_new:Npn \ztex_tl_replace_all:nnn #1#2#3 
+  {
+    \int_step_tokens:nn 
+      {
+        \sclist_count:e {\ztex_tl_pattern_range:nn {#1}{#2}}
+      }{
+        \exp_args:Nee \__ztex_gen_token_in_range:nnnn {#1}
+          {
+            \ztex_tl_pattern_range:nn {#1}{#2}
+          }{ #3 }
+      }
+  }
+\cs_generate_variant:Nn \ztex_tl_replace_once:nnn 
+  { onn, enn, noo, nee, eee }
+\cs_generate_variant:Nn \ztex_tl_replace_all:nnn 
+  { onn, enn, noo, nee, eee }
+
 % tl strip
 \cs_generate_variant:Nn \tl_tail:n {e}
 \cs_new:Npn \ztex_token_strip_both:n #1

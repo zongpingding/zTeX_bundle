@@ -7,18 +7,21 @@
 \RequirePackage{mathtools}
 
 
-% ==> check the minimum requirement
+\ztex_msg_set:nn { expl-too-old@alias }
+  {
+    *~Matrix-related~aliases~from~the~'alias'~library~are~not~
+    available~in~your~TeX~distribution. \\
+    *~Please~install~an~TeX~distribution~up~to~'January~15,~2025'~or~
+    update~using~your~TeX~package~manager~or~from~CTAN~to~use~it. \\
+    *~See~zTeX~documentation.~Loading~matrix-related~aliases~from~
+    'alias'~library~will~abort!
+  }
 \cs_if_exist:NF \int_step_tokens:nn
   {
-    \ztex_msg_set:nn { expl-too-old@alias }
-      {
-        Please~install~an~up~to~date~TeX~distribution~or~update~using~
-        your~TeX~package~manager~or~from~CTAN. \\
-        See~documentation.~Loading~'alias'~library~will~abort!
-      }
-    \msg_fatal:nn { ztex } { expl-too-old@alias }
-    \ExplSyntaxOff
-    \file_input_stop:
+    \ztex_msg_warn:n { expl-too-old@alias }
+    % \msg_fatal:nn { ztex } { expl-too-old@alias }
+    % \ExplSyntaxOff
+    % \file_input_stop:
   }
 
 
@@ -284,7 +287,7 @@
 \@onlypreamble\zaliasopset
 
 
-% ==> pyhsics package commands (\cs{qty}, ...) implementation ???
+% ==> pyhsics package commands 
 \NewDocumentCommand{\z@ab}{d()d[]d\{\}}
   { 
     \IfValueT{#1}{ \left(#1\right) }
@@ -306,6 +309,9 @@
     \exp_args:NNe \regex_split:NnN \l__zalias_num_extract_tl 
       { \clist_use:nn {#1}{+} } #3
   }
+\cs_new:Npn \__zalias_expr_format:N #1 
+  { }
+
 \tl_new:N \l__zalias_dv_order_tl
 \tl_new:N \l__zalias_dv_frac_over_tl
 \tl_new:N \l__zalias_dv_frac_lower_tl
@@ -415,6 +421,12 @@
 \ztex_mathalias_set:nn 
   { mat,   pmat,   bmat,   Bmat,   vmat,   Vmat   }
   { z@mat, z@pmat, z@bmat, z@Bmat, z@vmat, z@Vmat }
+
+
+% ==> check the minimum requirement for matrix alias
+\cs_if_exist:NTF \int_step_tokens:nn
+  { \if_true:  }
+  { \if_false: }
 
 % '\imat', '\admat' and '\zmat'
 \cs_new:Npn \zalias_diag_mat_data:nnnn #1#2#3#4 
@@ -607,3 +619,7 @@
     \rangle
   }
 \ztex_mathalias_set:nn { gmat }{ z@gmat }
+
+
+% end of '\int_step_tokens:nn' check
+\fi:
