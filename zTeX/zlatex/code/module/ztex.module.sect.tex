@@ -1,167 +1,1367 @@
-\ProvidesExplFile{ztex.module.sect.tex}{2025/05/19}{1.0.1}{sect~module~for~ztex}
+\ProvidesExplFile{ztex.module.sect.tex}{2025/07/08}{1.0.1}{sect~module~for~ztex}
 
 
-%%%%%     sect module for ztex     %%%%%
-% ==> backmatter and appmatter
-\IfClassLoadedTF{book}
+%%%%%             sect module for ztex          %%%%%
+%%% REFERENCE: 
+% 1. https://github.com/Sophanatprime/cus/blob/main/module/cus.module.struct.tex
+% 2. https://github.com/CTeX-org/ctex-kit/blob/master/ctex/ctex.dtx
+% 3. https://github.com/jbezos/titlesec
+
+
+%%%%%      disable 'sect' module scope begin    %%%%%
+\bool_if:NTF \g__ztex_sect_load_bool 
+  { \if_true:  }
+  { \if_false: }
+
+
+
+% ----------------------------------------------------------------------
+%                           sect module init
+% ----------------------------------------------------------------------
+\__ztool_load_library:n { file-io }
+
+\tl_new:N \l__zsect_level_keyval_tl
+\tl_new:N \l__zsect_level_clist_tl
+\tl_new:N \l__zsect_level_tl
+\int_new:N \l__zsect_class_type_int
+\int_set:Nn \l__zsect_class_type_int { 0 }
+\cs_generate_variant:Nn \cs_set:Npn { Npo }
+\clist_const:Nn \c_zsect_class_type_clist
   {
-    \renewcommand{\backmatter}
+    volume,  book, part, chapter, 
+    section, subsection, subsubsection, 
+    paragraph, subparagraph,
+  }
+\cs_new:Npn \__zsect_get_title_class_top:n #1
+  { 
+    \cs_if_exist:cT { #1 }
       {
-        \cleardoublepage
-        \@mainmattertrue
-        \pagestyle{plain}
+        \int_incr:N \l__zsect_class_type_int
+        \tl_put_right:Ne \l__zsect_level_keyval_tl
+          { #1 = \int_use:N \l__zsect_class_type_int, }
+        \tl_put_right:Ne \l__zsect_level_clist_tl { #1, }
+        \tl_put_right:Ne \l__zsect_level_tl { {#1} }
       }
-    \newcommand{\appmatter}
-      {
-        \cleardoublepage
-        \@mainmattertrue
-        \setcounter{chapter}{0}
-        \def\thechapter{\Alph{chapter}}
-        \renewcommand\theHchapter{Appendix-\thechapter}
-      }
-  }{}
-
-
-% ==> title page
-\let\ori@maketitle\maketitle
-\bool_if:NTF \g__ztex_slide_bool 
+  }
+\clist_map_function:NN \c_zsect_class_type_clist
+  \__zsect_get_title_class_top:n
+\int_const:Nn \g_zsect_class_type_int { \l__zsect_class_type_int }
+\exp_args:NNo \prop_const_from_keyval:Nn \c_zsect_level_prop
   {
-    \definecolor{zslide@title@color}{HTML}{d9d9d9}
-    \newcommand\ztex@maketitle 
+    \l__zsect_level_keyval_tl
+  }
+\clist_const:Ne \c_zsect_level_clist { \l__zsect_level_clist_tl }
+\tl_const:Ne \c_zsect_level_tl { \l__zsect_level_tl }
+\prop_const_from_keyval:Nn \c_zsect_level_leagcy_prop
+  {
+    volume        = -3,
+    book          = -2,
+    part          = -1,
+    chapter       = 0,
+    section       = 1,
+    subsection    = 2,
+    subsubsection = 3,
+    paragraph     = 4,
+    subparagraph  = 5,
+  }
+% ==> section class path map (for future use)
+\prop_const_from_keyval:Nn \g__ztoc_class_pathmap_prop
+  {
+    subparagraph  = part/chapter/section/subsection/subsubsection/paragraph/,
+    paragraph     = part/chapter/section/subsection/subsubsection/,
+    subsubsection = part/chapter/section/subsection/,
+    subsection    = part/chapter/section/,
+    section       = part/chapter/,
+    chapter       = part/,
+  }
+% temporary variables
+\newdimen\zsect@dim@a
+\newdimen\zsect@dim@b
+\newdimen\zsect@dim@c
+\box_new:N \l__ztoc_title_box
+\scan_new:N \s__ztoc_ignore_empty_mark
+
+
+
+% ----------------------------------------------------------------------
+%                           bookmark interface
+% ----------------------------------------------------------------------
+\cs_new:Npn \zsect_bookmark_add:nnn #1#2#3
+  {
+    \pdfbookmark[#1]{#2}{#3}
+  }
+\cs_generate_variant:Nn \zsect_bookmark_add:nnn { ene, eee }
+\cs_new:Npn \zsect_counter_to_arabic:N #1 
+  {
+    \exp_after:wN \def \cs:w the#1 \cs_end:
+      { \exp_args:Ne \arabic{#1} }
+  }
+\cs_generate_variant:Nn \zsect_counter_to_arabic:N { c }
+
+
+
+% ----------------------------------------------------------------------
+%                             toc interface
+% ----------------------------------------------------------------------
+% ==> toc related variables setup
+% public iow and bool checker
+\iow_new:N \g_ztoc_toc_iow
+\iow_new:N \g_ztoc_lof_iow
+\iow_new:N \g_ztoc_lot_iow
+\iow_new:N \g_ztoc_log_iow
+\iow_new:N \g_ztoc_lom_iow
+\iow_new:N \g_ztoc_loa_iow
+\bool_new:N \g_toc_write_enable_bool
+\bool_new:N \g_lof_write_enable_bool
+\bool_new:N \g_lot_write_enable_bool
+\bool_new:N \g_log_write_enable_bool
+\bool_new:N \g_lom_write_enable_bool
+\bool_new:N \g_loa_write_enable_bool
+
+% public globle seq for user
+\seq_new:N \g_ztoc_toc_seq
+\seq_new:N \g_ztoc_lof_seq
+\seq_new:N \g_ztoc_lot_seq
+\seq_new:N \g_ztoc_log_seq  % glossary
+\seq_new:N \g_ztoc_lom_seq  % theorem 
+\seq_new:N \g_ztoc_loa_seq  % algorithm
+\seq_gclear:N \g_ztoc_toc_seq
+\seq_gclear:N \g_ztoc_lof_seq
+\seq_gclear:N \g_ztoc_lot_seq
+\seq_gclear:N \g_ztoc_log_seq
+\seq_gclear:N \g_ztoc_lom_seq
+\seq_gclear:N \g_ztoc_loa_seq
+
+% public local toc seq
+\seq_new:N \g_ztoc_localtoc_seq
+\seq_new:N \g_ztoc_locallof_seq
+\seq_new:N \g_ztoc_locallot_seq
+\seq_new:N \g_ztoc_locallog_seq
+\seq_new:N \g_ztoc_locallom_seq 
+\seq_new:N \g_ztoc_localloa_seq 
+\seq_gclear:N \g_ztoc_localtoc_seq
+\seq_gclear:N \g_ztoc_locallof_seq
+\seq_gclear:N \g_ztoc_locallot_seq
+\seq_gclear:N \g_ztoc_locallog_seq
+\seq_gclear:N \g_ztoc_locallom_seq
+\seq_gclear:N \g_ztoc_localloa_seq
+
+% public and private formated(key-value) toc seq 
+% NOTE: used to generate local toc
+\seq_new:N \g_ztoc_keyvaltoc_seq
+\seq_new:N \g_ztoc_keyvallot_seq
+\seq_new:N \g_ztoc_keyvallof_seq
+\seq_new:N \g_ztoc_keyvallom_seq
+\seq_new:N \g_ztoc_keyvallog_seq
+\seq_new:N \g_ztoc_keyvalloa_seq
+
+\seq_new:N \g__ztoc_keyvaltoc_seq
+\seq_new:N \g__ztoc_keyvallot_seq
+\seq_new:N \g__ztoc_keyvallof_seq
+\seq_new:N \g__ztoc_keyvallom_seq
+\seq_new:N \g__ztoc_keyvallog_seq
+\seq_new:N \g__ztoc_keyvalloa_seq
+
+\seq_new:N \g__ztoc_localtoc_enabled_seq
+
+
+% ==> leagcy toc interface
+% NOTE: 
+% 1. redef these commands at last to prevent them from being modified;
+% 2. '\numberline' has been deprecated in 'zsect'.
+\ztex_hook_preamble_last:n
+  {
+    \cs_set_protected:Npn \numberline #1 
+      { 
+        \hb@xt@\zsect@dim@a{#1\hfil} 
+      }
+    \protected\def\contentsline #1#2#3#4
       {
-        \bool_if:NT \g__ztex_hyperref_bool 
+        \gdef\@contentsline@destination {#4}
+        \gdef\ztoc@current@class{#1} 
+        \csname l@#1\endcsname {#2}{#3}
+      }
+  }
+\cs_new:Npn \zsect_leaders:nnnnn #1#2#3#4#5
+  {% #1:type, #2:repeat, #3:width, #4:raise, #5:skip
+    \cs:w #1leaders\cs_end: \hbox:n { 
+      \box_move_up:nn { #4 }
+        {
+          \hbox_to_wd:nn {#3}{\hss #2 \hss}
+        }
+    } \hskip #5\relax
+  }
+\def\@dottedtocline #1#2#3#4#5
+  {%
+    \ifnum #1>\c@tocdepth \else 
+      \vskip \z@ \@plus.2\p@
+      {\leftskip #2\relax \rightskip \@tocrmarg \parfillskip -\rightskip
+        \parindent #2\relax\@afterindenttrue
+        \interlinepenalty\@M
+        \leavevmode
+        \@tempdima #3\relax
+        \advance\leftskip \@tempdima \null\nobreak\hskip -\leftskip
+        {#4}\nobreak
+        \leaders\hbox{$\m@th
+          \mkern \@dotsep mu\hbox{.}\mkern \@dotsep
+          mu$}\hfill
+        \nobreak\hb@xt@\@pnumwidth{\hfil #5%
+                                  \kern-\p@\kern\p@}%
+        \par}%
+    \fi
+  }
+\cs_new:Npn \zdottedtocline:nnnnnnnnn #1#2#3#4#5#6#7#8#9
+  {
+    \ifnum #1 > \c@tocdepth \else
+      \vskip #9 \relax
+      {
+        \leftskip  #2 \relax
+        \rightskip #3 \parfillskip -\rightskip
+        \parindent #2 \relax\@afterindenttrue
+        \interlinepenalty\@M
+        \leavevmode
+        \zsect@dim@a #4 \relax
+        \advance\leftskip \zsect@dim@a 
+        \null\nobreak \hskip -\leftskip
+        { #5 } \nobreak
+        #6 % leaders
+        \nobreak #7 #8
+      }
+    \fi
+  }
+\cs_new:Npn \zdotedtoclineleagcy:nnnnn #1#2#3#4#5
+  {
+    \zdottedtocline:nnnnnnnnn
+      {#1}{#2}{\@tocrmarg}
+      {#3}{#4}
+      {
+        \leaders\hbox
+          {$ \m@th
+            \mkern \@dotsep mu
+            \hbox{.}
+            \mkern \@dotsep mu
+          $}\hfill
+      }
+      { \hb@xt@\@pnumwidth{\hfil\normalfont \normalcolor #5} }
+      { \par }{ \z@ \@plus.2\p@ }
+  }
+
+
+% ==> ztoc interface 
+\cs_new:Npn \zsect_add_toc_line:nnnn #1#2#3#4 
+  {
+    \bool_if:NT \g_toc_write_enable_bool 
+      {
+        \iow_now:Ne \g_ztoc_toc_iow
           {
-            \phantomsection
-            \hypertarget{zslide:titlepage}{}
+            \token_to_str:N \contentsline{#1}{#2}{#3}{#4}
+            \c_percent_str
           }
-        \newgeometry{margin=1cm}
-        \null\vfill\begin{center}
-          \begin{tabular}{c}
-            \begin{zpic}[unit=\textwidth]
-              \zrectangle[arc=.01, draw=white, fill=zslide@title@color](-0.48, -.05)(.48, .05)
-              \put(-.425, -.015){\hb@xt@.85\textwidth{\hss\Large\zslidetitle\hss}}
-            \end{zpic}\\[3.5em]
-            \zslideauthor\\[3em]
-            \zslidedate
-          \end{tabular}
-        \end{center}\vfill\null
-        \thispagestyle{empty}\setcounter{page}{0}
-        \restoregeometry
       }
+  }
+\cs_new:Npn \zsect_add_to_table:Nnn #1#2#3
+  {% #1: stream; #2:table type; #3:content
+    \bool_if:cT { g_#2_write_enable_bool }
+      {
+        \iow_now:Ne #1  { #3 }
+      }
+  }
+\cs_generate_variant:Nn \zsect_add_to_table:Nnn  { Nne, Nee, cnn }
+\cs_generate_variant:Nn \zsect_add_toc_line:nnnn { eeee, eeoe, nnee, nnoe }
+
+
+% ==> toc template declare
+% NOTE: toc = name + title + leaders + page
+\gdef\ztoc@leader@type{}
+\gdef\ztoc@leader@content{.}
+\long\gdef\ztoc@line@end{\par}
+\def\ztoc@ignore@level{}
+
+\newlength{\ztoc@rmargin}
+\newlength{\ztoc@page@width}
+\newlength{\ztoc@leader@sep}
+\newlength{\ztoc@leader@raise}
+\setlength{\ztoc@rmargin}{\@tocrmarg}
+\setlength{\ztoc@leader@sep}{4.5pt}
+\setlength{\ztoc@leader@raise}{0pt}
+\setlength{\ztoc@page@width}{\@pnumwidth}
+
+\NewTemplateType{ztextoc}{3}
+\DeclareTemplateInterface{ztextoc}{default}{3}
+  {
+    no-parent     : boolean,
+
+    ignore        : boolean    = { false },
+    ignore.negate : boolean    = { false },
+    ignore.text   : tokenlist  = \s__ztoc_ignore_empty_mark,
+    ignore.name   : commalist  = { },
+    ignore.page   : commalist  = { },
+
+    hyper.name    : boolean    = { false },
+    hyper.title   : boolean    = { false },
+    hyper.page    : boolean    = { true },
+
+    line.end      : tokenlist  = \ztoc@line@end,
+    line.width    : length,
+
+    name          : tokenlist  = { },
+    name.width    : length,
+    name.format   : tokenlist,
+    name.format+  : tokenlist  = { },
+    name.before   : tokenlist  = { },
+    name.after    : tokenlist  = { },
+    name.hyper    : boolean    = \KeyValue { hyper.name },
+
+    title.width   : length,
+    title.format  : tokenlist,
+    title.format+ : tokenlist  = { },
+    title.before  : tokenlist  = { },
+    title.after   : tokenlist  = { },
+    title.hyper   : boolean    = \KeyValue { hyper.title },
+
+    page.format   : tokenlist  = \normalfont\normalcolor,
+    page.format+  : tokenlist  = { },
+    page.before   : tokenlist  = { },
+    page.after    : tokenlist  = { },
+    page.width    : length     = \ztoc@page@width,
+    page.hyper    : boolean    = \KeyValue { hyper.page },
+
+    format        : tokenlist  = { },
+    format+       : tokenlist  = { },
+    format.name   : tokenlist  = \KeyValue { name.format },
+    format.name+  : tokenlist  = \KeyValue { name.format+ },
+    format.title  : tokenlist  = \KeyValue { title.format },
+    format.title+ : tokenlist  = \KeyValue { title.format+ },
+    format.page   : tokenlist  = \KeyValue { page.format },
+    format.page+  : tokenlist  = \KeyValue { page.format+ },
+
+    width.name     : length    = \KeyValue { name.width },
+    width.title    : length,
+    width.page     : length    = \KeyValue { page.width },
+    width.line     : length    = \KeyValue { line.width },
+
+    space.before   : skip,
+    space.left     : skip,
+    space.right    : skip      = \ztoc@rmargin,
+    space.hang     : length    = \KeyValue { width.name },
+
+    leader.sep     : length    = \ztoc@leader@sep,
+    leader.raise   : length    = \ztoc@leader@raise,
+    leader.type    : tokenlist = \ztoc@leader@type,
+    leader.content : tokenlist = \ztoc@leader@content,
+
+    explicit       : boolean   = { false },
+    code           : tokenlist = { },
+  }
+\DeclareTemplateCode{ztextoc}{default}{3}
+  {
+    no-parent      = \l__ztoc_no_parent_bool,  % TODO: handle it in local toc
+
+    ignore         = \l__ztoc_ignore_bool,
+    ignore.text    = \l__ztoc_ignore_text_tl,
+    ignore.name    = \l__ztoc_ignore_name_clist,
+    ignore.page    = \l__ztoc_ignore_page_clist,
+    ignore.negate  = \l__ztoc_ignore_negate_bool,
+
+    line.end       = \l__ztoc_line_end_tl,
+    line.width     = \l__ztoc_width_line_dim,  % TODO: handle this key in the future
+
+    hyper.name     = \l__ztoc_hyper_name_bool,
+    hyper.title    = \l__ztoc_hyper_title_bool,
+    hyper.page     = \l__ztoc_hyper_page_bool,
+
+    format         = \l__ztoc_format_tl,
+    format+        = \l__ztoc_format_p_tl,
+    format.name    = \l__ztoc_name_format_tl,
+    format.name+   = \l__ztoc_name_format_p_tl,
+    format.title   = \l__ztoc_title_format_tl,
+    format.title+  = \l__ztoc_title_format_p_tl,
+    format.page    = \l__ztoc_page_format_tl,
+    format.page+   = \l__ztoc_page_format_p_tl,
+
+    name           = \l__ztoc_name_tl,
+    name.width     = \l__ztoc_width_name_dim,
+    name.format    = \l__ztoc_name_format_tl,
+    name.format+   = \l__ztoc_name_format_p_tl,
+    name.before    = \l__ztoc_name_before_tl,
+    name.after     = \l__ztoc_name_after_tl,
+    name.hyper     = \l__ztoc_hyper_name_bool,
+
+    title.width    = \l__ztoc_width_title_dim, 
+    title.format   = \l__ztoc_title_format_tl,
+    title.format+  = \l__ztoc_title_format_p_tl,
+    title.before   = \l__ztoc_title_before_tl,
+    title.after    = \l__ztoc_title_after_tl,
+    title.hyper    = \l__ztoc_hyper_title_bool,
+
+    page.format    = \l__ztoc_page_format_tl,
+    page.format+   = \l__ztoc_page_format_p_tl,
+    page.before    = \l__ztoc_page_before_tl,
+    page.after     = \l__ztoc_page_after_tl,
+    page.width     = \l__ztoc_width_page_dim,
+    page.hyper     = \l__ztoc_hyper_page_bool,
+
+    width.name     = \l__ztoc_width_name_dim,
+    width.title    = \l__ztoc_width_title_dim, % TODO: handle this key in the future
+    width.page     = \l__ztoc_width_page_dim,
+    width.line     = \l__ztoc_width_line_dim,  % TODO: handle this key in the future
+
+    space.before   = \l__ztoc_space_before_skip,
+    space.left     = \l__ztoc_space_left_skip,
+    space.right    = \l__ztoc_space_right_skip,
+    space.hang     = \l__ztoc_space_hang_dim,
+
+    leader.sep     = \l__ztoc_leader_sep_dim,
+    leader.raise   = \l__ztoc_leader_raise_dim,
+    leader.type    = \l__ztoc_leader_sep_tl,
+    leader.content = \l__ztoc_leader_content_tl,
+
+    explicit       = \l__ztoc_explicit_bool,
+    code           = \l__ztoc_code_tl,
   }{
-    \cs_generate_variant:Nn \ztool_get_ht:Nn {No}
-    \long\def\format@title{{\huge\bfseries\@title}}
-    \long\def\format@author{{\Large\bfseries\@author}}
-    \long\def\format@date{{\Large\textcolor{gray}{\@date}}}
-    \newcommand\title@upper@box[2][0pt]
+    \AssignTemplateKeys
+    % #1:toc depth(int); #2:{name}{title}; #3:page
+    \bool_if:NTF \l__ztoc_explicit_bool
       {
-        \parbox[b][#2][r]{\l_tmpa_dim}{
-          {\format@title}\\[#1]
-          {\format@author}
-        }
-      }
-    \newcommand\ztex@maketitle 
-      {
-        \thispagestyle{empty}
-        % calc max width/height, add '1pt' for right padding in case of wrong line break
-        \ztool_get_wd:Nn \l_tmpa_dim {\hbox:n {\format@title}}
-        \ztool_get_wd:Nn \l_tmpb_dim {\hbox:n {\format@author}}
-        \dim_set:Nn \l_tmpa_dim {
-          \dim_min:nn {
-            \dim_max:nn {\l_tmpa_dim}{\l_tmpb_dim} 
-        }{.8\textwidth} + 1pt} 											              % the max title width
-        \ztool_get_ht_plus_dp:Nn \l_tmpb_dim {\title@upper@box{}}
-        \dim_set:Nn \l_tmpb_dim {\dim_max:nn {80pt}{\l_tmpb_dim}} % the total title height
-        % typeset info
-        \vfill\vspace*{20pt}\begin{center}
-          \rule{6pt}{\l_tmpb_dim}\enskip
-          \title@upper@box[\fill]{\l_tmpb_dim}
-          \par\vfill\format@date
-        \end{center}\newpage
-      }
-  }
-\RenewDocumentCommand{\maketitle}{so}
-  {
-    \IfBooleanTF{#1}{\ori@maketitle}
-      {
-        \IfNoValueTF{#2}
-          { \ztex@maketitle }
+        \cs_set:Npo \__ztoc_explicit:nnnn ##1##2##3##4
+          { \l__ztoc_code_tl } 
+        \exp_args:Nff \__ztoc_explicit:nnnn { #1 }
+          { \__ztoc_extract_name:w #2\scan_stop: }
+          { \__ztoc_extract_title:w #2\scan_stop: }
+          { #3 }
+      }{
+        \bool_if:NTF \l__ztoc_ignore_negate_bool 
           {
-            \newgeometry{margin=#2}
-            \ori@maketitle
-            \restoregeometry
+            \__ztoc_ignore_negate_parser:nnn {#1}{#2}{#3}
+          }{
+            \__ztoc_ignore_parser:nnn {#1}{#2}{#3}
+          }
+      }
+    \skip_set:Nn \l__ztoc_space_before_skip {\z@ \@plus.2\p@}
+  }
+
+% toc ignore setup
+\cs_new:Npn \__ztoc_ignore_parser:nnn #1#2#3
+  {
+    \clist_if_in:NnF \ztoc@ignore@level { #1 } 
+      {
+        \bool_if:NF \l__ztoc_ignore_bool
+          {
+            % NOTE: '#3' can NOT be warpped in any command, for
+            %       example, '#3' can not be '\hyperlink{page.3}{3}'.
+            \clist_if_in:NnF \l__ztoc_ignore_page_clist { #3 }
+              {
+                % NOTE: compare string instead of tokenlist, for that
+                %      'title/name' may be formatted as '\textbf{xxx}'.
+                \clist_if_empty:NTF \l__ztoc_ignore_name_clist
+                  {
+                    \exp_args:NNo \str_set:Nn \l_tmpb_str {\use_ii:nn #2}
+                    \exp_args:NNo \str_if_in:NnF \l_tmpb_str
+                      { \l__ztoc_ignore_text_tl }
+                      {
+                        \__ztoc_dotted_tocline:nnn {#1}{#2}{#3}
+                      }
+                  }{
+                    \clist_map_inline:Nn \l__ztoc_ignore_name_clist
+                      {
+                        \exp_args:NNo \str_set:Nn \l_tmpa_str {\use_i:nn #2}
+                        \exp_args:NNo \str_set:Nn \l_tmpb_str {\use_ii:nn #2}
+                        \str_if_in:NnF \l_tmpa_str { ##1 }           % check 'name'
+                          {
+                            \exp_args:NNo \str_if_in:NnF \l_tmpb_str % check 'title'('text')
+                              { \l__ztoc_ignore_text_tl }
+                              {
+                                \__ztoc_dotted_tocline:nnn {#1}{#2}{#3}
+                              }
+                          }
+                      }
+                  }
+              }
           }
       }
   }
-
-
-
-% ==> main ToC interface
-\RequirePackage{titletoc}
-\AddToHook{cmd/@starttoc/before}{\vspace*{\dim_use:N \g__ztex_toc_title_vspace_dim}}
-\ztex_hook_preamble_last:n 
+\cs_new:Npn \__ztoc_ignore_negate_parser:nnn #1#2#3
   {
-    % multi-column toc
-    \int_compare:nNnT {\g__ztex_toc_column_int} > {1} 
+    \clist_if_in:NnT \ztoc@ignore@level { #1 }
       {
-        \RequirePackage{multicol}
-        \AddToHook{cmd/@starttoc/before}{
-          \begin{multicols}{\int_use:N \g__ztex_toc_column_int}  
-        }
-        \AddToHook{cmd/@starttoc/after}{\end{multicols}}
+        \__ztoc_dotted_tocline:nnn {#1}{#2}{#3}
+        \prg_map_break:Nn \__ztoc_ignore_negate_break: {}
       }
-    % toc strech
-    \AddToHookNext{cmd/@starttoc/before}{
-      \renewcommand{\baselinestretch}{\fp_use:N \g__ztex_toc_stretch_fp}\normalsize 
-    }
-    \AddToHookNext{cmd/@starttoc/after}{
-      \renewcommand{\baselinestretch}{1.3}\normalsize 
-    }
+    \clist_if_in:NnT \l__ztoc_ignore_page_clist { #3 }
+      {
+        \__ztoc_dotted_tocline:nnn {#1}{#2}{#3}
+        \prg_map_break:Nn \__ztoc_ignore_negate_break: {}
+      }
+    \exp_args:NNf \clist_if_in:NnT \l__ztoc_ignore_name_clist 
+      { \__ztoc_extract_name:w #2\scan_stop: }
+      {
+        \__ztoc_dotted_tocline:nnn {#1}{#2}{#3}
+        \prg_map_break:Nn \__ztoc_ignore_negate_break: {}
+      }
+    \exp_args:Nf \tl_if_in:nVT
+      { \__ztoc_extract_title:w #2\scan_stop: } \l__ztoc_ignore_text_tl
+      {
+        \__ztoc_dotted_tocline:nnn {#1}{#2}{#3}
+      }
+    \prg_break_point:Nn \__ztoc_ignore_negate_break: {}
   }
-\NewDocumentCommand\ztexstoptoc{mm}
+
+% '\__ztoc_dotted_tocline:nnn' implement below:
+\cs_new:Npn \__ztoc_ignore_negate_break:
+  { \prg_map_break:Nn \__ztoc_ignore_negate_break: { } }
+
+
+%%%%%     toc group parser begin    %%%%%
+\seq_new:N \g__ztoc_gparser_curstack_seq
+\seq_gclear:N \g__ztoc_gparser_curstack_seq
+\tl_new:N \l__ztoc_gparser_prev_tl
+
+% hook interface for toc group
+\seq_new:N \g__ztoc_group_hooks_seq
+\seq_gclear:N \g__ztoc_group_hooks_seq
+\bool_new:N \l_ztoc_show_hooks_bool
+\bool_set_false:N \l_ztoc_show_hooks_bool
+\cs_new_protected:Npn \ztoc_group_hook_add:n #1 
   {
-    \int_compare:nNnTF {#2}<{1}
-      {\relax}{\stopcontents[#1]}
+    \seq_if_in:NeF \g__ztoc_group_hooks_seq {#1}
+      {
+        \seq_gput_right:Ne \g__ztoc_group_hooks_seq {#1}
+        \str_case:enF { \clist_item:en {#1}{-1} }
+          {
+            {begin}{\exp_args:Ne \NewHook{#1}}
+            { end }{\exp_args:Ne \NewReversedHook{#1}}
+          }{ \relax }
+      }
+    \UseHook{#1}
+    \bool_if:NT \l_ztoc_show_hooks_bool
+      { \rlap{\(\langle \texttt{#1} \rangle\)} }
   }
-\NewDocumentCommand{\ztexptoc}{O{2}}
+\cs_new:Npn \__ztoc_dotted_tocline:nnn #1#2#3
   {
-    \group_begin:
-      \setcounter{tocdepth}{#1}
-      \IfClassLoadedTF{book}
-        { 
-          \startcontents[chapters]
-          \printcontents[chapters]{p}{#1}{}
-          \AddToHook{cmd/chapter/before}{\ztexstoptoc{chapters}{\thechapter}}
+    \ifnum #1 > \c@tocdepth \else
+      \vskip \l__ztoc_space_before_skip \relax
+      \exp_args:No \__step_toc_group_int:n {\ztoc@current@class}
+      \edef\ztoc@newclass@level
+        { \prop_item:No \c_zsect_level_prop {\ztoc@current@class} }
+      \bool_while_do:nn 
+        {
+          ( ! \seq_if_empty_p:N \g__ztoc_gparser_curstack_seq) &&
+          ( 
+            \int_compare_p:n 
+              { 
+                ( \prop_item:Ne \c_zsect_level_prop
+                  { 
+                    \clist_item:en {\seq_item:Nn \g__ztoc_gparser_curstack_seq {1}}
+                      {1} 
+                  } + 0
+                )
+                >= \ztoc@newclass@level 
+              } 
+          )
         }{
-          \startcontents[sections]
-          \printcontents[sections]{p}{1}{}
-          \AddToHook{cmd/section/before}{\ztexstoptoc{sections}{\thesection}}
+          \seq_gpop:NN \g__ztoc_gparser_curstack_seq \l__ztoc_gparser_prev_tl
+          \ztoc_group_hook_add:n {\l__ztoc_gparser_prev_tl,end}
         }
-    \group_end:
+      \__ztoc_dotted_tocline_raw:nnn {#1}{#2}{#3}
+      \ztoc_group_hook_add:n {\ztoc@current@class,\__use_toc_group_int:e {\ztoc@current@class},begin}
+      \seq_gpush:Ne \g__ztoc_gparser_curstack_seq 
+        {
+          \ztoc@current@class
+          ,\int_eval:n { \__use_toc_group_int:e {\ztoc@current@class} }
+        }
+    \fi
   }
-
-
-% ==> sec format setup
-\RequirePackage{titlesec}
-\cs_new:Nn \__ztex_titlesec_copy:nnnnnnn 
+\cs_new:Npn \__ztoc_dotted_tocline_group_end:
   {
-    \titleformat{#1}[#2]{#3}{#4}{#5}{#6}[#7]
+    \seq_map_inline:Nn \g__ztoc_gparser_curstack_seq
+      {
+        \seq_gpop:NN \g__ztoc_gparser_curstack_seq \l__ztoc_gparser_prev_tl
+        \ztoc_group_hook_add:n {\l__ztoc_gparser_prev_tl,end}
+      }
   }
-\cs_generate_variant:Nn \__ztex_titlesec_copy:nnnnnnn { ooffofo }
+\NewHook{ztoc/tocline/begin}
+\NewReversedHook{ztoc/tocline/end}
+\cs_new:Npn \__ztoc_dotted_tocline_raw:nnn #1#2#3
+  {
+    \edef\ztoc@tmpa@skip
+      {
+        \skip_eval:n {
+          \l__ztoc_space_left_skip -
+          \l__ztoc_space_hang_dim
+        }
+      }
+    {
+      \UseHook{ztoc/tocline/begin}
+      \leftskip  \ztoc@tmpa@skip \relax
+      \rightskip \l__ztoc_space_right_skip \parfillskip -\rightskip
+      \parindent \ztoc@tmpa@skip \relax\@afterindenttrue
+      \interlinepenalty\@M
+      \leavevmode
+      \zsect@dim@a \l__ztoc_space_hang_dim \relax
+      \advance\leftskip \zsect@dim@a 
+      \null\nobreak \hskip -\leftskip
+      { \__ztoc_name_title_set:nn {#2}{\@contentsline@destination} } \nobreak
+      \__ztoc_leader_set: % leaders
+      \nobreak \__ztoc_page_set:nn { #3 }{page.#3} \l__ztoc_line_end_tl
+      \UseHook{ztoc/tocline/end}
+    }
+  }
 
-% numbered chapter format
-\titleformat{\chapter}[display]
-  {\bfseries\huge\color{black}}
-  {\flushright\bfseries\huge\color{\tl_use:N \l__ztex_chapter_color_tl}
-  \textsc{\chaptertitlename}\hspace{1ex}
-  {\scalebox{1.75}{\thechapter}}}
-  {5pt}
-  {\color{\tl_use:N \l__ztex_chapter_rule_color_tl}\titlerule\vspace{1ex}}
+% toc group parser aux functions:
+\clist_map_inline:Nn \c_zsect_level_clist
+  {
+    \bool_new:c { g__toc_#1_in_bool }
+    \bool_gset_false:c { g__toc_#1_in_bool }
+    \int_new:c { g__toc_group_#1_int }
+    \int_set:cn { g__toc_group_#1_int }{ 0 }
+  }
+\cs_new:Npn \__reset_toc_group_int: 
+  {
+    \clist_map_inline:Nn \c_zsect_level_clist
+      {
+        \int_gset:cn { g__toc_group_##1_int }
+          { 0 }
+      }
+  }
+\cs_new:Npn \__step_toc_group_int:n #1 
+  {
+    \int_gincr:c { g__toc_group_#1_int }
+    \__reset_class_below_int:nn { #1 }{0}
+  }
+\cs_new:Npn \__use_toc_group_int:n #1 
+  {
+    \int_use:c { g__toc_group_#1_int }
+  }
+\cs_generate_variant:Nn \__use_toc_group_int:n { e }
+\cs_new:Npn \__reset_class_below_int:nn #1#2 
+  {
+    \edef\zsect@tmpa@int { \prop_item:Nn \c_zsect_level_prop {#1} }
+    \prop_map_inline:Nn \c_zsect_level_prop
+      {
+        \int_compare:nNnT { ##2 } > { \zsect@tmpa@int }
+          { 
+            \int_gset:cn { g__toc_group_##1_int }{ #2 }
+          }
+      }
+  }
+%%%%%     toc group parser end    %%%%%
 
-% unnumbered chapter format
-\titleformat{name=\chapter, numberless}
-  {\bfseries\Huge}
-  {}{0pt}{}
+\cs_new:Npn \__ztoc_leader_set: 
+  {
+    \zsect_leaders:nnnnn { \l__ztoc_leader_sep_tl }
+      { \l__ztoc_leader_content_tl }
+      { \dim_eval:n {\l__ztoc_leader_sep_dim*2} }
+      { \l__ztoc_leader_raise_dim }
+      { \fill }
+  }
+\cs_new:Npn \__ztoc_page_set:nn #1#2
+  {
+    \__ztoc_item_hyper_begin_aux:nn {page}{ #2 }
+    \hb@xt@\l__ztoc_width_page_dim
+      {
+        \hss
+        \l__ztoc_page_format_tl
+        \l__ztoc_page_format_p_tl 
+        \l__ztoc_page_before_tl
+        #1
+        \l__ztoc_page_after_tl
+      }
+    \__ztoc_item_hyper_end_aux:n {page}
+  }
+\cs_new:Npn \__ztoc_name_title_set:nn #1#2
+  {
+    \__ztoc_item_hyper_begin_aux:nn {name}{ #2 }
+    \exp_args:Nf \__ztoc_dottedline_name_set:n 
+      { \__ztoc_extract_name:w #1\scan_stop: }
+    \__ztoc_item_hyper_end_aux:n {name}
+    \__ztoc_item_hyper_begin_aux:nn {title}{ #2 }
+    \exp_args:Nf \__ztoc_dottedline_title_set:n 
+      { \__ztoc_extract_title:w #1\scan_stop: }
+    \__ztoc_item_hyper_end_aux:n {title}
+  }
+\cs_new:Npn \__ztoc_item_hyper_begin_aux:nn #1#2
+  { 
+    \bool_if:cT { l__ztoc_hyper_#1_bool }
+      {
+        \hyper@linkstart{link}{#2} 
+      }
+  }
+\cs_new:Npn \__ztoc_item_hyper_end_aux:n #1
+  { 
+    \bool_if:cT { l__ztoc_hyper_#1_bool }
+      { \hyper@linkend }
+  }
+\cs_new:Npn \__ztoc_dottedline_name_set:n #1 
+  {
+    \hb@xt@ \l__ztoc_width_name_dim 
+      { 
+        \l__ztoc_format_tl
+        \l__ztoc_format_p_tl
+        \l__ztoc_name_format_tl
+        \l__ztoc_name_format_p_tl
+        \l__ztoc_name_before_tl
+        \tl_if_empty:NTF \l__ztoc_name_tl 
+          { #1 }{ \l__ztoc_name_tl }
+        \l__ztoc_name_after_tl
+      \hss}
+  }
+\cs_new:Npn \__ztoc_dottedline_title_set:n #1 
+  {
+    % \hb@xt@ \l__ztoc_width_title_dim 
+      {
+        \l__ztoc_format_tl
+        \l__ztoc_format_p_tl
+        \l__ztoc_title_format_tl
+        \l__ztoc_title_format_p_tl
+        \l__ztoc_title_before_tl
+        #1
+        \l__ztoc_title_after_tl
+      }
+  }
+\cs_new:Npn \__ztoc_extract_name:w #1\scan_stop:
+  { \tl_item:nn {#1}{1} }
+\cs_new:Npn \__ztoc_extract_title:w #1\scan_stop:
+  { \tl_item:nn {#1}{-1} }
 
-% chapter space
-\titlespacing{\chapter}{0pt}{-25pt}{25pt}
+
+% ==> declare '\l@<class>' in an abstract level
+\DeclareInstance{ztextoc}{ztoc/level 1}{default}
+  {
+    format         = \large\bfseries,
+    width.name     = 1.9em,
+    space.before   = 1em\@plus\p@,
+    space.hang     = 1.9em,
+    space.left     = 1.9em,
+    leader.content = ,
+  }
+\DeclareInstance{ztextoc}{ztoc/level 2}{default}
+  {
+    format         = \bfseries,
+    width.name     = 1.5em,
+    space.before   = 1em\@plus\p@,
+    space.hang     = 1.5em,
+    space.left     = 1.5em,
+    leader.content = ,
+  }
+\DeclareInstance{ztextoc}{ztoc/level 3}{default}
+  {
+    width.name     = 2.3em,
+    space.hang     = 2.3em,
+    space.left     = 3.8em,
+  }
+\DeclareInstance{ztextoc}{ztoc/level 4}{default}
+  {
+    width.name     = 3.2em,
+    space.hang     = 3.2em,
+    space.left     = 7em,
+  }
+\DeclareInstance{ztextoc}{ztoc/level 5}{default}
+  {
+    width.name     = 4.1em,
+    space.hang     = 4.1em,
+    space.left     = 11.1em,
+  }
+\DeclareInstance{ztextoc}{ztoc/level 6}{default}
+  {
+    width.name     = 5em,
+    space.hang     = 5em,
+    space.left     = 16.2em,
+  }
+\DeclareInstance{ztextoc}{ztoc/level 7}{default}
+  {
+    width.name     = 6em,
+    space.hang     = 6em,
+    space.left     = 22.25em,
+  }
+\prop_map_inline:Nn \c_zsect_level_prop 
+  {
+    \cs_set:cpn {l@#1} ##1##2
+      {
+        \exp_args:Nne \UseInstance{ztextoc}
+          { ztoc/level #2 }
+          { #2 }{ ##1 }{ ##2 }
+      }
+  }
+
+
+% ==> user interface
+\ztex_keys_define:nn { ztoc/option }
+  { 
+    rmargin        .code:n = { \setlength\ztoc@rmargin{#1} },
+    ignore.level   .code:n = { \def\ztoc@ignore@level {#1} },
+
+    line.end       .code:n = { \long\gdef\ztoc@line@end  {#1} },
+    page.width     .code:n = { \setlength\ztoc@page@width{#1} }, 
+
+    leader.type    .code:n = { \gdef\ztoc@leader@type{#1} },
+    leader.sep     .code:n = { \setlength\ztoc@leader@sep  {#1} },
+    leader.raise   .code:n = { \setlength\ztoc@leader@raise{#1} },
+    leader.content .code:n = { \setlength\ztoc@leader@content{#1} },
+  }
+\NewDocumentCommand{\ztocset}{ m }
+  {
+    \ztex_keys_set:nn { ztoc/option }
+      { #1 }
+  }
+% NOTE: 'explicit' bug lies here for '\clist_map_inline:nn' !!
+% \NewDocumentCommand{\ztocformat}{ m+m }
+%   {
+%     \clist_map_inline:nn { #1 }
+%       {
+%         \exp_args:Nne \EditInstance{ztextoc}
+%           { ztoc/level
+%             \prop_item:Ne \c_zsect_level_prop 
+%               { \cs_to_str:N ##1 }
+%           }{#2}
+%       }
+%   }
+\NewDocumentCommand{\ztocformat}{m+m}
+  {
+    \prop_if_in:NeT \c_zsect_level_prop { \cs_to_str:N #1 }
+      {
+        \exp_args:Nne \EditInstance{ztextoc}
+          { ztoc/level
+            \prop_item:Ne \c_zsect_level_prop 
+              { \cs_to_str:N #1 }
+          }{#2}
+      }
+  }
+\NewDocumentCommand{\ztocgroupinsert}{mm}
+  {
+    \AddToHook{#1}{#2}
+  }
+\NewDocumentCommand{\ztocgroupshow}{}
+  { \bool_set_true:N \l_ztoc_show_hooks_bool }
+\NewDocumentCommand{\ztocgrouphide}{}
+  { \bool_set_false:N \l_ztoc_show_hooks_bool }
+
+% extended toc interface
+\NewDocumentCommand{\ztocenabletable}{ O{toc} }
+  {
+    \seq_gset_from_clist:Nn \g__ztoc_localtoc_enabled_seq 
+      { #1 }
+    \clist_map_inline:nn { #1 }
+      {
+        \bool_gset_true:c { g_##1_write_enable_bool }
+        % global toc
+        \ztool_gread_file_as_seq:nnc { \c_false_bool }
+          { \c_sys_jobname_str.##1 } 
+          { g_ztoc_##1_seq }
+        % keyval toc from previous run
+        \ztool_gread_file_as_seq:nnc { \c_false_bool }
+          { \c_sys_jobname_str.p##1 } 
+          { g_ztoc_keyval##1_seq }
+        \seq_gclear:c { g__ztoc_keyval##1_seq }
+        \ztex_hook_doc_end:n
+          {
+            \ztool_write_seq_to_file:nce { \c_true_bool } 
+              { g__ztoc_keyval##1_seq  }
+              { \c_sys_jobname_str.p##1 }
+          }
+        % open stream for writing
+        \iow_open:cn { g_ztoc_##1_iow } 
+          { \c_sys_jobname_str.##1 }
+      }
+  }
+\DeclareDocumentCommand{\tableofcontents}{ o }
+  {
+    \IfValueT{#1}{\section*{#1}}
+    \seq_use:Nn \g_ztoc_toc_seq {}
+    \__ztoc_dotted_tocline_group_end:
+  }
+% '\multitableofcontent' need 'multicol' package
+\DeclareDocumentCommand{\multitableofcontent}{ O{2} }
+  {
+    \begin{multicols}{#1}
+      \seq_use:Nn \g_ztoc_toc_seq {}
+      \__ztoc_dotted_tocline_group_end:
+    \end{multicols}
+  }
+
+% local toc
+\NewDocumentCommand{\zlocaltoc}{mm}
+  {
+    \clist_map_inline:nn { #2 }
+      {
+        \ztoc_localtable_byclass:nn { #1 }{ ##1 }
+        \seq_use:Nn \g_ztoc_localtoc_seq {}
+        \__ztoc_dotted_tocline_group_end:
+      }
+  }
+\cs_new_protected:Npn \ztoc_localtable_byclass:nn #1#2 
+  {% #1:class, #2:index
+    \seq_gclear:N \g_ztoc_localtoc_seq
+    \bool_set_false:N \l__ztoc_find_collect_item_bool
+    \seq_map_inline:Nn \g_ztoc_keyvaltoc_seq
+      {
+        \prop_set_from_keyval:Nn \l_tmpa_prop { ##1 }
+        \exp_args:Ne \__step_toc_collect_int:n { \prop_item:Nn \l_tmpa_prop {class} }
+        \exp_args:Ne \int_compare:nNnT 
+          { \__use_toc_collect_int:n {#1} } = {#2+1}
+          { \seq_map_break: }
+        \bool_if:NT \l__ztoc_find_collect_item_bool 
+          {
+            \exp_args:Ne \int_compare:nNnT
+              { \prop_item:Nn \c_zsect_level_prop {#1} } 
+              > 
+              { \exp_args:NNe \prop_item:Nn \c_zsect_level_prop 
+                  { \prop_item:Nn \l_tmpa_prop {class} } 
+              }{ \seq_map_break: }
+          }
+        \exp_args:Ne \int_compare:nNnT { \__use_toc_collect_int:n {#1} } = {#2}
+          {
+            \bool_set_true:N \l__ztoc_find_collect_item_bool
+            \seq_gput_right:Ne \g_ztoc_localtoc_seq 
+              { \prop_item:Nn \l_tmpa_prop {raw} }
+          }
+      }
+    \__reset_toc_collect_int:
+  }
+\cs_generate_variant:Nn \ztoc_localtable_byclass:nn { ne, en, ee }
+% NOTE: '\__zsect_local_toc_generate:nn' has been deprecated 
+\cs_new:Npn \__zsect_local_toc_generate:nn #1#2 
+  { }
+
+
+% ==> 'toc line add' for 'sec' part
+\NewHook{ztoc/localtocline/begin}
+\NewReversedHook{ztoc/localtocline/end}
+\prop_new:N \g_local_toc_ref_prop % in article: { 1 = {  } }
+\cs_new:Npn \__zsect_title_toc_add:nn #1#2 
+  {
+    \exp_args:Ne \int_compare:nT % '\c@secnumdepth' vs '\c@tocdepth' ???
+      { \c@tocdepth >= \prop_item:NV \c_zsect_level_prop \l__zsect_title_class_tl }
+      {
+        \UseHook{ztoc/localtocline/begin}
+        % global toc interface
+        \zsect_add_toc_line:nnnn
+          { \l__zsect_title_class_tl }
+          { 
+            { \zsect@tocnum }
+            {
+              \tl_if_empty:nTF {#1}
+                { \exp_not:n {#2} }
+                { \exp_not:n {#1} } 
+            } 
+          }
+          { \thepage }
+          { \ztexhyperTF {\l__zsect_title_class_tl.\zsect@tocnum}{} }
+        % local toc interface
+        \__zsect_local_toc_generate:nn { #1 }{ #2 }
+        \UseHook{ztoc/localtocline/end}
+      }
+  }
+
+
+% ==> 'toc collector' for 'sec' part
+\bool_new:N \l__ztoc_find_collect_item_bool
+\clist_map_inline:Nn \c_zsect_level_clist
+  {
+    \int_new:c { g__toc_collect_#1_int }
+  }
+\cs_new:Npn \__reset_toc_collect_int: 
+  {
+    \clist_map_inline:Nn \c_zsect_level_clist
+      {
+        \int_gset:cn { g__toc_collect_##1_int }
+          { 0 }
+      }
+  }
+\cs_new:Npn \__step_toc_collect_int:n #1 
+  {
+    \int_gincr:c { g__toc_collect_#1_int }
+  }
+\cs_new:Npn \__use_toc_collect_int:n #1 
+  { 
+    \int_use:c { g__toc_collect_#1_int }
+  }
+\cs_new:Npn \__zsect_title_toc_collector:nn #1#2
+  {
+    \seq_gput_right:Ne \g__ztoc_keyvaltoc_seq
+      {
+        class  = { \l__zsect_title_class_tl },
+        name   = { \zsect@tocnum },
+        title  = { \tl_if_empty:nTF {#1}{\exp_not:n {#2}}{\exp_not:n {#1}} },
+        page   = { \thepage },
+        raw    = { \contentsline 
+                  { \l__zsect_title_class_tl }
+                  { 
+                    { \zsect@tocnum }
+                    {
+                      \tl_if_empty:nTF { #1 }
+                        { \exp_not:n {#2} }
+                        { \exp_not:n {#1} } 
+                    }
+                  }
+                  { \thepage }
+                  { \ztexhyperTF {\l__zsect_title_class_tl.\zsect@tocnum}{} } 
+                },
+      }
+  }
+
+
+
+% ----------------------------------------------------------------------
+%                           section title interface
+% ----------------------------------------------------------------------
+% ==> title interface (title = num + name)
+% TODO: use 'new marker mechanism' to implement.
+\cs_new:Npn \__zsect_title_mark:nn #1#2
+  {
+    \str_case:nnF {#1} 
+      {
+        {chapter}{\chaptermark{#2}}
+        {section}{\sectionmark{#2}}
+      }{}
+  }
+\cs_generate_variant:Nn \__zsect_title_mark:nn { Vn, ee }
+\NewTemplateType{ztexsect}{3} % toc-name, sec-name, bool
+\DeclareTemplateInterface{ztexsect}{default}{3}
+  {
+    class           : tokenlist,
+    type            : tokenlist,
+    hang            : boolean   = { false },
+    break           : tokenlist,
+    pagestyle       : tokenlist,
+    afterindent     : boolean   = { false },
+
+    space.before    : skip,
+    space.after     : skip,
+    space.left      : length,
+
+    format.num      : tokenlist  = \KeyValue { num.format },
+    format.num+     : tokenlist  = \KeyValue { num.format+ },
+    format.name     : tokenlist  = \KeyValue { name.format },
+    format.name+    : tokenlist  = \KeyValue { name.format+ },
+    format.title    : tokenlist  = \KeyValue { title.format },
+    format.title+   : tokenlist  = \KeyValue { title.format+ },
+
+    title.inline    : boolean    = { false }, 
+    title.format    : tokenlist,
+    title.format+   : tokenlist  = { },
+    title.before    : tokenlist  = { },
+    title.after     : tokenlist  = { \par },
+
+    name.sep        : length     = { 0pt },
+    name.before     : tokenlist  = { },
+    name.after      : tokenlist  = { },
+    % name.width      : length     = 30pt,
+    name.format     : tokenlist  = { },
+    name.format+    : tokenlist  = { },
+
+    num             : tokenlist  = { },
+    num.show        : boolean    = { true },
+    num.sep         : length,
+    num.with        : tokenlist  = { },
+    num.format      : tokenlist  = { },
+    num.format+     : tokenlist  = { },
+    num.before      : tokenlist  = { },
+    num.after       : tokenlist  = { },
+
+    explicit        : boolean    = { false },
+    code            : tokenlist  = { },
+
+    bookmark.before : tokenlist,
+    bookmark.after  : tokenlist,
+  }
+\DeclareTemplateCode{ztexsect}{default}{3}
+  {
+    class           = \l__zsect_title_class_tl,
+    type            = \l__zsect_title_type_tl,
+    hang            = \l__zsect_title_hang_bool,     % TODO: implement it !
+    break           = \l__zsect_title_break_tl,      % TODO: implement it !
+    pagestyle       = \l__zsect_title_pagestyle_tl,
+    afterindent     = \l__zsect_title_afterindent_bool,
+
+    space.before    = \l__zsect_title_spbf_skip,
+    space.after     = \l__zsect_title_spaf_skip,
+    space.left      = \l__zsect_title_left_dim,
+
+    format.num      = \l__zsect_title_num_format_tl, 
+    format.num+     = \l__zsect_title_num_format_p_tl, 
+    format.name     = \l__zsect_title_name_format_tl, 
+    format.name+    = \l__zsect_title_name_format_p_tl, 
+    format.title    = \l__zsect_title_format_tl, 
+    format.title+   = \l__zsect_title_format_p_tl, 
+
+    title.inline    = \l__zsect_title_inline_bool,
+    title.format    = \l__zsect_title_format_tl,
+    title.format+   = \l__zsect_title_format_p_tl,
+    title.before    = \l__zsect_title_before_tl,
+    title.after     = \l__zsect_title_after_tl,
+
+    name.sep        = \l__zsect_title_name_sep_dim,
+    name.format     = \l__zsect_title_name_format_tl,
+    name.format+    = \l__zsect_title_name_format_p_tl,
+    name.before     = \l__zsect_title_name_before_tl,
+    name.after      = \l__zsect_title_name_after_tl,
+
+    num             = \l__zsect_title_num_tl,
+    num.show        = \l__zsect_title_num_show_bool,
+    num.sep         = \l__zsect_title_num_sep_dim,
+    num.with        = \l__zsect_title_num_width_tl,  % TODO: implement it !
+    num.format      = \l__zsect_title_num_format_tl,
+    num.format+     = \l__zsect_title_num_format_p_tl,
+    num.before      = \l__zsect_title_num_before_tl,
+    num.after       = \l__zsect_title_num_after_tl,
+
+    explicit        = \l__zsect_title_explicit_bool,
+    code            = \l__zsect_title_code_tl,
+
+    bookmark.before = \l__zsect_title_bookmark_before_tl,
+    bookmark.after  = \l__zsect_title_bookmark_after_tl,
+  }{
+    \AssignTemplateKeys
+    % ARGS: toc-name, sec-name, bool(\BooleanFalse|\BooleanTrue)
+    % counter and hook
+    % NOTE: hooks will be added by 'lthooks'.
+    \IfBooleanF{#3}{ \refstepcounter{\l__zsect_title_class_tl} }
+    \edef\zsect@num
+      {
+        \tl_if_empty:NTF \l__zsect_title_num_tl 
+          { \cs:w the\l__zsect_title_class_tl \cs_end: }
+          { \l__zsect_title_num_tl }
+      }
+    \edef\zsect@tocnum
+      { 
+        \ztexhyperTF
+          { \cs:w theH\l__zsect_title_class_tl \cs_end: }
+          { \cs:w the\l__zsect_title_class_tl \cs_end: }
+      }
+    \xdef\zsect@cursec@class{\l__zsect_title_class_tl}
+    % title typeset
+    \bool_if:NTF \l__zsect_title_explicit_bool 
+      {
+        \cs_set:Npo \__zsect_explicit:nn ##1##2 
+          { \l__zsect_title_code_tl } 
+        \__zsect_explicit:nn { \zsect@num }{ #2 }
+      }{
+        \__zsect_title_type_spec:nn { page, top }
+          { \newpage\hspace{0pt} }
+        \tl_if_empty:NF \l__zsect_title_pagestyle_tl
+          { \thispagestyle{\l__zsect_title_pagestyle_tl} }
+        \__zsect_title_space_before:
+        \__zsect_title_space_left:
+        \group_begin:
+          \__zsect_title_body:nn { #2 }{ #3 }
+        \group_end:
+        \__zsect_title_space_after:
+        \__zsect_title_type_spec:nn { page }
+          { \hspace{0pt}\newpage }
+      }
+    % mark and toc
+    \__zsect_title_mark:Vn \l__zsect_title_class_tl { #2 }
+    \IfBooleanTF{#3}{}
+      {
+        \__zsect_title_bookmark_add:n { #2 }
+        \__zsect_title_toc_add:nn { #1 }{ #2 } 
+        \__zsect_title_toc_collector:nn { #1 }{ #2 }
+      }
+  }
+\cs_new:Npn \__zsect_title_bookmark_add:n #1
+  {
+    \zsect_bookmark_add:eee
+      { 
+        \prop_item:NV \c_zsect_level_prop 
+          \l__zsect_title_class_tl 
+      }
+      { \l__zsect_title_bookmark_before_tl #1 \l__zsect_title_bookmark_after_tl }
+      { \l__zsect_title_class_tl.\zsect@tocnum }
+    \tl_clear:N \l__zsect_title_bookmark_before_tl
+    \tl_clear:N \l__zsect_title_bookmark_after_tl
+  }
+\cs_new:Npn \__zsect_title_type_spec:nn #1#2 
+  {
+    \exp_args:Nne \str_if_in:nnT { #1 }
+      { \l__zsect_title_type_tl }{ #2 }
+  }
+\cs_new:Nn \__zsect_title_space_before: 
+  {
+    \if@noskipsec \leavevmode \fi \par
+    \zsect@dim@b \l__zsect_title_spbf_skip\relax
+    \ifdim \zsect@dim@b < \z@
+      \zsect@dim@b -\zsect@dim@b\relax
+    \fi
+    \if@nobreak 
+      \everypar{} 
+    \else
+      \addpenalty \@secpenalty
+      \addvspace \zsect@dim@b
+    \fi
+  }
+\cs_new:Nn \__zsect_title_space_after: 
+  {
+    \bool_if:NTF \l__zsect_title_inline_bool 
+      { \hskip \l__zsect_title_spaf_skip\relax }
+      {
+        \vskip \l__zsect_title_spaf_skip\relax
+        \bool_if:NTF \l__zsect_title_afterindent_bool
+          { \@afterindenttrue  }
+          { \@afterindentfalse }
+        \@afterheading
+      }
+  }
+\cs_new:Nn \__zsect_title_space_left: 
+  {
+    \noindent\hspace*{\l__zsect_title_left_dim}
+  }
+\cs_new:Npn \__zsect_title_body:nn #1#2
+  {
+    \l__zsect_title_format_tl
+    \l__zsect_title_format_p_tl
+    \l__zsect_title_before_tl
+    \IfBooleanT{#2}{ \bool_set_false:N \l__zsect_title_num_show_bool }
+    \bool_if:NT \l__zsect_title_num_show_bool
+      {
+        {
+          \l__zsect_title_num_before_tl 
+          \l__zsect_title_num_format_tl 
+          \l__zsect_title_num_format_p_tl 
+            \zsect@num
+          \l__zsect_title_num_after_tl 
+        }
+        \hskip \l__zsect_title_num_sep_dim\relax
+      }
+    {
+      \l__zsect_title_name_format_tl 
+      \l__zsect_title_name_format_p_tl 
+      \l__zsect_title_name_before_tl 
+        #1 
+      \l__zsect_title_name_after_tl 
+    }
+    \hskip \l__zsect_title_name_sep_dim\relax
+    \l__zsect_title_after_tl
+  }
+
+
+% ==> define title
+\cs_new:Npn \zsect_define_title:Nn #1#2
+  {
+    \exp_args:Nne \DeclareInstance{ztexsect}{\cs_to_str:N #1}
+      { default }{ #2 }
+    \exp_args:Neee \DeclareInstanceCopy{ztexsect}
+      { \cs_to_str:N #1-numberless }{\cs_to_str:N #1}
+    \DeclareDocumentCommand{ #1 }{sO{}m}
+      {
+        \IfBooleanTF{##1}
+          {
+            \exp_args:Nne \UseInstance{ztexsect}
+              { \cs_to_str:N #1-numberless }
+              { ##2 }{ ##3 }{ ##1 }
+          }{
+            \exp_args:Nne \UseInstance{ztexsect}
+              { \cs_to_str:N #1 }
+              { ##2 }{ ##3 }{ ##1 }
+          }
+      }
+  }
+\zsect_define_title:Nn \part 
+  {
+    class        = part,
+    type         = page,
+    pagestyle    = empty,
+    space.before = 0pt plus 1fill,
+    space.after  = 0pt plus 1fill,
+    title.format = \huge\bfseries\centering,
+    num          = \Roman{part},
+    num.before   = {PART~},
+    num.sep      = 20pt,
+  }
+\zsect_define_title:Nn \chapter 
+  {
+    class        = chapter,
+    type         = top,
+    pagestyle    = plain,
+    space.before = 50pt,
+    space.after  = 40pt,
+    title.format = \normalfont\huge\bfseries\centering,
+    num          = \Roman{chapter},
+    num.before   = {CHAP~},
+    num.sep      = 15pt,
+  }
+\zsect_define_title:Nn \section 
+  {
+    class        = section,
+    type         = normal,
+    space.left   = 0pt,
+    space.before = -3.5ex \@plus -1ex \@minus -.2ex,
+    space.after  = 2.3ex \@plus .2ex,
+    title.format = \normalfont\Large\bfseries,
+    num.sep      = 18pt,
+  }
+\zsect_define_title:Nn \subsection 
+  {
+    class        = subsection,
+    type         = normal,
+    space.left   = 0pt,
+    space.before = -3.25ex\@plus -1ex \@minus -.2ex,
+    space.after  = 1.5ex \@plus .2ex,
+    title.format = \normalfont\large\bfseries,
+    num.sep      = 15pt,
+  }
+\zsect_define_title:Nn \subsubsection 
+  {
+    class        = subsubsection,
+    type         = normal,
+    space.left   = 0pt,
+    space.before = -3.25ex\@plus -1ex \@minus -.2ex,
+    space.after  = 1.5ex \@plus .2ex,
+    title.format = \normalfont\normalsize\bfseries,
+    num.sep      = 13pt,
+  }
+\zsect_define_title:Nn \paragraph 
+  {
+    class        = paragraph,
+    type         = normal,
+    title.inline = true,
+    title.after  = ,
+    space.left   = 0pt,
+    space.before = 3.25ex \@plus 1ex \@minus .2ex,
+    space.after  = -1em, % this may be unnecessary for 'inline'? 
+    title.format = \normalfont\normalsize\bfseries,
+    num.show     = false,
+    name.sep     = 18pt,
+  }
+\zsect_define_title:Nn \subparagraph 
+  {
+    class        = subparagraph,
+    type         = normal,
+    title.inline = true,
+    title.after  = ,
+    space.left   = 18pt,
+    space.before = 3.25ex \@plus 1ex \@minus .2ex,
+    space.after  = -1em, % this may be unnecessary for 'inline' ?
+    title.format = \normalfont\normalsize\bfseries,
+    num.show     = false,
+    name.sep     = 19pt,
+  }
+
+
+% ==> custom interface for user
+\ztex_keys_define:nn { zsect/option }
+  {  }
+\NewDocumentCommand{\zsecset}{m}
+  {
+    \ztex_keys_set:nn { zsect/option }
+      { #1 }
+  }
+% NOTE: 'explicit' bug lies here for '\clist_map_inline:nn' !!
+% \NewDocumentCommand{\zsecformat}{sm+m}
+%   {
+%     \clist_map_inline:nn { #2 }
+%       {
+%         \exp_args:Nne \EditInstance{ztexsect}
+%           { \cs_to_str:N ##1 \IfBooleanT{#1}{-numberless} }
+%           { #3 }
+%       }
+%   } 
+\NewDocumentCommand{\zsecformat}{sm+m}
+  {
+    \exp_args:Nne \EditInstance{ztexsect}
+      { \cs_to_str:N #2 \IfBooleanT{#1}{-numberless} }
+      { #3 }
+  }
+
+
+%%%%%%      disable 'sect' module scope end    %%%%%%
+\fi:

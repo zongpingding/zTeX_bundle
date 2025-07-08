@@ -1,9 +1,0 @@
-This is a generated file for the l3build validation system.
-Don't change this file in any respect.
-============================================================
-TEST 1: ztikz-module-cache-cmd-wolframDSolve
-============================================================
-\g_tmpa_iow=\write...
-current hash is 9612557F7CCBBF1404ACD964D0EEAA62
-skip recompile, using the cache wolframscript result 1
-============================================================

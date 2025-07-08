@@ -18,7 +18,10 @@
 %       the modules: ztex.module.box.tex,                                     %
 %                    ztex.module.cmd.tex,                                     %
 %                    ztex.module.color.tex,                                   %
+%                    ztex.module.counter.tex,                                 %
 %                    ztex.module.font.tex,                                    %
+%                    ztex.module.graphics.tex,                                %
+%                    ztex.module.item.tex,                                    %
 %                    ztex.module.page.tex,                                    %
 %                    ztex.module.ref.tex,                                     %
 %                    ztex.module.sclist.tex,                                  %
@@ -33,7 +36,7 @@
 \NeedsTeXFormat{LaTeX2e}
 \tl_const:Nn \c__ztex_class_name_tl           {ztex}
 \tl_const:Nn \c__ztex_class_version_tl        {1.0.1}
-\tl_const:Nn \c__ztex_class_date_tl           {2025/06/22}
+\tl_const:Nn \c__ztex_class_date_tl           {2025/07/06}
 \clist_const:Nn \c__ztex_lang_support_clist   {en, cn}
 \tl_const:Nn    \c__ztex_class_description_tl  
   {
@@ -88,6 +91,7 @@
 %                             class tools
 % ----------------------------------------------------------------------
 % ztex hook interface
+\RequirePackage[box]{ztool}
 \cs_new_protected:Npn \ztex_hook_preamble_last:n #1
   { \AddToHook{env/document/before}{#1} }
 \cs_new_protected:Npn \ztex_label_hook_preamble_last:nn #1#2
@@ -170,15 +174,18 @@
   lang            .str_gset:N   = \g__ztex_lang_str,
   lang            .initial:n    = { en },
   lang            .usage:n      = load,
+  sect-load       .bool_gset:N  = \g__ztex_sect_load_bool,
+  sect-load       .initial:n    = { true },
+  sect-load       .usage:n      = load,
   hyper           .bool_gset:N  = \g__ztex_hyperref_bool,
   hyper           .initial:n    = { false },
   hyper           .usage:n      = load,
+  hyper-suppress  .clist_gset:N = \g__ztex_hyper_suppress_clist,
+  hyper-suppress  .initial:n    = { toc },
+  hyper-suppress  .usage:n      = load,
   fancy           .bool_gset:N  = \g__ztex_fancy_bool,
   fancy           .initial:n    = { false },
   fancy           .usage:n      = load,
-  cus             .bool_gset:N  = \g__ztex_cus_load_bool,
-  cus             .initial:n    = { false },
-  cus             .usage:n      = load,
   cref-backend    .str_gset:N   = \g__ztex_cref_backend_str,
   cref-backend    .initial:n    = { zref-clever },
   % sub class and options
@@ -194,8 +201,7 @@
       \ztex_package_options_pass:nn {#1} 
   },
   packageOption   .usage:n      = load,
-  % ztex options meta key 
-  toc             .meta:nn      = { ztex / toc }{#1},
+  % ztex options meta key
   font            .meta:nn      = { ztex / font }{#1},
   layout          .meta:nn      = { ztex / layout }{#1},
   layout          .usage:n      = load,
@@ -207,27 +213,6 @@
 }
 
 % sub-key for each meta option
-\ztex_keys_define:nn { toc }{
-  column          .int_gset:N   = \g__ztex_toc_column_int,
-  column          .initial:n    = { 1 },
-  title           .code:n       = { 
-    \@ifpackageloaded{babel}{
-      \AddToHook{package/babel/after}{
-        \ztex_hook_doc_begin:n {\renewcommand{\contentsname}{#1}}
-      }
-    }{
-      \ztex_hook_doc_begin:n {\renewcommand{\contentsname}{#1}}
-    }
-  },
-  title-vspace    .dim_gset:N   = \g__ztex_toc_title_vspace_dim,
-  title-vspace    .initial:n    = { -2em },
-  stretch         .fp_gset:N    = \g__ztex_toc_stretch_fp,
-  stretch         .initial:n    = { 1 },
-  unknown         .code:n       = { 
-    \ztex_metakey_msg_warning:nn {option-toc}
-      {column(<int>:1), title(<tl>:contentname), title-vspace(<dim>:-2em)} 
-  }
-}
 \ztex_keys_define:nn { font }{
   sysfont         .bool_gset:N  = \g__ztex_sysfont_cfg_bool,
   sysfont         .initial:n    = { false },
@@ -362,6 +347,12 @@
 % option setup
 \ProcessKeyOptions [ ztex ]
 \NewDocumentCommand{\ztexset}{m}{ \keys_set:nn {ztex}{#1} }
+\newcommand{\ztexoption}
+  {
+    \textbf{Class~Options:}~
+    \str_use:N \g__ztex_lang_str {~-~}
+    \clist_use:Nn \g__ztex_subclass_option_clist{~-~}\par
+  }
 
 
 
@@ -392,10 +383,6 @@
     \PassOptionsToClass{\g__ztex_subclass_option_clist}{ l3doc }
     \LoadClass{l3doc} 
   }
-  {l3dox}{
-    \PassOptionsToClass{\g__ztex_subclass_option_clist}{ l3dox }
-    \LoadClass{l3dox} 
-  }
 }{\ztex_msg_error:n {option-subclass}}
 
 % baisc document class and packages option
@@ -425,7 +412,7 @@
     \PassOptionsToPackage{quiet}{fontspec}
     \PassOptionsToPackage{no-math}{fontspec}
     \str_if_eq:VnF \g__ztex_subclass_type_str {ctexbook}{
-      \RequirePackage[UTF8, heading]{ctex}
+      \RequirePackage[UTF8, scheme=plain]{ctex}
       \linespread{1.3}
     }
   }
@@ -434,27 +421,26 @@
 
 
 % ----------------------------------------------------------------------
-%                             basic packages
+%                             ztex module
 % ----------------------------------------------------------------------
-\RequirePackage{xcolor}
-\RequirePackage{framed}
-
-
-
-% ----------------------------------------------------------------------
-%                        ztex module and library
-% ----------------------------------------------------------------------
-% NOTE: 
-% 1.'slide' lib need before 'fancy' or 'titlesec' to avoid 
-%   'titlesec' package's option clash conflict.
 \__ztex_load_module_library:nn {module}{sclist}
 \__ztex_load_module_library:nn {module}{cmd}
 \__ztex_load_module_library:nn {module}{box}
 \__ztex_load_module_library:nn {module}{page}
 \__ztex_load_module_library:nn {module}{thm}
+\__ztex_load_module_library:nn {module}{counter}
 \__ztex_load_module_library:nn {module}{ref}
 \__ztex_load_module_library:nn {module}{color}
 \__ztex_load_module_library:nn {module}{font}
+\__ztex_load_module_library:nn {module}{sect}
+\__ztex_load_module_library:nn {module}{graphics}
+\__ztex_load_module_library:nn {module}{item}
+
+
+
+% ----------------------------------------------------------------------
+%                             ztex  library
+% ----------------------------------------------------------------------
 \bool_if:NT \g__ztex_math_alias_bool 
   {
     \__ztex_load_module_library:nn {library}{alias}
@@ -463,79 +449,62 @@
   {
     \__ztex_load_module_library:nn {library}{slide}
   }{ \newcommand\zslideset[1]{} }
-\bool_if:NTF \g__ztex_cus_load_bool 
+\bool_if:NT \g__ztex_fancy_bool 
+  { \__ztex_load_module_library:nn {library}{fancy} }
+
+
+
+% ----------------------------------------------------------------------
+%                          module/library checker
+% ----------------------------------------------------------------------
+\newcommand\ztexhyperTF[2]
   {
-    \RequirePackage{cus}
-  }{
-    \bool_if:NTF \g__ztex_fancy_bool 
-      { \__ztex_load_module_library:nn {library}{fancy} }
-      { \__ztex_load_module_library:nn {module}{sect}   }
+    \bool_if:NTF \g__ztex_hyperref_bool 
+      { #1 }{ #2 }
   }
-
-
-
-% ----------------------------------------------------------------------
-%                          bool check user interface
-% ----------------------------------------------------------------------
-\newcommand\ztexhyperTF[2]{
-  \bool_if:NTF \g__ztex_hyperref_bool {#1}{#2}
-}
-\newcommand\ztexfancyTF[2]{
-  \bool_if:NTF \g__ztex_fancy_bool {#1}{#2}
-}
-\newcommand\ztexmarginTF[2]{
-  \bool_if:NTF \g__ztex_margin_bool {#1}{#2}
-}
-\newcommand\ztexslideTF[2]{
-  \bool_if:NTF \g__ztex_slide_bool {#1}{#2}
-}
-\newcommand\ztexsysfontTF[2]{
-  \bool_if:NTF \g__ztex_sysfont_cfg_bool {#1}{#2}
-}
-\newcommand\ztexaliasTF[2]{
-  \bool_if:NTF \g__ztex_math_alias_bool {#1}{#2}
-}
-\newcommand\ztexbibindTF[2]{
-  \bool_if:NTF \g__ztex_bib_index_load_bool {#1}{#2}
-}
+\newcommand\ztexfancyTF[2]
+  {
+    \bool_if:NTF \g__ztex_fancy_bool 
+      { #1 }{ #2 }
+  }
+\newcommand\ztexmarginTF[2]
+  {
+    \bool_if:NTF \g__ztex_margin_bool 
+      { #1 }{ #2 }
+  }
+\newcommand\ztexslideTF[2]
+  {
+    \bool_if:NTF \g__ztex_slide_bool 
+      { #1 }{ #2 }
+  }
+\newcommand\ztexsysfontTF[2]
+  {
+    \bool_if:NTF \g__ztex_sysfont_cfg_bool 
+      { #1 }{ #2 }
+  }
+\newcommand\ztexaliasTF[2]
+  {
+    \bool_if:NTF \g__ztex_math_alias_bool 
+      { #1 }{ #2 }
+  }
+\newcommand\ztexbibindTF[2]
+  {
+    \bool_if:NTF \g__ztex_bib_index_load_bool 
+      { #1 }{ #2 }
+  }
 \bool_new:N \g__ztex_theme_lib_load_bool
 \bool_gset_false:N \g__ztex_theme_lib_load_bool
-\newcommand\ztethmlibTF[2]{
-  \bool_if:NTF \g__ztex_theme_lib_load_bool {#1}{#2}
-}
-
-
-
-% ----------------------------------------------------------------------
-%                           extra commands
-% ----------------------------------------------------------------------
-\RequirePackage{graphicx}
-\graphicspath{
-  {./figure/}{./figures/}{./image/}{./images/}
-  {./Pictures/}{./picture/}{./Pics/}{./pics/}
-  {./graphics/}{./graphic/}
-}
-\renewcommand{\labelitemii}{\(\circ\)}
-\renewcommand{\labelitemiii}{\(\diamond\)}
-\NewDocumentCommand{\ztexcntwith}{mm}{\@addtoreset{#1}{#2}}
-\newcommand{\ztexoption}
+\newcommand\ztethmlibTF[2]
   {
-    \textbf{Class~Options:}~
-    \str_use:N \g__ztex_lang_str {~-~}
-    \clist_use:Nn \g__ztex_subclass_option_clist{~-~}\par
+    \bool_if:NTF \g__ztex_theme_lib_load_bool 
+      { #1 }{ #2 }
   }
-\NewDocumentCommand\ztexverb{O{\texttt}v}{#1{#2}}
 
-% framed env for user interface
-\cs_new_protected:Npn \ztex_frame:nn #1#2 {
-  \DeclareDocumentEnvironment{#1}{O{#2}}{
-    \def\FrameCommand{{\color{##1}\vrule width 3pt}\colorbox{##1!10}}
-    \MakeFramed{\advance\hsize-\width\FrameRestore}\noindent   
-  }{\endMakeFramed}
-}
-\NewDocumentCommand\ztexframe{O{black}m}{
-  \ztex_frame:nn {#2}{#1}
-}
+
+
+% ----------------------------------------------------------------------
+%                          ztex logo
+% ----------------------------------------------------------------------
 % 4.30554pt = 1ex.
 \NewDocumentCommand\zTeX{s}
   {
@@ -553,3 +522,7 @@
 \let\ztex\zTeX 
 \let\zLaTeX\zTeX
 \let\zlatex\zTeX
+\protected\def\HoLogo@zTeX#1{\zTeX}
+\protected\def\HoLogo@ztex#1{\zTeX}
+\protected\def\HoLogo@zLaTeX#1{\zTeX}
+\protected\def\HoLogo@zlatex#1{\zTeX}

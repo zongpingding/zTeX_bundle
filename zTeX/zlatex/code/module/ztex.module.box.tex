@@ -1,9 +1,31 @@
-\ProvidesExplFile{ztex.module.box.tex}{2025/05/20}{1.0.1}{box~module~for~ztex}
+\ProvidesExplFile{ztex.module.box.tex}{2025/07/06}{1.0.1}{box~module~for~ztex}
 
 
 %%%%%     box module for ztex     %%%%%
-\RequirePackage{ztool}
-\__ztool_load_library:n { box }
+\RequirePackage{framedmulticol}
+\RequirePackage{framed}
+% framed env for user interface
+\cs_new_protected:Npn \ztex_frame:nn #1#2 
+  {
+    \DeclareDocumentEnvironment{#1}{O{#2}}
+      {
+        \def\FrameCommand
+          {
+            {\color{##1}\vrule width 3pt}
+            \colorbox{##1!10}
+          }
+        \MakeFramed
+          {
+            \advance\hsize-\width\FrameRestore
+          }\noindent   
+      }{\endMakeFramed}
+  }
+\NewDocumentCommand\ztexframe{O{black}m}
+  {
+    \ztex_frame:nn {#2}{#1}
+  }
+
+
 % ==> constant dimension
 \dim_new:N \c_ztex_quad_dim 
 \ztool_gget_wd:Nn \c_ztex_quad_dim {\quad}

@@ -1,17 +1,17 @@
-\ProvidesExplFile{ztex.library.slide.tex}{2025/05/09}{1.0.1}{slide~library~for~ztex}
+\ProvidesExplFile{ztex.library.slide.tex}{2025/07/06}{1.0.1}{slide~library~for~ztex}
 
 
 %%%%%     slide library for ztex     %%%%%
+\__ztool_load_library:n { zdraw }
 \bool_gset_true:N \g__ztex_slide_bool
-% ==> slide initialization
-\exp_args:NNnx \seq_set_split:Nnn \l_tmpa_seq {|}{\g__ztex_aspectratio_tl}
-\RequirePackage[explicit]{titlesec}
-\RequirePackage{titletoc}
-\geometry {
-  papersize={\seq_item:Nn \l_tmpa_seq {1}cm, \seq_item:Nn \l_tmpa_seq {2}cm},
-  hmargin=1.25cm, top=.8cm, includefoot, bottom=5.5pt,
-  footskip=\dim_eval:n {1.25em + 5pt}
-}
+\exp_args:NNnx \seq_set_split:Nnn \l_tmpa_seq 
+  { | }{ \g__ztex_aspectratio_tl }
+\geometry 
+  {
+    papersize={\seq_item:Nn \l_tmpa_seq {1}cm, \seq_item:Nn \l_tmpa_seq {2}cm},
+    hmargin=1.25cm, top=.8cm, includefoot, bottom=5.5pt,
+    footskip=\dim_eval:n {1.25em + 5pt}
+  }
 \cs_generate_variant:Nn \dim_set:Nn { Ne }
 \dim_set:Ne \zpw {\seq_item:Nn \l_tmpa_seq {1}cm}
 \dim_set:Ne \zph {\seq_item:Nn \l_tmpa_seq {2}cm}
@@ -22,38 +22,30 @@
 \mark_new_class:n {zslide-right}
 \IfClassLoadedTF{book}{
   \let\cleardoublepage\clearpage
-  \renewcommand\chaptermark[1]{\mark_insert:nn {zslide-left}{#1}}
+  \renewcommand\chaptermark[1]{ \mark_insert:nn {zslide-left}{#1} }
   \renewcommand\thesection{\arabic{section}}
-  \renewcommand\tableofcontents {
-    \if@twocolumn\@restonecoltrue\onecolumn\else\@restonecolfalse\fi
-    \section*{\contentsname\@mkboth{\MakeUppercase\contentsname}{\MakeUppercase\contentsname}}
-    \@starttoc{toc}\if@restonecol\twocolumn\fi
-    \setcounter{page}{1}
-  }
-  \ztex_hook_preamble_last:n {
-  \renewcommand\mainmatter{}
-  \renewcommand\frontmatter{}
-  \renewcommand\part{
-    \thispagestyle{empty}
-    \if@twocolumn
-      \onecolumn
-      \@tempswatrue
-    \else
-      \@tempswafalse
-    \fi
-    \null\vfil
-    \secdef\@part\@spart
-  }
-  \titleformat{\chapter}
-    {\Huge}{}{0pt}
-    {\centerline{\makebox(0, 0){#1}}}
-    [\thispagestyle{empty}]
-  \titleformat{name=\chapter, numberless}
-    {\Huge}{}{0pt}
-    {\centerline{\makebox(0, 0){#1}}}
-    [\thispagestyle{empty}]
-  }
-}{\relax}
+  \ztex_hook_preamble_last:n 
+    {
+      \renewcommand\mainmatter{}
+      \renewcommand\frontmatter{}
+    }
+  \zsecformat\part
+    {
+      type         = page,
+      space.before = 0pt plus .8fill,
+      space.after  = 0pt plus 1fill,
+      pagestyle    = empty,
+      title.format+  = \centering,
+    }
+  \zsecformat\chapter
+    {
+      type         = page,
+      space.before = 0pt plus .8fill,
+      space.after  = 0pt plus 1fill,
+      pagestyle    = empty,
+      title.format+  = \centering,
+    }
+}{ \relax }
 \dim_new:N \g_zslide_status_info_sec_C_dim % vertical axis of symmetry
 \dim_new:N \g_zslide_status_info_sec_L_dim
 \dim_gset:Nn \g_zslide_status_info_sec_C_dim {-1.7em}
@@ -83,15 +75,6 @@
           \dim_use:c {g_zslide_status_info_sec_C_dim}
         ){ #1 }
       }
-  }
-% REF: https://tex.stackexchange.com/q/156792/294585
-\cs_new:Npn \__zslide_chr_if_chinese:n #1#2#3
-  {
-    \ifnum`#1>19968
-      #2
-    \else
-      #3 
-    \fi
   }
 \cs_generate_variant:Nn \__zslide_status_info_sec_coffin_typeset:n {o}
 \bool_new:N \g_new_manual_sec_bool 
@@ -125,15 +108,16 @@
     % after vspace
     \vspace*{.5em}
   }
-\titlespacing*{\section}{0pt}{*0}{0pt}
-\titleformat{\section}
-  {\Large}{}{0pt}
+\zsecformat\section
   {
-    \__zslide_status_info_sec_coffin_typeset:o {#1}
-  }[
-    \bool_gset_true:N \g_new_sec_bool
-    \int_gset:Nn \g__ztex_slide_framecnt_int {1}
-  ]
+    explicit = true,
+    code     = {
+      \__zslide_status_info_sec_coffin_typeset:o { \Large #2 }
+      \bool_gset_true:N \g_new_sec_bool
+      \int_gset:Nn \g__ztex_slide_framecnt_int {1}
+      \vspace*{.7em}
+    },
+  }
 \hook_gput_code:nnn {cmd/tableofcontents/before}
   {zslide-toc-leftmark} 
   {
@@ -196,11 +180,16 @@
 \dim_gset:Nn \g_zslide_status_bar_sec_H_dim  {2em}
 \dim_gset:Nn \g_zslide_status_bar_sec_B_dim  {-2.7em}
 \AddToHook{shipout/background}{
-  \zslide_status_bar:nnnn {UL}{(0,              -\dim_use:c {g_zslide_status_bar_head_H_dim})}{.5}{\dim_use:c {g_zslide_status_bar_head_H_dim}}
-  \zslide_status_bar:nnnn {UR}{(.5\paperwidth,  -\dim_use:c {g_zslide_status_bar_head_H_dim})}{.5}{\dim_use:c {g_zslide_status_bar_head_H_dim}}
-  \zslide_status_bar:nnnn {BL}{(0,              -\paperheight)}{.33}{\dim_use:c {g_zslide_status_bar_foot_H_dim}}
-  \zslide_status_bar:nnnn {BC}{(.33\paperwidth, -\paperheight)}{.34}{\dim_use:c {g_zslide_status_bar_foot_H_dim}}
-  \zslide_status_bar:nnnn {BR}{(.67\paperwidth, -\paperheight)}{.33}{\dim_use:c {g_zslide_status_bar_foot_H_dim}}
+  \zslide_status_bar:nnnn {UL}{(0, -\dim_use:c {g_zslide_status_bar_head_H_dim})}
+    {.5}{\dim_use:c {g_zslide_status_bar_head_H_dim}}
+  \zslide_status_bar:nnnn {UR}{(.5\paperwidth, -\dim_use:c {g_zslide_status_bar_head_H_dim})}
+    {.5}{\dim_use:c {g_zslide_status_bar_head_H_dim}}
+  \zslide_status_bar:nnnn {BL}{(0,              -\paperheight)}
+    {.33}{\dim_use:c {g_zslide_status_bar_foot_H_dim}}
+  \zslide_status_bar:nnnn {BC}{(.33\paperwidth, -\paperheight)}
+    {.34}{\dim_use:c {g_zslide_status_bar_foot_H_dim}}
+  \zslide_status_bar:nnnn {BR}{(.67\paperwidth, -\paperheight)}
+    {.33}{\dim_use:c {g_zslide_status_bar_foot_H_dim}}
   \bool_if:NT \g_new_sec_bool {
     \zslide_status_bar:nnnn {sec}
       {(0, \dim_use:c {g_zslide_status_bar_sec_B_dim})}
@@ -293,18 +282,18 @@
   toc                           .meta:nn   = { ztex / slide / toc }{#1},
   toc / leftmargin              .meta:nn   = { ztex / slide / toc / leftmargin }{#1},
   toc / leftmargin / chapter    .dim_set:N = \l__ztex_slide_toc_leftmargin_chapter_dim,
-  toc / leftmargin / chapter    .initial:n = { 2em },
+  toc / leftmargin / chapter    .initial:n = { 1.9em },
   toc / leftmargin / section    .dim_set:N = \l__ztex_slide_toc_leftmargin_section_dim,
-  toc / leftmargin / section    .initial:n = { 4em },
+  toc / leftmargin / section    .initial:n = { 1.5em },
   toc / leftmargin / subsection .dim_set:N = \l__ztex_slide_toc_leftmargin_subsection_dim,
-  toc / leftmargin / subsection .initial:n = { 6em },
+  toc / leftmargin / subsection .initial:n = { 3.8em },
   toc / label                   .meta:nn   = { ztex / slide / toc / label }{#1},
   toc / label / chapter         .tl_set:N  = \l__ztex_slide_toc_label_chapter_tl,
-  toc / label / chapter         .initial:n = { \zslidetoc@labelset[.25em]{\thecontentslabel.} },
+  toc / label / chapter         .initial:n = { },
   toc / label / section         .tl_set:N  = \l__ztex_slide_toc_label_section_tl,
-  toc / label / section         .initial:n = { \zslidetoc@labelset[.25em]{\zslidetoc@sicon} },
+  toc / label / section         .initial:n = { },
   toc / label / subsection      .tl_set:N  = \l__ztex_slide_toc_label_subsection_tl,
-  toc / label / subsection      .initial:n = { \zslidetoc@labelset[.5em]{\zslidetoc@ssicon} },
+  toc / label / subsection      .initial:n = { },
   toc / suffix                  .meta:nn   = { ztex / slide / toc / suffix }{#1},
   toc / suffix / chapter        .tl_set:N  = \l__ztex_slide_toc_suffix_chapter_tl,
   toc / suffix / chapter        .initial:n = {  },
@@ -379,27 +368,22 @@
       }{}
   }
 \@onlypreamble\zslidelogo
-% slide toc customization
-\let\zslidetoc@page\contentspage
-% bug: can NOT alias for command:'\cs{thecontentslabel}'
-\NewDocumentCommand{\zslidetoc@labelset}{om}{
-  \ztool_get_wd:Nn \l_tmpa_dim {#2}
-  \IfNoValueTF {#1}{\dim_set:Nn \l_tmpb_dim {\l_tmpa_dim}}
-    {\dim_set:Nn \l_tmpb_dim {\l_tmpa_dim + #1}}
-  \contentslabel[#2]{\dim_use:N \l_tmpb_dim}
-}
-\clist_map_inline:nn {chapter, section, subsection}{
-  \titlecontents{#1}
-    [\dim_use:c {l__ztex_slide_toc_leftmargin_#1_dim}]
-    {}{\tl_use:c {l__ztex_slide_toc_label_#1_tl}}
-    {}{\tl_use:c {l__ztex_slide_toc_suffix_#1_tl}}
-}
-\setcounter{tocdepth}{2}
-\gdef\zslidetoc@sicon
-  {\box_move_up:nn {2pt}
-    {\hbox:n {\ztool_set_to_wd:nn 
-      {6pt}{\(\blacktriangleright\)}}
+
+\clist_map_inline:nn { chapter, section, subsection }{
+  \exp_args:Nc \ztocformat { #1 }
+    {
+      name.before = \tl_use:c  { l__ztex_slide_toc_label_#1_tl },
+      title.after = \tl_use:c  { l__ztex_slide_toc_suffix_#1_tl },
+      space.left  = \dim_use:c { l__ztex_slide_toc_leftmargin_#1_dim },
     }
+}
+\gdef\zslidetoc@sicon
+  {
+    \box_move_up:nn {2pt}
+      {
+        \hbox:n {\ztool_set_to_wd:nn 
+          {6pt}{\(\blacktriangleright\)}}
+      }
   }
 \gdef\zslidetoc@ssicon{\rule[2pt]{3pt}{3pt}}
 % slide mode setup interface

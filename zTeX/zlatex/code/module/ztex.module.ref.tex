@@ -1,4 +1,4 @@
-\ProvidesExplFile{ztex.module.ref.tex}{2025/05/12}{1.0.1}{ref~module~for~ztex}
+\ProvidesExplFile{ztex.module.ref.tex}{2025/07/04}{1.0.1}{ref~module~for~ztex}
 
 
 %%%%%     ref module for ztex     %%%%%
@@ -11,16 +11,23 @@
   }
   \exp_args:Nx \addbibresource{\str_use:N \g__ztex_bib_source_str}
 }
-\bool_if:NT \g__ztex_hyperref_bool {
-  \RequirePackage{hyperref}
-  \SetLinkTargetFilter{ztex@\jobname @#1}
-}
+\bool_if:NT \g__ztex_hyperref_bool 
+  {
+    \clist_map_inline:Nn \g__ztex_hyper_suppress_clist
+      {
+        \exp_after:wN \def 
+          \cs:w hyper@nopatch@#1 \cs_end: { }
+      }
+    \RequirePackage{hyperref}
+    \SetLinkTargetFilter{ztex@\jobname @#1}
+  }
 
 
 % ==> provide hyper command
+\ProvideDocumentCommand\hypersetup{m}{}
 \ProvideDocumentCommand\hyper@anchor{m}{}
 \ProvideDocumentCommand\hyper@link{mmm}{}
-\ProvideDocumentCommand\hyper@linkstart{mmm}{}
+\ProvideDocumentCommand\hyper@linkstart{mm}{}
 \ProvideDocumentCommand\hyper@linkend{}{}
 \ProvideDocumentCommand\hyper@linkfile{mmm}{}
 \ProvideDocumentCommand\MakeLinkTarget{sO{}m}{}
@@ -28,9 +35,13 @@
 \ProvideDocumentCommand\LinkTargetOff{}{}
 \ProvideDocumentCommand\NextLinkTarget{m}{}
 \ProvideDocumentCommand\SetLinkTargetFilter{m}{}
+\ProvideDocumentCommand\pdfbookmark{omm}{}
 \ProvideDocumentCommand\texorpdfstring{mm}{#1}
-
-% H-counter set
+\cs_new:Npn \ztex_make_link_target:n #1 
+  { 
+    \MakeLinkTarget*{#1} 
+  }
+\cs_generate_variant:Nn \ztex_make_link_target:n { e }
 \NewDocumentCommand{\zsetHcnt}{mm}
   {
     \exp_after:wN \def\cs:w theH #1\cs_end: {#2}

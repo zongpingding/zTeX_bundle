@@ -1,2 +1,0 @@
-\contentsline {subsection}{\numberline {2.1}\ding {74}\;2.1:[DEFINITION]:({Définition})}{6}{definition.2.1}%
-\contentsline {subsection}{\numberline {2.1}\ding {98}\;2.1:[REMARK]:({Remarque})}{9}{remark.2.1}%

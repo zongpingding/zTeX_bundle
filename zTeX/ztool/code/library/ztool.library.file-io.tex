@@ -1,7 +1,7 @@
 \ProvidesExplFile{ztool.library.file-io.tex}{2025/05/27}{1.0.1}{file-io~library~for~ztool}
 
 
-% ==> file IO operations \MakeLinkTarget*{file@io} \pdfbookmark[2]{File IO}{file@io}
+% ==> file IO operations 
 % 1. create a new file
 % 2. append to a file
 % 3. read from file / write to file
@@ -99,7 +99,7 @@
       }
     \iow_close:N \g_tmpa_iow
   }
-\cs_generate_variant:Nn \ztool_write_seq_to_file:nNn { nNe, nNV }
+\cs_generate_variant:Nn \ztool_write_seq_to_file:nNn { nNe, nNV, nce, ncV }
 
 \cs_new_protected:Npn \ztool_replace_file_line:nnn #1#2#3 
   {% #1:file name; #2:line index; #3:replacement

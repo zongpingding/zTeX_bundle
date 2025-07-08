@@ -1,12 +1,10 @@
-\ProvidesExplFile{ztex.module.thm.tex}{2025/05/12}{1.0.1}{thm~module~for~ztex}
+\ProvidesExplFile{ztex.module.thm.tex}{2025/07/06}{1.0.1}{thm~module~for~ztex}
 
 
 %%%%%     thm module for ztex     %%%%%
 % basic packages
 \RequirePackage{amsfonts, amsmath}          
 \RequirePackage{esint} 
-\counterwithin{equation}{section}
-
 
 
 % ==> module init
@@ -258,10 +256,12 @@
 
 
 % ==> thm format and style setup
-\ztex_msg_set:nn {mathEnv-style}{
-  You~use~an~incorrect~MathEnv~style:~'\g__ztex_thm_style_tl',~All~valid~
-  MathEnv~are:'plain',~'leftbar',~'background',~'fancy',~'shadow',~'paris'.
-}
+\ztex_msg_set:nn {mathEnv-style}
+  {
+    You~use~an~incorrect~MathEnv~style:~'\g__ztex_thm_style_tl',~All~
+    valid~styles~are:'plain',~'leftbar',~'background',~'fancy',~'shadow',~
+    'paris',~'lapsis',~'tcb',~'obsidian',~and~'elegant'.
+  }
 % thm counter
 \bool_new:N \g__ztex_thm_cntshare_bool
 \ztex_keys_define:nn {thm/cnt} {
@@ -298,15 +298,17 @@
     \tl_if_exist:cTF {g__ztex_thm_style_\g__ztex_thm_style_tl _end_tl}
       {\tl_use:c {g__ztex_thm_style_\g__ztex_thm_style_tl _end_tl}}
       {\ztex_msg_error:n {mathEnv-style}}
-    \__ztex_thm_toc_add:eeoe
-      {\g__ztex_thm_toc_level_tl}
+    \zthm_add_toc_line:eeoe
+      { \g__ztex_thm_toc_level_tl }
       { 
-        \exp_not:N \l__ztex_thm_toc_prefix_tl
-        \exp_not:n {\prop_item:Nn \g_ztex_thm_toc_symbols_prop {#1}}
-        \g__ztex_thm_theorem_title_tl 
+        {
+          \exp_not:N \l__ztex_thm_toc_prefix_tl
+          \exp_not:n {\prop_item:Nn \g_ztex_thm_toc_symbols_prop {#1}}
+        }
+        { \g__ztex_thm_theorem_title_tl }
       }
-      {\ztexhyperTF{\exp_not:N \hyperlink{page.\thepage}{\thepage}}{\thepage}}
-      {zthm@#1.\zthmnumber}
+      { \thepage }
+      { zthm@#1.\zthmnumber }
   }
 
 % thm theorem title interface
@@ -400,40 +402,31 @@
   }
 
 
-
 % ==> Thm Toc interface
-% list of thm: ".thlist" as file extension
-% REF: https://github.com/mbertucci47/keytheorems
-\bool_new:N \g__ztex_thm_toc_bool
-\hook_gput_code:nnn { enddocument } { thm-toc }
-  {
-    \bool_if:NT \g__ztex_thm_toc_bool {
-      \iow_new:N \tf@thlist
-      \iow_open:Nn \tf@thlist { \c_sys_jobname_str.thlist }
-    }
-  }
 \NewDocumentCommand\zthmtocstop{}
   {
-    \bool_gset_false:N \g__ztex_thm_toc_bool
-    % \cs{iow_close:N} \cs{tf@thlist} leads to an error ??
-    \cs_set:Npn \__ztex_thm_toc_add:nnnn ##1##2##3##4 {}
+    \bool_gset_false:N \g_lom_write_enable_bool
+    \cs_set:Npn \zthm_add_toc_line:nnnn ##1##2##3##4 {}
   }
-\cs_new:Npn \__ztex_thm_toc_add:nnnn #1#2#3#4 
+\cs_new:Npn \zthm_add_toc_line:nnnn #1#2#3#4 
   {
-    \iow_now:Ne \@auxout 
+    \bool_if:NT \g_lom_write_enable_bool 
       {
-        \token_to_str:N \@writefile{thlist}
-          {\token_to_str:N \contentsline{#1}{#2}{#3}{#4}
-          \token_to_str:N \protected@file@percent}
+        \iow_now:Ne \g_ztoc_lom_iow
+          {
+            \token_to_str:N \contentsline{#1}{#2}{#3}{#4}
+            \c_percent_str
+          }
       }
   }
-\cs_generate_variant:Nn \__ztex_thm_toc_add:nnnn { eeee, eeoe, nnee, nnoe }
+\cs_generate_variant:Nn \zthm_add_toc_line:nnnn { eeee, eeoe, nnee, nnoe }
 \ztex_keys_define:nn { thm/add }
   {
     name      .tl_set:N  = \l__ztex_add_thm_toc_name_tl,
-    name      .initial:n = { ?? },
+    name      .initial:n = { },
+    title     .tl_set:N  = \l__ztex_add_thm_toc_title_tl,
+    title     .initial:n = { },
   }
-% subsection.0.0
 \int_new:N \g_zthm_added_toc_target_int 
 \NewDocumentCommand{\zthmtocadd}{O{section}m}{
   \int_incr:N \g_zthm_added_toc_target_int
@@ -441,10 +434,13 @@
   \MakeLinkTarget*{\zthmtoc@tmp@target}
   \group_begin:
   \ztex_keys_set:nn {thm/add}{#2}
-  \__ztex_thm_toc_add:nnoe {#1}
-    {\l__ztex_add_thm_toc_name_tl}
-    {\ztexhyperTF{\exp_not:N \hyperlink{page.\thepage}{\thepage}}{\thepage}}
-    {\zthmtoc@tmp@target}
+  \zthm_add_toc_line:nnoe {#1}
+    {
+      { \l__ztex_add_thm_toc_name_tl }
+      { \l__ztex_add_thm_toc_title_tl }
+    }
+    { \thepage }
+    { \zthmtoc@tmp@target }
   \group_end:
 }
 \tl_new:N \g__ztex_thm_toc_level_tl
@@ -456,11 +452,9 @@
 \@onlypreamble\zthmtoclevel
 \NewDocumentCommand{\zthmtoc}{O{1}}
   {
-    \bool_gset_true:N \g__ztex_thm_toc_bool
     \group_begin:
-    \legacy_if_set_false:n { @filesw }  
     \renewcommand{\baselinestretch}{#1}\normalsize 
-    \@input{\jobname.thlist}
+    \seq_use:Nn \g_ztoc_lom_seq {}
     \group_end:
   }
 % thm toc symbols
@@ -481,7 +475,6 @@
   }
 \NewDocumentCommand{\zthmtocsymrm}{}
   { \prop_gclear:N \g_ztex_thm_toc_symbols_prop }
-
 
 
 % ==> thm env definition
@@ -542,7 +535,6 @@
           }
       }
   }
-
 
 
 % ==> thm theorem-like env hook interface
@@ -626,7 +618,6 @@
   \hook_gput_code:nnn {ztex/thm-#1/before}{thm-#1-before}{#2}
 }
 \@onlypreamble\zthmbefore
-
 
 
 % ==> ztex thm hooks seq order

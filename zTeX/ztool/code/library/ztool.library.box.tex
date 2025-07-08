@@ -1,7 +1,7 @@
 \ProvidesExplFile{ztool.library.box.tex}{2025/05/21}{1.0.1}{box~library~for~ztool}
 
 
-% ==> box manipulation tool \MakeLinkTarget*{box@manipulation} \pdfbookmark[2]{盒子操作}{box@manipulation}
+% ==> box manipulation tool 
 \cs_set:Nn \__ztool_leave_vmode:
   { \ifvmode \leavevmode \fi }
 % catch box dimension
@@ -57,6 +57,8 @@
 \cs_generate_variant:Nn \ztool_autoset_to_wd_and_ht:nnn { nne, een, eee }
 
 % 2. width/height scale to same time
+% TODO: if '\dim(content) < dim', spread it to 'dim'.
+% \ztool_set_to_wd:nn {\l__zsect_title_num_dim}{\zsect@num}
 \cs_new_protected:Npn \ztool_set_to_wd:nn #1#2
   {% #1:width; #2:object
     \hbox_set:Nn \l_tmpa_box {#2}

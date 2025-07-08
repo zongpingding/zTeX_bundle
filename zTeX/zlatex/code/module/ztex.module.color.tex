@@ -2,6 +2,9 @@
 
 
 %%%%%     color module for ztex     %%%%%
+\RequirePackage{xcolor}
+
+
 % ==> color setup
 % dynamic color setup
 \regex_new:N \l__ztex_color_mode_regex
@@ -28,6 +31,8 @@
 \definecolor{ztex@color@proposition}{HTML}{f39c12}
 \definecolor{ztex@color@remark}{HTML}{c92a2a}
 
+% slide color
+\definecolor{zslide@title@color}{HTML}{d9d9d9}
 
 % ==> structure theme
 \ztex_keys_define:nn {color}{
