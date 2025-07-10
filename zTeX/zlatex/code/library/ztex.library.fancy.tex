@@ -36,7 +36,7 @@
         \node[anchor=south, color=white] at ($(stripES)+(-1.5em, 0em)$)
           {
             \normalsize\scalebox{4}{\Roman{chapter}}
-            \exp_args:Ne \zfancynumsuffix{\thechapter}
+            \exp_args:Ne \thmark{\thechapter}
           };
         \node[anchor=south~ west, inner~ sep=0pt, 
               yshift=4.25em, xshift=.25em, 
@@ -82,7 +82,7 @@
     0=th,  1=st,  2=nd,  3=rd, 
     11=th, 12=th, 13=th, _=th,
   } 
-\NewDocumentCommand\zfancynumsuffix{m}
+\NewDocumentCommand\thmark{m}
   {
     \int_compare:nTF { 11 <= #1 <= 13 }
       { \prop_item:Ne \g_arabic_suffix_prop {#1} }

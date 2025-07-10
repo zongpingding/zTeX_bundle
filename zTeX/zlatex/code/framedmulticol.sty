@@ -130,7 +130,7 @@
 \dim_new:N \l__fmulticol_rule_extend_top_dim
 \dim_new:N \l__fmulticol_rule_extend_bot_dim
 \cs_new_protected:Npn \fmulticol@rule 
-  { 
+  {
     \dim_set:Nn \l__fmulticol_tmpa_dim 
       {
         \box_ht:N \mult@rightbox + % height
@@ -214,92 +214,92 @@
 \cs_new_protected:Npn \fmulticolsetup { \keys_set:nn { fmulticol } }
 \keys_define:nn { fmulticol } 
   {
-    columns .code:n = \tl_set:Nx \l__fmulticol_cols_tl { \int_eval:n {#1} } ,
-    columns .initial:n = 2 ,
-    cols .meta:n = { columns = {#1} } ,
-    first-minimal .dim_set:N = \premulticols ,
-    last-minimal .dim_set:N = \postmulticols ,
-    outer-skip .skip_set:N = \multicolsep ,
-    outer-sep .meta:n = { outer-skip = {#1} } ,
-    column-sep .dim_set:N = \columnsep ,
-    sep .meta:n = { column-sep = {#1} } ,
-    heading .tl_set:N = \l__fmulticol_heading_tl ,
-    rule-width .dim_set:N = \columnseprule ,
-    rule-color .code:n = 
+    columns         .code:n = \tl_set:Nx \l__fmulticol_cols_tl { \int_eval:n {#1} } ,
+    columns         .initial:n = 2 ,
+    cols            .meta:n = { columns = {#1} } ,
+    first-minimal   .dim_set:N = \premulticols ,
+    last-minimal    .dim_set:N = \postmulticols ,
+    outer-skip      .skip_set:N = \multicolsep ,
+    outer-sep       .meta:n = { outer-skip = {#1} } ,
+    column-sep      .dim_set:N = \columnsep ,
+    sep             .meta:n = { column-sep = {#1} } ,
+    heading         .tl_set:N = \l__fmulticol_heading_tl ,
+    rule-width      .dim_set:N = \columnseprule ,
+    rule-color      .code:n = {}
       \tl_set:Nx \columnseprulecolor { \__fmulticol_color_select:n {#1} } ,
-    ragged .code:n = \raggedcolumns ,
-    ragged .value_forbidden:n = true ,
-    not-aligned .meta:n = { ragged } ,
-    not-aligned .value_forbidden:n = true ,
-    flush .code:n = \flushcolumns ,
-    flush .value_forbidden:n = true ,
-    aligned .meta:n = { flush } ,
-    aligned .value_forbidden:n = true ,
-    balanced .bool_set:N = \l__fmulticol_balanced_bool ,
-    balanced .initial:n = true ,
-    not-balanced .code:n = \bool_set_false:N \l__fmulticol_balanced_bool ,
-    not-balanced .value_forbidden:n = true ,
-    columns* .meta:n = { not-balanced , columns = {#1} } ,
-    cols*    .meta:n = { columns* = {#1} } ,
+    ragged          .code:n = \raggedcolumns ,
+    ragged          .value_forbidden:n = true ,
+    not-aligned     .meta:n = { ragged } ,
+    not-aligned     .value_forbidden:n = true ,
+    flush           .code:n = \flushcolumns ,
+    flush           .value_forbidden:n = true ,
+    aligned         .meta:n = { flush } ,
+    aligned         .value_forbidden:n = true ,
+    balanced        .bool_set:N = \l__fmulticol_balanced_bool ,
+    balanced        .initial:n = true ,
+    not-balanced    .code:n = \bool_set_false:N \l__fmulticol_balanced_bool ,
+    not-balanced    .value_forbidden:n = true ,
+    columns*        .meta:n = { not-balanced , columns = {#1} } ,
+    cols*           .meta:n = { columns* = {#1} } ,
 
     % hook point 
-    before .tl_set:N = \l__fmulticol_before_tl ,
-    after  .tl_set:N = \l__fmulticol_after_tl  ,
-    begin  .tl_set:N = \l__fmulticol_begin_tl  ,
-    end    .tl_set:N = \l__fmulticol_end_tl    ,
+    before              .tl_set:N = \l__fmulticol_before_tl ,
+    after               .tl_set:N = \l__fmulticol_after_tl  ,
+    begin               .tl_set:N = \l__fmulticol_begin_tl  ,
+    end                 .tl_set:N = \l__fmulticol_end_tl    ,
 
-    enable-swap-column .code:n = 
+    enable-swap-column  .code:n = 
       \cs_set_eq:NN \fmulticol@update@boxes \fmulticol@swapcolumninevenpages ,
-    enable-swap-column .value_forbidden:n = true ,
+    enable-swap-column  .value_forbidden:n = true ,
     disable-swap-column .code:n = \cs_set_eq:NN \fmulticol@update@boxes \use_none:nn ,
     disable-swap-column .value_forbidden:n = true ,
-    swap-column .bool_set:N = \fmulticol@swapcolumn ,
+    swap-column         .bool_set:N = \fmulticol@swapcolumn ,
 
-    adj .bool_set:N = \l__fmulticol_adj_bool ,
-    adj-inner .code:n = \bool_set_true:N \l__fmulticol_adj_bool 
+    adj                 .bool_set:N = \l__fmulticol_adj_bool ,
+    adj-inner           .code:n = \bool_set_true:N \l__fmulticol_adj_bool 
       \tl_set:Nx \l__fmulticol_adj_inner_tl { \dim_eval:n {#1} } ,
-    adj-outer .code:n = \bool_set_true:N \l__fmulticol_adj_bool 
+    adj-outer           .code:n = \bool_set_true:N \l__fmulticol_adj_bool 
       \tl_set:Nx \l__fmulticol_adj_outer_tl { \dim_eval:n {#1} } ,
-    adj*      .meta:n = { adj , not-balanced } ,
-    _adj      .code:n = \__fmulticol_adj:Nnnn #1 ,
-    shorten   .code:n = \bool_set_true:N \l__fmulticol_adj_bool
+    adj*                .meta:n = { adj , not-balanced } ,
+    _adj                .code:n = \__fmulticol_adj:Nnnn #1 ,
+    shorten             .code:n = \bool_set_true:N \l__fmulticol_adj_bool
       \__fmulticol_adj:Nnnn + {#1} { 0pt } { 0pt } ,
-    widen     .code:n = \bool_set_true:N \l__fmulticol_adj_bool 
+    widen               .code:n = \bool_set_true:N \l__fmulticol_adj_bool 
       \__fmulticol_adj:Nnnn - {#1} { 0pt } { 0pt } ,
 
-    wrap-box .bool_set:N = \l__fmulticol_wrap_box_bool ,
+    wrap-box            .bool_set:N = \l__fmulticol_wrap_box_bool ,
 
-    framed .choice: ,
-    framed-options  .clist_set:N = \fmulticol@framed@options ,
-    framed-options+ .code:n = \clist_put_right:Nn \fmulticol@framed@options {#1} ,
-    rule-top .dim_set:N = \l__fmulticol_rule_extend_top_dim ,
-    rule-bottom .dim_set:N = \l__fmulticol_rule_extend_bot_dim ,
+    framed              .choice: ,
+    framed-options      .clist_set:N = \fmulticol@framed@options ,
+    framed-options+     .code:n = \clist_put_right:Nn \fmulticol@framed@options {#1} ,
+    rule-top            .dim_set:N = \l__fmulticol_rule_extend_top_dim ,
+    rule-bottom         .dim_set:N = \l__fmulticol_rule_extend_bot_dim ,
 
     % be careful to use
-    addto-baselineskip .dim_set:N = \multicolbaselineskip ,
-    tolerance .int_set:N = \multicoltolerance , % 9999
-    pretolerance .int_set:N = \multicolpretolerance ,
-    collectmore .int_set:N = \c@collectmore ,
-    minrows .int_set:N = \c@minrows , % 1
-    unbalance .int_set:N = \c@unbalance ,
-    column-badness .int_set:N = \c@columnbadness ,
-    final-column-badness .int_set:N = \c@finalcolumnbadness , % 9999
-    top-fuzz .dim_set:N = \multicolovershoot , % 0pt 
-    bottom-fuzz .dim_set:N = \multicolundershoot , % 2pt 
-    bot-fuzz .meta:n = { bottom-fuzz = {#1} } ,
-    v-fuzz .meta:n = { top-fuzz = {#1} , bottom-fuzz = {#1} } ,
-    h-fuzz .dim_set:N = \tex_hfuzz:D ,
-    overflow .dim_set:N = \maxbalancingoverflow , % 12pt 
-    right-to-left .code:n = \RLmulticolcolumns ,
-    right-to-left .value_forbidden:n = true ,
-    RL .meta:n = { right-to-left } ,
-    RL .value_forbidden:n = true ,
-    left-to-right .code:n = \LRmulticolcolumns ,
-    left-to-right .value_forbidden:n = true ,
-    LR .meta:n = { left-to-right } ,
-    LR .value_forbidden:n = true ,
+    addto-baselineskip    .dim_set:N = \multicolbaselineskip ,
+    tolerance             .int_set:N = \multicoltolerance , % 9999
+    pretolerance          .int_set:N = \multicolpretolerance ,
+    collectmore           .int_set:N = \c@collectmore ,
+    minrows               .int_set:N = \c@minrows , % 1
+    unbalance             .int_set:N = \c@unbalance ,
+    column-badness        .int_set:N = \c@columnbadness ,
+    final-column-badness  .int_set:N = \c@finalcolumnbadness , % 9999
+    top-fuzz              .dim_set:N = \multicolovershoot , % 0pt 
+    bottom-fuzz           .dim_set:N = \multicolundershoot , % 2pt 
+    bot-fuzz              .meta:n = { bottom-fuzz = {#1} } ,
+    v-fuzz                .meta:n = { top-fuzz = {#1} , bottom-fuzz = {#1} } ,
+    h-fuzz                .dim_set:N = \tex_hfuzz:D ,
+    overflow              .dim_set:N = \maxbalancingoverflow , % 12pt 
+    right-to-left         .code:n = \RLmulticolcolumns ,
+    right-to-left         .value_forbidden:n = true ,
+    RL                    .meta:n = { right-to-left } ,
+    RL                    .value_forbidden:n = true ,
+    left-to-right         .code:n = \LRmulticolcolumns ,
+    left-to-right         .value_forbidden:n = true ,
+    LR                    .meta:n = { left-to-right } ,
+    LR                    .value_forbidden:n = true ,
 
-    unknown .code:n = 
+    unknown               .code:n = 
       { 
         \exp_args:Nf \__fmulticol_if_head_int:nTF { \l_keys_key_str } 
           { \tl_set:Nx \l__fmulticol_cols_tl { \int_eval:n { \l_keys_key_str } } } 

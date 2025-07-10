@@ -1,4 +1,4 @@
-\ProvidesExplFile{ztex.module.sect.tex}{2025/07/08}{1.0.1}{sect~module~for~ztex}
+\ProvidesExplFile{ztex.module.sect.tex}{2025/07/10}{1.0.1}{sect~module~for~ztex}
 
 
 %%%%%             sect module for ztex          %%%%%
@@ -9,9 +9,34 @@
 
 
 %%%%%      disable 'sect' module scope begin    %%%%%
+% ==> disable 'section' module
 \bool_if:NTF \g__ztex_sect_load_bool 
   { \if_true:  }
   { \if_false: }
+
+
+% ==> disable 'titlesec', 'titletoc', 'etoc' etc ...
+\ztex_msg_set:nn { zsect@disable }
+  {
+    You~can~NOT~use~'sect'~module~together~with~
+    'titlesec',~'titletoc',~'etoc',~etc~...
+  }
+\cs_new:Npn \__zsect_package_disable_error:
+  {
+    \msg_fatal:nn { ztex } { zsect@disable }
+    \ExplSyntaxOff
+    \file_input_stop:
+  }
+\cs_new:Npn \zsect_package_disable_error:
+  {
+    \@ifpackageloaded{ titlesec }{ \__zsect_package_disable_error: }{}
+    \@ifpackageloaded{ titletoc }{ \__zsect_package_disable_error: }{}
+    \@ifpackageloaded{   etoc   }{ \__zsect_package_disable_error: }{}
+  }
+\ztex_hook_preamble_last:n 
+  {
+    \zsect_package_disable_error:
+  }
 
 
 
@@ -46,11 +71,21 @@
 \clist_map_function:NN \c_zsect_class_type_clist
   \__zsect_get_title_class_top:n
 \int_const:Nn \g_zsect_class_type_int { \l__zsect_class_type_int }
+% prop data type
+\tl_put_right:Nn \l__zsect_level_keyval_tl 
+  {
+    figure = 2,
+    table  = 2,
+  }
 \exp_args:NNo \prop_const_from_keyval:Nn \c_zsect_level_prop
   {
     \l__zsect_level_keyval_tl
   }
+% clist data type
+\tl_put_right:Nn \l__zsect_level_clist_tl { figure, table }
 \clist_const:Ne \c_zsect_level_clist { \l__zsect_level_clist_tl }
+% tl data type
+\tl_put_right:Nn \l__zsect_level_tl { {figure}{table} }
 \tl_const:Ne \c_zsect_level_tl { \l__zsect_level_tl }
 \prop_const_from_keyval:Nn \c_zsect_level_leagcy_prop
   {
@@ -64,6 +99,8 @@
     paragraph     = 4,
     subparagraph  = 5,
   }
+
+
 % ==> section class path map (for future use)
 \prop_const_from_keyval:Nn \g__ztoc_class_pathmap_prop
   {
@@ -74,7 +111,9 @@
     section       = part/chapter/,
     chapter       = part/,
   }
-% temporary variables
+
+
+% ==> temporary variables
 \newdimen\zsect@dim@a
 \newdimen\zsect@dim@b
 \newdimen\zsect@dim@c
@@ -125,12 +164,14 @@
 \seq_new:N \g_ztoc_log_seq  % glossary
 \seq_new:N \g_ztoc_lom_seq  % theorem 
 \seq_new:N \g_ztoc_loa_seq  % algorithm
+\seq_new:N \g__ztoc_localtoc_enabled_seq
 \seq_gclear:N \g_ztoc_toc_seq
 \seq_gclear:N \g_ztoc_lof_seq
 \seq_gclear:N \g_ztoc_lot_seq
 \seq_gclear:N \g_ztoc_log_seq
 \seq_gclear:N \g_ztoc_lom_seq
 \seq_gclear:N \g_ztoc_loa_seq
+\seq_gclear:N \g__ztoc_localtoc_enabled_seq
 
 % public local toc seq
 \seq_new:N \g_ztoc_localtoc_seq
@@ -161,8 +202,6 @@
 \seq_new:N \g__ztoc_keyvallom_seq
 \seq_new:N \g__ztoc_keyvallog_seq
 \seq_new:N \g__ztoc_keyvalloa_seq
-
-\seq_new:N \g__ztoc_localtoc_enabled_seq
 
 
 % ==> leagcy toc interface
@@ -345,6 +384,7 @@
     space.right    : skip      = \ztoc@rmargin,
     space.hang     : length    = \KeyValue { width.name },
 
+    leader.fill    : skip      = { \fill },
     leader.sep     : length    = \ztoc@leader@sep,
     leader.raise   : length    = \ztoc@leader@raise,
     leader.type    : tokenlist = \ztoc@leader@type,
@@ -411,6 +451,7 @@
     space.right    = \l__ztoc_space_right_skip,
     space.hang     = \l__ztoc_space_hang_dim,
 
+    leader.fill    = \l__ztoc_leader_fill_skip,
     leader.sep     = \l__ztoc_leader_sep_dim,
     leader.raise   = \l__ztoc_leader_raise_dim,
     leader.type    = \l__ztoc_leader_sep_tl,
@@ -421,23 +462,12 @@
   }{
     \AssignTemplateKeys
     % #1:toc depth(int); #2:{name}{title}; #3:page
-    \bool_if:NTF \l__ztoc_explicit_bool
+    \bool_if:NTF \l__ztoc_ignore_negate_bool 
       {
-        \cs_set:Npo \__ztoc_explicit:nnnn ##1##2##3##4
-          { \l__ztoc_code_tl } 
-        \exp_args:Nff \__ztoc_explicit:nnnn { #1 }
-          { \__ztoc_extract_name:w #2\scan_stop: }
-          { \__ztoc_extract_title:w #2\scan_stop: }
-          { #3 }
+        \__ztoc_ignore_negate_parser:nnn {#1}{#2}{#3}
       }{
-        \bool_if:NTF \l__ztoc_ignore_negate_bool 
-          {
-            \__ztoc_ignore_negate_parser:nnn {#1}{#2}{#3}
-          }{
-            \__ztoc_ignore_parser:nnn {#1}{#2}{#3}
-          }
+        \__ztoc_ignore_parser:nnn {#1}{#2}{#3}
       }
-    \skip_set:Nn \l__ztoc_space_before_skip {\z@ \@plus.2\p@}
   }
 
 % toc ignore setup
@@ -539,11 +569,10 @@
 \cs_new:Npn \__ztoc_dotted_tocline:nnn #1#2#3
   {
     \ifnum #1 > \c@tocdepth \else
-      \vskip \l__ztoc_space_before_skip \relax
       \exp_args:No \__step_toc_group_int:n {\ztoc@current@class}
       \edef\ztoc@newclass@level
         { \prop_item:No \c_zsect_level_prop {\ztoc@current@class} }
-      \bool_while_do:nn 
+      \bool_while_do:nn
         {
           ( ! \seq_if_empty_p:N \g__ztoc_gparser_curstack_seq) &&
           ( 
@@ -563,7 +592,12 @@
           \ztoc_group_hook_add:n {\l__ztoc_gparser_prev_tl,end}
         }
       \__ztoc_dotted_tocline_raw:nnn {#1}{#2}{#3}
-      \ztoc_group_hook_add:n {\ztoc@current@class,\__use_toc_group_int:e {\ztoc@current@class},begin}
+      \ztoc_group_hook_add:n
+        {
+          \ztoc@current@class,
+          \__use_toc_group_int:e {\ztoc@current@class},
+          begin
+        }
       \seq_gpush:Ne \g__ztoc_gparser_curstack_seq 
         {
           \ztoc@current@class
@@ -590,21 +624,37 @@
           \l__ztoc_space_hang_dim
         }
       }
-    {
-      \UseHook{ztoc/tocline/begin}
-      \leftskip  \ztoc@tmpa@skip \relax
-      \rightskip \l__ztoc_space_right_skip \parfillskip -\rightskip
-      \parindent \ztoc@tmpa@skip \relax\@afterindenttrue
-      \interlinepenalty\@M
-      \leavevmode
-      \zsect@dim@a \l__ztoc_space_hang_dim \relax
-      \advance\leftskip \zsect@dim@a 
-      \null\nobreak \hskip -\leftskip
-      { \__ztoc_name_title_set:nn {#2}{\@contentsline@destination} } \nobreak
-      \__ztoc_leader_set: % leaders
-      \nobreak \__ztoc_page_set:nn { #3 }{page.#3} \l__ztoc_line_end_tl
-      \UseHook{ztoc/tocline/end}
+    \UseHook{ztoc/tocline/begin}
+    \bool_if:NTF \l__ztoc_explicit_bool
+      {
+        \cs_set:Npo \__ztoc_explicit:nnnn ##1##2##3##4
+          { \l__ztoc_code_tl } 
+        \exp_args:Nff \__ztoc_explicit:nnnn { #1 }
+          { \__ztoc_extract_name:w #2\scan_stop: }
+          { \__ztoc_extract_title:w #2\scan_stop: }
+          { #3 }
+      }{
+        {
+          \vskip \l__ztoc_space_before_skip \relax
+          \leftskip  \ztoc@tmpa@skip \relax
+          \skip_if_finite:nF { \l__ztoc_leader_fill_skip }
+            {
+              \rightskip \l__ztoc_space_right_skip \parfillskip -\rightskip
+            }
+          \parindent \ztoc@tmpa@skip \relax\@afterindenttrue
+          \interlinepenalty\@M
+          \leavevmode
+          \zsect@dim@a \l__ztoc_space_hang_dim \relax
+          \advance\leftskip \zsect@dim@a 
+          \null\nobreak \hskip -\leftskip
+          { \__ztoc_name_title_set:nn {#2}{\@contentsline@destination} } \nobreak
+          \__ztoc_leader_typeset: \nobreak % leaders
+          \__ztoc_page_set:nn { #3 }{page.#3}
+          \l__ztoc_line_end_tl
+        }
     }
+    \UseHook{ztoc/tocline/end}
+    \skip_set:Nn \l__ztoc_space_before_skip {\z@ \@plus.2\p@}
   }
 
 % toc group parser aux functions:
@@ -646,13 +696,13 @@
   }
 %%%%%     toc group parser end    %%%%%
 
-\cs_new:Npn \__ztoc_leader_set: 
+\cs_new:Npn \__ztoc_leader_typeset: 
   {
     \zsect_leaders:nnnnn { \l__ztoc_leader_sep_tl }
       { \l__ztoc_leader_content_tl }
       { \dim_eval:n {\l__ztoc_leader_sep_dim*2} }
       { \l__ztoc_leader_raise_dim }
-      { \fill }
+      { \l__ztoc_leader_fill_skip }
   }
 \cs_new:Npn \__ztoc_page_set:nn #1#2
   {
@@ -784,11 +834,11 @@
   }
 
 
-% ==> user interface
+% ==> user interface for toc
 \ztex_keys_define:nn { ztoc/option }
-  { 
+  {
     rmargin        .code:n = { \setlength\ztoc@rmargin{#1} },
-    ignore.level   .code:n = { \def\ztoc@ignore@level {#1} },
+    ignore.level   .code:n = { \gdef\ztoc@ignore@level {#1} },
 
     line.end       .code:n = { \long\gdef\ztoc@line@end  {#1} },
     page.width     .code:n = { \setlength\ztoc@page@width{#1} }, 
@@ -803,18 +853,6 @@
     \ztex_keys_set:nn { ztoc/option }
       { #1 }
   }
-% NOTE: 'explicit' bug lies here for '\clist_map_inline:nn' !!
-% \NewDocumentCommand{\ztocformat}{ m+m }
-%   {
-%     \clist_map_inline:nn { #1 }
-%       {
-%         \exp_args:Nne \EditInstance{ztextoc}
-%           { ztoc/level
-%             \prop_item:Ne \c_zsect_level_prop 
-%               { \cs_to_str:N ##1 }
-%           }{#2}
-%       }
-%   }
 \NewDocumentCommand{\ztocformat}{m+m}
   {
     \prop_if_in:NeT \c_zsect_level_prop { \cs_to_str:N #1 }
@@ -826,7 +864,7 @@
           }{#2}
       }
   }
-\NewDocumentCommand{\ztocgroupinsert}{mm}
+\NewDocumentCommand{\ztocgroupinsert}{m+m}
   {
     \AddToHook{#1}{#2}
   }
@@ -840,36 +878,52 @@
   {
     \seq_gset_from_clist:Nn \g__ztoc_localtoc_enabled_seq 
       { #1 }
-    \clist_map_inline:nn { #1 }
+    \keyval_parse:nnn
+      { \__ztoc_enable_table:nn {\c_sys_jobname_str} }
+      { \__ztoc_enable_table_inverse:nn }
+      { #1 }
+  }
+\cs_new:Npn \__ztoc_enable_table_inverse:nn #1#2
+  { \__ztoc_enable_table:nn { #2 }{ #1 } }
+\cs_new:Npn \__ztoc_enable_table:nn #1#2
+  {% #1:file, #2:toc, lom, etc
+    \clist_map_inline:nn { #2 }
       {
-        \bool_gset_true:c { g_##1_write_enable_bool }
         % global toc
         \ztool_gread_file_as_seq:nnc { \c_false_bool }
-          { \c_sys_jobname_str.##1 } 
+          { #1.##1 }
           { g_ztoc_##1_seq }
         % keyval toc from previous run
         \ztool_gread_file_as_seq:nnc { \c_false_bool }
-          { \c_sys_jobname_str.p##1 } 
+          { #1.p##1 } 
           { g_ztoc_keyval##1_seq }
-        \seq_gclear:c { g__ztoc_keyval##1_seq }
-        \ztex_hook_doc_end:n
+        \str_if_eq:nnT { #1 }{ \c_sys_jobname_str }
           {
-            \ztool_write_seq_to_file:nce { \c_true_bool } 
-              { g__ztoc_keyval##1_seq  }
-              { \c_sys_jobname_str.p##1 }
+            \seq_gclear:c { g__ztoc_keyval##1_seq }
+            \ztex_hook_doc_end:n
+              {
+                \ztool_write_seq_to_file:nce { \c_true_bool } 
+                  { g__ztoc_keyval##1_seq  }
+                  { \c_sys_jobname_str.p##1 }
+              }
           }
         % open stream for writing
-        \iow_open:cn { g_ztoc_##1_iow } 
-          { \c_sys_jobname_str.##1 }
+        \str_if_eq:nnT { #1 }{ \c_sys_jobname_str }
+          {
+            \bool_gset_true:c { g_##1_write_enable_bool }
+            \iow_open:cn { g_ztoc_##1_iow }
+              { \c_sys_jobname_str.##1 }
+          }
       }
   }
+
+% global toc (based on '*.toc' file)
 \DeclareDocumentCommand{\tableofcontents}{ o }
   {
     \IfValueT{#1}{\section*{#1}}
     \seq_use:Nn \g_ztoc_toc_seq {}
     \__ztoc_dotted_tocline_group_end:
   }
-% '\multitableofcontent' need 'multicol' package
 \DeclareDocumentCommand{\multitableofcontent}{ O{2} }
   {
     \begin{multicols}{#1}
@@ -878,7 +932,7 @@
     \end{multicols}
   }
 
-% local toc
+% local toc (based on '*.ptoc' file)
 \NewDocumentCommand{\zlocaltoc}{mm}
   {
     \clist_map_inline:nn { #2 }
@@ -1045,7 +1099,6 @@
     name.sep        : length     = { 0pt },
     name.before     : tokenlist  = { },
     name.after      : tokenlist  = { },
-    % name.width      : length     = 30pt,
     name.format     : tokenlist  = { },
     name.format+    : tokenlist  = { },
 
@@ -1061,6 +1114,7 @@
     explicit        : boolean    = { false },
     code            : tokenlist  = { },
 
+    bookmark.num    : boolean    = false,
     bookmark.before : tokenlist,
     bookmark.after  : tokenlist,
   }
@@ -1108,6 +1162,7 @@
     explicit        = \l__zsect_title_explicit_bool,
     code            = \l__zsect_title_code_tl,
 
+    bookmark.num    = \l__zsect_title_bookmark_num_bool,
     bookmark.before = \l__zsect_title_bookmark_before_tl,
     bookmark.after  = \l__zsect_title_bookmark_after_tl,
   }{
@@ -1161,11 +1216,17 @@
 \cs_new:Npn \__zsect_title_bookmark_add:n #1
   {
     \zsect_bookmark_add:eee
-      { 
+      {
         \prop_item:NV \c_zsect_level_prop 
           \l__zsect_title_class_tl 
       }
-      { \l__zsect_title_bookmark_before_tl #1 \l__zsect_title_bookmark_after_tl }
+      { 
+        \l__zsect_title_bookmark_before_tl
+          \bool_if:NT \l__zsect_title_bookmark_num_bool 
+            { \zsect@tocnum\ }
+          #1
+        \l__zsect_title_bookmark_after_tl
+      }
       { \l__zsect_title_class_tl.\zsect@tocnum }
     \tl_clear:N \l__zsect_title_bookmark_before_tl
     \tl_clear:N \l__zsect_title_bookmark_after_tl
@@ -1177,17 +1238,21 @@
   }
 \cs_new:Nn \__zsect_title_space_before: 
   {
-    \if@noskipsec \leavevmode \fi \par
-    \zsect@dim@b \l__zsect_title_spbf_skip\relax
-    \ifdim \zsect@dim@b < \z@
-      \zsect@dim@b -\zsect@dim@b\relax
-    \fi
-    \if@nobreak 
-      \everypar{} 
-    \else
-      \addpenalty \@secpenalty
-      \addvspace \zsect@dim@b
-    \fi
+    \exp_args:Nne \clist_if_in:nnTF {page, top}{\l__zsect_title_type_tl}
+      { \vskip\l__zsect_title_spbf_skip\relax }
+      {
+        \if@noskipsec \leavevmode \fi \par
+        \zsect@dim@b \l__zsect_title_spbf_skip\relax
+        \ifdim \zsect@dim@b < \z@
+          \zsect@dim@b -\zsect@dim@b\relax
+        \fi
+        \if@nobreak 
+          \everypar{} 
+        \else
+          \addpenalty \@secpenalty
+          \addvspace \zsect@dim@b
+        \fi
+      }
   }
 \cs_new:Nn \__zsect_title_space_after: 
   {
@@ -1237,6 +1302,8 @@
 % ==> define title
 \cs_new:Npn \zsect_define_title:Nn #1#2
   {
+    % \cs_if_exist:cF { c@\cs_to_str:N #1 } 
+    %   { \exp_args:Ne \newcounter{\cs_to_str:N #1} }
     \exp_args:Nne \DeclareInstance{ztexsect}{\cs_to_str:N #1}
       { default }{ #2 }
     \exp_args:Neee \DeclareInstanceCopy{ztexsect}
@@ -1260,12 +1327,12 @@
     class        = part,
     type         = page,
     pagestyle    = empty,
-    space.before = 0pt plus 1fill,
+    space.before = 0pt plus .7fill,
     space.after  = 0pt plus 1fill,
     title.format = \huge\bfseries\centering,
-    num          = \Roman{part},
+    num          = \Roman{part}\par,
     num.before   = {PART~},
-    num.sep      = 20pt,
+    % num.sep      = 20pt, % remove it for multi-line
   }
 \zsect_define_title:Nn \chapter 
   {
@@ -1334,6 +1401,11 @@
     title.format = \normalfont\normalsize\bfseries,
     num.show     = false,
     name.sep     = 19pt,
+  }
+\NewDocumentCommand{\zsecdefine}{mm}
+  {
+    \zsect_define_title:Nn #1 
+      { #2 }
   }
 
 

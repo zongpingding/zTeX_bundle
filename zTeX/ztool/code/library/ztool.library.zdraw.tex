@@ -1,4 +1,4 @@
-\ProvidesExplFile{ztool.library.zdraw.tex}{2025/05/21}{1.0.1}{zdraw~library~for~ztool}
+\ProvidesExplFile{ztool.library.zdraw.tex}{2025/07/08}{1.0.1}{zdraw~library~for~ztool}
 
 
 % ==> ztool draw (based on package 'pict2e' and 'picture' env)
@@ -93,7 +93,7 @@
 % --> line/vector
 \fp_new:N \l__draw_vector_slope_fp 
 \fp_new:N \l__draw_vector_normal_fp
-\fp_new:N \l__draw_vector_xsep_fp
+\fp_new:N \l__draw_vector_xysep_fp
 \cs_new:Npn \__@@_pic_line:nnn #1#2#3
   {% #1:$x$; #2:$y$; #3:$x$-distance NOT the length
     \line(\fp_eval:n {#1}, \fp_eval:n {#2})
@@ -143,33 +143,64 @@
         \msg_error:nn { ztool }{unknown-arrow-style}
       }
   }
+\tl_new:N \l__draw_line_type  % 'horizontal', 'vertical', 'normal'
 \cs_new_protected:Npn \ztool_pic_line_vector:nnnn #1#2#3#4
   {% #1:line/vector; #2:key-value; #3:start coor; #4:end coor;
     \group_begin:
     \keys_set:nn { ztool / draw / picture / #1 }{#2}
-    \fp_set:Nn \l__draw_vector_slope_fp
-      { (\__coor_nd:n {#4} - \__coor_nd:n {#3})
-      / (\__coor_st:n {#4} - \__coor_st:n {#3}) }
-    \fp_set:Nn \l__draw_vector_xsep_fp
-      { abs(\__coor_st:n {#4} - \__coor_st:n {#3}) }
+    \tl_set:Nn \l__draw_line_type { normal }
+    \fp_compare:nNnTF { \__coor_st:n {#4} - \__coor_st:n {#3} } > {0.001}
+      {
+        \fp_set:Nn \l__draw_vector_slope_fp
+          { (\__coor_nd:n {#4} - \__coor_nd:n {#3})
+          / (\__coor_st:n {#4} - \__coor_st:n {#3}) }
+        \fp_set:Nn \l__draw_vector_xysep_fp
+          { abs(\__coor_st:n {#4} - \__coor_st:n {#3}) }
+      }{
+        % NOTE: we do NOT set slope infinte, just set it to '0'
+        \fp_set:Nn \l__draw_vector_slope_fp {0} 
+        \fp_set:Nn \l__draw_vector_xysep_fp
+          { abs(\__coor_nd:n {#4} - \__coor_nd:n {#3}) }
+        \tl_set:Nn \l__draw_line_type { vertical }
+      }
+    \fp_compare:nNnT { abs(\__coor_nd:n {#4} - \__coor_nd:n {#3}) } < {0.001}
+      { \tl_set:Nn \l__draw_line_type { horizontal } }
     \z@pic@vector@style
-    \__pic_set_line_width: 
+    \__pic_set_line_width:
     \exp_last_unbraced:Ne \__@@_pic_put:nnn {\__coor_st_nd:n {#3}}
       {
         \__pic_set_line_color:
-        \cs:w __@@_pic_#1:nnn\cs_end: {1}
-          { \l__draw_vector_slope_fp }
-          { \l__draw_vector_xsep_fp  }
+        \str_case:VnF \l__draw_line_type
+          {
+            {vertical}{
+              \cs:w __@@_pic_#1:nnn\cs_end:
+                { \l__draw_vector_slope_fp }
+                { 1 }
+                { \l__draw_vector_xysep_fp  }
+            }
+            {horizontal}{
+              \cs:w __@@_pic_#1:nnn\cs_end: 
+                { 1 }
+                { \l__draw_vector_slope_fp }
+                { \l__draw_vector_xysep_fp  }
+            }
+            {normal}{
+              \cs:w __@@_pic_#1:nnn\cs_end: {1}
+                { \l__draw_vector_slope_fp }
+                { \l__draw_vector_xysep_fp  }
+            }
+        }{ \relax }
       }
     \group_end:
   }
+\cs_generate_variant:Nn \ztool_pic_line_vector:nnnn {neee, nooo}
 \NewDocumentCommand{\zline}{O{}d()d()}
-  { 
-    \ztool_pic_line_vector:nnnn {line}{#1}{#2}{#3}
+  {
+    \ztool_pic_line_vector:neee {line}{#1}{#2}{#3}
   }
 \NewDocumentCommand{\zvector}{O{}d()d()}
   { 
-    \ztool_pic_line_vector:nnnn {vector}{#1}{#2}{#3}
+    \ztool_pic_line_vector:neee {vector}{#1}{#2}{#3}
   }
 
 
@@ -449,4 +480,15 @@
 \NewDocumentCommand{\zrectangle}{O{}d()d()}
   {
     \ztool_pic_rectangle:nnn { #1 }{#2}{#3}
+  }
+
+
+% ==> absolute page coordinate (left, bottom) = (0, 0)
+\NewDocumentCommand{\zpin}{O{background}m}
+  {
+    \hook_gput_next_code:nn {shipout/#1}
+      {
+        \put(0pt, -\paperheight)
+          { \makebox(0, 0)[bl]{#2} }
+      }
   }

@@ -349,9 +349,9 @@
 \NewDocumentCommand{\ztexset}{m}{ \keys_set:nn {ztex}{#1} }
 \newcommand{\ztexoption}
   {
-    \textbf{Class~Options:}~
-    \str_use:N \g__ztex_lang_str {~-~}
-    \clist_use:Nn \g__ztex_subclass_option_clist{~-~}\par
+    \str_use:N \g__ztex_lang_str {~,~}
+    \clist_use:Nn \g__ztex_subclass_option_clist
+      { ~,~ }
   }
 
 
