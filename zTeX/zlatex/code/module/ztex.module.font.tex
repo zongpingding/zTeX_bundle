@@ -1,4 +1,4 @@
-\ProvidesExplFile{ztex.module.font.tex}{2025/05/20}{1.0.1}{font~module~for~ztex}
+\ProvidesExplFile{ztex.module.font.tex}{2025/07/10}{1.0.1}{font~module~for~ztex}
 
 
 %%%%%     font module for ztex     %%%%%
@@ -65,56 +65,7 @@
     feat / BoldSlantedFont .meta:n     = { feat / bdsl = #1 },
     feat / bdsl            .initial:n  = { * }, % *-boldslant
   }
-\cs_new_protected:Npn \__ztex_sysfont_new:nn #1#2
-  {% #1:en/cn; #2:key-value(font cfg args)
-    \ztex_keys_set:nn { fontcfg / new } {#2}
-    \__ztex_fontcfg_newfamily_copy:ooooo 
-      { \l__ztex_fontcfg_new_cmd_tl  }
-      { 
-        \tl_if_empty:VF \l__ztex_fontcfg_new_path_tl 
-          { Path=\l__ztex_fontcfg_new_path_tl, }
-      }
-      { \l__ztex_fontcfg_new_name_tl }
-      {
-        \tl_if_empty:VF \l__ztex_fontcfg_new_ext_tl
-          { Extension   = \l__ztex_fontcfg_new_ext_tl, }
-        UprightFont = \l__ztex_fontcfg_new_up_tl,
-        BoldFont    = \l__ztex_fontcfg_new_bd_tl,
-        ItalicFont  = \l__ztex_fontcfg_new_it_tl,
-        SlantedFont = \l__ztex_fontcfg_new_sl_tl,
-        SmallCapsFont   = \l__ztex_fontcfg_new_sc_tl,
-        BoldItalicFont  = \l__ztex_fontcfg_new_bdit_tl,
-        BoldSlantedFont = \l__ztex_fontcfg_new_bdsl_tl,
-      }{#1}
-    % Reset key value, '\cs{group_end:}' conflict with '\cs{newfontfamily}',
-    % See also: https://tex.stackexchange.com/q/729765/294585.
-    \ztex_keys_set:nn { fontcfg / new }
-      {
-        path = ,
-        feat / ext  = ,
-        feat / up   = *, 
-        feat / bd   = *,
-        feat / it   = *,
-        feat / sl   = *,
-        feat / sc   = *,
-        feat / bdsl = *,
-        feat / bdit = *,
-      }
-  }
-\bool_if:NTF \g__ztex_sysfont_cfg_bool
-  {
-    \__ztex_sysfont_new:nn {en}
-      {
-        cmd  = cinzel,
-        name = CinzelRegular.ttf,
-        bd   = *Bold,
-        it   = *Italic,
-      } 
-  }{\def\cinzel{\relax}}
-\NewDocumentCommand{\zfontfamilynew}{O{en}m}
-  {
-    \__ztex_sysfont_new:nn {#1} {#2}
-  }
+
 \ztex_msg_set:nn { fontcfg / lang }{ Current~font~type~supported~are:'en',~'CJK'. }
 \cs_set:Npn \__ztex_fontcfg_newfamily_copy:nnnnn #1#2#3#4#5 
   {% #1:font family; #2:font file path(format 'Path=xxx,'); 
@@ -140,6 +91,58 @@
       }
   }
 \cs_generate_variant:Nn \__ztex_fontcfg_newfamily_copy:nnnnn {ooooo}
+\cs_new_protected:Npn \__ztex_sysfont_new:nn #1#2
+  {% #1:en/cn; #2:key-value(font cfg args)
+    \ztex_keys_set:nn { fontcfg / new } {#2}
+    \__ztex_fontcfg_newfamily_copy:ooooo 
+      { \l__ztex_fontcfg_new_cmd_tl  }
+      { 
+        \tl_if_empty:VF \l__ztex_fontcfg_new_path_tl 
+          { Path=\l__ztex_fontcfg_new_path_tl, }
+      }
+      { \l__ztex_fontcfg_new_name_tl }
+      {
+        \tl_if_empty:VF \l__ztex_fontcfg_new_ext_tl
+          { Extension   = \l__ztex_fontcfg_new_ext_tl, }
+        UprightFont = \l__ztex_fontcfg_new_up_tl,
+        BoldFont    = \l__ztex_fontcfg_new_bd_tl,
+        ItalicFont  = \l__ztex_fontcfg_new_it_tl,
+        SlantedFont = \l__ztex_fontcfg_new_sl_tl,
+        SmallCapsFont   = \l__ztex_fontcfg_new_sc_tl,
+        BoldItalicFont  = \l__ztex_fontcfg_new_bdit_tl,
+        BoldSlantedFont = \l__ztex_fontcfg_new_bdsl_tl,
+      }{ #1 }
+    % Reset key value, '\cs{group_end:}' conflict with '\cs{newfontfamily}',
+    % See also: https://tex.stackexchange.com/q/729765/294585.
+    \ztex_keys_set:nn { fontcfg / new }
+      {
+        path = ,
+        feat / ext  = ,
+        feat / up   = *, 
+        feat / bd   = *,
+        feat / it   = *,
+        feat / sl   = *,
+        feat / sc   = *,
+        feat / bdsl = *,
+        feat / bdit = *,
+      }
+  }
+\bool_if:NTF \g__ztex_sysfont_cfg_bool
+  {
+    \__ztex_sysfont_new:nn {en}
+      {
+        cmd  = cinzel,
+        name = Cinzel-Regular.ttf,
+        feat / bd   = Cinzel-Bold,
+        feat / it   = ParsiMatn-Italic,
+      }
+  }{ \def\cinzel{\relax} }
+\NewDocumentCommand{\zfontfamilynew}{O{en}m}
+  {
+    \__ztex_sysfont_new:nn {#1} {#2}
+  }
+
+
 % TARGET: \cs{zfontset}\marg{en=\{main=, sans=\}, CJK=\{main=, mono=\}} 
 % Is this interface too complex ???
 \ztex_keys_define:nn { fontcfg / set }
@@ -148,14 +151,13 @@
   }
 \cs_new_protected:Npn \__ztex_docfont_set:nn #1#2
   {% #1: roman,sans,mono; #2:font family
-    \__ztex_fontcfg_setfamily_copy:oooo 
-      { #1 }{ #2 }
+    \__ztex_fontcfg_setfamily_copy:ooooo 
+      { #1 }{ #2 }{}{}{}
   }
 \NewDocumentCommand{\zfontfamilyset}{O{en}m}
-  {
-    
-  }
-\ztex_msg_set:nn { fontcfg / family }{ Valid~family~options~are:'main',~'sans'~and~'mono'. }
+  { }
+\ztex_msg_set:nn { fontcfg / family }
+  { Valid~family~options~are:'main',~'sans'~and~'mono'. }
 \cs_set:Npn \__ztex_fontcfg_setfamily_copy:nnnn #1#2#3#4
   {% #1:lang, #2:family, #3:font, #4: font features
     \tl_if_in:nnF {en, CJK}{#1}

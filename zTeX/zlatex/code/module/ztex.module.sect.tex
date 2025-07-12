@@ -1,4 +1,4 @@
-\ProvidesExplFile{ztex.module.sect.tex}{2025/07/10}{1.0.1}{sect~module~for~ztex}
+\ProvidesExplFile{ztex.module.sect.tex}{2025/07/11}{1.0.1}{sect~module~for~ztex}
 
 
 %%%%%             sect module for ztex          %%%%%
@@ -19,7 +19,8 @@
 \ztex_msg_set:nn { zsect@disable }
   {
     You~can~NOT~use~'sect'~module~together~with~
-    'titlesec',~'titletoc',~'etoc',~etc~...
+    'titlesec',~'titletoc',~'titleps',~'sectsty',~
+    'tocloft'~'etoc',~etc~...
   }
 \cs_new:Npn \__zsect_package_disable_error:
   {
@@ -31,6 +32,9 @@
   {
     \@ifpackageloaded{ titlesec }{ \__zsect_package_disable_error: }{}
     \@ifpackageloaded{ titletoc }{ \__zsect_package_disable_error: }{}
+    \@ifpackageloaded{  titleps }{ \__zsect_package_disable_error: }{}
+    \@ifpackageloaded{  sectsty }{ \__zsect_package_disable_error: }{}
+    \@ifpackageloaded{  tocloft }{ \__zsect_package_disable_error: }{}
     \@ifpackageloaded{   etoc   }{ \__zsect_package_disable_error: }{}
   }
 \ztex_hook_preamble_last:n 
@@ -74,8 +78,8 @@
 % prop data type
 \tl_put_right:Nn \l__zsect_level_keyval_tl 
   {
-    figure = 2,
-    table  = 2,
+    figure = 3,
+    table  = 3,
   }
 \exp_args:NNo \prop_const_from_keyval:Nn \c_zsect_level_prop
   {
@@ -1051,6 +1055,72 @@
                   { \ztexhyperTF {\l__zsect_title_class_tl.\zsect@tocnum}{} } 
                 },
       }
+  }
+
+
+
+% ----------------------------------------------------------------------
+%                         listoftables / figures
+% ----------------------------------------------------------------------
+% NOTE: '*.plot', '*.plof' file is empty, for 'localtoc' have not been implemented.
+\cs_new:Npn \zsect_add_table_line:nnnn #1#2#3#4 
+  {
+    \bool_if:NT \g_lot_write_enable_bool
+      {
+        \iow_now:Ne \g_ztoc_lot_iow
+          {
+            \token_to_str:N \contentsline{#1}{#2}{#3}{#4}
+            \c_percent_str
+          }
+      }
+  }
+\cs_new:Npn \zsect_add_figure_line:nnnn #1#2#3#4 
+  {
+    \bool_if:NT \g_lof_write_enable_bool 
+      {
+        \iow_now:Ne \g_ztoc_lof_iow
+          {
+            \token_to_str:N \contentsline{#1}{#2}{#3}{#4}
+            \c_percent_str
+          }
+      }
+  }
+\DeclareDocumentCommand{\listoffigures}{}
+  {
+    \seq_use:Nn \g_ztoc_lof_seq {}
+  }
+\DeclareDocumentCommand{\listoftables}{}
+  {
+    \seq_use:Nn \g_ztoc_lot_seq {}
+  }
+% NOTE: if '\@captype' undefined, an ERROR will occur, 'figure'
+%       and 'table' env define '\@captype' to 'figure' or 'table'.
+\long\def\@caption#1[#2]#3 
+  {
+    \par \use:c { zsect_add_#1_line:nnnn } 
+      { #1 }
+      { {\use:c {the#1}}{\ignorespaces \exp_not:n {#2}} }
+      { \thepage }
+      { \ztexhyperTF {\l__zsect_title_class_tl.\zsect@tocnum}{} }
+    \begingroup
+      \@parboxrestore
+      \if@minipage
+        \@setminipage
+      \fi
+      \normalsize
+      \@makecaption
+        {\csname fnum@#1\endcsname}
+        {\ignorespaces #3}
+    \par\endgroup
+  }
+% listoffigures/tables format
+\NewDocumentCommand{\zfigtabformat}{m}
+  {
+    % NOTE: 1. or 'table', but they are the same, for that
+    %       they are in same level;
+    %       2. this format will affect all section class of class '3'.
+    \exp_args:Nc \ztocformat { figure } 
+      { #1 }
   }
 
 

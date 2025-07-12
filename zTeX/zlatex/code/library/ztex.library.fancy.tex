@@ -1,4 +1,4 @@
-\ProvidesExplFile{ztex.library.fancy.tex}{2025/07/01}{1.0.1}{fancy~library~for~ztex}
+\ProvidesExplFile{ztex.library.fancy.tex}{2025/07/10}{1.0.1}{fancy~library~for~ztex}
 
 
 %%%%%     fancy library for ztex     %%%%%
@@ -22,40 +22,40 @@
   {
     explicit = true,
     code = {
-      \newpage
+      \newpage \thispagestyle{empty}
       \begin{tikzpicture}[overlay, remember~ picture]
         % mark nodes (need 'calc' library)
         \coordinate (A) at ($(current~ page.north~ west)+(.125\paperwidth, 0pt)$);
-        \coordinate (stripES) at ($(A)+(3em, -.25\paperheight)$);
+        \coordinate (stripES) at ($(A)+(5em, -.25\paperheight)$);
         % chapter head
         \fill[zchapColor] (A) rectangle (stripES);
         \draw[draw=zchapColor] (stripES)++(.25em, 4em)   -- ++(.75\paperwidth-3.25em, 0pt);
         \draw[draw=zchapColor] (stripES)++(.25em, 1.5pt) -- ++(.75\paperwidth-3.25em, 0pt);
         \draw[draw=zchapColor] (stripES)++(.25em, 0em)   -- ++(.75\paperwidth-3.25em, 0pt);
         % chapter title and index
-        \node[anchor=south, color=white] at ($(stripES)+(-1.5em, 0em)$)
+        \node[anchor=south, color=white] at ($(stripES)+(-2.5em, 0em)$)
           {
-            \normalsize\scalebox{4}{\Roman{chapter}}
+            \normalsize\scalebox{4}{\arabic{chapter}}
             \exp_args:Ne \thmark{\thechapter}
           };
-        \node[anchor=south~ west, inner~ sep=0pt, 
-              yshift=4.25em, xshift=.25em, 
-              font=\Large\bfseries, color=zchapColor
-          ] at (stripES) {\z@subtitle};
         \node[anchor=south~ west, inner~ sep=0pt,
-              yshift=1.5em, xshift=.25em,
+              yshift=4.25em, xshift=.25em,
+              font=\Large\bfseries, color=zchapColor
+          ] at (stripES) {\l__zfancy_chap_subtitle_tl};
+        \node[anchor=south~ west, inner~ sep=0pt,
+              yshift=1.25em, xshift=.25em,
               font=\cinzel\Huge\bfseries, color=zchapColor
           ] at (stripES) {#2};
         % parbox insert
-        \node[anchor=north~ west, inner~ sep=0pt] at ($(stripES)+(-3em, -1em)$)
+        \node[anchor=north~ west, inner~ sep=0pt] at ($(stripES)+(-5em, -1em)$)
           {
             \parbox[t]{.3\paperwidth}{\fontsize{10pt}{15pt}
-              \selectfont\cinzel\itshape\z@leftContent}
+              \selectfont\cinzel\itshape\l__zfancy_chap_lcontent_tl}
           };
-        \node[anchor=north~ west, inner~ sep=0pt] at ($(stripES)+(-3em+.45em+.3\paperwidth, -1em)$)
+        \node[anchor=north~ west, inner~ sep=0pt] at ($(stripES)+(-5em+.45em+.3\paperwidth, -1em)$)
           {
             \parbox[t]{\dimeval{.45\paperwidth-.45em}}{
-              \fontsize{10pt}{15pt}\selectfont\z@rightContent}
+              \fontsize{10pt}{15pt}\selectfont\l__zfancy_chap_rcontent_tl}
           };
         % saying block
         \coordinate (sayingWN) at ($(current~ page.south~ west)+(0, .3\paperheight)$); 
@@ -68,8 +68,8 @@
             \parbox[t][][r]{.75\paperwidth}
               {
                 \fontsize{15pt}{22.5pt}\selectfont
-                \MakeUppercase{\cinzel\z@saying\\
-                \hspace*{\fill}{\itshape\normalsize\z@sayauthor}}
+                \MakeUppercase{\cinzel\l__zfancy_chap_saying_tl\\
+                \hspace*{\fill}{\itshape\normalsize\l__zfancy_chap_sayauthor_tl}}
               }
           };
       \end{tikzpicture}
@@ -92,16 +92,22 @@
           {\prop_item:Ne \g_arabic_suffix_prop {\int_mod:nn {#1}{10}}}
       }
   }
-\ExplSyntaxOff
-  % default settings
-  \newcommand{\z@subtitle}{Subtitle}
-  \newcommand{\z@saying}{SAYING}
-  \newcommand{\z@sayauthor}{-- Author}
-  \newcommand{\z@rightContent}{Right Content}
-  \newcommand{\z@leftContent}{\includegraphics[width=1\linewidth]{example-image-duck}\\[.5em]Figure Description}
-  % users' interface
-  \NewDocumentCommand{\zfancysubtitle}{m}{\renewcommand\z@subtitle{#1}}
-  \NewDocumentCommand{\zfancychapsaying}{O{}m}{\renewcommand\z@saying{#2}\renewcommand\z@sayauthor{#1}}
-  \NewDocumentCommand{\zfancychapl}{m}{\renewcommand\z@leftContent{#1}}
-  \NewDocumentCommand{\zfancychapr}{m}{\renewcommand\z@rightContent{#1}}
-\ExplSyntaxOn
+
+% fancy chapter page text
+\ztex_keys_define:nn { fancy/chap/text }
+  {
+    subtitle   .tl_set:N  = \l__zfancy_chap_subtitle_tl,
+    subtitle   .initial:n = { SUBTITLE },
+    saying     .tl_set:N  = \l__zfancy_chap_saying_tl,
+    saying     .initial:n = { SAYING },
+    sayauthor  .tl_set:N  = \l__zfancy_chap_sayauthor_tl,
+    sayauthor  .initial:n = { SAY-AUTHOR },
+    rcontent   .tl_set:N  = \l__zfancy_chap_rcontent_tl,
+    rcontent   .initial:n = { R-CONTENT },
+    lcontent   .tl_set:N  = \l__zfancy_chap_lcontent_tl,
+    lcontent   .initial:n = { L-CONTENT },
+  }
+\NewDocumentCommand{\zfancychapset}{m}
+  {
+    \ztex_keys_set:nn { fancy/chap/text }{ #1 }
+  }

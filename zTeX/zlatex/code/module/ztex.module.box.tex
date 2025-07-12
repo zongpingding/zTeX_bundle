@@ -1,34 +1,192 @@
-\ProvidesExplFile{ztex.module.box.tex}{2025/07/06}{1.0.1}{box~module~for~ztex}
+\ProvidesExplFile{ztex.module.box.tex}{2025/07/11}{1.0.1}{box~module~for~ztex}
 
 
 %%%%%     box module for ztex     %%%%%
-\RequirePackage{framedmulticol}
 \RequirePackage{framed}
-% framed env for user interface
-\cs_new_protected:Npn \ztex_frame:nn #1#2 
-  {
-    \DeclareDocumentEnvironment{#1}{O{#2}}
-      {
-        \def\FrameCommand
-          {
-            {\color{##1}\vrule width 3pt}
-            \colorbox{##1!10}
-          }
-        \MakeFramed
-          {
-            \advance\hsize-\width\FrameRestore
-          }\noindent   
-      }{\endMakeFramed}
-  }
-\NewDocumentCommand\ztexframe{O{black}m}
-  {
-    \ztex_frame:nn {#2}{#1}
-  }
+\RequirePackage{framedmulticol}
 
 
-% ==> constant dimension
+% ==> dimension / tmp variables
 \dim_new:N \c_ztex_quad_dim 
 \ztool_gget_wd:Nn \c_ztex_quad_dim {\quad}
+\dim_new:N \l__zbox_tmpa_dim
+\dim_new:N \l__zbox_tmpb_dim
+\dim_new:N \l__zbox_tmpc_dim
+\box_new:N \l__zbox_tmpa_box
+\box_new:N \l__zbox_tmpb_box
+\box_new:N \l__zbox_tmpc_box
+\cs_new:Npn \zbox_ltx_rule:nnn #1#2#3
+  { \rule[#1]{#2}{#3} }
+
+
+% ==> 'framed' env for user
+\ztex_keys_define:nn { box/framed-user }
+  {
+    rulewidth    .dim_set:N = \l__zbox_frameduser_rulewd_dim,
+    rulewidth    .initial:n = { 5pt },
+    rulecolor    .tl_set:N  = \l__zbox_frameduser_rulecolor_tl,
+    rulecolor    .initial:n = { red },
+    padding      .dim_set:N = \l__zbox_frameduser_padding_dim,
+    padding      .initial:n = { 5pt },
+    bg           .tl_set:N  = \l__zbox_frameduser_bgcolor_tl,
+    bg           .initial:n = { gray!10 },
+    adj          .dim_set:N = \l__zbox_frameduser_boxadj_dim, % width adjust
+    adj          .initial:n = { 0pt },
+  }
+\cs_new_protected:Npn \ztex_make_frame_begin:nnnnn #1#2#3#4#5 
+  {% #1:rule color; #2:rule width; #3:padding; #4:bg color; #5:box width adjust
+    \def\FrameCommand
+      {
+        { \color{#1} \vrule width #2 } % leftbar
+        { \color{#4} \vrule width #3 } % padding
+        \colorbox{#4}
+      }
+    \MakeFramed
+      {
+        % NOTE: \width = padding + rulewidth
+        \dim_set:Nn \l__zbox_tmpa_dim { -\width + #5 }
+        \advance\hsize \l__zbox_tmpa_dim \relax
+        \FrameRestore
+      }
+  }
+\cs_generate_variant:Nn \ztex_make_frame_begin:nnnnn { eeeee, ooooo }
+\cs_new_protected:Npn \ztex_make_frame_end:
+  { \endMakeFramed }
+\NewDocumentCommand\ztexframe{o}
+  {
+    \group_begin:
+    \IfValueT { #1 }
+      {
+        \ztex_keys_set:nn { box/framed-user }{#1}
+      }
+    \ztex_make_frame_begin:eeeee
+      { \l__zbox_frameduser_rulecolor_tl }
+      { \l__zbox_frameduser_rulewd_dim   }
+      { \l__zbox_frameduser_padding_dim  }
+      { \l__zbox_frameduser_bgcolor_tl   }
+      { \l__zbox_frameduser_boxadj_dim   }
+  }
+\NewDocumentCommand\ztexframeend{}
+  { 
+    \ztex_make_frame_end: 
+    \group_end: 
+  }
+
+
+% ==> box info, scale, raise/lower
+% get dim info
+\NewDocumentCommand{\getwd}{smm}
+  {
+    \IfBooleanTF{#1}
+      {
+        \ztool_gget_wd:Nn #2{#3}
+      }{
+        \ztool_get_wd:Nn #2{#3}
+      }
+  }
+\NewDocumentCommand{\getht}{smm}
+  {
+    \IfBooleanTF{#1}
+      {
+        \ztool_gget_ht:Nn #2{#3}
+      }{
+        \ztool_get_ht:Nn #2{#3}
+      }
+  }
+\NewDocumentCommand{\getdp}{smm}
+  {
+    \IfBooleanTF{#1}
+      {
+        \ztool_gget_dp:Nn #2{#3}
+      }{
+        \ztool_get_dp:Nn #2{#3}
+      }
+  }
+% scale box
+\NewDocumentCommand{\wscale}{smm}
+  {
+    \IfBooleanTF{#1}
+      {
+        \ztool_scale_to_wd:nn {#2}{#3}
+      }{
+        \ztool_set_to_wd:nn {#2}{#3}
+      }
+  }
+\NewDocumentCommand{\hscale}{smm}
+  {
+    \IfBooleanTF{#1}
+      {
+        \ztool_scale_to_ht:nn {#2}{#3}
+      }{
+        \ztool_set_to_ht:nn {#2}{#3}
+      }
+  }
+\NewDocumentCommand{\zrotate}{mm}
+  {
+    \ztool_rotate:nn {#1}{#2}
+  }
+% raise box
+\NewDocumentCommand{\zraise}{mm}
+  {
+    \box_move_up:nn {#1}{\hbox:n {#2}}
+  }
+\NewDocumentCommand{\zlower}{mm}
+  {
+    \box_move_down:nn {#1}{\hbox:n {#2}}
+  }
+
+
+% ==> hide text
+\tl_new:N \l__zbox_hidetext_map_tl
+\ztex_keys_define:nn { box/hidetext }
+  {
+    map           .choice:,
+    map / tl      .code:n     = { \tl_set:Nn \l__zbox_hidetext_map_tl { tl }  },
+    map / str     .code:n     = { \tl_set:Nn \l__zbox_hidetext_map_tl { str } },
+    map / unknown .code:n     = { 
+      \ztex_msg_set:nn { zbox@hidentext@maptype }
+        { map~type~must~be~'tl'~or~'str',~but~you~entered~'#1' }
+      \ztex_msg_error:n { zbox@hidentext@maptype } },
+    fill          .tl_set:N   = \l__zbox_hidetext_fill_tl,
+    fill          .initial:n  = { black },
+    frame         .tl_set:N   = \l__zbox_hidetext_frame_tl,
+    frame         .initial:n  = { black },
+    killdp        .bool_set:N = \l__zbox_hidetext_killdp_bool,
+    killdp        .initial:n  = { false },
+    killdp        .default:n  = {  true },
+    separator     .tl_set:N   = \l__zbox_hidetext_separator_tl,
+    separator     .initial:n  = { \- }, % to allow line break
+    % separator   .initial:n  = { \discretionary{}{}{} }, % to allow line break
+    cmd           .cs_set:Np  = \__zbox_hidetext_cmd:n #1,
+    cmd           .initial:n  = { #1 },
+  }
+\NewDocumentCommand{\hidetext}{om}
+  {
+    \group_begin:
+    \tl_set:Nn \l__zbox_hidetext_map_tl { tl }
+    \IfValueT { #1 }
+      {
+        \ztex_keys_set:nn { box/hidetext }{ #1 }
+      }
+    \use:c { \l__zbox_hidetext_map_tl _map_inline:nn }{ #2 }
+      {
+        \hbox_set:Nn \l__zbox_tmpa_box { ##1 }
+        \bool_if:NTF \l__zbox_hidetext_killdp_bool 
+          { \dim_set:Nn \l__zbox_tmpa_dim { 0pt } }
+          { \dim_set:Nn \l__zbox_tmpa_dim { - \box_dp:N \l__zbox_tmpa_box } }
+        \__zbox_hidetext_cmd:n
+          { \textcolor { \l__zbox_hidetext_fill_tl }
+            {
+              \zbox_ltx_rule:nnn
+                { \dim_use:N \l__zbox_tmpa_dim }
+                { \box_wd:N  \l__zbox_tmpa_box }
+                { \box_ht:N  \l__zbox_tmpa_box } 
+            }
+          }
+        \l__zbox_hidetext_separator_tl
+      }
+    \group_end:
+  }
 
 
 % ==> box item align
