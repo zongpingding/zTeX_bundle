@@ -1,0 +1,90 @@
+% DATE: 2024/12/17
+\ExplSyntaxOff
+\begingroup\newif\ifgnuscript
+\IfFileExists{./ztikz_output/scripts/plot_plot.gp}{}{\gnuscripttrue}
+
+\ifgnuscript
+\ztikzMkdir{ztikz_output/scripts/}
+\begin{filecontents}[noheader]{ztikz_output/scripts/plot_plot.gp}
+set table "./ztikz_output/gnuplot_data/gnu_data.table"
+set format "%.5f"
+set samples 100
+
+
+# ==> specific a 2d function
+f(x) = x
+set xr [-3:3]
+plot f(x)
+\end{filecontents}
+
+\begin{filecontents}[noheader]{ztikz_output/scripts/contour_plot.gp}
+set table "./ztikz_output/gnuplot_data/gnu_data.table"
+set samples 100,100
+set isosamples 100,100
+set format "%.5f"
+set cont base
+set cntrparam levels discrete 0,0
+unset surface
+
+
+# ==> contour plot a function
+set xr [-4:4]
+set yr [*:*]
+set zr [*:*]
+f(x, y) = y-3*sin(1/x)
+splot f(x,y)
+\end{filecontents}
+
+\begin{filecontents}[noheader]{ztikz_output/scripts/param_plot.gp}
+set table "./ztikz_output/gnuplot_data/gnu_data.table"
+set format "%.5f"
+set samples 100
+set parametric
+
+
+# ==> specific a parametric function
+set trange [0:2*pi]
+plot sin(t), cos(t)  
+\end{filecontents}
+
+\begin{filecontents}[noheader]{ztikz_output/scripts/polar_plot.gp}
+set table "./ztikz_output/gnuplot_data/gnu_data.table"
+set format "%.5f"
+set samples 100
+set polar
+
+
+# ==> polar plot, default varible name 't'
+set trange [0:12*pi]
+plot t
+\end{filecontents}
+
+\begin{filecontents}[noheader]{ztikz_output/scripts/3d_plot.gp}
+set terminal pdfcairo enhanced color size 8,8 font "Times New Roman, 16"
+set output "./ztikz_output/gnuplot_data/plot_3d.pdf"
+set isosamples 50
+
+
+# ==> label and legend
+set xlabel 'x'
+set ylabel 'y'
+set zlabel 'z'
+set view 75,336
+unset key
+set xyplane at 0
+set hidden3d
+
+
+# ==> color map
+set hidd front
+set palette rgbformulae 22,13,-31
+unset colorbox
+
+
+# ==> plot function
+set xr [-3:3]
+set yr [-3:3]
+splot x**2+y**2 with pm3d, -x**2-y**2+8 with lines
+unset out 
+\end{filecontents}
+\fi\endgroup\ExplSyntaxOn

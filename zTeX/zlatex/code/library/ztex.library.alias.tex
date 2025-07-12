@@ -1,0 +1,625 @@
+\ProvidesExplFile{ztex.library.alias.tex}{2025/06/22}{1.0.1}{alias~library~for~ztex}
+
+
+%%%%%     alias library for ztex     %%%%%
+\bool_gset_true:N \g__ztex_math_alias_bool
+\RequirePackage{amssymb, mathrsfs}
+\RequirePackage{mathtools}
+
+
+\ztex_msg_set:nn { expl-too-old@alias }
+  {
+    *~Matrix-related~aliases~from~the~'alias'~library~are~not~
+    available~in~your~TeX~distribution. \\
+    *~Please~install~an~TeX~distribution~up~to~'January~15,~2025'~or~
+    update~using~your~TeX~package~manager~or~from~CTAN~to~use~it. \\
+    *~See~zTeX~documentation.~Loading~matrix-related~aliases~from~
+    'alias'~library~will~abort!
+  }
+\cs_if_exist:NF \int_step_tokens:nn
+  {
+    \ztex_msg_warn:n { expl-too-old@alias }
+    % \msg_fatal:nn { ztex } { expl-too-old@alias }
+    % \ExplSyntaxOff
+    % \file_input_stop:
+  }
+
+
+% ==> copy the original cs from hash table
+\__zcmd_cs_copy:cc {z@ltx@s}{S}
+\__zcmd_cs_copy:cc {z@ltx@div}{div}
+\__zcmd_cs_copy:cc {z@ltx@hom}{hom}
+
+
+% ==> Alias switch on/off
+\bool_new:N \g__ztex_math_alias_switch_bool  % for future use
+\bool_gset_false:N \g__ztex_math_alias_switch_bool
+\seq_new:N \g__ztex_mathalias_user_seq
+\seq_new:N \g__ztex_mathalias_internal_seq
+\seq_new:N \g__ztex_mathalias_protected_seq
+\seq_gclear:N \g__ztex_mathalias_user_seq
+\seq_gclear:N \g__ztex_mathalias_internal_seq
+\seq_gclear:N \g__ztex_mathalias_protected_seq
+\NewDocumentCommand{\zaliasOn}{O{OLD}}
+  {
+    \group_begin:
+    \__zalias_init:
+    \__zalias_cmd_create:n {#1}
+  }
+\cs_set_protected:Npn \__zalias_init: 
+  {
+    \char_set_mathcode:nn {"2F}{"413D} % for '/' in 'fixdif'
+    \bool_gset_true:N \g__ztex_math_alias_switch_bool
+    \seq_gset_from_clist:NN \g__ztex_mathalias_user_seq 
+      \g__ztex_mathalias_user_clist
+    \seq_gset_from_clist:NN \g__ztex_mathalias_internal_seq 
+      \g__ztex_mathalias_internal_clist
+  }
+\cs_set_protected:Npn \__zalias_cmd_create:n #1
+  {
+    \seq_map_indexed_inline:Nn \g__ztex_mathalias_user_seq 
+      {
+        \cs_if_exist:cT {##2} 
+          {
+            \seq_gput_right:Nn \g__ztex_mathalias_protected_seq {##2}
+            \__zcmd_cs_copy:cc {z@ltx@##2}{##2} % store the original
+            \__zcmd_cs_copy:cc {#1##2}{##2}     % for tmp usage
+          }
+        \cs_set_protected:cpe {##2}
+          {
+            \exp_not:N \cs:w
+              \seq_item:Nn \g__ztex_mathalias_internal_seq 
+                { ##1 }
+            \exp_not:N \cs_end:
+          }
+      }
+  }
+\cs_set_protected:Nn \__zalias_delete:
+  {
+    \seq_map_inline:Nn \g__ztex_mathalias_user_seq 
+      {
+        \seq_if_in:NnF \g__ztex_mathalias_protected_seq {##1}
+          {
+            \cs_undefine:c {##1}
+          }
+      }
+  }
+\NewDocumentCommand{\zaliasOff}{o}
+  {
+    \__zalias_delete:
+    \bool_gset_false:N \g__ztex_math_alias_switch_bool
+    \group_end:
+  }
+\NewDocumentCommand{\zaliasError}{}
+  {
+    \ztex_msg_set:nn {math-alias-cmd}{
+      Math~alias~related~commands~only~available~ 
+      between~'\zaliasOn'~and~'\zaliasOff'~
+      or~in~the~environment~'zalias'
+    }
+    \ztex_msg_error:n {math-alias-cmd}
+  }
+\NewDocumentEnvironment{zalias}{O{OLD}}
+  { 
+    \group_begin:
+    \bool_gset_true:N \g__ztex_math_alias_switch_bool
+    \__zalias_cmd_create:n { #1 }
+  }{
+    \bool_gset_false:N \g__ztex_math_alias_switch_bool
+    \group_end:
+  }
+
+
+% ==> mathalias commands setup interface
+\clist_new:N \g__ztex_mathalias_user_clist
+\clist_new:N \g__ztex_mathalias_internal_clist
+\clist_gclear:N \g__ztex_mathalias_user_clist
+\clist_gclear:N \g__ztex_mathalias_internal_clist
+\cs_new:Npn \ztex_mathalias_set:nn #1#2
+  {% #1:the users' interface; #2: the internal interface
+    \clist_put_right:Nn \g__ztex_mathalias_user_clist     {#1}
+    \clist_put_right:Nn \g__ztex_mathalias_internal_clist {#2}
+  }
+\cs_generate_variant:Nn \ztex_mathalias_set:nn { ee, oo }
+
+
+% ==> make text and math commands robust
+\cs_new:Npn \zalias_make_cmd_robust:n #1 
+  {
+    \__zcmd_cs_copy:cc {z@ltx@#1}{#1}
+    \ztex_mathalias_set:nn {#1}{z@ltx@#1}
+    % \exp_after:wN \tex_protected:D \exp_after:wN 
+    %   \def\cs:w #1\cs_end:{\cs:w z@ltx@#1\cs_end:} % --> works
+  }
+\cs_generate_variant:Nn \zalias_make_cmd_robust:n { e, o, f }
+\zalias_make_cmd_robust:n {mathrm}
+\zalias_make_cmd_robust:n {mathbf}
+\zalias_make_cmd_robust:n {mathfrak}
+\zalias_make_cmd_robust:n {mathcal}
+\zalias_make_cmd_robust:n {mathscr}
+\zalias_make_cmd_robust:n {mathbb}
+\zalias_make_cmd_robust:n {textrm}
+\zalias_make_cmd_robust:n {textbf}
+\zalias_make_cmd_robust:n {textsf}
+\zalias_make_cmd_robust:n {textsc}
+\zalias_make_cmd_robust:n {textsl}
+\zalias_make_cmd_robust:n {textit}
+
+
+% ==> Math Font 
+\DeclareRobustCommand{\z@R}[1]{\ensuremath{\mathrm{#1}}}
+\DeclareRobustCommand{\z@K}[1]{\ensuremath{\mathfrak{#1}}}
+\DeclareRobustCommand{\z@C}[1]{\ensuremath{\mathcal{#1}}}
+\DeclareRobustCommand{\z@B}[1]{\ensuremath{\mathbb{#1}}}
+\DeclareRobustCommand{\z@S}[1]{\ensuremath{\mathscr{#1}}}
+\DeclareRobustCommand{\z@F}[1]{\ensuremath{\boldsymbol{#1}}}
+\DeclareRobustCommand{\z@FF}[1]{\ensuremath{\mathbf{#1}}}
+\ztex_mathalias_set:nn
+  { R,   K,   C,   B,   S,   F,   FF   }
+  { z@R, z@K, z@C, z@B, z@S, z@F, z@FF }
+
+
+% ==> Math Arrow 
+% simple arrow
+\prop_new:N \g_ztex_math_simple_arrow_prop
+\prop_set_from_keyval:Nn \g_ztex_math_simple_arrow_prop 
+  { % 1.double:long;  2.capital:double line; 
+    % 3.neg:negation; 4.No '\cs{nlongleftarrow}', '\cs{nLongleftarrow}' etc.
+    ma   = \mapsto,
+    mma  = \longmapsto,
+    % left arrow
+    la   = \leftarrow,
+    La   = \Leftarrow,
+    nla  = \nleftarrow,
+    Nla  = \nLeftarrow,
+    lla  = \longleftarrow,
+    Lla  = \Longleftarrow,
+    % right arrow
+    ra   = \rightarrow,
+    Ra   = \Rightarrow,
+    nra  = \nrightarrow,
+    Nra  = \nRightarrow,
+    rra  = \longrightarrow,
+    Rra  = \Longrightarrow,
+    % bidirectional arrow
+    da   = \leftrightarrow,
+    Da   = \Leftrightarrow,
+    nda  = \nleftrightarrow,
+    Nda  = \nLeftrightarrow,
+    dda  = \longleftrightarrow,
+    Dda  = \Longleftrightarrow,
+  }
+\prop_map_inline:Nn \g_ztex_math_simple_arrow_prop 
+  {
+    \cs_new_protected:cpn {z@#1}{#2}
+  }
+\ztex_mathalias_set:nn 
+  { ma,  mma, la, La, nla, Nla, 
+    lla, Lla, ra, Ra, nra, Nra, 
+    rra, Rra, da, Da, nda, Nda, 
+    dda, Dda }
+  { z@ma,  z@mma, z@la, z@La, z@nla, z@Nla,
+    z@lla, z@Lla, z@ra, z@Ra, z@nra, z@Nra,
+    z@rra, z@Rra, z@da, z@Da, z@nda, z@Nda, 
+    z@dda, z@Dda }
+% extend text arrow
+\cs_new:Npn \ext_arrow_set:nn #1#2 
+  { \exp_args:Nee \NewDocumentCommand{\use:c {z@#1}}{sO{}D(){}}
+      {
+        \IfBooleanTF{##1}
+          {#2[\text{##3}]{\text{##2}}}
+          {#2[##3]{##2}}
+      }
+  }
+\keyval_parse:NNn \use_none:n \ext_arrow_set:nn 
+  {
+    xla  = \xleftarrow,
+    Xla  = \xLeftarrow,
+    xxla = \xLongleftarrow,
+    xra  = \xrightarrow,
+    Xra  = \xRightarrow,
+    xxra = \xLongrightarrow,
+    hla  = \xhookleftarrow,
+    hra  = \xhookrightarrow,
+  }
+\ztex_mathalias_set:nn 
+  { xla,   Xla,   xxla,   xra,   Xra,   xxra,   hla,   hra }
+  { z@xla, z@Xla, z@xxla, z@xra, z@Xra, z@xxra, z@hla, z@hra }
+
+
+% ==> Math Operator and symbols
+% REF: 1. https://en.wikipedia.org/wiki/List\_of\_mathematical\_abbreviations
+%      2. https://tex.stackexchange.com/a/289946/294585
+\DeclareRobustCommand{\z@A}{\ensuremath{\forall}}
+\DeclareRobustCommand{\z@E}{\ensuremath{\exists}}
+\DeclareRobustCommand{\z@ns}{\ensuremath{\varnothing}}
+\DeclareRobustCommand{\z@se}{\ensuremath{\backsimeq}}
+\DeclareRobustCommand{\z@sse}{\ensuremath{\cong}}
+\DeclareRobustCommand{\z@CC}{\ensuremath{\mathbb{C}}}
+\DeclareRobustCommand{\z@RR}{\ensuremath{\mathbb{R}}}
+\DeclareRobustCommand{\z@ZZ}{\ensuremath{\mathbb{Z}}}
+\DeclareRobustCommand{\z@NN}{\ensuremath{\mathbb{N}}}
+\DeclareRobustCommand{\z@dd}{\mathinner{\mathrm{d}}\zalias@mu@p}
+\def\zalias@mu@p{\mathchoice{\mskip-\thinmuskip}{\mskip-\thinmuskip}{}{}{}}
+\ztex_mathalias_set:nn 
+  { A,   E,   ns,   se,   sse,   CC,   RR,   ZZ,   NN,   dd   }
+  { z@A, z@E, z@ns, z@se, z@sse, z@CC, z@RR, z@ZZ, z@NN, z@dd }
+% math operator alias setup
+\prop_set_from_keyval:Nn \g_ztex_math_op_prop 
+  {
+    alt   = alt,
+    rot   = rot,
+    div   = div,
+    curl  = curl,
+    grad  = grad,
+    id    = Id,
+    im    = Im,
+    ker   = Ker,
+    cok   = Cok,
+    hom   = Hom,
+    supp  = supp,
+    sign  = sign,
+    trace = trace,
+  }
+\prop_map_inline:Nn \g_ztex_math_op_prop 
+  {
+    \exp_args:Ne \DeclareRobustCommand{\use:c {z@#1}}
+      { 
+        \operatorname{\prop_item:Nn \g_ztex_math_op_prop {#1}}
+        \peek_after:Nw \ztex_op_check: 
+      }
+  }
+\tl_const:Nn \c_ztex_math_ops_tl { \cdot \wedge \times \oplus \otimes }
+\cs_new_protected:Nn \ztex_op_check: { 
+  \tl_map_inline:Nn \c_ztex_math_ops_tl {
+    \token_if_eq_meaning:NNT \l_peek_token ##1 { \tl_map_break:n {{\!}} }
+  }
+}
+\ztex_mathalias_set:nn 
+  { alt, rot, div, curl, grad, id, 
+    im,  ker, cok, hom,  supp, sign, trace }
+  { z@alt, z@rot, z@div, z@curl, z@grad, z@id, 
+    z@im,  z@ker, z@cok, z@hom,  z@supp, z@sign, z@trace }
+\NewDocumentCommand\zaliasopset{m}
+  {
+    \prop_put_from_keyval:Nn \g_ztex_math_op_prop {#1}
+  }
+\@onlypreamble\zaliasopset
+
+
+% ==> pyhsics package commands 
+\NewDocumentCommand{\z@ab}{d()d[]d\{\}}
+  { 
+    \IfValueT{#1}{ \left(#1\right) }
+    \IfValueT{#2}{ \left[#2\right] }
+    \IfValueT{#3}{ \left\{#3\right\} }
+  }
+\ztex_mathalias_set:nn { zab }{ z@ab }
+
+
+% '\dv' and '\pdv' command
+\seq_new:N \l__zalias_num_rest_seq
+\tl_new:N \l__zalias_num_extract_tl
+\seq_new:N \l__zalias_num_extract_seq
+\regex_set:Nn \l__zalias_num_extract_tl { -?(?:\d+\.\d*|\.\d+|\d+) }
+\cs_new:Npn \__zalias_extract_num:nNN #1#2#3
+  {
+    \regex_extract_all:NnN \l__zalias_num_extract_tl
+      { #1 } #2
+    \exp_args:NNe \regex_split:NnN \l__zalias_num_extract_tl 
+      { \clist_use:nn {#1}{+} } #3
+  }
+\cs_new:Npn \__zalias_expr_format:N #1 
+  { }
+
+\tl_new:N \l__zalias_dv_order_tl
+\tl_new:N \l__zalias_dv_frac_over_tl
+\tl_new:N \l__zalias_dv_frac_lower_tl
+\cs_set:Npn \__zalias_derivative:nnnn #1#2#3#4
+  {% #1:start check; #2:over; #3:below; #4:'\dd'/'\partial'
+    \__zalias_extract_num:nNN {#3} 
+      \l__zalias_num_extract_seq
+      \l__zalias_num_rest_seq
+    \tl_set:Ne \l__zalias_dv_order_tl 
+      { 
+        \seq_use:Nn \l__zalias_num_rest_seq {} 
+      }
+    \tl_regex_replace_all:Nnn \l__zalias_dv_order_tl {\+{2,}}{+}
+    \tl_set:Ne \l__zalias_dv_order_tl 
+      {
+        \ztex_index_token_if_eq:ennTF {\l__zalias_dv_order_tl}{1}{+}
+          { \tl_tail:N \l__zalias_dv_order_tl }
+          { \l__zalias_dv_order_tl  }
+        \tl_if_empty:VF \l__zalias_dv_order_tl 
+          {
+            \seq_if_empty:NF \l__zalias_num_extract_seq
+              {
+                \ztex_index_token_if_eq:ennF {\l__zalias_dv_order_tl}{-1}{+}
+                  { + }
+              }
+          } 
+      }
+    \tl_set:Ne \l__zalias_dv_frac_over_tl
+      {
+        #4^{
+          \l__zalias_dv_order_tl
+          \seq_if_empty:NF \l__zalias_num_extract_seq
+            {
+              \fp_eval:n 
+                {
+                  \seq_use:Nn \l__zalias_num_extract_seq {+}
+                }
+            }
+        }
+        \zclist_item:nn {#2}{1}
+      }
+    \tl_set:Nn \l__zalias_dv_frac_lower_tl
+      {
+        \int_step_inline:nnn {2}
+          { \zclist_count:e {#2} }
+          {
+            #4\zclist_item:nn {#2}{##1}
+            ^{
+              \tl_if_eq:neF {1}
+                { \zclist_item:nn {#3}{##1-1} }
+                { \zclist_item:nn {#3}{##1-1} }
+            }
+          }
+      }
+    \IfBooleanTF{#1}
+      {
+        \l__zalias_dv_frac_over_tl/
+          \l__zalias_dv_frac_lower_tl
+      }{
+        \frac{\l__zalias_dv_frac_over_tl}
+          {\l__zalias_dv_frac_lower_tl}
+      }
+  }
+\NewDocumentCommand{\z@dv}{smO{}}
+  {
+    \__zalias_derivative:nnnn {#1}{#2}{#3}{\mathrm{d}}
+  }
+\NewDocumentCommand{\z@pdv}{smO{}}
+  {
+    \__zalias_derivative:nnnn {#1}{#2}{#3}{\partial}
+  }
+\ztex_mathalias_set:nn { dv, pdv }{ z@dv, z@pdv }
+
+
+% matrix commands
+\seq_new:N \l__zalias_matrix_a_seq
+\seq_new:N \l__zalias_matrix_b_seq
+\cs_new:Npn \zalias_matrix_from_list:n #1 
+  {
+    \sclist_map_tokens:nn {#1}
+      { 
+        \__zalias_mat_generate_row:n 
+      }
+  }
+\cs_new:Npn \__zalias_mat_generate_row:n #1 
+  {
+    \clist_use:en 
+      {
+        \exp_args:Ne \clist_map_tokens:nn 
+          { \zcmd_clist_patch:nn {\scan_stop:}{#1} }
+          { 
+            \__zalias_mat_item_cmd:n 
+          }
+      }{ & } \\
+  }
+\cs_new:Npn \__zalias_mat_item_cmd:n #1 
+  { #1, }
+\cs_generate_variant:Nn \zalias_matrix_from_list:n {e, o, f}
+% NOTE: do NOT nest other mat cmd in '\mat' or '\pmat' ...
+\cs_set_eq:NN \z@mat@plain \zalias_matrix_from_list:n
+\cs_set:Npn \z@mat  #1 { \begin{matrix}  \z@mat@plain{#1} \end{matrix} }
+\cs_set:Npn \z@pmat #1 { \begin{pmatrix} \z@mat@plain{#1} \end{pmatrix} }
+\cs_set:Npn \z@bmat #1 { \begin{bmatrix} \z@mat@plain{#1} \end{bmatrix} }
+\cs_set:Npn \z@Bmat #1 { \begin{Bmatrix} \z@mat@plain{#1} \end{Bmatrix} }
+\cs_set:Npn \z@vmat #1 { \begin{vmatrix} \z@mat@plain{#1} \end{vmatrix} }
+\cs_set:Npn \z@Vmat #1 { \begin{Vmatrix} \z@mat@plain{#1} \end{Vmatrix} }
+\ztex_mathalias_set:nn 
+  { mat,   pmat,   bmat,   Bmat,   vmat,   Vmat   }
+  { z@mat, z@pmat, z@bmat, z@Bmat, z@vmat, z@Vmat }
+
+
+% ==> check the minimum requirement for matrix alias
+\cs_if_exist:NTF \int_step_tokens:nn
+  { \if_true:  }
+  { \if_false: }
+
+% '\imat', '\admat' and '\zmat'
+\cs_new:Npn \zalias_diag_mat_data:nnnn #1#2#3#4 
+  {
+    \exp_args:Ne \int_step_tokens:nn {\zclist_count:n {#4}}
+      {
+        \__zalias_diag_mat_aux:nnen
+          { #1 }{ #2 } 
+          { \zcmd_clist_patch:nn {#3}{#4} }
+      }
+  }
+\cs_new:Npn \__zalias_diag_mat_aux:nnnn #1#2#3#4
+  {
+    \bool_if:nTF {#1}
+      {
+        \prg_replicate:nn { #4-1 }{ #2 & } 
+      }{
+        \prg_replicate:nn { \clist_count:n {#3} - #4 }
+          { #2 & }
+      }
+    \clist_item:nn { #3 }{#4}
+    \bool_if:nTF {!#1}
+      {
+        \prg_replicate:nn { #4-1 }{ & #2 } 
+      }{
+        \prg_replicate:nn { \clist_count:n {#3} - #4 }
+          { & #2 }
+      }
+    \int_compare:nNnF {#4}={\clist_count:n {#3}}{\\}
+  }
+\cs_generate_variant:Nn \__zalias_diag_mat_aux:nnnn { nne }
+\cs_generate_variant:Nn \zalias_diag_mat_data:nnnn { nnne }
+\cs_set:Npn \z@imat  #1#2 { \zalias_diag_mat_data:nnnn {\c_true_bool}{#1}{1}{#2}  }
+\cs_set:Npn \z@admat #1#2 { \zalias_diag_mat_data:nnnn {\c_false_bool}{#1}{1}{#2} }
+\NewDocumentCommand{\z@zmat}{ O{i} m }
+  {
+    \str_case:nnF {#1}
+      {
+        {i}{
+          \zalias_diag_mat_data:nnne 
+            { \c_true_bool }{  }{ 0 }
+            { \prg_replicate:nn {#2-1}{0,} } 
+        }
+        {a}{
+          \zalias_diag_mat_data:nnne 
+            { \c_false_bool }{ }{ 0 }
+            { \prg_replicate:nn {#2-1}{,} } 
+        }
+        {z}{
+          \zalias_diag_mat_data:nnne 
+            { \c_true_bool }{ 0 }{ 0 }
+            { \prg_replicate:nn {#2-1}{,} } 
+        }
+      }{
+        \ztex_msg_set:nn {zalias@zmat}
+          { '\string\zmat'~only~support~'i',~'a'~and~'z'~type,~but~you~enter~'#1'.}
+        \ztex_msg_error:n {zalias@zmat}
+      }
+  }
+\ztex_mathalias_set:nn { imat, admat, zmat }{ z@imat, z@admat, z@zmat }
+
+% '\jmat' and '\hmat'
+\cs_new:Npn \zalias_jmat_data:nn #1#2 
+  {
+    \exp_args:Ne \clist_map_tokens:nn { \sclist_item:nn {#2}{1} }
+      { 
+        \exp_args:Ne \__zalias_jmat_row:nnn 
+          { #1 }
+          { \sclist_item:nn {#2}{2} } 
+      }
+  }
+\cs_new:Npn \__zalias_jmat_row:nnn #1#2#3
+  {
+    \clist_use:en 
+      {
+        \exp_args:Ne \clist_map_tokens:nn { #2 }
+          { \__zalias_frac_partial:nnn {#1}{#3} },
+      }{ & } \\
+  }
+\cs_new:Npn \__zalias_frac_partial:nnn #1#2#3 
+  {
+    \exp_not:c {#1} \exp_not:N \frac
+      { \exp_not:N \mathstrut \exp_not:N \partial #2 }
+      { \exp_not:N \mathstrut \exp_not:N \partial #3 } ,
+  }
+\cs_generate_variant:Nn \zalias_jmat_data:nn { ne, no }
+\ztex_keys_define:nn { zalias/jhmat }
+  {
+    b   .tl_set:N   = \l__zalias_jmat_border_tl,
+    b   .initial:n  = { p },
+    c   .tl_set:N   = \l__zalias_jmat_cmd_tl,
+    c   .initial:n  = { textstyle },
+    s   .fp_set:N   = \l__zalias_jmat_stretch_fp,
+    s   .initial:n  = { 1.25 },
+  }
+\NewDocumentCommand{\z@jmat}{O{}m} 
+  { 
+    \group_begin:
+      \ztex_keys_set:nn { zalias/jhmat }{ #1 }
+      \renewcommand{\arraystretch}{\fp_use:N \l__zalias_jmat_stretch_fp}
+      \exp_args:No \begin{\l__zalias_jmat_border_tl matrix}
+        \exp_args:No \zalias_jmat_data:nn {\l__zalias_jmat_cmd_tl}{#2} 
+      \exp_args:No \end{\l__zalias_jmat_border_tl matrix}
+    \group_end:
+  }
+\cs_new:Npn \zalias_hmat_data:nn #1#2 
+  {
+    \exp_args:Ne \clist_map_tokens:nn { \sclist_item:en {\zcmd_sclist_patch:nn {\scan_stop:}{#2}}{2} }
+      {
+        \exp_args:Neee \__zalias_hmat_row:nnnn { #1 } 
+          { \sclist_item:en {\zcmd_sclist_patch:nn {\hbox{}}{#2}}{1} }
+          { \sclist_item:en {\zcmd_sclist_patch:nn {\scan_stop:}{#2}}{2} }
+      }
+  }
+\cs_new:Npn \__zalias_hmat_row:nnnn #1#2#3#4
+  {
+    \clist_use:en 
+      {
+        \clist_map_tokens:nn {#3}
+          {
+            \__zalias_hmat_item:nnnn {#1}{#2}{#4}
+          }
+      }{&} \\
+  }
+\cs_new:Npn \__zalias_hmat_item:nnnn #1#2#3#4
+  { 
+    \tl_if_eq:nnTF {#3}{#4}
+      {
+        {\exp_not:c {#1} \z@pdv{#2,#4}[2]}
+      }{
+        {\exp_not:c {#1} \z@pdv{#2,#3,#4}[1, 1]}
+      } ,
+  }
+\cs_generate_variant:Nn \zalias_hmat_data:nn { ne, no }
+\NewDocumentCommand{\z@hmat}{O{}m} 
+  { 
+    \group_begin:
+      \ztex_keys_set:nn { zalias/jhmat }{ #1 }
+      \renewcommand{\arraystretch}{\fp_use:N \l__zalias_jmat_stretch_fp}
+      \exp_args:No \begin{\l__zalias_jmat_border_tl matrix}
+        \exp_args:No \zalias_hmat_data:nn {\l__zalias_jmat_cmd_tl}{#2} 
+      \exp_args:No \end{\l__zalias_jmat_border_tl matrix}
+    \group_end:
+  }
+\ztex_mathalias_set:nn { jmat, hmat }{ z@jmat, z@hmat }
+
+% '\xmat' 
+\cs_new:Npn \zalias_xmat_data:nn #1#2 
+  {
+    \exp_args:Ne \int_step_tokens:nn { \clist_item:nn {#2}{1} }
+      {
+        \exp_args:Nne \__zalias_xmat_row:nnn { #1 }
+          { \clist_item:nn {#2}{2} } 
+      }
+  }
+\cs_new:Npn \__zalias_xmat_row:nnn #1#2#3
+  {% #1:cmd; #2:x-range; #3:y-coor
+    \clist_use:en 
+      {
+        \exp_args:Ne \int_step_tokens:nn { #2 }
+          { ,#1 {#3} }
+      }{ & } \\
+  }
+\cs_new:Npn \z@xmat #1
+  {
+    \zalias_xmat_data:nn {\clist_item:nn {#1}{-1}}
+      { 
+        \clist_item:nn {#1}{1}, 
+        \clist_item:nn {#1}{2} 
+      }
+  }
+\cs_generate_variant:Nn \zalias_xmat_data:nn { ne, no }
+\ztex_mathalias_set:nn { xmat }{ z@xmat }
+
+% \gmat
+\cs_new:Npn \z@gmat #1 
+  {
+    \z@xmat
+      {
+        \zclist_count:n {#1}, 
+        \zclist_count:n {#1}, 
+        \__zalias_gmat_item:nnn {#1}
+      }
+  }
+\cs_new:Npn \__zalias_gmat_item:nnn #1#2#3
+  {
+    \langle 
+      \zclist_item:nn {#1}{#2} , 
+      \zclist_item:nn {#1}{#3}
+    \rangle
+  }
+\ztex_mathalias_set:nn { gmat }{ z@gmat }
+
+
+% end of '\int_step_tokens:nn' check
+\fi:

@@ -51,6 +51,10 @@
 latex.out/
 ztikz_output/
 keytheorems/
+<<<<<<< HEAD
+=======
+ZTEX_INSTALL/
+>>>>>>> dev
 Fonts/
 *.hd
 testIO.txt

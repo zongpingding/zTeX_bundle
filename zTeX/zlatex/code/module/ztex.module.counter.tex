@@ -1,0 +1,11 @@
+\ProvidesExplFile{ztex.counter.ref.tex}{2025/07/05}{1.0.1}{counter~module~for~ztex}
+
+
+%%%%%     counter module for ztex     %%%%%
+\NewDocumentCommand{\ztexcntwith}{mm}{\@addtoreset{#1}{#2}}
+
+
+% ==> counter spec
+% \setcounter{secnumdepth}{3}
+\setcounter{tocdepth}{3}
+\counterwithin{equation}{section}

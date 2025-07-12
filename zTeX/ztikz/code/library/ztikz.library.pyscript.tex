@@ -1,0 +1,37 @@
+% DATE: 2024/12/17
+\ExplSyntaxOff
+\begingroup\newif\ifpyscript
+\IfFileExists{./ztikz_output/scripts/sympy_script.py}{}{\pyscripttrue}
+
+\ifpyscript
+\ztikzMkdir{ztikz_output/scripts/}
+\begin{filecontents}[noheader]{ztikz_output/scripts/python_script.py}
+from numpy import *
+from scipy import *
+
+
+# ==> echo to file
+Float_res = 2**10
+
+# ==> write output
+filename = "./ztikz_output/python_data/PyFloat.out"
+with open(filename, 'w') as file: 
+    file.write(str(Float_res)+"\n")
+\end{filecontents}
+  
+\begin{filecontents}[noheader]{ztikz_output/scripts/sympy_script.py}
+from sympy import *
+
+
+# ==> symbols declearation
+x, y, z, u, v, t = symbols('x y z u v t') 
+
+# ==> echo to file
+F_res = integrate(sin(x)/x, (x, -oo, oo))
+
+# ==> write output
+filename = './ztikz_output/python_data/sympy.out'
+with open(filename, 'w') as file: 
+    file.write(latex(F_res)+"\n")
+\end{filecontents}
+\fi\endgroup\ExplSyntaxOn
