@@ -1,4 +1,4 @@
-\ProvidesExplFile{ztex.library.alias.tex}{2025/06/22}{1.0.1}{alias~library~for~ztex}
+\ProvidesExplFile{ztex.library.alias.tex}{2025/07/13}{1.0.1}{alias~library~for~ztex}
 
 
 %%%%%     alias library for ztex     %%%%%
@@ -287,13 +287,96 @@
 \@onlypreamble\zaliasopset
 
 
-% ==> pyhsics package commands 
-\NewDocumentCommand{\z@ab}{d()d[]d\{\}}
-  { 
-    \IfValueT{#1}{ \left(#1\right) }
-    \IfValueT{#2}{ \left[#2\right] }
-    \IfValueT{#3}{ \left\{#3\right\} }
+% ==> pyhsics package commands
+% '\ab'(auto brace) command
+\cs_new_protected:Npn \z@ab
+  {
+    \peek_after:Nw \__zab_case_match:
   }
+\cs_new_protected:Npn \__zab_case_match:
+  {
+    \token_case_meaning:NnF \l_peek_token
+      {
+        { \big  }{ \__zab_case_match_remove_next:nn {\big} {\big}  }
+        { \Big  }{ \__zab_case_match_remove_next:nn {\Big} {\Big}  }
+        { \bigg }{ \__zab_case_match_remove_next:nn {\bigg}{\bigg} }
+        { \Bigg }{ \__zab_case_match_remove_next:nn {\Bigg}{\Bigg} }
+        {   *   }{ \__zab_case_match_remove_next:nn {}{}}
+        {   (   }{ \__zab_case_math_auto: }
+        {   [   }{ \__zab_case_math_auto: }
+        {   <   }{ \__zab_case_math_auto: }
+        {   |   }{ \__zab_case_math_auto: }
+        {   \|  }{ \__zab_case_math_auto: }
+        { \c_group_begin_token}{ \__zab_case_math_auto: }
+      }{
+        \ztex_msg_warn:n { zab@invalid@deli@size }
+        \ztex_msg_warn:n { zab@invalid@deli@type }
+        \msg_fatal:nn    { ztex } { zab@syntax@invalid  }
+        % TODO: improve the error message !!!
+        % \ztex_token_if_in:nNTF {\c_group_begin_token([<|\|} \l_peek_token
+        %   {
+        %     \__zab_case_math_auto:
+        %   }{
+        %     \ztex_msg_error:n { zab@invalid@deli@type } 
+        %   }
+      }
+  }
+\cs_new:Npn \__zab_case_match_remove_next:nn #1#2
+  {
+    \tl_set:Nn \l__zalias_deli_modifer_left_tl  { #1 }
+    \tl_set:Nn \l__zalias_deli_modifer_right_tl { #2 }
+    \exp_after:wN \peek_after:Nw \exp_after:wN
+      \__zab_case_match_kernel: \use_none:n
+  }
+\cs_new:Npn \__zab_case_math_auto: 
+  {
+    \tl_set:Nn \l__zalias_deli_modifer_left_tl  { \left }
+    \tl_set:Nn \l__zalias_deli_modifer_right_tl { \right }
+    \peek_after:Nw \__zab_case_match_kernel:
+  }
+% TODO: This piece of code might be redundant 
+\cs_new:Npn \__zab_case_match_kernel:
+  {
+    \token_case_meaning:NnF \l_peek_token
+      {
+        {\c_group_begin_token}{ \z@ab@curly }
+        {( }{\z@ab@round }
+        {[ }{\z@ab@square}
+        {< }{\z@ab@angle }
+        {| }{\z@ab@vert  }
+        {\|}{\z@ab@Vert  }
+      }{ \ztex_msg_error:n { zab@invalid@deli@type } }
+  }
+\ztex_msg_set:nn { zab@syntax@invalid  }{ \string\zab\space syntax~error }
+\ztex_msg_set:nn { zab@invalid@deli@type }
+  {
+    The~delimiter~types~\string\zab\space support~
+    are:'{}',~'()',~'[]',~'<>',~'||',~'\|\|';~
+    but~you~enter~'\token_to_meaning:N \l_peek_token'.
+  }
+\ztex_msg_set:nn { zab@invalid@deli@size }
+  {
+    The~delimiter~sizes~\string\zab\space support~
+    are:'\string\big',~'\string\Big',~'\string\bigg',~
+    '\string\Bigg';~
+    but~you~enter~'\token_to_meaning:N \l_peek_token'.
+  }
+\tl_new:N \l__zalias_deli_modifer_left_tl
+\tl_new:N \l__zalias_deli_modifer_right_tl
+\protected\def\zab@left
+  {
+    \l__zalias_deli_modifer_left_tl
+  }
+\protected\def\zab@right
+  {
+    \l__zalias_deli_modifer_right_tl
+  }
+\protected\def\z@ab@curly#1   {\zab@left \{#1 \zab@right\}}
+\protected\def\z@ab@round(#1) {\zab@left (#1  \zab@right)}
+\protected\def\z@ab@square[#1]{\zab@left [#1  \zab@right]}
+\protected\def\z@ab@vert |#1| {\zab@left |#1  \zab@right|}
+\protected\def\z@ab@Vert\|#1\|{\zab@left \|#1 \zab@right\|} % double line
+\protected\def\z@ab@angle<#1> {\zab@left \langle #1 \zab@right\rangle}
 \ztex_mathalias_set:nn { zab }{ z@ab }
 
 

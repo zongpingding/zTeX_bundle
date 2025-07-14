@@ -1,0 +1,38 @@
+\documentclass[hyper, lang=cn]{ztex}
+\usepackage{zhlipsum}
+\ExplSyntaxOn
+\cs_set:Npn \killspaces {\tl_trim_spaces:n}
+\ExplSyntaxOff
+%\zfontfamilynew[CJK]{
+%  cmd = dengxian,
+%  name = Deng.ttf,
+%  path = ./fonts/,
+%  feat = { bd=*b, it=*l }
+%}
+\def\dengxian{\relax}
+
+
+\newlength{\sechangindent}
+\newlength{\sechangsep}
+\setlength{\sechangsep}{0pt}
+\zsecformat\section
+  {
+    explicit = true,
+    code = {%
+      \noindent\getwd\sechangindent{\dengxian\Large #1\;#2\hskip\sechangsep}%
+      \hangindent\sechangindent {\color{blue!50!black}\dengxian\Large #1\;#2}%
+      \hskip\sechangsep\ignorespaces
+      % or use `\killspaces'
+    },
+  }
+
+\begin{document}
+\section{第一个标题}
+\zhlipsum[1] $\alpha^2 + \beta^2 = kx + b = y$ 
+
+\zhlipsum[1]
+
+
+\subsection{BBB-1}
+\zhlipsum[1]
+\end{document}

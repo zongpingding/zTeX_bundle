@@ -14,7 +14,14 @@
   { 
     \ztex_font_set:n {#1}
   }
-
+% reset text font to the default computer modern
+\NewDocumentCommand{\resetfont}{}
+  {
+    \renewcommand\rmdefault{lmr}
+    \renewcommand\sfdefault{lmss}
+    \renewcommand\ttdefault{lmtt}
+    \normalfont
+  }
 
 
 % ==> font symbols patch

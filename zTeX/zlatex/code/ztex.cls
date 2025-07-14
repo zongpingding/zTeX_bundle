@@ -36,7 +36,7 @@
 \NeedsTeXFormat{LaTeX2e}
 \tl_const:Nn \c__ztex_class_name_tl           {ztex}
 \tl_const:Nn \c__ztex_class_version_tl        {1.0.1}
-\tl_const:Nn \c__ztex_class_date_tl           {2025/07/06}
+\tl_const:Nn \c__ztex_class_date_tl           {2025/07/14}
 \clist_const:Nn \c__ztex_lang_support_clist   {en, cn}
 \tl_const:Nn    \c__ztex_class_description_tl  
   {
@@ -126,11 +126,17 @@
     { \msg_set:nnn { ztex }{#1}{#2} }
     { \msg_new:nnn { ztex }{#1}{#2} }
 }
+\cs_new_protected:Npn \ztex_msg_info:n #1 { 
+  \msg_info:nn { ztex }{#1}
+}
 \cs_new_protected:Npn \ztex_msg_warn:n #1 { 
   \msg_warning:nn { ztex }{#1} 
 }
 \cs_new_protected:Npn \ztex_msg_error:n #1 { 
   \msg_error:nn { ztex }{#1} 
+}
+\cs_new_protected:Npn \ztex_msg_fatal:n #1 {
+  \msg_fatal:nn { ztex } { #1 }
 }
 % meta key warning message
 \cs_new_protected:Npn \ztex_metakey_msg_warning:nn #1#2 {
@@ -168,8 +174,12 @@
   }
   \ztex_msg_warn:n {package-option}
 }
+\ztex_msg_set:nn { metakey@file@missing }
+  {
+    file~'ztex.options.tex'~is~missing~from~the~ztex~bundle...
+  }
 % setup class options
-\keys_define:nn { ztex }{  
+\keys_define:nn { ztex }{
   % basic options
   lang            .str_gset:N   = \g__ztex_lang_str,
   lang            .initial:n    = { en },
@@ -188,7 +198,7 @@
   fancy           .usage:n      = load,
   cref-backend    .str_gset:N   = \g__ztex_cref_backend_str,
   cref-backend    .initial:n    = { zref-clever },
-  % sub class and options
+  % sub class and meta key
   class           .str_gset:N   = \g__ztex_subclass_type_str,
   class           .initial:n    = { article },
   class           .usage:n      = load,
@@ -211,139 +221,9 @@
     \ztex_msg_warn:n {option-unknown} 
   }
 }
-
-% sub-key for each meta option
-\ztex_keys_define:nn { font }{
-  sysfont         .bool_gset:N  = \g__ztex_sysfont_cfg_bool,
-  sysfont         .initial:n    = { false },
-  doc             .choice:,
-  doc / ptmx      .code:n       = {
-    \RequirePackage{mathptmx}
-    \RequirePackage{newtxtext}
-    \DeclareSymbolFont{letters}{OML}{ntxmi}{m}{it}
-    \DeclareMathAlphabet{\mathbf}{OT1}{ntxtlf}{b}{it}
-    \DeclareSymbolFont{CMMletters}{OML}{cmm}{m}{it}
-    \DeclareSymbolFont{CMMsymbols}{OMS}{cmsy}{m}{n}
-    \DeclareSymbolFont{CMMlargesymbols}{OMX}{cmex}{m}{n}
-    \DeclareMathSymbol{\new@pi}{0}{CMMletters}{"19}
-    \DeclareMathSymbol{\new@jmath}{0}{CMMletters}{"7C}
-    \DeclareMathSymbol{\new@amalg}{0}{CMMsymbols}{"71}
-    \DeclareMathSymbol{\new@coprod}{1}{CMMlargesymbols}{"61}
-    \AddToHook{begindocument}
-      {
-        \let\pi\new@pi
-        \let\jmath\new@jmath
-        \let\amalg\new@amalg
-        \let\coprod\new@coprod
-      }
-  },
-  doc / newtx    .code:n       = {
-    \RequirePackage{newtxtext}
-    \RequirePackage{newtxmath}
-  },
-  doc / lmm       .code:n      = {
-    \sys_if_engine_pdftex:TF 
-      { 
-        \RequirePackage{lmodern}
-        \RequirePackage{fixcmex} 
-      }{ 
-        \ztex_msg_set:nn {lmm-font-pdftex}
-          {The~default~font~for~XeTeX/LuaTeX~is~latin~modern,~there~is~no~need~to~load~lmodern.}
-        \ztex_msg_warn:n {lmm-font-pdftex} 
-      }
-  },
-  text            .choice:,
-  text / times    .code:n      = { \RequirePackage{newtxtext} },
-  math            .choice:,
-  math / newtx    .code:n       = { 
-    \ztex_hook_preamble_last:n { \RequirePackage{newtxmath} } 
-  },
-  math / mtpro2   .code:n       = { 
-    \ztex_hook_preamble_last:n { 
-      \RequirePackage[lite, subscriptcorrection, slantedGreek, nofontinfo]{mtpro2} 
-    } 
-  },
-  math / euler    .code:n       = { 
-    \ztex_hook_preamble_last:n { \RequirePackage[OT1, euler-digits]{eulervm} } 
-  },
-  math / var-euler .code:n       = {
-    \usepackage[OT1]{eulervm}
-    \DeclareSymbolFont{cmmlargesymbols}{OMX}{cmex}{m}{n}
-    \DeclareSymbolFont{greekletters}{OML}{cmm}{m}{it}
-    \DeclareMathDelimiter{\new@int}{\mathop}{cmmlargesymbols}{"52}{cmmlargesymbols}{"5A}
-    \DeclareMathDelimiter{\new@sum}{\mathop}{cmmlargesymbols}{"50}{cmmlargesymbols}{"58}
-    \AddToHook{begindocument}
-      {
-        \renewcommand{\int}{\new@int\nolimits}
-        \DeclareMathSymbol{\kappa}{\mathord}{greekletters}{"14}  
-        \DeclareMathSymbol{\tau}{\mathord}{greekletters}{"1C}
-        \DeclareMathSymbol{\omega}{\mathord}{greekletters}{"21}
-      }
-  },
-  math / ptmx     .code:n       = { 
-    \ztex_msg_set:nn {option-font-math}
-      {To~use~ptmx~math~font,use~the~'doc=ptmx'~setting~instead.}
-    \ztex_msg_warn:n {option-font-math}
-  },
-  math / mathpazo .code:n       = { 
-    \let\rmbefore\rmdefault
-    \ztex_hook_preamble_last:n { \RequirePackage{mathpazo} } 
-    \let\rmdefault\rmbefore
-  },
-  math / unknown  .code:n       = { 
-    \ztex_metakey_msg_warning:nn {option-mathSpec-font}{newtx, mtpro2, euler, mathpazo} 
-  },
-  unknown         .code:n      = { 
-    \ztex_metakey_msg_warning:nn {option-font}
-      {
-        sysfont(<bool>:false), 
-        doc(<choice>:newtx,ptmx), 
-        text(<choice>:times), 
-        math(<choice>:newtx,mtpro2,euler,mathpazo)
-      }
-  }
-}
-\ztex_keys_define:nn { layout }{
-  margin          .bool_gset:N  = \g__ztex_margin_bool,
-  margin          .initial:n    = { false },
-  slide           .bool_gset:N  = \g__ztex_slide_bool,
-  slide           .initial:n    = { false },
-  aspect          .tl_gset:N    = \g__ztex_aspectratio_tl,
-  aspect          .initial:n    = { 12|9 },
-  theme           .str_gset:N   = \g__ztex_slide_theme_str,
-  theme           .initial:n    = { AnnArborDefault },
-  unknown         .code:n       = { 
-    \ztex_metakey_msg_warning:nn {option-layout}
-      {margin(<bool>:false), slide, aspect} 
-  }
-}
-\ztex_keys_define:nn { mathSpec }{
-  alias           .bool_gset:N  = \g__ztex_math_alias_bool,
-  alias           .initial:n    = { false },
-  envStyle        .tl_gset:N    = \g__ztex_thm_style_tl,
-  envStyle        .initial:n    = { plain },
-  font            .choice:,
-  font / newtx    .meta:nn      = { ztex / font / math }{#1},
-  font / mtpro2   .meta:nn      = { ztex / font / math }{#1},
-  font / euler    .meta:nn      = { ztex / font / math }{#1},
-  font / mathpazo .meta:nn      = { ztex / font / math }{#1},
-  unknown         .code:n       = { 
-    \ztex_metakey_msg_warning:nn {option-mathSpec}
-      {alias(<bool>:false), envStyle, font(<choice>:newtx,mtpro2,euler,mathpazo)} 
-  }
-}
-\ztex_keys_define:nn { bib_index }{
-  load                .bool_gset:N  = \g__ztex_bib_index_load_bool,
-  source              .str_gset:N   = \g__ztex_bib_source_str,
-  source              .initial:n    = { ref.bib },
-  backend             .str_gset:N   = \g__ztex_bib_backend_str,
-  backend             .initial:n    = { biber },
-  unknown             .code:n       = { 
-    \ztex_metakey_msg_warning:nn {option-bib_index}
-      {load(<bool>:false), source, backend} 
-  } 
-}
-
+% sub(meta) key implementation
+\file_if_exist_input:nF { ztex.options.tex }
+  { \ztex_msg_fatal:n { metakey@file@missing } }
 % option setup
 \ProcessKeyOptions [ ztex ]
 \NewDocumentCommand{\ztexset}{m}{ \keys_set:nn {ztex}{#1} }
@@ -457,6 +337,8 @@
 % ----------------------------------------------------------------------
 %                          module/library checker
 % ----------------------------------------------------------------------
+\bool_new:N \g__ztex_thm_lib_load_bool
+\bool_gset_false:N \g__ztex_thm_lib_load_bool
 \newcommand\ztexhyperTF[2]
   {
     \bool_if:NTF \g__ztex_hyperref_bool 
@@ -492,11 +374,9 @@
     \bool_if:NTF \g__ztex_bib_index_load_bool 
       { #1 }{ #2 }
   }
-\bool_new:N \g__ztex_theme_lib_load_bool
-\bool_gset_false:N \g__ztex_theme_lib_load_bool
 \newcommand\ztethmlibTF[2]
   {
-    \bool_if:NTF \g__ztex_theme_lib_load_bool 
+    \bool_if:NTF \g__ztex_thm_lib_load_bool 
       { #1 }{ #2 }
   }
 
@@ -505,7 +385,6 @@
 % ----------------------------------------------------------------------
 %                          ztex logo
 % ----------------------------------------------------------------------
-% 4.30554pt = 1ex.
 \NewDocumentCommand\zTeX{s}
   {
     \IfBooleanTF{#1}
@@ -514,9 +393,11 @@
         \raise0.0894ex\hbox{z}
         \kern-0.4645ex\hbox{\TeX}
       }{
-        \ztool_scale_to_wd_and_ht:nnn {.9ex}{1.3ex}{
-          \ztool_rotate:nn {89}{\(\aleph\)}
-        }\kern-0.3423ex\hbox{\TeX}
+        \ztool_scale_to_wd_and_ht:nnn 
+          {.9ex}{1.3ex}
+          {
+            \ztool_rotate:nn {89}{\(\aleph\)}
+          } \kern-0.3423ex\hbox{\TeX}
       }
   }
 \let\ztex\zTeX 
