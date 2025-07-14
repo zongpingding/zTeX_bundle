@@ -1,0 +1,145 @@
+% ==> font options
+\ztex_keys_define:nn { font }{
+  sysfont         .bool_gset:N  = \g__ztex_sysfont_cfg_bool,
+  sysfont         .initial:n    = { false },
+  doc             .choice:,
+  doc / ptmx      .code:n       = {
+    \RequirePackage{mathptmx}
+    \RequirePackage{newtxtext}
+    \DeclareSymbolFont{letters}{OML}{ntxmi}{m}{it}
+    \DeclareMathAlphabet{\mathbf}{OT1}{ntxtlf}{b}{it}
+    \DeclareSymbolFont{CMMletters}{OML}{cmm}{m}{it}
+    \DeclareSymbolFont{CMMsymbols}{OMS}{cmsy}{m}{n}
+    \DeclareSymbolFont{CMMlargesymbols}{OMX}{cmex}{m}{n}
+    \DeclareMathSymbol{\new@pi}{0}{CMMletters}{"19}
+    \DeclareMathSymbol{\new@jmath}{0}{CMMletters}{"7C}
+    \DeclareMathSymbol{\new@amalg}{0}{CMMsymbols}{"71}
+    \DeclareMathSymbol{\new@coprod}{1}{CMMlargesymbols}{"61}
+    \ztex_hook_doc_begin:n
+      {
+        \let\pi\new@pi
+        \let\jmath\new@jmath
+        \let\amalg\new@amalg
+        \let\coprod\new@coprod
+      }
+  },
+  doc / newtx    .code:n       = {
+    \RequirePackage{newtxtext}
+    \RequirePackage{newtxmath}
+  },
+  doc / lmm       .code:n      = {
+    \sys_if_engine_pdftex:TF 
+      { 
+        \RequirePackage{lmodern}
+        \RequirePackage{fixcmex} 
+      }{ 
+        \ztex_msg_set:nn {lmm-font-pdftex}
+          {
+            The~default~font~for~XeTeX/LuaTeX~is~latin~
+            modern,~there~is~no~need~to~load~lmodern~again.
+          }
+        \ztex_msg_warn:n {lmm-font-pdftex} 
+      }
+  },
+  text            .choice:,
+  text / times    .code:n       = { \RequirePackage{newtxtext} },
+  doc / texgyre   .code:n       = {  },  % TODO: implement it !!
+  math            .choice:,
+  math / newtx    .code:n       = {
+    \ztex_hook_preamble_last:n { \RequirePackage{newtxmath} } 
+  },
+  math / mtpro2   .code:n       = { 
+    \ztex_hook_preamble_last:n { 
+      \RequirePackage[lite, subscriptcorrection, slantedGreek, nofontinfo]{mtpro2} 
+    } 
+  },
+  math / euler    .code:n       = { 
+    \ztex_hook_preamble_last:n { \RequirePackage[OT1, euler-digits]{eulervm} } 
+  },
+  math / var-euler .code:n       = {
+    \usepackage[OT1]{eulervm}
+    \DeclareSymbolFont{cmmlargesymbols}{OMX}{cmex}{m}{n}
+    \DeclareSymbolFont{greekletters}{OML}{cmm}{m}{it}
+    \DeclareMathDelimiter{\new@int}{\mathop}{cmmlargesymbols}{"52}{cmmlargesymbols}{"5A}
+    \DeclareMathDelimiter{\new@sum}{\mathop}{cmmlargesymbols}{"50}{cmmlargesymbols}{"58}
+    \ztex_hook_doc_begin:n
+      {
+        \DeclareRobustCommand\int {\new@int}
+        \DeclareMathSymbol{\kappa}{\mathord}{greekletters}{"14}  
+        \DeclareMathSymbol{ \tau }{\mathord}{greekletters}{"1C}
+        \DeclareMathSymbol{\omega}{\mathord}{greekletters}{"21}
+      }
+  },
+  math / ptmx     .code:n       = { 
+    \ztex_msg_set:nn {option-font-math}
+      {To~use~ptmx~math~font,use~the~'doc=ptmx'~setting~instead.}
+    \ztex_msg_warn:n {option-font-math}
+  },
+  math / mathpazo .code:n       = { 
+    \let\rmbefore\rmdefault
+    \ztex_hook_preamble_last:n { \RequirePackage{mathpazo} } 
+    \let\rmdefault\rmbefore
+  },
+  math / unknown  .code:n       = { 
+    \ztex_metakey_msg_warning:nn {option-mathSpec-font}{newtx, mtpro2, euler, mathpazo} 
+  },
+  unknown         .code:n      = { 
+    \ztex_metakey_msg_warning:nn {option-font}
+      {
+        sysfont(<bool>:false), 
+        doc(<choice>:newtx,ptmx), 
+        text(<choice>:times), 
+        math(<choice>:newtx,mtpro2,euler,mathpazo)
+      }
+  }
+}
+
+
+% ==> page(layout) options
+\ztex_keys_define:nn { layout }{
+  margin          .bool_gset:N  = \g__ztex_margin_bool,
+  margin          .initial:n    = { false },
+  slide           .bool_gset:N  = \g__ztex_slide_bool,
+  slide           .initial:n    = { false },
+  aspect          .tl_gset:N    = \g__ztex_aspectratio_tl,
+  aspect          .initial:n    = { 12|9 },
+  theme           .str_gset:N   = \g__ztex_slide_theme_str,
+  theme           .initial:n    = { AnnArborDefault },
+  unknown         .code:n       = { 
+    \ztex_metakey_msg_warning:nn {option-layout}
+      {margin(<bool>:false), slide, aspect, theme} 
+  }
+}
+
+
+% ==> thm(mathspec) options 
+\ztex_keys_define:nn { mathSpec }{
+  alias            .bool_gset:N  = \g__ztex_math_alias_bool,
+  alias            .initial:n    = { false },
+  envStyle         .tl_gset:N    = \g__ztex_thm_style_tl,
+  envStyle         .initial:n    = { plain },
+  font             .choice:,
+  font / newtx     .meta:nn      = { ztex / font / math }{#1},
+  font / mtpro2    .meta:nn      = { ztex / font / math }{#1},
+  font / euler     .meta:nn      = { ztex / font / math }{#1},
+  font / var-euler .meta:nn      = { ztex / font / math }{#1},
+  font / mathpazo  .meta:nn      = { ztex / font / math }{#1},
+  unknown          .code:n       = { 
+    \ztex_metakey_msg_warning:nn {option-mathSpec}
+      {alias(<bool>:false), envStyle, font(<choice>:newtx,mtpro2,euler,mathpazo)} 
+  }
+}
+
+
+% ==> bib/index options
+\ztex_keys_define:nn { bib_index }{
+  load                .bool_gset:N  = \g__ztex_bib_index_load_bool,
+  source              .str_gset:N   = \g__ztex_bib_source_str,
+  source              .initial:n    = { ref.bib },
+  backend             .str_gset:N   = \g__ztex_bib_backend_str,
+  backend             .initial:n    = { biber },
+  unknown             .code:n       = { 
+    \ztex_metakey_msg_warning:nn {option-bib_index}
+      {load(<bool>:false), source, backend} 
+  }
+}

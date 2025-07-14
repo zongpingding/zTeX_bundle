@@ -1,4 +1,4 @@
-\ProvidesExplFile{ztex.module.sect.tex}{2025/07/11}{1.0.1}{sect~module~for~ztex}
+\ProvidesExplFile{ztex.module.sect.tex}{2025/07/15}{1.0.1}{sect~module~for~ztex}
 
 
 %%%%%             sect module for ztex          %%%%%
@@ -1254,6 +1254,14 @@
           { \cs:w the\l__zsect_title_class_tl \cs_end: }
       }
     \xdef\zsect@cursec@class{\l__zsect_title_class_tl}
+    % mark and toc
+    \__zsect_title_mark:Vn \l__zsect_title_class_tl { #2 }
+    \IfBooleanTF{#3}{}
+      {
+        \__zsect_title_bookmark_add:n { #2 }
+        \__zsect_title_toc_add:nn { #1 }{ #2 } 
+        \__zsect_title_toc_collector:nn { #1 }{ #2 }
+      }
     % title typeset
     \bool_if:NTF \l__zsect_title_explicit_bool 
       {
@@ -1273,14 +1281,6 @@
         \__zsect_title_space_after:
         \__zsect_title_type_spec:nn { page }
           { \hspace{0pt}\newpage }
-      }
-    % mark and toc
-    \__zsect_title_mark:Vn \l__zsect_title_class_tl { #2 }
-    \IfBooleanTF{#3}{}
-      {
-        \__zsect_title_bookmark_add:n { #2 }
-        \__zsect_title_toc_add:nn { #1 }{ #2 } 
-        \__zsect_title_toc_collector:nn { #1 }{ #2 }
       }
   }
 \cs_new:Npn \__zsect_title_bookmark_add:n #1

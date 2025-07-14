@@ -1,4 +1,4 @@
-\ProvidesExplFile{ztex.module.cmd.tex}{2025/07/05}{1.0.1}{cmd~module~for~ztex}
+\ProvidesExplFile{ztex.module.cmd.tex}{2025/07/13}{1.0.1}{cmd~module~for~ztex}
 
 
 %%%%%     cmd module for ztex     %%%%%
@@ -255,6 +255,26 @@
       #3 
     \fi
   }
+
+% single token check(include implict token '\l_peek_token')
+% NOTE: this token check macro is expandable
+\prg_new_conditional:Npnn \ztex_token_if_in:nN #1#2 { p, T, F, TF }
+  {
+    \exp_args:Nee \int_compare:nNnTF
+      {
+        \exp_args:Ne \int_from_bin:n
+          {
+            \tl_map_tokens:nn { #1 }
+              { \ztex_token_if_eq:NN #2 }
+          }
+      } = { 0 }
+      { \prg_return_false: }
+      { \prg_return_true:  }
+  }
+\cs_new:Npn \ztex_token_if_eq:NN #1#2
+  { \tex_ifx:D #1 #2 1 \else: 0 \fi: }
+\prg_generate_conditional_variant:Nnn \ztex_token_if_in:nN 
+  { o, e }{ p, T, F, TF }
 
 % tl if eq check
 \prg_new_conditional:Npnn \__ztex_token_if_eq:nn #1#2 {T, F, TF}
