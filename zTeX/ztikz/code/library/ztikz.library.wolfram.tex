@@ -1,9 +1,8 @@
-\ProvidesExplFile{ztikz.library.wolfram.tex}{2025/05/31}{1.0.0}{wolfram~library~for~ztikz}
+\ProvidesExplFile{ztikz.library.wolfram.tex}{2025/08/10}{1.0.0}{wolfram~library~for~ztikz}
 
 
 
 % ==> init variables
-\RequirePackage{xsimverb}
 \ztool_shell_mkdir:n {ztikz_output/mma_data/}
 \tl_const:Nn \g__ztikz_wolfram_path_tl {ztikz_output/mma_data}
 \tl_new:N \l_part_table_data_tl
@@ -14,7 +13,6 @@
 \seq_new:N \l__ztikz_wolfram_tmp_res_seq
 \ior_new:N \g__ztikz_wolfram_ior 
 \iow_new:N \g__ztikz_wolfram_iow
-\cs_generate_variant:Nn \xsim_file_write_start:nn {ne}
 
 
 % ==> core function
