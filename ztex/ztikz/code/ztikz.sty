@@ -24,7 +24,7 @@
 %                       ztikz.library.pyscript.tex.                           %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \NeedsTeXFormat{LaTeX2e}
-\ProvidesExplPackage{ztikz}{2025/05/20}{1.0.0}{A~pre-release~diagram~and~CAS~package}
+\ProvidesExplPackage{ztikz}{2025/08/10}{1.0.0}{A~pre-release~diagram~and~CAS~package}
 
 
 % ----------------------------------------------------------------------
@@ -81,6 +81,8 @@
 % ----------------------------------------------------------------------
 %                        Init ztikz's Environment
 % ----------------------------------------------------------------------
+\RequirePackage{xsimverb}
+\cs_generate_variant:Nn \xsim_file_write_start:nn {ne}
 \ztool_shell_mkdir:n {ztikz_output/}
 \tl_const:Nn \g__ztikz_scripts_path_tl  {ztikz_output/scripts}
 \NewDocumentCommand\ztikzMkdir{m}{ \ztool_shell_mkdir:n {#1} }

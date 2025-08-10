@@ -1,4 +1,4 @@
-\ProvidesExplFile{ztex.module.sect.tex}{2025/07/15}{1.0.1}{sect~module~for~ztex}
+\ProvidesExplFile{ztex.module.sect.tex}{2025/07/16}{1.0.1}{sect~module~for~ztex}
 
 
 %%%%%             sect module for ztex          %%%%%
@@ -121,6 +121,7 @@
 \newdimen\zsect@dim@a
 \newdimen\zsect@dim@b
 \newdimen\zsect@dim@c
+\box_new:N \l__ztoc_name_box
 \box_new:N \l__ztoc_title_box
 \scan_new:N \s__ztoc_ignore_empty_mark
 
@@ -386,7 +387,7 @@
     space.before   : skip,
     space.left     : skip,
     space.right    : skip      = \ztoc@rmargin,
-    space.hang     : length    = \KeyValue { width.name },
+    space.hang     : length    = \KeyValue { name.width },
 
     leader.fill    : skip      = { \fill },
     leader.sep     : length    = \ztoc@leader@sep,
@@ -628,6 +629,8 @@
           \l__ztoc_space_hang_dim
         }
       }
+    \edef\ztoccurname { \__ztoc_extract_name:w #2\scan_stop: }
+    \edef\ztoccurtitle{ \__ztoc_extract_title:w #2\scan_stop: }
     \UseHook{ztoc/tocline/begin}
     \bool_if:NTF \l__ztoc_explicit_bool
       {
@@ -651,7 +654,7 @@
           \zsect@dim@a \l__ztoc_space_hang_dim \relax
           \advance\leftskip \zsect@dim@a 
           \null\nobreak \hskip -\leftskip
-          { \__ztoc_name_title_set:nn {#2}{\@contentsline@destination} } \nobreak
+          { \__ztoc_name_title_typeset:nn {#2}{\@contentsline@destination} } \nobreak
           \__ztoc_leader_typeset: \nobreak % leaders
           \__ztoc_page_set:nn { #3 }{page.#3}
           \l__ztoc_line_end_tl
@@ -722,7 +725,7 @@
       }
     \__ztoc_item_hyper_end_aux:n {page}
   }
-\cs_new:Npn \__ztoc_name_title_set:nn #1#2
+\cs_new:Npn \__ztoc_name_title_typeset:nn #1#2
   {
     \__ztoc_item_hyper_begin_aux:nn {name}{ #2 }
     \exp_args:Nf \__ztoc_dottedline_name_set:n 
@@ -747,8 +750,8 @@
   }
 \cs_new:Npn \__ztoc_dottedline_name_set:n #1 
   {
-    \hb@xt@ \l__ztoc_width_name_dim 
-      { 
+    \hbox_set:Nn \l__ztoc_name_box 
+      {
         \l__ztoc_format_tl
         \l__ztoc_format_p_tl
         \l__ztoc_name_format_tl
@@ -757,7 +760,14 @@
         \tl_if_empty:NTF \l__ztoc_name_tl 
           { #1 }{ \l__ztoc_name_tl }
         \l__ztoc_name_after_tl
-      \hss}
+      }
+    \dim_compare:nTF { \l__ztoc_width_name_dim = 0pt }
+      {
+        \box_use_drop:N \l__ztoc_name_box
+      }{
+        \hb@xt@ \l__ztoc_width_name_dim
+          { \box_use_drop:N \l__ztoc_name_box \hss }
+      }
   }
 \cs_new:Npn \__ztoc_dottedline_title_set:n #1 
   {
@@ -782,7 +792,7 @@
 \DeclareInstance{ztextoc}{ztoc/level 1}{default}
   {
     format         = \large\bfseries,
-    width.name     = 1.9em,
+    name.width     = 1.9em,
     space.before   = 1em\@plus\p@,
     space.hang     = 1.9em,
     space.left     = 1.9em,
@@ -791,7 +801,7 @@
 \DeclareInstance{ztextoc}{ztoc/level 2}{default}
   {
     format         = \bfseries,
-    width.name     = 1.5em,
+    name.width     = 1.5em,
     space.before   = 1em\@plus\p@,
     space.hang     = 1.5em,
     space.left     = 1.5em,
@@ -799,31 +809,31 @@
   }
 \DeclareInstance{ztextoc}{ztoc/level 3}{default}
   {
-    width.name     = 2.3em,
+    name.width     = 2.3em,
     space.hang     = 2.3em,
     space.left     = 3.8em,
   }
 \DeclareInstance{ztextoc}{ztoc/level 4}{default}
   {
-    width.name     = 3.2em,
+    name.width     = 3.2em,
     space.hang     = 3.2em,
     space.left     = 7em,
   }
 \DeclareInstance{ztextoc}{ztoc/level 5}{default}
   {
-    width.name     = 4.1em,
+    name.width     = 4.1em,
     space.hang     = 4.1em,
     space.left     = 11.1em,
   }
 \DeclareInstance{ztextoc}{ztoc/level 6}{default}
   {
-    width.name     = 5em,
+    name.width     = 5em,
     space.hang     = 5em,
     space.left     = 16.2em,
   }
 \DeclareInstance{ztextoc}{ztoc/level 7}{default}
   {
-    width.name     = 6em,
+    name.width     = 6em,
     space.hang     = 6em,
     space.left     = 22.25em,
   }
@@ -1402,7 +1412,7 @@
     title.format = \huge\bfseries\centering,
     num          = \Roman{part}\par,
     num.before   = {PART~},
-    % num.sep      = 20pt, % remove it for multi-line
+    num.sep      = 0pt,
   }
 \zsect_define_title:Nn \chapter 
   {
