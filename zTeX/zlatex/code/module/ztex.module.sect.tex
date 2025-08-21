@@ -1359,7 +1359,7 @@
         % 2. non-empty toc name(#1) comes before the sec name(#2);
         % 3. command or math shift may occur in '#1'(i.e. toc name).
         {
-          \Hy@pdfstringtrue
+          \bool_if:NT \g__ztex_hyperref_bool { \Hy@pdfstringtrue }
           \exp_args:Ne \__zsect_title_bookmark_add:n 
             {
               \tl_if_empty:nTF { #1 }

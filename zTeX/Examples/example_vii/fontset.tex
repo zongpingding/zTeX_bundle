@@ -1,0 +1,41 @@
+\documentclass[lang=cn, font={sysfont}]{ztex}
+\zfontfamilynew\IBMPlex
+  {
+    name=IBMPlexSansSC-Regular.ttf,
+    path=./Fonts/,
+    feat = {
+      bd    = IBMPlexSansSC-Bold.ttf,
+      other = {
+        FontFace = {el}{\shapedefault}{IBMPlexSansSC-ExtraLight.ttf},
+      }
+    }
+  }
+\DeclareRobustCommand{\IBMPlexelseries}
+  {
+    \IBMPlex
+    \fontseries{el}\selectfont
+  }
+\usepackage{lipsum}
+\usepackage{zhlipsum}
+
+
+\begin{document}
+\section{Enhance interface}
+\subsection{original}
+\zhlipsum[1]
+
+\subsection{merge En/CJK}
+{\IBMPlex \lipsum[1][1-3]}
+
+{\IBMPlex \zhlipsum[1]}
+
+
+\subsection{Other FontSpec Features}
+{\IBMPlexelseries \zhlipsum[1]\lipsum[1][1-2]}
+
+
+\section{cinzel Font}
+{\cinzel \lipsum[1][1-2]}
+
+{\cinzel\itshape \lipsum[1][1-2]}
+\end{document}
