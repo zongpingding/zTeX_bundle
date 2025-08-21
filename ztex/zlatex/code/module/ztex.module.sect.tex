@@ -1185,7 +1185,10 @@
 \cs_new:Npn \zsect_right_mark_insert:n #1
   {
     \mark_insert:nn {ztex-right}{#1}
-    \mark_insert:nn {ztex-right-nonempty}{#1}
+    \tl_if_empty:eF {#1}
+      {
+        \mark_insert:nn {ztex-right-nonempty}{#1}
+      }
   }
 \cs_generate_variant:Nn \zsect_mark_insert:nn { Vn, ee }
 \NewDocumentCommand{\zsecmarkinsert}{mm}
