@@ -1,4 +1,4 @@
-\ProvidesExplFile{ztex.module.page.tex}{2025/07/06}{1.0.1}{page~module~for~ztex}
+\ProvidesExplFile{ztex.module.page.tex}{2025/08/20}{1.0.1}{page~module~for~ztex}
 
 
 %%%%%     page module for ztex     %%%%%
@@ -32,7 +32,7 @@
       ~margin~option~is~now~enabled~by~default.}
     \ztex_msg_warn:n {option-page-margin}
   }
-\else 
+\else
   \bool_if:NTF \g__ztex_margin_bool {
     \__ztex_layout_setup:n {
       a4paper, 
@@ -148,32 +148,48 @@
 
 
 % ==> fancyhdr setup
-\bool_if:NF \g__ztex_slide_bool 
+\cs_new_protected:Npn \zpage_set_style:nnn #1#2#3
+  {
+    \tl_if_empty:nTF { #2 }
+      { \fancypagestyle{#1}{#3} }
+      { \fancypagestyle{#1}[#2]{#3} }
+  }
+\NewDocumentCommand{\zpagestyleset}{O{}mm}
+  { 
+    \zpage_set_style:nnn {#2}{#1}{#3}
+    % \fancypagestyleassign {#1}{#1@new} % --> '! TeX capacity exceeded,' 
+  }
+\bool_if:NF \g__ztex_slide_bool
   {
     \RequirePackage{fancyhdr}
-    \fancypagestyle{fancy}
+    \zpage_set_style:nnn { fancy }{}
       {
-        \fancyhf{}  
+        \fancyhf{}
         \dim_gset:Nn \headheight{15pt}
         \renewcommand{\headrule}{\hrule width\textwidth}
         \if@twoside
-          \fancyhead[EL]{\leftmark}
+          \fancyhead[EL]{\ztexleftmark}
           \fancyhead[ER]{\thepage}
           \fancyhead[OL]{\thepage}
-          \fancyhead[OR]{\rightmark}
+          \fancyhead[OR]{\ztexrightmark}
         \else
           \IfClassLoadedTF{book}{
             \fancyhead[L]{\thepage}
-            \fancyhead[R]{\rightmark}
+            \fancyhead[R]{\ztexrightmark}
           }{
             \fancyhead[L]{\thepage}
-            \fancyhead[R]{\leftmark}
+            \fancyhead[R]
+              {
+                \IfMarksEqualTF{ztex-left}{first}{last}
+                  { \FirstMark{ztex-left} }
+                  { \FirstMark{ztex-left} \;\(\Rightarrow\)\; \LastMark{ztex-left} }
+              }
           }
         \fi
       }
-    \fancypagestyle{plain}
+    \zpage_set_style:nnn { plain }{}
       {
-        \fancyhf{}  
+        \fancyhf{}
         \renewcommand{\headrulewidth}{0pt}
         \renewcommand{\headrule}{}
         \fancyfoot[C]{\thepage}
@@ -196,16 +212,15 @@
     \pagenumbering{arabic}
   }
 }{
-  \bool_if:NF \g__ztex_slide_bool 
-    {\ztex_hook_preamble_last:n {\pagestyle{fancy}}}
+  \bool_if:NF \g__ztex_slide_bool
+    { \pagestyle{fancy} }
 }
-
 
 
 % ==> page annotation
 % #1: fore/background; #2: position; 
-% #3: anchor;          #4: object
-% #5: hook range
+% #3: anchor;          #4: object;
+% #5: hook range.
 \dim_const:Nn \zph {\paperheight}
 \dim_const:Nn \zpw {\paperwidth}
 \cs_generate_variant:Nn \hook_gput_code:nnn {nne}

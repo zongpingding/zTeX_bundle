@@ -1,4 +1,4 @@
-\ProvidesExplFile{ztex.module.sect.tex}{2025/07/16}{1.0.1}{sect~module~for~ztex}
+\ProvidesExplFile{ztex.module.sect.tex}{2025/08/21}{1.0.1}{sect~module~for~ztex}
 
 
 %%%%%             sect module for ztex          %%%%%
@@ -106,6 +106,7 @@
 
 
 % ==> section class path map (for future use)
+% TODO: generate these path Dynamically
 \prop_const_from_keyval:Nn \g__ztoc_class_pathmap_prop
   {
     subparagraph  = part/chapter/section/subsection/subsubsection/paragraph/,
@@ -254,6 +255,8 @@
         \par}%
     \fi
   }
+% TODO: refactor '\zdottedtocline:nnnnnnnnn' to recieve more than
+%       9 args using '\def\cmda#1{#1\cmdb} \def\cmdb#1{#1}'.
 \cs_new:Npn \zdottedtocline:nnnnnnnnn #1#2#3#4#5#6#7#8#9
   {
     \ifnum #1 > \c@tocdepth \else
@@ -291,9 +294,14 @@
   }
 
 
-% ==> ztoc interface 
+% ==> ztoc interface
+\cs_new_protected:Npn \zsect_restore_protect: 
+  { \let\protect\relax }
+\cs_new_protected:Npn \zsect_unexpand_protect: 
+  { \let\protect\noexpand }
 \cs_new:Npn \zsect_add_toc_line:nnnn #1#2#3#4 
   {
+    \zsect_unexpand_protect:
     \bool_if:NT \g_toc_write_enable_bool 
       {
         \iow_now:Ne \g_ztoc_toc_iow
@@ -302,6 +310,7 @@
             \c_percent_str
           }
       }
+    \zsect_restore_protect:
   }
 \cs_new:Npn \zsect_add_to_table:Nnn #1#2#3
   {% #1: stream; #2:table type; #3:content
@@ -527,21 +536,25 @@
         \__ztoc_dotted_tocline:nnn {#1}{#2}{#3}
         \prg_map_break:Nn \__ztoc_ignore_negate_break: {}
       }
-    \exp_args:NNf \clist_if_in:NnT \l__ztoc_ignore_name_clist 
+    % TODO: handle special section name, eg: '\textbf{1.1-2}'
+    \exp_args:NNf \clist_if_in:NnT \l__ztoc_ignore_name_clist
       { \__ztoc_extract_name:w #2\scan_stop: }
       {
         \__ztoc_dotted_tocline:nnn {#1}{#2}{#3}
         \prg_map_break:Nn \__ztoc_ignore_negate_break: {}
       }
-    \exp_args:Nf \tl_if_in:nVT
-      { \__ztoc_extract_title:w #2\scan_stop: } \l__ztoc_ignore_text_tl
+    %% name ignore parser begin ->
+    \exp_args:NNo \str_set:Nn \l_tmpb_str {\use_ii:nn #2}
+    \exp_args:NNo \str_if_in:NnT \l_tmpb_str
+      { \l__ztoc_ignore_text_tl }
       {
         \__ztoc_dotted_tocline:nnn {#1}{#2}{#3}
       }
+    %% <- name ignore parser end
     \prg_break_point:Nn \__ztoc_ignore_negate_break: {}
   }
 
-% '\__ztoc_dotted_tocline:nnn' implement below:
+% The implementation of '\__ztoc_dotted_tocline:nnn' comes afterward.
 \cs_new:Npn \__ztoc_ignore_negate_break:
   { \prg_map_break:Nn \__ztoc_ignore_negate_break: { } }
 
@@ -986,15 +999,22 @@
     \__reset_toc_collect_int:
   }
 \cs_generate_variant:Nn \ztoc_localtable_byclass:nn { ne, en, ee }
-% NOTE: '\__zsect_local_toc_generate:nn' has been deprecated 
-\cs_new:Npn \__zsect_local_toc_generate:nn #1#2 
-  { }
+% TODO: implement '\__zsect_local_toc_generate:nn' to generate variables
+%       '\g_ztoc_keyval<toc|lof>_seq' from a user-specified file.
+\cs_new:Npn \__zsect_local_toc_generate:nn #1#2
+  {% #1:toc, lof, etc; #2:file
+    % generate '*.ptoc'
+    % ...
+    % generate seq from '*.ptoc'
+    \ztool_gread_file_as_seq:nnc { \c_false_bool }
+      { #1.p##1 }
+      { g_ztoc_keyval##1_seq }
+  }
 
 
 % ==> 'toc line add' for 'sec' part
 \NewHook{ztoc/localtocline/begin}
 \NewReversedHook{ztoc/localtocline/end}
-\prop_new:N \g_local_toc_ref_prop % in article: { 1 = {  } }
 \cs_new:Npn \__zsect_title_toc_add:nn #1#2 
   {
     \exp_args:Ne \int_compare:nT % '\c@secnumdepth' vs '\c@tocdepth' ???
@@ -1007,15 +1027,16 @@
           { 
             { \zsect@tocnum }
             {
-              \tl_if_empty:nTF {#1}
-                { \exp_not:n {#2} }
-                { \exp_not:n {#1} } 
-            } 
+              % NOTE: to support command '\texorpdfstring' in '#2', the
+              %       original '\exp_not:n {#2}' has been removed, you
+              %       need to add macro '\protect' manually !
+              \exp_args:Nne \tl_if_empty:nTF { #1 }
+                { #2 }{ #1 }
+            }
           }
           { \thepage }
           { \ztexhyperTF {\l__zsect_title_class_tl.\zsect@tocnum}{} }
         % local toc interface
-        \__zsect_local_toc_generate:nn { #1 }{ #2 }
         \UseHook{ztoc/localtocline/end}
       }
   }
@@ -1045,26 +1066,27 @@
   }
 \cs_new:Npn \__zsect_title_toc_collector:nn #1#2
   {
+    \zsect_unexpand_protect:
     \seq_gput_right:Ne \g__ztoc_keyvaltoc_seq
       {
         class  = { \l__zsect_title_class_tl },
         name   = { \zsect@tocnum },
-        title  = { \tl_if_empty:nTF {#1}{\exp_not:n {#2}}{\exp_not:n {#1}} },
+        title  = { \tl_if_empty:nTF {#1}{#2}{#1} },
         page   = { \thepage },
-        raw    = { \contentsline 
+        raw    = { \token_to_str:N \contentsline 
                   { \l__zsect_title_class_tl }
                   { 
                     { \zsect@tocnum }
                     {
                       \tl_if_empty:nTF { #1 }
-                        { \exp_not:n {#2} }
-                        { \exp_not:n {#1} } 
+                        { #2 }{ #1 } 
                     }
                   }
                   { \thepage }
                   { \ztexhyperTF {\l__zsect_title_class_tl.\zsect@tocnum}{} } 
                 },
       }
+    \zsect_restore_protect:
   }
 
 
@@ -1075,6 +1097,7 @@
 % NOTE: '*.plot', '*.plof' file is empty, for 'localtoc' have not been implemented.
 \cs_new:Npn \zsect_add_table_line:nnnn #1#2#3#4 
   {
+    \zsect_unexpand_protect:
     \bool_if:NT \g_lot_write_enable_bool
       {
         \iow_now:Ne \g_ztoc_lot_iow
@@ -1083,9 +1106,11 @@
             \c_percent_str
           }
       }
+    \zsect_restore_protect:
   }
 \cs_new:Npn \zsect_add_figure_line:nnnn #1#2#3#4 
   {
+    \zsect_unexpand_protect:
     \bool_if:NT \g_lof_write_enable_bool 
       {
         \iow_now:Ne \g_ztoc_lof_iow
@@ -1094,7 +1119,10 @@
             \c_percent_str
           }
       }
+    \zsect_restore_protect:
   }
+\cs_generate_variant:Nn \zsect_add_table_line:nnnn  { eeee }
+\cs_generate_variant:Nn \zsect_add_figure_line:nnnn { eeee }
 \DeclareDocumentCommand{\listoffigures}{}
   {
     \seq_use:Nn \g_ztoc_lof_seq {}
@@ -1107,7 +1135,7 @@
 %       and 'table' env define '\@captype' to 'figure' or 'table'.
 \long\def\@caption#1[#2]#3 
   {
-    \par \use:c { zsect_add_#1_line:nnnn } 
+    \par \use:c { zsect_add_#1_line:eeee } 
       { #1 }
       { {\use:c {the#1}}{\ignorespaces \exp_not:n {#2}} }
       { \thepage }
@@ -1138,17 +1166,72 @@
 % ----------------------------------------------------------------------
 %                           section title interface
 % ----------------------------------------------------------------------
-% ==> title interface (title = num + name)
-% TODO: use 'new marker mechanism' to implement.
-\cs_new:Npn \__zsect_title_mark:nn #1#2
+% ==> marker interface
+\mark_new_class:n { ztex-1st   } % for top title class ('part')
+\mark_new_class:n { ztex-left  }
+\mark_new_class:n { ztex-right }
+\mark_new_class:n { ztex-right-nonempty }
+\mark_new_class:n { ztex-4th   } % for the 4th level title class ('subsection'/'subsubsection')
+\cs_new:Npn \zsect_mark_insert:nn #1#2
   {
-    \str_case:nnF {#1} 
+    \exp_args:Ne \int_case:nnF { \prop_item:Nn \c_zsect_level_prop {#1} }
       {
-        {chapter}{\chaptermark{#2}}
-        {section}{\sectionmark{#2}}
-      }{}
+        {1}{ \mark_insert:nn { ztex-1st } {#2} }
+        {2}{ \mark_insert:nn { ztex-left} {#2} }
+        {3}{ \zsect_right_mark_insert:n   {#2} }
+        {4}{ \mark_insert:nn { ztex-4th } {#2} }
+      }{ \ztex_msg_error:n { mark-nonexist } }
   }
-\cs_generate_variant:Nn \__zsect_title_mark:nn { Vn, ee }
+\cs_new:Npn \zsect_right_mark_insert:n #1
+  {
+    \mark_insert:nn {ztex-right}{#1}
+    \mark_insert:nn {ztex-right-nonempty}{#1}
+  }
+\cs_generate_variant:Nn \zsect_mark_insert:nn { Vn, ee }
+\NewDocumentCommand{\zsecmarkinsert}{mm}
+  {
+    \zsect_mark_insert:nn {#1}{#2}
+  }
+\DeclareDocumentCommand{\markright}{m}
+  { 
+    \zsect_right_mark_insert:n {#1} 
+  }
+\DeclareDocumentCommand{\markboth}{mm}
+  { 
+    \mark_insert:nn { ztex-left} {#1}
+    \zsect_right_mark_insert:n {#2}
+  }
+\IfClassLoadedTF{book}
+  {
+    \DeclareDocumentCommand{\chaptermark}{m}
+      { \zsect_mark_insert:nn {chapter}{#1} }
+    \DeclareDocumentCommand{\sectionmark}{m}
+      { \zsect_mark_insert:nn {section}{#1} }
+  }{
+    \DeclareDocumentCommand{\sectionmark}{m}
+      { \zsect_mark_insert:nn {section}{#1} }
+    \DeclareDocumentCommand{\subsectionmark}{m}
+      { \zsect_mark_insert:nn {subsection}{#1} }
+  }
+\cs_new_protected:Npn \zsect_robust_left_mark:
+  { \mark_use_first:nn {page}{ ztex-left } }
+\cs_new_protected:Npn \zsect_robust_right_mark:
+  {
+    \mark_if_eq:nnnnTF {page}{ztex-right-nonempty}{top}{first}
+      {
+        \( \langle\mbox{empty}\rangle \)
+        \ztex_msg_warn:n { right-mark-empty }
+      }{ \mark_use_first:nn {page}{ztex-right-nonempty} }
+  }
+\cs_set_eq:NN \ztexleftmark  \zsect_robust_left_mark:
+\cs_set_eq:NN \ztexrightmark \zsect_robust_left_mark:
+\cs_set_eq:NN \robustleftmark  \zsect_robust_right_mark:
+\cs_set_eq:NN \robustrightmark \zsect_robust_right_mark:
+\ztex_msg_set:nn { mark-nonexist }{ current~title~class~is~not~avaliable. }
+\ztex_msg_set:nn { right-mark-empty }{ right~mark~is~empty~at~page:\thepage. }
+
+
+% ==> title interface (title = num + name)
 \NewTemplateType{ztexsect}{3} % toc-name, sec-name, bool
 \DeclareTemplateInterface{ztexsect}{default}{3}
   {
@@ -1265,11 +1348,22 @@
       }
     \xdef\zsect@cursec@class{\l__zsect_title_class_tl}
     % mark and toc
-    \__zsect_title_mark:Vn \l__zsect_title_class_tl { #2 }
+    \zsect_mark_insert:Vn \l__zsect_title_class_tl { #2 }
     \IfBooleanTF{#3}{}
       {
-        \__zsect_title_bookmark_add:n { #2 }
-        \__zsect_title_toc_add:nn { #1 }{ #2 } 
+        % NOTE:
+        % 1. set '\Hy@pdfstring' true to support command '\texorpdfstring';
+        % 2. non-empty toc name(#1) comes before the sec name(#2);
+        % 3. command or math shift may occur in '#1'(i.e. toc name).
+        {
+          \Hy@pdfstringtrue
+          \exp_args:Ne \__zsect_title_bookmark_add:n 
+            {
+              \tl_if_empty:nTF { #1 }
+                { #2 }{ #1 }
+            }
+        }
+        \__zsect_title_toc_add:nn { #1 }{ #2 }
         \__zsect_title_toc_collector:nn { #1 }{ #2 }
       }
     % title typeset
@@ -1292,6 +1386,8 @@
         \__zsect_title_type_spec:nn { page }
           { \hspace{0pt}\newpage }
       }
+    % clear previous variables
+    \tl_clear:N \l__zsect_title_pagestyle_tl
   }
 \cs_new:Npn \__zsect_title_bookmark_add:n #1
   {
@@ -1359,8 +1455,8 @@
     \bool_if:NT \l__zsect_title_num_show_bool
       {
         {
-          \l__zsect_title_num_before_tl 
-          \l__zsect_title_num_format_tl 
+          \l__zsect_title_num_before_tl
+          \l__zsect_title_num_format_tl
           \l__zsect_title_num_format_p_tl 
             \zsect@num
           \l__zsect_title_num_after_tl 

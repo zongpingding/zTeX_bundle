@@ -1,4 +1,4 @@
-\ProvidesExplFile{ztex.module.thm.tex}{2025/07/06}{1.0.1}{thm~module~for~ztex}
+\ProvidesExplFile{ztex.module.thm.tex}{2025/08/20}{1.0.1}{thm~module~for~ztex}
 
 
 %%%%%     thm module for ztex     %%%%%
@@ -183,8 +183,8 @@
     #1 / preamble .code:n    = { 
       % NOTE:
       % 1. thm preamble can be only set by one style
-      % 2. '\cs{g__ztex_thm_style_tl}' need to be set 
-      %       before '\cs{ztexloadlib}\{theme\}'
+      % 2. '\g__ztex_thm_style_tl' need to be set 
+      %       before '\ztexloadlib{theme}'
       \tl_if_eq:cnT {g__ztex_thm_style_tl}
         { #1 }{ ##1 }
     },
@@ -410,6 +410,7 @@
   }
 \cs_new:Npn \zthm_add_toc_line:nnnn #1#2#3#4 
   {
+    \zsect_unexpand_protect:
     \bool_if:NT \g_lom_write_enable_bool 
       {
         \iow_now:Ne \g_ztoc_lom_iow
@@ -418,6 +419,7 @@
             \c_percent_str
           }
       }
+    \zsect_restore_protect:
   }
 \cs_generate_variant:Nn \zthm_add_toc_line:nnnn { eeee, eeoe, nnee, nnoe }
 \ztex_keys_define:nn { thm/add }

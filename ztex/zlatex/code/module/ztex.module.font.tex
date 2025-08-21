@@ -1,4 +1,4 @@
-\ProvidesExplFile{ztex.module.font.tex}{2025/07/10}{1.0.1}{font~module~for~ztex}
+\ProvidesExplFile{ztex.module.font.tex}{2025/08/13}{1.0.1}{font~module~for~ztex}
 
 
 %%%%%     font module for ztex     %%%%%
@@ -11,7 +11,7 @@
     \ztex_keys_set:nn { font }{#1}
   }
 \NewDocumentCommand{\zfontset}{m}
-  { 
+  {
     \ztex_font_set:n {#1}
   }
 % reset text font to the default computer modern
@@ -42,7 +42,6 @@
 % 2. MOST CJK fonts' features are not equal to english fonts.
 \ztex_keys_define:nn { fontcfg / new }
   {
-    cmd      .tl_set:N  = \l__ztex_fontcfg_new_cmd_tl,
     name     .tl_set:N  = \l__ztex_fontcfg_new_name_tl, % font name / file name
     path     .tl_set:N  = \l__ztex_fontcfg_new_path_tl,
     path     .initial:n = { },
@@ -71,25 +70,36 @@
     feat / bdsl            .tl_set:N   = \l__ztex_fontcfg_new_bdsl_tl,
     feat / BoldSlantedFont .meta:n     = { feat / bdsl = #1 },
     feat / bdsl            .initial:n  = { * }, % *-boldslant
+    feat / other           .tl_set:N   = \l__ztex_fontcfg_new_other_tl,
+    feat / other           .initial:n  = {  },  % other fontspec config
   }
 
 \ztex_msg_set:nn { fontcfg / lang }{ Current~font~type~supported~are:'en',~'CJK'. }
 \cs_set:Npn \__ztex_fontcfg_newfamily_copy:nnnnn #1#2#3#4#5 
-  {% #1:font family; #2:font file path(format 'Path=xxx,'); 
-  %  #3:font file name; #4:font feat;  #5:en/CJK
+  {% #1:font cmd; #2:font file path(format 'Path=xxx,'); 
+   % #3:font file name; #4:font feat;  #5:en/CJK
     \str_case:nnF {#5}
       {
         {en}{
-          \exp_args:Ne \setfontfamily{\use:c {zfont@#1}}{#3}[#2 #4]
-          \exp_args:Ne \NewDocumentCommand { \use:c {#1} }{}
+          \exp_args:Nc \setfontfamily{zfont@#1}{#3}[#2 #4]
+          \exp_args:Nc \NewDocumentCommand { #1 }{}
             {
               \use:c {zfont@#1}
             }
         }
         {CJK}{
           \setCJKfamilyfont{zfont@#1}{#3}[#2 #4]
-          \exp_args:Ne \NewDocumentCommand { \use:c {#1} }{}
+          \exp_args:Nc \NewDocumentCommand { #1 }{}
             {
+              \CJKfamily{zfont@#1}
+            }
+        }
+        {en/CJK}{
+          \setCJKfamilyfont{zfont@#1}{#3}[#2 #4]
+          \exp_args:Nc \setfontfamily{zfont@#1}{#3}[#2 #4]
+          \exp_args:Nc \NewDocumentCommand { #1 }{}
+            {
+              \use:c {zfont@#1}
               \CJKfamily{zfont@#1}
             }
         }
@@ -98,11 +108,11 @@
       }
   }
 \cs_generate_variant:Nn \__ztex_fontcfg_newfamily_copy:nnnnn {ooooo}
-\cs_new_protected:Npn \__ztex_sysfont_new:nn #1#2
-  {% #1:en/cn; #2:key-value(font cfg args)
-    \ztex_keys_set:nn { fontcfg / new } {#2}
+\cs_new_protected:Npn \__ztex_sysfont_new:nnn #1#2#3
+  {% #1:en/cn; #2:cmd; #3:key-value(font cfg args)
+    \ztex_keys_set:nn { fontcfg / new } {#3}
     \__ztex_fontcfg_newfamily_copy:ooooo 
-      { \l__ztex_fontcfg_new_cmd_tl  }
+      { #2 }
       { 
         \tl_if_empty:VF \l__ztex_fontcfg_new_path_tl 
           { Path=\l__ztex_fontcfg_new_path_tl, }
@@ -118,6 +128,7 @@
         SmallCapsFont   = \l__ztex_fontcfg_new_sc_tl,
         BoldItalicFont  = \l__ztex_fontcfg_new_bdit_tl,
         BoldSlantedFont = \l__ztex_fontcfg_new_bdsl_tl,
+        \l__ztex_fontcfg_new_other_tl % other fontspec config
       }{ #1 }
     % Reset key value, '\cs{group_end:}' conflict with '\cs{newfontfamily}',
     % See also: https://tex.stackexchange.com/q/729765/294585.
@@ -132,25 +143,28 @@
         feat / sc   = *,
         feat / bdsl = *,
         feat / bdit = *,
+        feat / other = ,
       }
   }
 \bool_if:NTF \g__ztex_sysfont_cfg_bool
   {
-    \__ztex_sysfont_new:nn {en}
+    \__ztex_sysfont_new:nnn {en}{cinzel}
       {
-        cmd  = cinzel,
         name = Cinzel-Regular.ttf,
         feat / bd   = Cinzel-Bold,
         feat / it   = ParsiMatn-Italic,
       }
   }{ \def\cinzel{\relax} }
-\NewDocumentCommand{\zfontfamilynew}{O{en}m}
+\NewDocumentCommand{\zfontfamilynew}{O{en/CJK}mm}
   {
-    \__ztex_sysfont_new:nn {#1} {#2}
+    \__ztex_sysfont_new:nnn 
+      { #1 }
+      { \cs_to_str:N #2 }
+      { #3 }
   }
 
 
-% TARGET: \cs{zfontset}\marg{en=\{main=, sans=\}, CJK=\{main=, mono=\}} 
+% TARGET: \zfontset{en={main=, sans=}, CJK={main=, mono=}}
 % Is this interface too complex ???
 \ztex_keys_define:nn { fontcfg / set }
   {
