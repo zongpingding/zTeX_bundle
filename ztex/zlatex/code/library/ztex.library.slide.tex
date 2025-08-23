@@ -1,4 +1,4 @@
-\ProvidesExplFile{ztex.library.slide.tex}{2025/07/06}{1.0.1}{slide~library~for~ztex}
+\ProvidesExplFile{ztex.library.slide.tex}{2025/08/23}{1.0.1}{slide~library~for~ztex}
 
 
 %%%%%     slide library for ztex     %%%%%
@@ -56,7 +56,7 @@
 \cs_new:Npn \__zslide_status_info_sec_coffin_typeset:n #1 
   {
     \hcoffin_gset:Nn \g__zslide_status_info_sec_text_coffin 
-      { \Large\textcolor{\tl_use:N \l__ztex_slide_sec_fg_tl}{#1} }
+      { \textcolor{\tl_use:N \l__ztex_slide_sec_fg_tl}{#1} }
     \__zslide_frame_title_info:n 
       {
         \tl_use:N \l__ztex_slide_sec_prefix_tl
@@ -328,11 +328,12 @@
 
 % ==> zslide custom interface
 % zslide users' tools
-\NewDocumentCommand{\zslideframeall}{m}{%
-  \cs_if_exist:cTF {zsec@#1@cnt}
-    {\cs:w zsec@#1@cnt\cs_end:}
-    {??}
-}
+\NewDocumentCommand{\zslideframeall}{m}
+  {
+    \cs_if_exist:cTF {zsec@#1@cnt}
+      {\cs:w zsec@#1@cnt\cs_end:}
+      {??}
+  }
 \NewDocumentCommand{\zslideframeind}{}{
   \int_use:N \g__ztex_slide_framecnt_int
 }

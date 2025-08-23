@@ -1,4 +1,4 @@
-\ProvidesExplFile{ztex.module.page.tex}{2025/08/20}{1.0.1}{page~module~for~ztex}
+\ProvidesExplFile{ztex.module.page.tex}{2025/08/23}{1.0.1}{page~module~for~ztex}
 
 
 %%%%%     page module for ztex     %%%%%
@@ -295,6 +295,15 @@
 
 
 % ==> doc info
+\gdef\@abspage@last{-1}
+\newcommand{\ztexpageall}
+  {
+    \bool_lazy_any:nTF
+      {
+        { \int_compare_p:n {\@abspage@last > 100000} }
+        { \int_compare_p:n {\@abspage@last < 0}      }
+      }{ \c_empty_tl }{ \@abspage@last }
+  }
 \ztex_hook_preamble_last:n 
   {
     \let\ztextitle\@title
