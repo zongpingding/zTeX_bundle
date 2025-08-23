@@ -1,4 +1,4 @@
-\ProvidesExplFile{ztex.module.sect.tex}{2025/08/21}{1.0.1}{sect~module~for~ztex}
+\ProvidesExplFile{ztex.module.sect.tex}{2025/08/22}{1.0.1}{sect~module~for~ztex}
 
 
 %%%%%             sect module for ztex          %%%%%
@@ -1180,7 +1180,11 @@
         {2}{ \mark_insert:nn { ztex-left} {#2} }
         {3}{ \zsect_right_mark_insert:n   {#2} }
         {4}{ \mark_insert:nn { ztex-4th } {#2} }
-      }{ \ztex_msg_error:n { mark-nonexist } }
+      }{
+        \ztex_msg_set:nn { mark-nonexist }
+          { current~title~class:'#1'~is~not~a~valid~mark~class. } 
+        \ztex_msg_error:n { mark-nonexist } 
+      }
   }
 \cs_new:Npn \zsect_right_mark_insert:n #1
   {
@@ -1190,19 +1194,36 @@
         \mark_insert:nn {ztex-right-nonempty}{#1}
       }
   }
+\cs_new:Npn \__zsect_lower_markclass_empty:n #1 
+  {
+    \prop_map_inline:Nn \c_zsect_level_prop 
+      {
+        % NOTE:only have 4 mark class at now.
+        \int_compare:nT { ##2 > 4 }
+          { \prop_map_break: }
+        \int_compare:nNnT { ##2 } >
+          { \prop_item:Nn \c_zsect_level_prop {#1}  }
+          { \zsect_mark_insert:nn {##1}{} }
+      }
+  }
 \cs_generate_variant:Nn \zsect_mark_insert:nn { Vn, ee }
+\cs_generate_variant:Nn \__zsect_lower_markclass_empty:n { V, o, e }
+\cs_new:Npn \__zsect_ltx_mark_end: 
+  { \if@nobreak\ifvmode\nobreak\fi\fi }
 \NewDocumentCommand{\zsecmarkinsert}{mm}
   {
     \zsect_mark_insert:nn {#1}{#2}
   }
 \DeclareDocumentCommand{\markright}{m}
   { 
-    \zsect_right_mark_insert:n {#1} 
+    \zsect_right_mark_insert:n {#1}
+    \__zsect_ltx_mark_end: 
   }
 \DeclareDocumentCommand{\markboth}{mm}
   { 
     \mark_insert:nn { ztex-left} {#1}
     \zsect_right_mark_insert:n {#2}
+    \__zsect_ltx_mark_end:
   }
 \IfClassLoadedTF{book}
   {
@@ -1230,7 +1251,6 @@
 \cs_set_eq:NN \ztexrightmark \zsect_robust_left_mark:
 \cs_set_eq:NN \robustleftmark  \zsect_robust_right_mark:
 \cs_set_eq:NN \robustrightmark \zsect_robust_right_mark:
-\ztex_msg_set:nn { mark-nonexist }{ current~title~class~is~not~avaliable. }
 \ztex_msg_set:nn { right-mark-empty }{ right~mark~is~empty~at~page:\thepage. }
 
 
@@ -1352,6 +1372,7 @@
     \xdef\zsect@cursec@class{\l__zsect_title_class_tl}
     % mark and toc
     \zsect_mark_insert:Vn \l__zsect_title_class_tl { #2 }
+    % \__zsect_lower_markclass_empty:V \l__zsect_title_class_tl
     \IfBooleanTF{#3}{}
       {
         % NOTE:

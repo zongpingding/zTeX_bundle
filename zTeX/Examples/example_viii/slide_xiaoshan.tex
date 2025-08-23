@@ -1,0 +1,75 @@
+% ==> 'xiaoshan' beamer theme
+\InputIfFileExists{zlatex-cfg.tex}{}{}
+\documentclass[layout={slide=true, theme=AnnArborSpruce}]{../code/ztex}
+\usepackage{pgfornament-han}
+\usepackage{lipsum}
+\zslidethemeuse[
+  UL={bg=white, text=}, 
+  UR={bg=white, text=},
+  BL={bg=white, text=},
+  BC={bg=white, text=},
+  BR={bg=white, text=\thepage/\pageref{zslide:lastpage}},  
+]{AnnArborSpruce}
+\ExplSyntaxOn\makeatletter
+\zsecformat\subsection
+  {
+    explicit = true,
+    code     = {
+      \vskip.5em\relax
+      \par\noindent
+      {\bfseries #1\kern2pt\relax #2}
+      \par\vskip.5em\relax
+    },
+  }
+% dim config
+\dim_gset:Nn \g_zslide_status_info_sec_C_dim {-1em}
+\dim_gset:Nn \g_zslide_status_bar_sec_B_dim  {-2em}
+\dim_gset:Nn \g_zslide_status_info_head_C_dim {-2.25em}
+\dim_gset:Nn \g_zslide_status_info_foot_C_dim { -\zph+0.75em }
+% navigator
+\AddToHook{shipout/foreground}
+  {
+    \zslide_status_info:nnnn {head}{0}{1}
+      {
+        { \color{green!25!gray}\rule[-3pt]{\paperwidth}{.51em} }
+        \kern-\paperwidth\relax
+        { 
+          \exp_args:Ne \__status_ornament_single:nn 
+            {\paperwidth/\tl_if_empty:NTF \ztexpageall{1}{(\ztexpageall-1)}*\thepage}
+            {teal!60!black}
+        }
+      }
+  }
+\cs_set:Npn \__status_ornament_single:nn #1#2
+  {
+    \hbox_to_wd:nn { \dim_eval:n { #1 } }
+      {
+        \leaders\hbox{\pgfornamenthan[color=#2, scale=0.05]{39}}
+          \hfill
+      }
+  }
+\makeatother\ExplSyntaxOff
+
+
+\title{xiaoshan beamer theme}
+\author{Eureka}
+\date{\today}
+\begin{document}
+\maketitle
+
+
+\section{Fisrt Section}
+\lipsum[1][1-3]
+
+\section{Second Section}
+\lipsum[1][1-3]
+
+\section{Third Section}
+\subsection{First subsection}
+\lipsum[2][1-4]
+
+\section{Fourth Section}
+\lipsum[3][1-4]
+\subsection{Second subsection}
+\lipsum[3][1-4]
+\end{document}
