@@ -1,5 +1,5 @@
 \ProvidesExplFile{ztex.module.sect.tex}
-  {2025/09/10}{\ztex@versi@n}
+  {2025/09/11}{\ztex@versi@n}
   {sect~module~for~ztex}
 
 
@@ -1730,6 +1730,7 @@
 \NewDocumentCommand{\zlocaltoc}{O{\jobname}mm}
   {
     \ztoc_save_main_table:n { #1 }
+    \ztoc_table_typeset_before:
       \edef\zlocaltoc@curext
         { 
           \exp_args:NNe \prop_item:Nn \c_ztoc_table_types_prop 
@@ -1744,9 +1745,10 @@
             { #2 }{ ##1 }
             { g_ztoc_keyval\zlocaltoc@curext _seq }
             { g_ztoc_local \zlocaltoc@curext _seq }
-          \ztoc_table_typeset:cn
+          \seq_use:cn
             { g_ztoc_local\zlocaltoc@curext _seq } 
             {  }
+          \ztoc_table_typeset_after:
         }
       \cs_undefine:N \zlocaltoc@curext
     \ztoc_restore_main_table:n { #1 }
