@@ -1,4 +1,6 @@
-\ProvidesExplFile{ztool.library.zdraw.tex}{2025/07/08}{1.0.1}{zdraw~library~for~ztool}
+\ProvidesExplFile{ztool.library.zdraw.tex}
+  {2025/09/06}{1.0.1} 
+  {zdraw~library~for~ztool}
 
 
 % ==> ztool draw (based on package 'pict2e' and 'picture' env)
@@ -11,8 +13,10 @@
   { \end{picture} }
 \cs_new:Npn \__@@_pic_put:nnn #1#2#3 
   { \put(\fp_eval:n {#1}, \fp_eval:n {#2}){ #3 } }
-\cs_generate_variant:Nn \_@@_begin_picture:nnnn { VVVV, eeee }
-\cs_generate_variant:Nn \__@@_pic_put:nnn { VVV, een }
+\cs_generate_variant:Nn \_@@_begin_picture:nnnn 
+  { VVVV, eeee }
+\cs_generate_variant:Nn \__@@_pic_put:nnn 
+  { VVV, een }
 
 % picture environment alias
 \keys_define:nn { ztool / draw / picture }
@@ -87,7 +91,8 @@
   }
 \prg_generate_conditional_variant:Nnn \__color_if_valid:n 
   { V, e }{ p, T, F, TF }
-\cs_generate_variant:Nn \__color_safe_use:n { V, e }
+\cs_generate_variant:Nn \__color_safe_use:n 
+  { V, e }
 
 
 % --> line/vector
@@ -95,12 +100,12 @@
 \fp_new:N \l__draw_vector_normal_fp
 \fp_new:N \l__draw_vector_xysep_fp
 \cs_new:Npn \__@@_pic_line:nnn #1#2#3
-  {% #1:$x$; #2:$y$; #3:$x$-distance NOT the length
+  {% #1:x; #2:y; #3:x-distance NOT the length
     \line(\fp_eval:n {#1}, \fp_eval:n {#2})
       { \fp_eval:n {#3} }
   }
 \cs_new:Npn \__@@_pic_vector:nnn #1#2#3
-  {% #1:$x$; #2:$y$; #3:$x$-distance NOT the length
+  {% #1:x; #2:y; #3:x-distance NOT the length
     \vector(\fp_eval:n {#1}, \fp_eval:n {#2})
       { \fp_eval:n {#3} }
   }
@@ -204,13 +209,13 @@
   }
 
 
-% --> \cs{zdraw} -- similar to \cs{tikz} command in tikz
+% --> \zdraw -- similar to \tikz command in tikz
 % NOTE: these line/vector commands are identical to
-%  1. \cs{Line} $(x_1, y_1)(x_2, y_2)$,        \cs{Vector}$(x_1,y_1)(x_2,y_2)$
-%  2. \cs{polyline} $(x_1, y_1) \cdots (x_n, y_n)$, \cs{polyvector}$(x_1, y_1) \cdots (x_n, y_n)$
-%  3. \cs{polygon} $(x_1, y_1) \cdots (x_n, y_n)$, when set 'cycle', 
-%     \cs{polygon}*$(x_1, y_1) \cdots (x_n, y_n)$, when set 'fill' (auto cycle).
-%  4. Trim leading space after '\cs{polygon}' or '*' to avoid error !!
+%  1. \Line (x_1, y_1)(x_2, y_2),         \Vector (x_1,y_1)(x_2,y_2)
+%  2. \polyline(x_1, y_1) ... (x_n, y_n), \polyvector(x_1, y_1) ... (x_n, y_n)
+%  3. \polygon (x_1, y_1) ... (x_n, y_n), when set 'cycle', 
+%     \polygon*(x_1, y_1) ... (x_n, y_n), when set 'fill' (auto cycle).
+%  4. Trim leading space after '\polygon' or '*' to avoid error !!
 \cs_new:Npn \__@@_pic_Line:nnnn #1#2#3#4
   { \Line (#1, #2)(#3, #4) }
 \cs_new:Npn \__@@_pic_Vector:nnnn #1#2#3#4
@@ -368,7 +373,8 @@
     \__region_fill_color_miss:n { gray }
     \__color_if_valid:VF \l__pic_region_fill_color_tl
       { \bool_set_false:N \l__pic_region_fill_bool }
-    \exp_last_unbraced:Ne \__@@_pic_put:nnn {\__coor_st_nd:n {#2}}
+    \exp_last_unbraced:Ne \__@@_pic_put:nnn 
+      { \__coor_st_nd:n {#2} }
       {
         \__pic_set_line_width:
         \bool_if:eT \l__pic_region_fill_bool
@@ -399,8 +405,8 @@
 
 
 % --> oval / rectangle
-% \cs{oval}\oarg{arc}\parg{full-$x$-width, full-$y$-width}\oarg{part}
-% part: (l, r) $\times$ (t, b) 
+% \oval[arc](full-x-width, full-y-width)[part]
+% part: (l, r) x (t, b) 
 \cs_new:Npn \__@@_pic_oval:nnnn #1#2#3#4
   {% #1:arc; #2:part; #3:x-width; #4:y-width;
     \oval 
@@ -453,7 +459,8 @@
       }{
         \int_incr:N \l__pic_rec_quadrant_index_int
         \edef\qu@drant@index{\int_use:N \l__pic_rec_quadrant_index_int}
-        \exp_last_unbraced:Ne \__@@_pic_put:nnn {\__coor_st_nd:n {##1}}
+        \exp_last_unbraced:Ne \__@@_pic_put:nnn 
+          { \__coor_st_nd:n {##1} }
           {
             \__color_safe_use:V \l__pic_opacity_color_tl 
             \__@@_pic_arc:nnnn {*}
@@ -466,7 +473,9 @@
       }
     %% end fill rounded rectangle
     \prg_break_point:Nn \l__ztool_pic_rec_fill { }
-    \__@@_pic_put:nnn {\__coor_st:n {#2}+\rec@width/2}{\__coor_nd:n {#2}+\rec@height/2}
+    \__@@_pic_put:nnn
+      { \__coor_st:n {#2}+\rec@width/2  }
+      { \__coor_nd:n {#2}+\rec@height/2 }
       { 
         \__pic_set_line_color:
         \__pic_set_line_width:

@@ -1,6 +1,5 @@
 % ==> 'xiaoshan' beamer theme
-\InputIfFileExists{zlatex-cfg.tex}{}{}
-\documentclass[layout={slide=true, theme=AnnArborSpruce}]{../code/ztex}
+\documentclass[layout={slide=true, theme=AnnArborSpruce}]{ztex}
 \usepackage{pgfornament-han}
 \usepackage{lipsum}
 \zslidethemeuse[
@@ -17,7 +16,7 @@
     code     = {
       \vskip.5em\relax
       \par\noindent
-      {\bfseries #1\kern2pt\relax #2}
+      {\bfseries \zsecnum\kern2pt\relax \zsecname}
       \par\vskip.5em\relax
     },
   }

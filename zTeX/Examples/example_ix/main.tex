@@ -1,0 +1,32 @@
+\documentclass[lang=cn, class=book]{ztex}
+\ztexloadlib{alias}
+\usepackage{lettrine}
+
+\setmainfont{EBGaramond-Regular.ttf}[
+  Path=fonts/,
+  BoldFont=EBGaramond-Bold.ttf,
+  ItalicFont=EBGaramond-Italic.ttf
+]
+\usepackage[math-style=ISO, bold-style=ISO]{unicode-math}
+\setmathfont{Garamond-Math.otf}[StylisticSet={7,9}]
+
+\zsecformat\chapter
+  {
+    title.format=\scshape\centering\huge,
+    num.format=,
+    num.after=\par,
+    num.before={Chapter\kern10pt},
+    format.name=, 
+  }
+\pagestyle{fancy}
+
+
+\begin{document}
+\chapter{Locally Compact Space}
+\thispagestyle{plain}
+\lettrine{I}{n} the Bourbaki's point of view, the only measure that worth to investigate should be 
+defined as a Functional (continuous linear form) over $\mathscr{K}(X, \mathbb{R})$ (space of 
+continuous function with compact support) , and in order to obtain sufficient many of continuous 
+function with compact support, $X$ shoulde quipped with some property, Locally compact 
+will satisfied with this request. 
+\end{document}

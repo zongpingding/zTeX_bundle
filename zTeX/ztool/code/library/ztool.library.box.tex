@@ -1,4 +1,6 @@
-\ProvidesExplFile{ztool.library.box.tex}{2025/05/21}{1.0.1}{box~library~for~ztool}
+\ProvidesExplFile{ztool.library.box.tex}
+  {2025/09/06}{1.0.1}
+  {box~library~for~ztool}
 
 
 % ==> box manipulation tool 
@@ -6,16 +8,18 @@
   { \ifvmode \leavevmode \fi }
 % catch box dimension
 \box_new:N \l_ztool_measure_box
-\cs_new:Npn \ztool_box_set_to:NNn #1#2#3 {
-  \hbox_set:Nn \l_ztool_measure_box {#3}
-  \dim_set:Nn #2 {#1 \l_ztool_measure_box}
-  \box_set_eq:NN \l_ztool_measure_box \c_empty_box
-}
-\cs_new:Npn \ztool_box_gset_to:NNn #1#2#3 {
-  \hbox_set:Nn \l_ztool_measure_box {#3}
-  \dim_gset:Nn #2 {#1 \l_ztool_measure_box}
-  \box_set_eq:NN \l_ztool_measure_box \c_empty_box
-}
+\cs_new:Npn \ztool_box_set_to:NNn #1#2#3 
+  {
+    \hbox_set:Nn \l_ztool_measure_box {#3}
+    \dim_set:Nn #2 {#1 \l_ztool_measure_box}
+    \box_set_eq:NN \l_ztool_measure_box \c_empty_box
+  }
+\cs_new:Npn \ztool_box_gset_to:NNn #1#2#3 
+  {
+    \hbox_set:Nn \l_ztool_measure_box {#3}
+    \dim_gset:Nn #2 {#1 \l_ztool_measure_box}
+    \box_set_eq:NN \l_ztool_measure_box \c_empty_box
+  }
 \cs_new:Npn \ztool_get_ht:Nn 
   { \ztool_box_set_to:NNn \box_ht:N }
 \cs_new:Npn \ztool_get_ht_plus_dp:Nn 
@@ -30,11 +34,16 @@
   { \ztool_box_gset_to:NNn \box_wd:N }
 \cs_new:Npn \ztool_gget_dp:Nn  
   { \ztool_box_gset_to:NNn \box_dp:N }
-\cs_generate_variant:Nn \ztool_get_ht:Nn  { Ne, ce }
-\cs_generate_variant:Nn \ztool_get_ht_plus_dp:Nn  { Ne, ce }
-\cs_generate_variant:Nn \ztool_get_wd:Nn  { Ne, ce }
-\cs_generate_variant:Nn \ztool_gget_ht:Nn { Ne, ce }
-\cs_generate_variant:Nn \ztool_gget_wd:Nn { Ne, ce }
+\cs_generate_variant:Nn \ztool_get_ht:Nn  
+  { Ne, ce }
+\cs_generate_variant:Nn \ztool_get_ht_plus_dp:Nn  
+  { Ne, ce }
+\cs_generate_variant:Nn \ztool_get_wd:Nn  
+  { Ne, ce }
+\cs_generate_variant:Nn \ztool_gget_ht:Nn 
+  { Ne, ce }
+\cs_generate_variant:Nn \ztool_gget_wd:Nn 
+  { Ne, ce }
 
 
 %% modify box content
@@ -53,12 +62,13 @@
     \__ztool_leave_vmode:
     \box_use:N \l_tmpa_box
   }
-\cs_generate_variant:Nn \ztool_rotate:nn { e, ne, ee }
-\cs_generate_variant:Nn \ztool_autoset_to_wd_and_ht:nnn { nne, een, eee }
+\cs_generate_variant:Nn \ztool_rotate:nn 
+  { e, ne, ee }
+\cs_generate_variant:Nn \ztool_autoset_to_wd_and_ht:nnn 
+  { nne, een, eee }
 
 % 2. width/height scale to same time
 % TODO: if '\dim(content) < dim', spread it to 'dim'.
-% \ztool_set_to_wd:nn {\l__zsect_title_num_dim}{\zsect@num}
 \cs_new_protected:Npn \ztool_set_to_wd:nn #1#2
   {% #1:width; #2:object
     \hbox_set:Nn \l_tmpa_box {#2}
@@ -77,7 +87,7 @@
 \cs_generate_variant:Nn \ztool_set_to_ht:nn { e, ne, ee }
 
 % 3. only scale one dimension
-% NOTE: if boxwd{content} $\le$ given dim, no manipulation
+% NOTE: if boxwd{content} <= given dim, no manipulation
 \cs_new_protected:Npn \ztool_scale_to_wd:nn #1#2
   {
     \hbox_set:Nn \l_tmpa_box {#2}
@@ -119,9 +129,12 @@
     \__ztool_leave_vmode:
     \box_use:N \l_tmpa_box
   }
-\cs_generate_variant:Nn \ztool_scale_to_wd:nn { e, ne, ee }
-\cs_generate_variant:Nn \ztool_scale_to_ht:nn { e, ne, ee }
-\cs_generate_variant:Nn \ztool_scale_to_wd_and_ht:nnn { nne, nno, eee }
+\cs_generate_variant:Nn \ztool_scale_to_wd:nn 
+  { e, ne, ee }
+\cs_generate_variant:Nn \ztool_scale_to_ht:nn 
+  { e, ne, ee }
+\cs_generate_variant:Nn \ztool_scale_to_wd_and_ht:nnn 
+  { nne, nno, eee }
 
 
 %% box content align
@@ -131,7 +144,8 @@
     \hb@xt@#2{
       \tl_map_inline:nn {#3} 
         {
-          \seq_put_right:No \l__ztool_boxitem_seq {\exp_not:N #1{##1}}
+          \seq_put_right:No \l__ztool_boxitem_seq 
+            { \exp_not:N #1{##1} }
         } 
       \str_case:nnF { #4 }
         {
@@ -161,7 +175,8 @@
     }
     \seq_clear:N \l__ztool_boxitem_seq
   }
-\cs_generate_variant:Nn \ztool_box_item_align:Nnnn { c, Nnno, cnno, Nne, Nnee }
+\cs_generate_variant:Nn \ztool_box_item_align:Nnnn 
+  { c, Nnno, cnno, Nne, Nnee }
 
 
 %% affine transformation
@@ -174,7 +189,7 @@
   {
     \fp_eval:n { #1*#4 - #2*#3 }
   }
-% (translation) + $x$-scale + $y$-scale + rotate
+% (translation) + x-scale + y-scale + rotate
 \fp_new:N \g_affine_precision_fp
 \fp_set:Nn \g_affine_precision_fp {0.0001}
 \fp_new:N \l__affine_@@_a_fp
@@ -203,10 +218,13 @@
     \__box_affine_transform:N #1
     \prg_break_point:Nn \l__affine_matrix_det_zero { }
     \coffin_typeset:Nxxxx \l__affine_trans_coffin 
-      { \l__ztool_affine_pole_a_tl }{ \l__ztool_affine_pole_b_tl }
-      { \l__ztool_affine_xoffset_dim }{ \l__ztool_affine_yoffset_dim }
+      { \l__ztool_affine_pole_a_tl }
+      { \l__ztool_affine_pole_b_tl }
+      { \l__ztool_affine_xoffset_dim }
+      { \l__ztool_affine_yoffset_dim }
   }
-\cs_generate_variant:Nn \ztool_affine_transformation:Nnnnn { Neeee, cnnnn, ceeee }
+\cs_generate_variant:Nn \ztool_affine_transformation:Nnnnn 
+  { Neeee, cnnnn, ceeee }
 \cs_new:Npn \__box_affine_transform:N #1
   {
     % transform debug
@@ -265,7 +283,7 @@
 \cs_new:Nn \__ztool_affine_debug_fp:N
   {
     \bool_if:NTF \g_ztool_affine_debug_bool 
-      { \string #1 % \cs{show} #1
+      { \string #1 % \show #1
         ~=~\fp_use:N #1\\
       }{ \relax } 
   }

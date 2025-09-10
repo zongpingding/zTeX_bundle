@@ -1,3 +1,16 @@
+% ==> sect options
+\ztex_keys_define:nn { sect }{
+  load          .bool_gset:N  = \g__ztex_sect_load_bool,
+  load          .initial:n    = { true },
+  load          .usage:n      = load,
+  style         .tl_gset:N    = \g__zsect_title_style_tl,
+  style         .initial:n    = { ltx },
+  dump-ptable   .bool_gset:N  = \g__zsect_dump_ptable_bool,
+  dump-ptable   .initial:n    = { false },
+  dump-ptable   .usage:n      = load,
+}
+
+
 % ==> font options
 \ztex_keys_define:nn { font }{
   sysfont         .bool_gset:N  = \g__ztex_sysfont_cfg_bool,

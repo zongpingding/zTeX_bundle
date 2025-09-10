@@ -1,4 +1,6 @@
-\ProvidesExplFile{ztex.counter.ref.tex}{2025/07/05}{1.0.1}{counter~module~for~ztex}
+\ProvidesExplFile{ztex.counter.ref.tex}
+  {2025/09/07}{\ztex@versi@n}
+  {counter~module~for~ztex}
 
 
 %%%%%     counter module for ztex     %%%%%
@@ -9,3 +11,13 @@
 % \setcounter{secnumdepth}{3}
 \setcounter{tocdepth}{3}
 \counterwithin{equation}{section}
+
+
+% ==> counter form
+\cs_new:Npn \zcnt_to_arabic:N #1 
+  {
+    \exp_after:wN \def \cs:w the#1 \cs_end:
+      { \exp_args:Ne \arabic{#1} }
+  }
+\cs_generate_variant:Nn \zcnt_to_arabic:N { c }
+
