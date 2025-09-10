@@ -1,4 +1,6 @@
-\ProvidesExplFile{ztex.module.page.tex}{2025/08/23}{1.0.1}{page~module~for~ztex}
+\ProvidesExplFile{ztex.module.page.tex}
+  {2025/08/23}{\ztex@versi@n}
+  {page~module~for~ztex}
 
 
 %%%%%     page module for ztex     %%%%%
@@ -178,11 +180,21 @@
             \fancyhead[R]{\ztexrightmark}
           }{
             \fancyhead[L]{\thepage}
-            \fancyhead[R]
+            \bool_if:NTF \g__ztex_sect_load_bool
               {
-                \IfMarksEqualTF{ztex-left}{first}{last}
-                  { \FirstMark{ztex-left} }
-                  { \FirstMark{ztex-left} \;\(\Rightarrow\)\; \LastMark{ztex-left} }
+                \fancyhead[R]
+                  {
+                    \IfMarksEqualTF{ztex-left}{first}{last}
+                      { \FirstMark{ztex-left} }
+                      { \FirstMark{ztex-left} \;\(\Rightarrow\)\; \LastMark{ztex-left} }
+                  }
+              }{
+                \fancyhead[R]
+                  {
+                    \IfMarksEqualTF{2e-left}{first}{last}
+                      { \FirstMark{2e-left} }
+                      { \FirstMark{2e-left} \;\(\Rightarrow\)\; \LastMark{2e-left} }
+                  }
               }
           }
         \fi

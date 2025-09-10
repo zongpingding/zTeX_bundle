@@ -1,4 +1,6 @@
-\ProvidesExplFile{ztex.library.alias.tex}{2025/07/13}{1.0.1}{alias~library~for~ztex}
+\ProvidesExplFile{ztex.library.alias.tex}
+  {2025/08/29}{\ztex@versi@n}
+  {alias~library~for~ztex}
 
 
 %%%%%     alias library for ztex     %%%%%
@@ -20,7 +22,6 @@
   {
     \ztex_msg_warn:n { expl-too-old@alias }
     % \msg_fatal:nn { ztex } { expl-too-old@alias }
-    % \ExplSyntaxOff
     % \file_input_stop:
   }
 
@@ -507,9 +508,8 @@
 
 
 % ==> check the minimum requirement for matrix alias
-\cs_if_exist:NTF \int_step_tokens:nn
-  { \if_true:  }
-  { \if_false: }
+\cs_if_exist:NF \int_step_tokens:nn
+  { \file_input_stop: }
 
 % '\imat', '\admat' and '\zmat'
 \cs_new:Npn \zalias_diag_mat_data:nnnn #1#2#3#4 
@@ -702,7 +702,3 @@
     \rangle
   }
 \ztex_mathalias_set:nn { gmat }{ z@gmat }
-
-
-% end of '\int_step_tokens:nn' check
-\fi:

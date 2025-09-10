@@ -1,4 +1,6 @@
-\ProvidesExplFile{ztex.library.fancy.tex}{2025/07/10}{1.0.1}{fancy~library~for~ztex}
+\ProvidesExplFile{ztex.library.fancy.tex}
+  {2025/07/10}{\ztex@versi@n}
+  {fancy~library~for~ztex}
 
 
 %%%%%     fancy library for ztex     %%%%%
@@ -45,7 +47,7 @@
         \node[anchor=south~ west, inner~ sep=0pt,
               yshift=1.25em, xshift=.25em,
               font=\cinzel\Huge\bfseries, color=zchapColor
-          ] at (stripES) {#2};
+          ] at (stripES) {\zsecname};
         % parbox insert
         \node[anchor=north~ west, inner~ sep=0pt] at ($(stripES)+(-5em, -1em)$)
           {

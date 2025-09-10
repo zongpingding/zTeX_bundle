@@ -1,4 +1,6 @@
-\ProvidesExplFile{ztex.library.slide.tex}{2025/08/23}{1.0.1}{slide~library~for~ztex}
+\ProvidesExplFile{ztex.library.slide.tex}
+  {2025/09/10}{\ztex@versi@n}
+  {slide~library~for~ztex}
 
 
 %%%%%     slide library for ztex     %%%%%
@@ -112,7 +114,7 @@
   {
     explicit = true,
     code     = {
-      \__zslide_status_info_sec_coffin_typeset:o { \Large #2 }
+      \__zslide_status_info_sec_coffin_typeset:o { \Large\zsecname }
       \bool_gset_true:N \g_new_sec_bool
       \int_gset:Nn \g__ztex_slide_framecnt_int {1}
       \vspace*{.7em}
@@ -371,11 +373,14 @@
 \@onlypreamble\zslidelogo
 
 \clist_map_inline:nn { chapter, section, subsection }{
-  \exp_args:Nc \ztocformat { #1 }
+  \clist_if_in:NnT \c_zsect_level_clist { #1 }
     {
-      name.before = \tl_use:c  { l__ztex_slide_toc_label_#1_tl },
-      title.after = \tl_use:c  { l__ztex_slide_toc_suffix_#1_tl },
-      space.left  = \dim_use:c { l__ztex_slide_toc_leftmargin_#1_dim },
+      \exp_args:Nc \ztocformat { #1 }
+        {
+          name.before = \tl_use:c  { l__ztex_slide_toc_label_#1_tl },
+          title.after = \tl_use:c  { l__ztex_slide_toc_suffix_#1_tl },
+          space.left  = \dim_use:c { l__ztex_slide_toc_leftmargin_#1_dim },
+        }
     }
 }
 \gdef\zslidetoc@sicon

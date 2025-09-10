@@ -30,13 +30,16 @@
 % and the libraries: ztex.library.alias.tex,                                  %
 %                    ztex.library.slide.tex,                                  %
 %                    ztex.library.thm.tex,                                    %
+%                    ztex.library.primitive.tex,                              %
 %                    ztex.library.fancy.tex.                                  %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \ExplSyntaxOn
 \NeedsTeXFormat{LaTeX2e}
+\def\ztex@d@te{2025/09/10}
+\def\ztex@versi@n{1.0.1}
 \tl_const:Nn \c__ztex_class_name_tl           {ztex}
-\tl_const:Nn \c__ztex_class_version_tl        {1.0.1}
-\tl_const:Nn \c__ztex_class_date_tl           {2025/07/14}
+\tl_const:Nn \c__ztex_class_version_tl        {\ztex@versi@n}
+\tl_const:Nn \c__ztex_class_date_tl           {2025/09/04}
 \clist_const:Nn \c__ztex_lang_support_clist   {en, cn}
 \tl_const:Nn    \c__ztex_class_description_tl  
   {
@@ -93,13 +96,25 @@
 % ztex hook interface
 \RequirePackage[box]{ztool}
 \cs_new_protected:Npn \ztex_hook_preamble_last:n #1
-  { \AddToHook{env/document/before}{#1} }
+  { 
+    \hook_gput_code:nnn {env/document/before}
+      {ztex/preamble/last}{#1}
+  }
 \cs_new_protected:Npn \ztex_label_hook_preamble_last:nn #1#2
-  { \AddToHook{env/document/before}[#1]{#2} }
+  {
+    \hook_gput_code:nnn {env/document/before}
+      {#1}{#2}
+  }
 \cs_new_protected:Npn \ztex_hook_doc_begin:n #1
-  { \AddToHook{begindocument}{#1} }
+  {
+    \hook_gput_code:nnn {begindocument}
+      {ztex/doc/begin}{#1}
+  }
 \cs_new_protected:Npn \ztex_hook_doc_end:n #1
-  { \AddToHook{enddocument}{#1} }
+  {
+    \hook_gput_code:nnn {enddocument}
+      {ztex/doc/end}{#1}
+  }
 
 % ztex key-value setup interface
 \cs_new_protected:Npn \ztex_option_keys_define:n
@@ -184,9 +199,6 @@
   lang            .str_gset:N   = \g__ztex_lang_str,
   lang            .initial:n    = { en },
   lang            .usage:n      = load,
-  sect-load       .bool_gset:N  = \g__ztex_sect_load_bool,
-  sect-load       .initial:n    = { true },
-  sect-load       .usage:n      = load,
   hyper           .bool_gset:N  = \g__ztex_hyperref_bool,
   hyper           .initial:n    = { false },
   hyper           .usage:n      = load,
@@ -212,11 +224,13 @@
   },
   packageOption   .usage:n      = load,
   % ztex options meta key
-  font            .meta:nn      = { ztex / font }{#1},
-  layout          .meta:nn      = { ztex / layout }{#1},
+  sect            .meta:nn      = { ztex / sect }{#1},
+  sect            .usage:n      = load,
+  font            .meta:nn      = { ztex / font  }{#1},
+  layout          .meta:nn      = { ztex / layout}{#1},
   layout          .usage:n      = load,
   mathSpec        .meta:nn      = { ztex / mathSpec }{#1},
-  bib_index       .meta:nn      = { ztex / bib_index }{#1},
+  bib_index       .meta:nn      = { ztex / bib_index}{#1},
   unknown         .code:n       = { 
     \ztex_msg_warn:n {option-unknown} 
   }
@@ -224,9 +238,13 @@
 % sub(meta) key implementation
 \file_if_exist_input:nF { ztex.options.tex }
   { \ztex_msg_fatal:n { metakey@file@missing } }
-% option setup
+
+% ztex options setup
 \ProcessKeyOptions [ ztex ]
-\NewDocumentCommand{\ztexset}{m}{ \keys_set:nn {ztex}{#1} }
+\NewDocumentCommand{\ztexset}{m}
+  { 
+    \keys_set:nn {ztex}{#1} 
+  }
 \newcommand{\ztexoption}
   {
     \str_use:N \g__ztex_lang_str {~,~}
@@ -400,10 +418,29 @@
           } \kern-0.3423ex\hbox{\TeX}
       }
   }
-\let\ztex\zTeX 
-\let\zLaTeX\zTeX
-\let\zlatex\zTeX
+\NewDocumentCommand\zLaTeX{s}
+  {
+    \IfBooleanTF{#1}
+    {
+      \__ztool_leave_vmode:
+      \raise0.1ex\hbox{z}
+      \kern-0.3ex\hbox{\LaTeX}
+    }{
+      L\kern -.375em
+        {
+          \lower-.4ex \hbox {
+            \ztool_scale_to_wd_and_ht:nnn 
+              {.9ex}{1.3ex}
+              {
+                \ztool_rotate:nn {88}{\(\aleph\)}
+              }
+          }
+        } \kern -.05em\TeX
+    }
+  }
+\let\ztex\zTeX
+\let\zlatex\zLaTeX
 \protected\def\HoLogo@zTeX#1{\zTeX}
 \protected\def\HoLogo@ztex#1{\zTeX}
-\protected\def\HoLogo@zLaTeX#1{\zTeX}
-\protected\def\HoLogo@zlatex#1{\zTeX}
+\protected\def\HoLogo@zLaTeX#1{\zLaTeX}
+\protected\def\HoLogo@zlatex#1{\zLaTeX}

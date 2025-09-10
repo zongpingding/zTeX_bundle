@@ -1,7 +1,10 @@
-\ProvidesExplFile{ztex.module.cmd.tex}{2025/07/13}{1.0.1}{cmd~module~for~ztex}
+\ProvidesExplFile{ztex.module.cmd.tex}
+  {2025/09/03}{\ztex@versi@n}
+  {cmd~module~for~ztex}
 
 
 %%%%%     cmd module for ztex     %%%%%
+\RequirePackage{etoolbox}
 \NewDocumentCommand\ztexverb{O{\texttt}v}
   { #1{#2} }
 
@@ -12,6 +15,57 @@
 \str_new:N \l__ztex_cmd_name_str
 \scan_new:N \s__clist_patch_stop
 \scan_new:N \s__sclist_patch_stop
+
+
+% ==> command protect and other utils, most
+%     of them are from 'etoolbox' package.
+% >> ltx commands utils:
+\cs_new:Npn \__zcmd_exp_not:n #1 
+  { {\exp_not:N\exp_not:n {\exp_not:n {#1}}} }
+\cs_new:Npn \zcmd_exp_not_tl:n #1
+  {
+    \tl_map_function:nN {#1} 
+      \__zcmd_exp_not:n
+  }
+\cs_new_protected:Npn \zcmd_robustify:N #1
+  { \robustify #1 }
+\cs_generate_variant:Nn \zcmd_robustify:N { c }
+\prg_new_conditional:Npnn \zcmd_if_param:N #1 
+  { p, T, F, TF }
+  {
+    \ifdefparam #1 
+      { \prg_return_true:  }
+      { \prg_return_false: }
+  }
+\prg_new_conditional:Npnn \zcmd_if_protected:N #1 
+  { p, T, F, TF }
+  {
+    \ifdefprotected #1 
+      { \prg_return_true:  }
+      { \prg_return_false: }
+  }
+% NOTE: '\ifdefltxprotect' is not expandable. 
+\prg_new_protected_conditional:Npnn \zcmd_if_ltxprotect:N #1 
+  { T, F, TF }
+  {
+    \ifdefltxprotect #1 
+      { \prg_return_true:  }
+      { \prg_return_false: }
+  }
+\prg_generate_conditional_variant:Nnn \zcmd_if_param:N
+  { c }{ p, T, F, TF }
+\prg_generate_conditional_variant:Nnn \zcmd_if_protected:N
+  { c }{ p, T, F, TF }
+\prg_generate_conditional_variant:Nnn \zcmd_if_ltxprotect:N
+  { c }{ T, F, TF }
+
+% >> other utils based on expl3:
+\prg_generate_conditional_variant:Nnn \token_if_expandable:N
+  { c }{ p, T, F, TF }
+\prg_generate_conditional_variant:Nnn \token_if_long_macro:N
+  { c }{ p, T, F, TF }
+\prg_generate_conditional_variant:Nnn \token_if_primitive:N
+  { c }{ p, T, F, TF }
 
 
 % ==> kernel patches
@@ -256,7 +310,7 @@
     \fi
   }
 
-% single token check(include implict token '\l_peek_token')
+% single token check(include implicit token '\l_peek_token')
 % NOTE: this token check macro is expandable
 \prg_new_conditional:Npnn \ztex_token_if_in:nN #1#2 { p, T, F, TF }
   {

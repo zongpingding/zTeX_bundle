@@ -1,4 +1,6 @@
-\ProvidesExplFile{ztex.module.font.tex}{2025/08/13}{1.0.1}{font~module~for~ztex}
+\ProvidesExplFile{ztex.module.font.tex}
+  {2025/09/03}{\ztex@versi@n}
+  {font~module~for~ztex}
 
 
 %%%%%     font module for ztex     %%%%%
@@ -15,16 +17,26 @@
     \ztex_font_set:n {#1}
   }
 % reset text font to the default computer modern
-\NewDocumentCommand{\resetfont}{}
+\NewDocumentCommand{\resetfont}{O{cm}}
   {
-    \renewcommand\rmdefault{lmr}
-    \renewcommand\sfdefault{lmss}
-    \renewcommand\ttdefault{lmtt}
-    \normalfont
+    \str_case:nnT { #1 }
+      {
+        {cm}{
+          \renewcommand\rmdefault{cmr}
+          \renewcommand\sfdefault{cmss}
+          \renewcommand\ttdefault{cmtt}
+        }
+        {lm}{
+          \renewcommand\rmdefault{lmr}
+          \renewcommand\sfdefault{lmss}
+          \renewcommand\ttdefault{lmtt}
+        }
+      }{ \normalfont }
   }
 
 
-% ==> font symbols patch
+% ==> patches:
+% symbols:
 \DeclareMathSymbol{\blacktriangleright}{\mathrel}{AMSa}{"49}
 \cs_new:Nn \__ztex_text_symbol_patch: 
   {
@@ -34,12 +46,38 @@
     \DeclareRobustCommand{\textbullet}
       {\zslideCmsyOms\oldtextbullet}
   }
+% cancel CJKecglue(use it inside a group)
+% NOTE: default 'CJKecglue' is one space.
+\cs_new_protected:Nn \zfont_cancel_CJKecglue:
+  {
+    \str_if_eq:VnT \g__ztex_lang_str { cn }
+      {
+        \xeCJKsetup
+          {
+            CJKecglue = {\hskip 0pt plus 0.08\baselineskip}
+          }
+      }
+  }
+\cs_new_protected:Nn \zfont_restore_CJKecglue:
+  {
+    \str_if_eq:VnT \g__ztex_lang_str { cn }
+      {
+        \xeCJKsetup
+          {
+            CJKecglue = { \tex_space:D }
+          }
+      }
+  }
+\cs_new_protected:Npn \removeCJKecglue 
+  { \zfont_cancel_CJKecglue: }
+\cs_new_protected:Npn \restoreCJKecglue 
+  { \zfont_restore_CJKecglue: }
 
 
 % ==> using system fonts
 %%%%%                 NOTE                  %%%%%
 % 1. MOST FONTS only have a limited set of FEATURES 
-% 2. MOST CJK fonts' features are not equal to english fonts.
+% 2. MOST CJK fonts' features are not equal to western fonts.
 \ztex_keys_define:nn { fontcfg / new }
   {
     name     .tl_set:N  = \l__ztex_fontcfg_new_name_tl, % font name / file name

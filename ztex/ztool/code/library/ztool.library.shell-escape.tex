@@ -1,8 +1,35 @@
-\ProvidesExplFile{ztool.library.shell-escape.tex}{2025/05/21}{1.0.1}{shell-escape~library~for~ztool}
+%% 
+%% This is file `ztool.library.shell-escape.tex'.
+%% This file is based on the original source code with modifications.
+%% The original disclaimer reads as follows:
+%%
+%%
+%% This is file `l3sys-shell.sty',
+%% generated with the docstrip utility.
+%%
+%% The original source files were:
+%%
+%% l3sys-shell.dtx  (with options: `package')
+%% 
+%% Copyright (C) 2018,2019 The LaTeX3 Project
+%% 
+%% It may be distributed and/or modified under the conditions of
+%% the LaTeX Project Public License (LPPL), either version 1.3c of
+%% this license or (at your option) any later version.  The latest
+%% version of this license is in the file:
+%% 
+%%    http://www.latex-project.org/lppl.txt
+%% 
+%% This file is part of the "l3experimental bundle" (The Work in LPPL)
+%% and all files in that bundle must be distributed together.
+%% 
+%% File: l3sys-shell.dtx
+\ProvidesExplFile{ztool.library.shell-escape.tex}
+  {2025/09/06}{1.0.1}
+  {shell-escape~library~for~ztool}
 
 
 % ==> l3sys-shell tool
-% NOTE: Copy from 'l3sys-shell' + some modifications
 % windows path handle
 \cs_new:Npn \ztool_sys_path_to_win:N #1 
   {
@@ -24,7 +51,8 @@
   }
 \cs_new:Npn \ztool_sys_path_to_win:n #1
   {
-    \exp_after:wN \ztool_sys_path_to_win:w \tl_to_str:n {#1} ~ \q_stop
+    \exp_after:wN \ztool_sys_path_to_win:w 
+      \tl_to_str:n {#1} ~ \q_stop
   }
 % respective commands
 \cs_new_protected:Npn \ztool_shell_escape:n #1
