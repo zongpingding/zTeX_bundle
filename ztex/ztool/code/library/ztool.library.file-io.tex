@@ -1,5 +1,5 @@
 \ProvidesExplFile{ztool.library.file-io.tex}
-  {2025/09/06}{1.0.1}
+  {2025/09/12}{1.0.1}
   {file-io~library~for~ztool}
 
 
@@ -25,9 +25,15 @@
         \ior_open:Nn \g_ztool_file_read_ior {#2}
         \ior_map_inline:Nn \g_ztool_file_read_ior
           {
-            \bool_if:nTF {#1}
-              { \seq_put_right:Nn #3 {##1} }
-              { \seq_put_right:Ne #3 {\tl_trim_spaces:n {##1}} }
+            \tl_if_empty:nF {##1}
+              {
+                \bool_if:nTF {#1}
+                  { \seq_put_right:Nn #3 {##1} }
+                  { 
+                    \seq_put_right:Ne #3 
+                      { \tl_trim_spaces:n {##1} }
+                  }
+              }
           }
         \ior_close:N \g_ztool_file_read_ior
       }
@@ -40,11 +46,14 @@
         \ior_open:Nn \g_ztool_file_read_ior {#2}
         \ior_map_inline:Nn \g_ztool_file_read_ior
           {
-            \bool_if:nTF {#1}
-              { \seq_gput_right:Nn #3 {##1} }
-              { 
-                \seq_gput_right:Ne #3 
-                  { \tl_trim_spaces:n {##1} }
+            \tl_if_empty:nF {##1}
+              {
+                \bool_if:nTF {#1}
+                  { \seq_gput_right:Nn #3 {##1} }
+                  { 
+                    \seq_gput_right:Ne #3 
+                      { \tl_trim_spaces:n {##1} }
+                  }
               }
           }
         \ior_close:N \g_ztool_file_read_ior
@@ -56,59 +65,63 @@
   { ne, nnc, nec }
 
 % read file as seq(keep these internal spaces):
-\cs_new_protected:Npn \ztool_read_file_as_seq_keep_spaces:nnN #1#2#3 
-  {% #1: bool(True to keep trim spaces, False to trim); #2: file name; #3: seq
-    \seq_gclear:N #3
-    \file_if_exist:nT {#2}
+\tl_new:N \l__ztool_strmap_read_tl
+\cs_new_protected:Npn \ztool_read_file_keep_spaces:nn #1#2
+  {
+    \file_if_exist:nT {#1}
       {
-        \ior_open:Nn \g_ztool_file_read_ior {#2}
+        \ior_open:Nn \g_ztool_file_read_ior {#1}
         \ior_str_map_inline:Nn \g_ztool_file_read_ior
           {
-            \tl_set_rescan:Nnn \l_tmpa_tl 
-              { 
-                \cctab_select:N \c_document_cctab
-                \char_set_catcode_space:n {  9 } % tab
-                \char_set_catcode_space:n { 32 } % space
-              }{ ##1 }
-            \bool_if:nTF {#1}
+            \exp_args:Nee \str_if_in:nnF { \tl_head:n {##1} }
+              { \char_generate:nn {37}{12} }
               {
-                \exp_args:NNo \seq_put_right:Nn #3 
-                  { \l_tmpa_tl } 
-              }{ 
-                \seq_put_right:Ne #3 
-                  { \exp_args:No \tl_trim_spaces:n {\l_tmpa_tl} } 
+                \tl_set_rescan:Nnn \l__ztool_strmap_read_tl 
+                  { 
+                    \cctab_select:N \c_document_cctab
+                    \char_set_catcode_space:n {  9 } % tab
+                    \char_set_catcode_space:n { 32 } % space
+                  }{ ##1 }
+                #2
               }
           }
         \ior_close:N \g_ztool_file_read_ior
       }
   }
+\cs_new_protected:Npn \ztool_read_file_as_seq_keep_spaces:nnN #1#2#3 
+  {% #1: bool(True to keep trim spaces, False to trim); #2: file name; #3: seq
+    \seq_gclear:N #3
+    \ztool_read_file_keep_spaces:nn {#2}
+      {
+        \bool_if:nTF {#1}
+          {
+            \exp_args:NNo \seq_put_right:Nn #3 
+              { \l__ztool_strmap_read_tl } 
+          }{
+            \seq_gput_right:Ne #3
+              { 
+                \exp_args:No \tl_trim_spaces:n 
+                  { \l__ztool_strmap_read_tl }
+              }
+          }
+      }
+  }
 \cs_new_protected:Npn \ztool_gread_file_as_seq_keep_spaces:nnN #1#2#3 
   {% #1: bool(True to keep trim spaces, False to trim); #2: file name; #3: seq
     \seq_gclear:N #3
-    \file_if_exist:nT {#2}
+    \ztool_read_file_keep_spaces:nn {#2}
       {
-        \ior_open:Nn \g_ztool_file_read_ior {#2}
-        \ior_str_map_inline:Nn \g_ztool_file_read_ior
+        \bool_if:nTF {#1}
           {
-            \tl_set_rescan:Nnn \l_tmpa_tl 
+            \exp_args:NNo \seq_gput_right:Nn #3 
+              { \l__ztool_strmap_read_tl } 
+          }{
+            \seq_gput_right:Ne #3
               { 
-                \cctab_select:N \c_document_cctab
-                \char_set_catcode_space:n {  9 } % tab
-                \char_set_catcode_space:n { 32 } % space
-              }{ ##1 }
-            \bool_if:nTF {#1}
-              {
-                \exp_args:NNo \seq_gput_right:Nn #3 
-                  { \l_tmpa_tl } 
-              }{ 
-                \seq_gput_right:Ne #3 
-                  { 
-                    \exp_args:No \tl_trim_spaces:n 
-                      { \l_tmpa_tl }
-                  } 
+                \exp_args:No \tl_trim_spaces:n 
+                  { \l__ztool_strmap_read_tl }
               }
           }
-        \ior_close:N \g_ztool_file_read_ior
       }
   }
 \cs_generate_variant:Nn \ztool_read_file_as_seq_keep_spaces:nnN 
