@@ -1,5 +1,5 @@
 \ProvidesExplFile{ztex.module.sect.tex}
-  {2025/09/11}{\ztex@versi@n}
+  {2025/09/12}{\ztex@versi@n}
   {sect~module~for~ztex}
 
 
@@ -8,6 +8,7 @@
 % 1. https://github.com/Sophanatprime/cus/blob/main/module/cus.module.struct.tex
 % 2. https://github.com/CTeX-org/ctex-kit/blob/master/ctex/ctex.dtx
 % 3. https://github.com/jbezos/titlesec
+% 4. https://github.com/jfbu/etoc
 
 
 %%%%%      disable 'sect' module scope begin    %%%%%
@@ -730,54 +731,13 @@
     code           = \l__ztoc_code_tl,
   }{
     %%% #1:toc depth(int); #2:{name}{title}; #3:page
-    %%% NOTE: use '\ztoc@current@class' to get current class.
-    \exp_args:No \__ztoc_step_toc_group_int:n 
-      { \ztoc@current@class }
-    \ztoc_get_class_level:No \ztoc@newclass@level 
-      { \ztoc@current@class }
-    \bool_while_do:nn
-      {
-        ( ! \seq_if_empty_p:N \g__ztoc_gparser_curstack_seq) &&
-        ( 
-          \int_compare_p:n 
-            { 
-              (
-                \ztoc_get_class_level_expandable:e
-                  {
-                    \clist_item:en 
-                      { \seq_item:Nn \g__ztoc_gparser_curstack_seq {1} }
-                      { 1 }
-                  } + 0
-              )
-              >= \ztoc@newclass@level 
-            }
-        )
-      }{
-        \seq_gpop:NN \g__ztoc_gparser_curstack_seq \l__ztoc_gparser_prev_tl
-        \ztoc_group_hook_add:n {\l__ztoc_gparser_prev_tl,end}
-        \ztoc_group_hook_add:n {\l__ztoc_gparser_prev_tl,after}
-      }
-    \ztoc_group_hook_add:n
-      {
-        \ztoc@current@class,
-        \__ztoc_use_toc_group_int:e {\ztoc@current@class},
-        before
-      }
-    \group_begin:
-      \AssignTemplateKeys
-      \__ztoc_dotted_tocline:nnn {#1}{#2}{#3}
-    \group_end:
-    \ztoc_group_hook_add:n
-      {
-        \ztoc@current@class,
-        \__ztoc_use_toc_group_int:e {\ztoc@current@class},
-        begin
-      }
-    \seq_gpush:Ne \g__ztoc_gparser_curstack_seq 
-      {
-        \ztoc@current@class
-        ,\int_eval:n { \__ztoc_use_toc_group_int:e {\ztoc@current@class} }
-      }
+    %%% NOTE: 
+    % 1. use '\ztoc@current@class' to get current class.
+    % 2. group wraper has been removed.
+    \AssignTemplateKeys
+    \ztoc_group_hook_create:Nnnn 
+      \__ztoc_dotted_tocline:nnn 
+      { #1 }{ #2 }{ #3 }
   }
 
 
@@ -831,6 +791,73 @@
   }
 \cs_generate_variant:Nn \__ztoc_group_hook_safe_new:nn 
   { ne }
+
+% get current toc index(expandable)
+\newcommand{\ztocindex}
+  {
+    \__ztoc_use_toc_group_int:e {\ztoc@current@class}
+  }
+\newcommand{\ztocindexall}[3][toc]
+  {
+    \ztoc_table_tocline_index_bynametitle:nnc
+      { #2 }{ #3 }
+      { g_ztoc_keyval#1_seq }
+  }
+% check if first contentsline(expandable)
+\prg_new_conditional:Npnn \ztoc_if_first_tocline: {p, T, F, TF}
+  {
+    \int_compare:nNnTF 
+      { \__ztoc_use_toc_group_int:e {\ztoc@current@class} }
+      = { 1 }
+      { \prg_return_true:  }
+      { \prg_return_false: }
+  }
+\newcommand{\ztociffirst}[2]
+  {
+    \ztoc_if_first_tocline:TF 
+      { #1 }{ #2 }
+  }
+% check if last contentsline(expandable)
+\prg_new_conditional:Npnn \ztoc_if_last_tocline:Nnn #1#2#3 { p, T, F, TF }
+  {% #1:ori seq; #2:name; #3:title
+    \int_compare:nNnT 
+      { \ztoc_table_tocline_index_bynametitle:nnN {#2}{#3}#1 }
+        < 
+      { 0 }
+      { \prg_return_false: }
+    \exp_args:Ne \int_compare:nTF
+      {
+        \ztoc_get_class_level_expandable:e 
+          {
+            \prop_item:en
+              { 
+                \seq_item:Ne #1 
+                  { \ztoc_table_tocline_index_bynametitle:nnN {#2}{#3}#1 } 
+              }
+              { class }
+          } + 0
+        >
+        \ztoc_get_class_level_expandable:e 
+          {
+            \prop_item:en 
+              { 
+                \seq_item:Ne #1 
+                  { \ztoc_table_tocline_index_bynametitle:nnN {#2}{#3}#1 + 1 } 
+              }
+              { class }
+          } + 0
+      }
+      { \prg_return_true:  }
+      { \prg_return_false: }
+  }
+\prg_generate_conditional_variant:Nnn \ztoc_if_last_tocline:Nnn
+  { c, Nee, cee }{ p, T, F, TF }
+\NewDocumentCommand{\ztociflast}{O{toc}mm}
+  {
+    \ztoc_if_last_tocline:ceeTF { g_ztoc_keyval#1_seq }
+      { \ztocname }{ \ztoctitle }
+      { #2 }{ #3 }
+  }
 
 % group hook aux functions:
 \cs_new:Npn \__ztoc_gparser_var_setup:n #1
@@ -1022,6 +1049,7 @@
 \cs_new:Npn \__ztoc_dotted_tocline_raw:nnn #1#2#3
   {
     \ifnum #1 > \c@tocdepth \else
+      % temp variables setup: 
       \edef\ztoc@tmpa@skip
         {
           \skip_eval:n {
@@ -1029,15 +1057,25 @@
             \l__ztoc_space_hang_dim
           }
         }
+      \cs_gset:Npn \ztocdepth { #1 }
+      \cs_gset:Npe \ztocclass { \ztoc@current@class }
+      \cs_gset:Npn \ztocpage  { #3 }
+      \edef\ztoc@expnot@nametitle
+        { \zcmd_exp_not_tl:n {#2} }
+      \exp_args:NNe \cs_gset:Npn \ztocname
+        {
+          \exp_after:wN \__ztoc_extract_name:w 
+            \ztoc@expnot@nametitle \scan_stop:
+        }
+      \exp_args:NNe \cs_gset:Npn \ztoctitle
+        { 
+          \exp_after:wN \__ztoc_extract_title:w 
+            \ztoc@expnot@nametitle\scan_stop:
+        }
+      % typeset tocline:
       \hook_use:n { ztoc/tocline/begin }
       \bool_if:NTF \l__ztoc_explicit_bool
         {
-          \cs_set:Npn \ztocdepth { #1 }
-          \cs_set:Npn \ztocpage  { #3 }
-          \cs_set:Npn \ztocname
-            { \__ztoc_extract_name:w #2\scan_stop: }
-          \cs_set:Npn \ztoctitle
-            { \__ztoc_extract_title:w #2\scan_stop: }
           \l__ztoc_code_tl
         }{
           {
@@ -1561,37 +1599,10 @@
   }
 
 % >> extract toc in local region (relies on keyval toc seq)
-\cs_new_protected:Npn \ztoc_table_filter_byclass:nnNN #1#2#3#4 
-  {% #1:class; #2:index; #3:raw seq; #4:res seq
-    \seq_gclear:N #4
-    \bool_set_false:N \l__ztoc_filter_item_found_bool
-    \seq_map_inline:Nn #3
-      {
-        \prop_set_from_keyval:Nn \l_tmpa_prop { ##1 }
-        \exp_args:Ne \__ztoc_step_filter_int:n 
-          { \prop_item:Nn \l_tmpa_prop {class} }
-        \exp_args:Ne \int_compare:nNnT 
-          { \__ztoc_use_filter_int:n {#1} } = {#2+1}
-          { \seq_map_break: }
-        \bool_if:NT \l__ztoc_filter_item_found_bool 
-          {
-            \exp_args:Ne \int_compare:nNnT
-              { \prop_item:Nn \c_zsect_level_prop {#1} } 
-              > 
-              { \exp_args:NNe \prop_item:Nn \c_zsect_level_prop 
-                  { \prop_item:Nn \l_tmpa_prop {class} } 
-              }{ \seq_map_break: }
-          }
-        \exp_args:Ne \int_compare:nNnT 
-          { \__ztoc_use_filter_int:n {#1} } = {#2}
-          {
-            \bool_set_true:N \l__ztoc_filter_item_found_bool
-            \seq_gput_right:Ne #4
-              { \prop_item:Nn \l_tmpa_prop {raw} }
-          }
-      }
-    \__ztoc_reset_filter_int:
-  }
+% 'byclass' filter variables setup:
+\int_new:N \l__ztoc_tmpa_int
+\prop_new:N \l__ztoc_tmpa_prop
+\prop_new:N \l__ztoc_tmpb_prop
 \bool_new:N \l__ztoc_filter_item_found_bool
 \exp_args:Ne \clist_map_inline:nn 
   { \c_zsect_level_clist, \c_ztoc_special_level_clist }
@@ -1617,6 +1628,113 @@
   }
 \cs_generate_variant:Nn \ztoc_table_filter_byclass:nnNN
   { ne, en, ee, nncc, eecc }
+
+% extract custom key by class
+\cs_new_protected:Npn \ztoc_table_filter_key_byclass:nnnNN #1#2#3#4#5 
+  {% #1:class; #2:index; #3:type; #4:raw seq; #5:res seq
+    \seq_gclear:N #5
+    \bool_set_false:N \l__ztoc_filter_item_found_bool
+    \seq_map_inline:Nn #4
+      {
+        \prop_set_from_keyval:Nn \l__ztoc_tmpa_prop { ##1 }
+        \exp_args:Ne \__ztoc_step_filter_int:n 
+          { \prop_item:Nn \l__ztoc_tmpa_prop {class} }
+        \exp_args:Ne \int_compare:nNnT 
+          { \__ztoc_use_filter_int:n {#1} } = {#2+1}
+          { \seq_map_break: }
+        \bool_if:NT \l__ztoc_filter_item_found_bool 
+          {
+            \exp_args:Ne \int_compare:nNnT
+              { \prop_item:Nn \c_zsect_level_prop {#1} } 
+              > 
+              { \exp_args:NNe \prop_item:Nn \c_zsect_level_prop 
+                  { \prop_item:Nn \l__ztoc_tmpa_prop {class} } 
+              }{ \seq_map_break: }
+          }
+        \exp_args:Ne \int_compare:nNnT 
+          { \__ztoc_use_filter_int:n {#1} } = {#2}
+          {
+            \bool_set_true:N \l__ztoc_filter_item_found_bool
+            \seq_gput_right:Ne #5
+              { \prop_item:Nn \l__ztoc_tmpa_prop {#3} }
+          }
+      }
+    \__ztoc_reset_filter_int:
+  }
+\cs_generate_variant:Nn \ztoc_table_filter_key_byclass:nnnNN
+  { ooo, eee, nnncc, eeecc }
+
+% extract 'raw' by class
+\cs_new_protected:Npn \ztoc_table_filter_byclass:nnNN #1#2#3#4 
+  {% #1:class; #2:index; #3:raw seq; #4:res seq
+    \ztoc_table_filter_key_byclass:nnnNN
+      { #1 }{ #2 }{ raw }
+      #3 #4
+  }
+
+% extract by 'name' & 'title'(i.e., {1.2.4}{AAA})
+% NOTE: name and title need to be expanded before grabbed.
+\cs_new_protected:Npn \ztoc_table_filter_bynametitle:nnNN #1#2#3#4
+  {% #1:name; #2:title; #3:ori seq; #4:prop
+    \prop_gclear:N #4
+    \seq_map_inline:Nn #3
+      {
+        \prop_set_from_keyval:Nn \l__ztoc_tmpb_prop { ##1 }
+        \int_incr:N \l__ztoc_tmpa_int
+        \bool_lazy_all:nT
+          {
+            { \exp_args:Ne \str_if_eq_p:nn
+                { \prop_item:Nn \l__ztoc_tmpb_prop {name} }
+                { #1 }
+            }
+            { \exp_args:Ne \str_if_eq_p:nn 
+                { \prop_item:Nn \l__ztoc_tmpb_prop {title} }
+                { #2 }
+            }
+          }{
+            \prop_gset_eq:NN #4 \l__ztoc_tmpb_prop
+          }
+      }
+  }
+\cs_generate_variant:Nn \ztoc_table_filter_bynametitle:nnNN
+  { ee, nncc, eecc }
+
+% get index of current contentsline(expandable)
+% NOTE: if not found, an negative value will be returned
+\cs_new:Npn \ztoc_table_tocline_index_bynametitle:nnN #1#2#3
+  {% #1:name; #2:title; #3:ori seq
+    \int_eval:n {
+      (
+        \seq_map_tokens:Nn #3
+          {
+            \__ztoc_table_tocline_index_bynametitle_aux:nnn
+              { #1 }{ #2 }
+          } + 0
+      )
+      \prg_break_point:Nn \__special_seq_map_break: {}
+    }
+  }
+\cs_new:Npn \__ztoc_table_tocline_index_bynametitle_aux:nnn #1#2#3
+  {
+    \bool_lazy_all:nTF
+      {
+        { \exp_args:Ne \str_if_eq_p:nn
+            { \prop_item:nn { #3 }{name} }
+            { #1 }
+        }
+        { \exp_args:Ne \str_if_eq_p:nn 
+            { \prop_item:nn { #3 }{title} }
+            { #2 }
+        }
+      }{
+        -1 \prg_map_break:Nn \__special_seq_map_break: 
+          { )*(-1) }
+      }{ -1 }
+  }
+\cs_new:Npn \__special_seq_map_break:
+  { \prg_map_break:Nn \__special_seq_map_break: { } }
+\cs_generate_variant:Nn \ztoc_table_tocline_index_bynametitle:nnN
+  { nnc, eec, eeN }
 
 % >> new TemplateType from scratch
 \cs_new_protected:Npn \ztoc_new_templatetype:nn #1#2

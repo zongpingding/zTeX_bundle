@@ -1,5 +1,5 @@
 \ProvidesExplFile{ztex.module.cmd.tex}
-  {2025/09/03}{\ztex@versi@n}
+  {2025/09/12}{\ztex@versi@n}
   {cmd~module~for~ztex}
 
 
@@ -527,6 +527,29 @@
 \cs_generate_variant:Nn \ztex_token_strip_both:n  { e, V }
 \cs_generate_variant:Nn \ztex_token_strip_left:n  { e, V }
 \cs_generate_variant:Nn \ztex_token_strip_right:n { e, V }
+
+
+% ==> implement an expandable '\prop_item:nn'
+\cs_new:Npn \prop_item:nn #1#2
+  {
+    \use:e {
+      \_zcmd_prop_item_aux_i:nn {#1}{#2}
+    }
+  }
+\cs_new:Npn \_zcmd_prop_item_aux_i:nn #1#2
+  {
+    \keyval_parse:nnn
+      { \use_none:n }
+      { \__zcmd_prop_item_aux_ii:nnn {#2} }
+      { #1 }
+  }
+\cs_new:Npn \__zcmd_prop_item_aux_ii:nnn #1#2#3
+  {
+    \str_if_eq:nnT { #1 }{ #2 }
+      { \exp_not:n {#3} }
+  }
+\cs_generate_variant:Nn \prop_item:nn
+  { no, ne, Vn, Ve, vn, ve, en, ee }
 
 
 % ==> ztex cmd kernel
