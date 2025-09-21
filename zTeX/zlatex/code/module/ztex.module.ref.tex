@@ -1,5 +1,5 @@
 \ProvidesExplFile{ztex.module.ref.tex}
-  {2025/09/06}{\ztex@versi@n}
+  {2025/09/20}{\ztex@versi@n}
   {ref~module~for~ztex}
 
 
@@ -28,7 +28,7 @@
 % ==> provide hyper command
 \ProvideDocumentCommand\hypersetup{m}{}
 \ProvideDocumentCommand\hyper@anchor{m}{}
-\ProvideDocumentCommand\hyper@link{mmm}{}
+\ProvideDocumentCommand\hyper@link{mmm}{#3}
 \ProvideDocumentCommand\hyper@linkstart{mm}{}
 \ProvideDocumentCommand\hyper@linkend{}{}
 \ProvideDocumentCommand\hyper@linkfile{mmm}{}
@@ -40,14 +40,69 @@
 \ProvideDocumentCommand\pdfbookmark{omm}{}
 \ProvideDocumentCommand\texorpdfstring{mm}{#1}
 \cs_new:Npn \ztex_make_link_target:n #1 
-  { 
+  {
     \MakeLinkTarget*{#1} 
   }
 \cs_generate_variant:Nn \ztex_make_link_target:n { e }
 \NewDocumentCommand{\zsetHcnt}{mm}
   {
-    \exp_after:wN \def\cs:w theH #1\cs_end: {#2}
+    \exp_after:wN \def\cs:w theH #1\cs_end: 
+      { #2 }
   }
+\NewDocumentCommand{\ztexlink}{sm}
+  {
+    \IfBooleanTF{#1}{
+      \zboxcollectcustom
+        {
+          \hyper@link{link}{#2}{\box\ztexcollectbox}
+        }
+    }{
+      \hyper@link{link}{#2}
+    }
+  }
+
+% link to title class
+\ztex_msg_set:nn { linkclass@nonexist }
+  {
+    link~title:'#2'~of~class~'#1'~does~NOT~
+    exsit,~check~it~again.
+  }
+\NewDocumentCommand{\ztexlinkclass}{smm}
+  {
+    \edef\ztexlinkclass@curtoclineindex
+      {
+        \ztoc_tocline_index_byclasstitle:nnnN
+          { #2 }{ #3 }{ \c_false_bool }
+          \g_ztoc_keyvaltoc_seq
+      }
+    \exp_args:No \int_compare:nNnTF
+      {
+        \ztexlinkclass@curtoclineindex
+      } < { 0 }
+      {
+        \ztex_msg_warn:nnn
+          { linkclass@nonexist }
+          { #2 }{ #3 }
+      }{
+        \edef\ztexlinkclass@curtocline
+          {
+            \seq_item:Ne \g_ztoc_keyvaltoc_seq
+              {
+                \ztexlinkclass@curtoclineindex
+              }
+          }
+        \IfBooleanTF{#1}
+          { \exp_args:NNe \ztexlink* }
+          { \exp_args:Ne  \ztexlink }
+          {
+            \exp_args:No \prop_item:nn 
+              { \ztexlinkclass@curtocline }{ anchor }
+          }
+      }
+  }
+
+% display style of the link page:
+% \pdf_destination:nn
 
 
 % ==> clever reference for sections, figure and table
@@ -179,4 +234,18 @@
       ~or~'zref-clever'~for~option-backend.
     }
     \ztex_msg_error:n {option-backend}
+  }
+
+
+% ==> save position
+\NewDocumentCommand\zrefsavepos{m}
+  {
+    \tex_savepos:D
+    \property_record:nn {ztexref@#1@pos}{xpos, ypos}
+    \tex_savepos:D
+  }
+\NewExpandableDocumentCommand\zrefgetpos{mm} % return in 'pt'
+  {
+    \fp_eval:n
+      { \property_ref:nn {ztexref@#1@pos}{#2}/65536 }
   }

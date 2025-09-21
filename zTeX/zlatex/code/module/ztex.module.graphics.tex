@@ -1,15 +1,42 @@
 \ProvidesExplFile{ztex.module.graphics.tex}
-  {2025/07/05}{\ztex@versi@n}
+  {2025/09/20}{\ztex@versi@n}
   {graphics~module~for~ztex}
 
 
 %%%%%     graphics module for ztex     %%%%%
 \RequirePackage{graphicx}
-\graphicspath
+\RequirePackage{l3graphics}
+
+
+% graphics path
+\clist_const:Nn \c__ztex_graphics_path_clist
   {
-    {./Pictures/}{./picture/}
-    {./graphics/}{./graphic/}
-    {./figure/}{./figures/}
-    {./image/}{./images/}
-    {./Pics/}{./pics/}
+    ./picture/, ./pictures/,
+    ./graphic/, ./graphics/,
+    ./figure/,  ./figures/,
+    ./image/,   ./images/,
+    ./pic/,     ./pics/,
+  }
+\clist_map_inline:Nn \c__ztex_graphics_path_clist
+  {
+    \graphicspath{{#1}}
+    \seq_put_right:Nn 
+      \l_graphics_search_path_seq
+      { #1 }
+  }
+
+% include graphics(expl3)
+\NewDocumentCommand{\zgraphicsinclude}{O{}m}
+  {
+    \graphics_include:nn 
+      { #1 }
+      { #2 }
+  }
+
+% count pdf graphics pages
+\tl_new:N \zgraphicspageint
+\NewDocumentCommand{\zgraphicspagecnt}{m}
+  {
+    \graphics_get_pagecount:nN {#1}
+      \zgraphicspageint
   }

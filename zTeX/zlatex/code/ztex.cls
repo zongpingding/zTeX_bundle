@@ -35,11 +35,11 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \ExplSyntaxOn
 \NeedsTeXFormat{LaTeX2e}
-\def\ztex@d@te{2025/09/10}
-\def\ztex@versi@n{1.0.1}
+\gdef\ztex@d@te{2025/09/21}
+\gdef\ztex@versi@n{1.1.3}
 \tl_const:Nn \c__ztex_class_name_tl           {ztex}
 \tl_const:Nn \c__ztex_class_version_tl        {\ztex@versi@n}
-\tl_const:Nn \c__ztex_class_date_tl           {2025/09/04}
+\tl_const:Nn \c__ztex_class_date_tl           {\ztex@d@te}
 \clist_const:Nn \c__ztex_lang_support_clist   {en, cn}
 \tl_const:Nn    \c__ztex_class_description_tl  
   {
@@ -58,25 +58,35 @@
 % ----------------------------------------------------------------------
 \clist_new:N \g__ztex_module_library_loaded_clist
 \clist_gclear:N \g__ztex_module_library_loaded_clist
-\cs_new_nopar:Npn \__ztex_load_module_library:nn #1#2 {
-  \clist_map_inline:nn {#2} {
-    \clist_if_in:NnTF \g__ztex_module_library_loaded_clist {#1:##1} {
-      \msg_set:nnn {ztex} {#1-loaded} {
-        ztex~#1~"##1"~already~loaded,ignored~loading
-        ~\msg_line_context:
+\cs_new_nopar:Npn \__ztex_load_module_library:nn #1#2 
+  {
+    \clist_map_inline:nn {#2} 
+      {
+        \clist_if_in:NnTF \g__ztex_module_library_loaded_clist 
+          { #1:##1 }
+          {
+            \msg_set:nnn {ztex} {#1-loaded}
+              {
+                ztex~#1~"##1"~already~loaded,give~
+                up~loading~again.\msg_line_context:
+              }
+            \msg_warning:nnn {ztex} {#1-loaded} {##1}
+          }{
+            \file_if_exist:nTF {#1/ztex.#1.##1.tex}
+              {
+                \clist_gput_right:Nn 
+                  \g__ztex_module_library_loaded_clist 
+                  { #1:##1 }
+                \makeatletter\file_input:n {#1/ztex.#1.##1.tex}
+              }{
+                \msg_set:nnn {ztex} {#1-not-found} 
+                  { ztex~#1~`##1'~not~found. }
+                \msg_error:nnn {ztex} {#1-not-found} 
+                  { ##1 }
+              }
+          }
       }
-      \msg_warning:nnn {ztex} {#1-loaded} {##1}
-    }{
-      \file_if_exist:nTF {#1/ztex.#1.##1.tex}{
-        \clist_gput_right:Nn \g__ztex_module_library_loaded_clist {#1:##1}
-        \makeatletter\file_input:n {#1/ztex.#1.##1.tex}
-      }{
-        \msg_set:nnn {ztex} {#1-not-found} {ztex~#1~`##1'~not~found.}
-        \msg_error:nnn {ztex} {#1-not-found} {##1}
-      }
-    }
   }
-}
 \NewDocumentCommand\ztexloadmod{m}
   {
     \__ztex_load_module_library:nn {module}{#1}
@@ -135,44 +145,65 @@
 % ----------------------------------------------------------------------
 %                   ztex Message system
 % ----------------------------------------------------------------------
-\prop_gput:Nnn \g_msg_module_type_prop { ztex } { Class }
-\cs_new_protected:Npn \ztex_msg_set:nn #1#2 { 
-  \msg_if_exist:nnTF { ztex }{#1} 
-    { \msg_set:nnn { ztex }{#1}{#2} }
-    { \msg_new:nnn { ztex }{#1}{#2} }
-}
-\cs_new_protected:Npn \ztex_msg_info:n #1 { 
-  \msg_info:nn { ztex }{#1}
-}
-\cs_new_protected:Npn \ztex_msg_warn:n #1 { 
-  \msg_warning:nn { ztex }{#1} 
-}
-\cs_new_protected:Npn \ztex_msg_error:n #1 { 
-  \msg_error:nn { ztex }{#1} 
-}
-\cs_new_protected:Npn \ztex_msg_fatal:n #1 {
-  \msg_fatal:nn { ztex } { #1 }
-}
-% meta key warning message
-\cs_new_protected:Npn \ztex_metakey_msg_warning:nn #1#2 {
-  \ztex_msg_set:nn {#1}
-    {You~use~an~invalid~key~"\l_keys_path_str"~or~key~assign~for~it~in~the~meta~
-    key~"#1",~Valid~options~are:#2;~Assignment~Ignored~and~zLaTeX~default~"#1"~
-    settings~of~this~key~substitute.}
-  \ztex_msg_warn:n {#1}
-}
+\prop_gput:Nnn \g_msg_module_type_prop 
+  { ztex } { Class }
+\cs_new_protected:Npn \ztex_msg_set:nn #1#2
+  {
+    \msg_if_exist:nnTF { ztex }{ #1 } 
+      { \msg_set:nnn { ztex }{#1}{#2} }
+      { \msg_new:nnn { ztex }{#1}{#2} }
+  }
+\cs_new_protected:Npn \ztex_metakey_msg_warning:nn #1#2 
+  {
+    \ztex_msg_set:nn {#1}
+      {
+        You~use~an~invalid~key~"\l_keys_path_str"~or~key~
+        assign~for~it~in~the~meta~key~"#1",~Valid~options~
+        are:#2;~Assignment~Ignored~and~zLaTeX~default~"#1"~
+        settings~of~this~key~substitute.
+      }
+    \ztex_msg_warn:n {#1}
+  }
+\prop_const_from_keyval:Nn \c__ztex_msg_type_prop
+  {
+    info  = info,
+    warn  = warning,
+    error = error,
+    fatal = fatal,
+  }
+\prop_map_inline:Nn \c__ztex_msg_type_prop
+  {
+    \cs_new_protected:cpn { ztex_msg_#1:n } ##1
+      {
+        \use:c { msg_#2:nn }
+          { ztex }{ ##1 }
+      }
+    \cs_new_protected:cpn { ztex_msg_#1:nn } ##1##2
+      {
+        \use:c { msg_#2:nnn }
+          { ztex }{ ##1 }{ ##2 }
+      }
+    \cs_new_protected:cpn { ztex_msg_#1:nnn } ##1##2##3
+      {
+        \use:c { msg_#2:nnnn }
+          { ztex }{ ##1 }{ ##2 }{ ##3 }
+      }
+  }
 
 % ztex class options message
-\ztex_msg_set:nn {option-unknown}{
-  You~use~an~unknown~class~option~key:'\l_keys_path_str'.~Valid~options~are:lang,~
-  hyper,~fancy,~class,~classOption(<clist>),~toc(<key-value>),~font(<key-value>),~
-  layout(<key-value>),~section(<key-value>),~mathSpec(<key-value>),~bib_index(<key-value>).~
-  Assignment~Ignored~and~LaTeX~default~settings~substitute.
-}
-\ztex_msg_set:nn {option-language} {
-  Current~invalid~language~option~is:~'\g__ztex_lang_str',~ztex~only~
-  support~'en(english)',~and~'cn(chinese)'~till~now.
-}
+\ztex_msg_set:nn {option-unknown}
+  {
+    You~use~an~unknown~class~option~key:'\l_keys_path_str'.~
+    Valid~options~are:lang,~hyper,~fancy,~class,~classOption(<clist>),~
+    toc(<key-value>),~font(<key-value>),~layout(<key-value>),~
+    section(<key-value>),~mathSpec(<key-value>),~bib_index(<key-value>).~
+    Assignment~Ignored~and~LaTeX~default~settings~substitute.
+  }
+\ztex_msg_set:nn {option-language}
+  {
+    Current~invalid~language~option~is:~'\g__ztex_lang_str',~
+    ztex~only~support~'en(english)',~and~'cn(chinese)'~till~now.
+  }
 
 
 
@@ -180,18 +211,23 @@
 %                             class option 
 % ----------------------------------------------------------------------
 % package options passing
-\cs_new:Npn \ztex_package_options_pass:nn #1#2 {
-  \PassOptionsToPackage{#2}{#1}
-}
-\cs_new:Npn \ztex_package_options_pass_deprecate:n #1 {
-  \ztex_msg_set:nn {package-option}{
-    No~options~were~passed~to~package:#1,~Deprecated~this~option(s)~for~package~#1.
+\cs_new:Npn \ztex_package_options_pass:nn #1#2
+  {
+    \PassOptionsToPackage{#2}{#1}
   }
-  \ztex_msg_warn:n {package-option}
-}
+\cs_new:Npn \ztex_package_options_pass_deprecate:n #1
+  {
+    \ztex_msg_set:nn {package-option}
+      {
+        No~options~were~passed~to~package:#1,~
+        Deprecated~this~option(s)~for~package~#1.
+      }
+    \ztex_msg_warn:n {package-option}
+  }
 \ztex_msg_set:nn { metakey@file@missing }
   {
-    file~'ztex.options.tex'~is~missing~from~the~ztex~bundle...
+    file~'ztex.options.tex'~is~missing~
+    from~the~ztex~bundle...
   }
 % setup class options
 \keys_define:nn { ztex }{
@@ -258,63 +294,88 @@
 %                          subClass and package Option 
 % ----------------------------------------------------------------------
 % pass clist options main subclass: 'article', 'book', 'ctexbook'
-\ztex_msg_set:nn {option-subclass}{
-  subclass~option:"\g__ztex_subclass_type_str"~is~not~
-  accessible,~Valid~options~are:article,~book,~ctexbook,~l3doc~and~l3dox.
-}
-\str_case:VnF \g__ztex_subclass_type_str {
-  {article}{
-    \PassOptionsToClass{\g__ztex_subclass_option_clist}{ article }
-    \LoadClass{article}
+\ztex_msg_set:nn {option-subclass}
+  {
+    subclass~option:"\g__ztex_subclass_type_str"~is~
+    not~accessible,~Valid~options~are:article,~book,~
+    ctexbook,~l3doc~and~l3dox.
   }
-  {book}{
-    \PassOptionsToClass{\g__ztex_subclass_option_clist}{ book }
-    \LoadClass{book}   
+\str_case:VnF \g__ztex_subclass_type_str 
+  {
+    {article}{
+      \PassOptionsToClass{\g__ztex_subclass_option_clist}
+        { article }
+      \LoadClass{article}
+    }
+    {book}{
+      \PassOptionsToClass{\g__ztex_subclass_option_clist}
+        { book }
+      \LoadClass{book}   
+    }
+    {ctexbook}{
+      \str_set:Nn \g__ztex_lang_str {cn}
+      \PassOptionsToClass{\g__ztex_subclass_option_clist}
+        { ctexbook }
+      \PassOptionsToPackage{quiet}{fontspec}
+      \LoadClass{ctexbook}    
+    }
+    {l3doc}{
+      \PassOptionsToClass{\g__ztex_subclass_option_clist}
+        { l3doc }
+      \LoadClass{l3doc}
+    }
+  }{
+    \ztex_msg_error:n {option-subclass}
   }
-  {ctexbook}{
-    \str_set:Nn \g__ztex_lang_str {cn}
-    \PassOptionsToClass{\g__ztex_subclass_option_clist}{ ctexbook }
-    \PassOptionsToPackage{quiet}{fontspec}
-    \LoadClass{ctexbook}    
-  }
-  {l3doc}{
-    \PassOptionsToClass{\g__ztex_subclass_option_clist}{ l3doc }
-    \LoadClass{l3doc} 
-  }
-}{\ztex_msg_error:n {option-subclass}}
 
 % baisc document class and packages option
-\tl_set_rescan:NnV \l_tmpa_tl {\cctab_select:N \c_code_cctab} \g__ztex_lang_str
+\tl_set_rescan:NnV \l_tmpa_tl 
+  { \cctab_select:N \c_code_cctab }
+  \g__ztex_lang_str
 \clist_if_in:NVF \c__ztex_lang_support_clist \l_tmpa_tl
-  {\ztex_msg_error:n {option-language}}
-\str_case:VnF \g__ztex_lang_str {
-  {en} { 
-    \sys_if_engine_xetex:T 
-      {
-        \ztex_hook_preamble_last:n {
-          \bool_if:NF \g__ztex_sysfont_cfg_bool {
-            \ztex_msg_set:nn {compile-engine-pdftex}
-              {Current~compile~engine~is~XETEX,~For~better~output,~use~PDFTEX~instead.}
-            \ztex_msg_warn:n {compile-engine-pdftex}
-          }
+  { \ztex_msg_error:n {option-language} }
+\str_case:VnF \g__ztex_lang_str 
+  {
+    {en} {
+      \sys_if_engine_xetex:T 
+        {
+          \ztex_hook_preamble_last:n 
+            {
+              \bool_if:NF \g__ztex_sysfont_cfg_bool
+                {
+                  \ztex_msg_set:nn {compile-engine-pdftex}
+                    {
+                      Current~compile~engine~is~XETEX,~For~better~
+                      output,~use~PDFTEX~instead.
+                    }
+                  \ztex_msg_warn:n {compile-engine-pdftex}
+                }
+            }
         }
-      }
-    \RequirePackage[T1]{fontenc}
-  }
-  {cn} {
-    \sys_if_engine_pdftex:T {
-      \ztex_msg_set:nn {compile-engine-xetex}
-        {Current~compile~engine~is~PDFTEX,~For~chinese~material,~use~XETEX~instead.}
-      \ztex_msg_error:n {compile-engine-xetex}
+      \RequirePackage[T1]{fontenc}
     }
-    \PassOptionsToPackage{quiet}{fontspec}
-    \PassOptionsToPackage{no-math}{fontspec}
-    \str_if_eq:VnF \g__ztex_subclass_type_str {ctexbook}{
-      \RequirePackage[UTF8, scheme=plain]{ctex}
-      \linespread{1.3}
+    {cn} {
+      \sys_if_engine_pdftex:T 
+        {
+          \ztex_msg_set:nn {compile-engine-xetex}
+            {
+              Current~compile~engine~is~PDFTEX,~For~
+              chinese~material,~use~XETEX~instead.
+            }
+          \ztex_msg_error:n {compile-engine-xetex}
+        }
+      \PassOptionsToPackage{quiet}{fontspec}
+      \PassOptionsToPackage{no-math}{fontspec}
+      \str_if_eq:VnF \g__ztex_subclass_type_str 
+        { ctexbook }
+        {
+          \RequirePackage[UTF8, scheme=plain]{ctex}
+          \linespread{1.3}
+        }
     }
+  }{
+    \ztex_msg_error:n {option-language}
   }
-}{\ztex_msg_error:n {option-language}}   
 
 
 

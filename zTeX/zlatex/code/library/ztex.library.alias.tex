@@ -1,5 +1,5 @@
 \ProvidesExplFile{ztex.library.alias.tex}
-  {2025/08/29}{\ztex@versi@n}
+  {2025/09/21}{\ztex@versi@n}
   {alias~library~for~ztex}
 
 
@@ -17,12 +17,6 @@
     update~using~your~TeX~package~manager~or~from~CTAN~to~use~it. \\
     *~See~zTeX~documentation.~Loading~matrix-related~aliases~from~
     'alias'~library~will~abort!
-  }
-\cs_if_exist:NF \int_step_tokens:nn
-  {
-    \ztex_msg_warn:n { expl-too-old@alias }
-    % \msg_fatal:nn { ztex } { expl-too-old@alias }
-    % \file_input_stop:
   }
 
 
@@ -303,12 +297,12 @@
         { \bigg }{ \__zab_case_match_remove_next:nn {\bigg}{\bigg} }
         { \Bigg }{ \__zab_case_match_remove_next:nn {\Bigg}{\Bigg} }
         {   *   }{ \__zab_case_match_remove_next:nn {}{}}
-        {   (   }{ \__zab_case_math_auto: }
-        {   [   }{ \__zab_case_math_auto: }
-        {   <   }{ \__zab_case_math_auto: }
-        {   |   }{ \__zab_case_math_auto: }
-        {   \|  }{ \__zab_case_math_auto: }
-        { \c_group_begin_token}{ \__zab_case_math_auto: }
+        {   (   }{ \__zab_case_match_auto: }
+        {   [   }{ \__zab_case_match_auto: }
+        {   <   }{ \__zab_case_match_auto: }
+        {   |   }{ \__zab_case_match_auto: }
+        {   \|  }{ \__zab_case_match_auto: }
+        { \c_group_begin_token}{ \__zab_case_match_auto: }
       }{
         \ztex_msg_warn:n { zab@invalid@deli@size }
         \ztex_msg_warn:n { zab@invalid@deli@type }
@@ -316,7 +310,7 @@
         % TODO: improve the error message !!!
         % \ztex_token_if_in:nNTF {\c_group_begin_token([<|\|} \l_peek_token
         %   {
-        %     \__zab_case_math_auto:
+        %     \__zab_case_match_auto:
         %   }{
         %     \ztex_msg_error:n { zab@invalid@deli@type } 
         %   }
@@ -329,7 +323,7 @@
     \exp_after:wN \peek_after:Nw \exp_after:wN
       \__zab_case_match_kernel: \use_none:n
   }
-\cs_new:Npn \__zab_case_math_auto: 
+\cs_new:Npn \__zab_case_match_auto: 
   {
     \tl_set:Nn \l__zalias_deli_modifer_left_tl  { \left }
     \tl_set:Nn \l__zalias_deli_modifer_right_tl { \right }
@@ -372,12 +366,12 @@
   {
     \l__zalias_deli_modifer_right_tl
   }
-\protected\def\z@ab@curly#1   {\zab@left \{#1 \zab@right\}}
-\protected\def\z@ab@round(#1) {\zab@left (#1  \zab@right)}
-\protected\def\z@ab@square[#1]{\zab@left [#1  \zab@right]}
-\protected\def\z@ab@vert |#1| {\zab@left |#1  \zab@right|}
-\protected\def\z@ab@Vert\|#1\|{\zab@left \|#1 \zab@right\|} % double line
-\protected\def\z@ab@angle<#1> {\zab@left \langle #1 \zab@right\rangle}
+\NewDocumentCommand\z@ab@curly {m}  {\zab@left \{#1 \zab@right\}}
+\NewDocumentCommand\z@ab@round {r()}{\zab@left (#1  \zab@right)}
+\NewDocumentCommand\z@ab@square{r[]}{\zab@left [#1  \zab@right]}
+\NewDocumentCommand\z@ab@vert  {r||}{\zab@left |#1  \zab@right|}
+\NewDocumentCommand\z@ab@Vert{r\|\|}{\zab@left \|#1 \zab@right\|} % double line
+\NewDocumentCommand\z@ab@angle {r<>}{\zab@left \langle #1 \zab@right\rangle}
 \ztex_mathalias_set:nn { zab }{ z@ab }
 
 
@@ -505,11 +499,6 @@
 \ztex_mathalias_set:nn 
   { mat,   pmat,   bmat,   Bmat,   vmat,   Vmat   }
   { z@mat, z@pmat, z@bmat, z@Bmat, z@vmat, z@Vmat }
-
-
-% ==> check the minimum requirement for matrix alias
-\cs_if_exist:NF \int_step_tokens:nn
-  { \file_input_stop: }
 
 % '\imat', '\admat' and '\zmat'
 \cs_new:Npn \zalias_diag_mat_data:nnnn #1#2#3#4 

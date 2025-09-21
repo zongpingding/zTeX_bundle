@@ -1,5 +1,5 @@
 \ProvidesExplFile{ztex.module.page.tex}
-  {2025/08/23}{\ztex@versi@n}
+  {2025/09/18}{\ztex@versi@n}
   {page~module~for~ztex}
 
 
@@ -159,7 +159,8 @@
 \NewDocumentCommand{\zpagestyleset}{O{}mm}
   { 
     \zpage_set_style:nnn {#2}{#1}{#3}
-    % \fancypagestyleassign {#1}{#1@new} % --> '! TeX capacity exceeded,' 
+    % \fancypagestyleassign {#1}{#1@new} 
+    % ERROR: '! TeX capacity exceeded,' 
   }
 \bool_if:NF \g__ztex_slide_bool
   {
@@ -248,50 +249,118 @@
           {\put#2{\makebox(0, 0)[#3]{#4}}}
       }
   }
-\DeclareHookRule{shipout/background}{.}{<}{pgfrcs}
-\ztex_keys_define:nn { page/mask }{
-  layer    .tl_set:N  = \l__ztex_page_mask_layer_tl,
-  layer    .initial:n = background,
-  position .tl_set:N  = \l__ztex_page_mask_position_tl,
-  position .initial:n = {(.5\zpw, .5\zph)},
-  anchor   .tl_set:N  = \l__ztex_page_mask_anchor_tl,
-  anchor   .initial:n = c,
-  label    .tl_set:N  = \l__ztex_page_mask_label_tl,
-  label    .initial:n = { DEFAULT },
-}
+\hook_gset_rule:nnnn {shipout/foreground}
+  { . }{ < }{ pgfrcs }
+\hook_gset_rule:nnnn {shipout/background}
+  { . }{ < }{ pgfrcs }
+\ztex_keys_define:nn { page/mask }
+  {
+    layer    .choice:,
+    layer / foreground  .code:n = 
+      { \tl_set:Nn \l__ztex_page_mask_layer_tl {#1} },
+    layer / background  .code:n = 
+      { \tl_set:Nn \l__ztex_page_mask_layer_tl {#1} },
+    layer / unknown     .code:n =
+      {
+        \ztex_msg_set:nn {pagemask@layer@wrong}
+          {layer~only~accepts~values:'foreground'~or~'background'.}
+        \ztex_msg_error:n {pagemask@layer@wrong}
+      },
+    layer    .initial:n = background,
+    position .tl_set:N  = \l__ztex_page_mask_position_tl,
+    position .initial:n = {(.5\zpw, .5\zph)},
+    anchor   .tl_set:N  = \l__ztex_page_mask_anchor_tl,
+    anchor   .initial:n = c,
+    label    .tl_set:N  = \l__ztex_page_mask_label_tl,
+    label    .initial:n = { DEFAULT },
+  }
 \cs_generate_variant:Nn \ztex_page_annotate:nnnnn {eee}
 \cs_new:Npn \__page_mask_pos_parse:w (#1, #2) 
   {(
     \dim_to_decimal:n {#1} pt, 
     \dim_to_decimal:n {#2-\paperheight} pt
   )}
-\ztex_msg_set:nn {pageinfo}{Only~star~version~of~\string\zpagemask\ is~label-allowed.}
+\ztex_msg_set:nn {pageinfo}
+  {
+    Only~star~version~of~\string\zpagemask\ 
+    is~label-allowed.
+  }
+\prop_gclear_new:N \g__zpage_mask_label_prop
 \NewDocumentCommand{\zpagemask}{so+m}
   {
     \group_begin:
-    \IfValueT{#2}{\ztex_keys_set:nn { page/mask }{#2}}
-    \IfBooleanTF{#1}{\gdef\@once@hook@sign{}}{
-      \gdef\@once@hook@sign{*}
-      \tl_if_eq:enF {\l__ztex_page_mask_label_tl}
-        { DEFAULT }
-        { \ztex_msg_warn:n {pageinfo} }
-    }
-    \exp_args:Neee \DeclareHookRule{shipout/\l__ztex_page_mask_layer_tl}
-      {ztex@page@mask-\l__ztex_page_mask_label_tl}
-      {<}{pgfrcs}
-    \ztex_page_annotate:eeenn 
-      {\l__ztex_page_mask_layer_tl}
-      {\exp_after:wN \__page_mask_pos_parse:w \l__ztex_page_mask_position_tl}
-      {\l__ztex_page_mask_anchor_tl}{#3}
-      {\@once@hook@sign}
+    \IfValueT{ #2 }
+      {
+        \ztex_keys_set:nn { page/mask }{#2}
+      }
+    \IfBooleanTF{#1}{\gdef\@once@hook@sign{}}
+      {
+        \gdef\@once@hook@sign{*}
+        \tl_if_eq:enF { \l__ztex_page_mask_label_tl }
+          { DEFAULT }
+          { \ztex_msg_warn:n {pageinfo} }
+      }
+    \exp_args:Neee \hook_gset_rule:nnnn
+      { shipout/\l__ztex_page_mask_layer_tl }
+      { ztex@page@mask-\l__ztex_page_mask_label_tl }
+      { < }{ pgfrcs }
+    \exp_args:NNe \prop_gput_from_keyval:Nn \g__zpage_mask_label_prop
+      { \l__ztex_page_mask_label_tl = \l__ztex_page_mask_layer_tl }
+    \ztex_page_annotate:eeenn
+      { \l__ztex_page_mask_layer_tl }
+      { \exp_after:wN \__page_mask_pos_parse:w \l__ztex_page_mask_position_tl }
+      { \l__ztex_page_mask_anchor_tl }
+      { #3 }{ \@once@hook@sign }
     \group_end:
   }
-\NewDocumentCommand{\zpagemaskrm}{mm}
+\ztex_msg_set:nn {zpage@masklabel@nonexist}
   {
-    \hook_gremove_code:nn {shipout/#1}
-      {ztex@page@mask-#2}
+    Page~mask~of~label:~'#1'~does~NOT~exist,~
+    i'll~give~up~this~operation.~Current~page~
+    mask~label~listed~as~follows(without~outer~braces):
+    \prop_map_function:NN \g__zpage_mask_label_prop
+      \__prop_typeout:nn
   }
-
+\NewDocumentCommand{\zpagemaskrm}{ m }
+  {
+    \prop_if_in:NnTF \g__zpage_mask_label_prop
+      { #1 }
+      {
+        \exp_args:Ne \hook_gremove_code:nn 
+          { shipout/\prop_item:Nn \g__zpage_mask_label_prop {#1} }
+          { ztex@page@mask-#1 }
+        \prop_gpop:NnN \g__zpage_mask_label_prop
+          { #1 } \l_tmpa_tl
+      }{
+        \ztex_msg_warn:nn 
+          { zpage@masklabel@nonexist }
+          { #1 }
+      }
+  }
+\cs_new:Npn \__prop_typeout:nn #1#2
+  { \\{#1}~~~=>~~~{#2} }
+\NewDocumentCommand{\zpagemaskrule}{mmm}
+  {
+    \prop_if_in:NnTF \g__zpage_mask_label_prop {#1}
+      {
+        \prop_if_in:NnTF \g__zpage_mask_label_prop {#3}
+          {
+            \exp_args:Neee \hook_gset_rule:nnnn
+              { shipout/\prop_item:Nn \g__zpage_mask_label_prop {#1} }
+              { ztex@page@mask-#1 }
+              { #2 }
+              { ztex@page@mask-#3 }
+          }{
+            \ztex_msg_warn:nn
+              { zpage@masklabel@nonexist }
+              { #2 }
+          }
+      }{
+        \ztex_msg_warn:nn
+          { zpage@masklabel@nonexist }
+          { #1 }
+      }
+  }
 
 
 % ==> page target

@@ -1,5 +1,5 @@
 \ProvidesExplFile{ztex.module.box.tex}
-  {2025/07/11}{\ztex@versi@n}
+  {2025/09/13}{\ztex@versi@n}
   {box~module~for~ztex}
 
 
@@ -19,6 +19,40 @@
 \box_new:N \l__zbox_tmpc_box
 \cs_new:Npn \zbox_ltx_rule:nnn #1#2#3
   { \rule[#1]{#2}{#3} }
+
+
+% ==> better '\mbox' and '\fbox'(\verb can be used inside)
+% REF: https://texhacks.blogspot.com/2011/01/better-mbox-and-fbox.html?m=1
+\def\zmbox{\leavevmode\hbox}
+\newbox\ztexcollectbox
+\protected\long\def\zboxcollect
+  {
+    \leavevmode
+    \afterassignment\zboxcollect@pre
+    \setbox\ztexcollectbox\hbox
+  }
+\def\zboxcollect@pre
+  {
+    \bgroup
+    \aftergroup\zboxcollect@post
+  }
+\def\zboxcollect@post
+  {
+    \egroup
+    \zboxcollect@typeset
+  }
+\def\zboxcollect@typeset
+  {
+    \box\ztexcollectbox
+  }
+\cs_set_protected:Npn \zbox_item_collect:nw #1
+  {
+    \cs_set:Npn \zboxcollect@typeset
+      { #1 }
+    \zboxcollect
+  }
+\NewDocumentCommand{\zboxcollectcustom}{m}
+  { \zbox_item_collect:nw { #1 } }
 
 
 % ==> 'framed' env for user

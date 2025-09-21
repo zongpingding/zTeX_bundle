@@ -1,4 +1,5 @@
-\ProvidesExplFile{ztikz.library.basic.tex}{2024/12/17}{1.0.0}{basic~library~for~ztikz}
+\ProvidesExplFile{ztikz.library.basic.tex}{2025/09/22}
+  {1.0.0}{basic~library~for~ztikz}
 
 
 
@@ -44,26 +45,29 @@
     \exp_args:Nne \ztikz_keys_set:nn { point } { #1 }
     \seq_set_split:Nnn \l__point_list_seq { ; }{#2}
     \seq_set_split:Nnn \l__point_label_seq { ; }{#3}
-    \int_step_inline:nnnn {1}{1}{\seq_count:N \l__point_list_seq}{        
-      \draw plot [
-        only~ marks,
-        mark = \str_use:N \l__point_type_str, 
-        mark~ size = \dim_use:N \l__point_radius_dim,
-        mark~ options = {
-          rotate  = \fp_use:N \l__point_rotate_angle, 
-          opacity = \tl_use:N \l__point_opacity_tl, 
-          color   = \tl_use:N \l__point_color_tl,
-          ball~ color = \tl_use:N \l__point_color_tl,
-        }
-      ] coordinates{\seq_item:Nn \l__point_list_seq{##1}} 
-        node[#4] {\seq_item:Nn \l__point_label_seq{##1}};
-    }
+    \int_step_inline:nnnn {1}{1}
+      { \seq_count:N \l__point_list_seq }
+      {        
+        \draw plot [
+          only~ marks,
+          mark = \str_use:N \l__point_type_str, 
+          mark~ size = \dim_use:N \l__point_radius_dim,
+          mark~ options = {
+            rotate  = \fp_use:N \l__point_rotate_angle, 
+            opacity = \tl_use:N \l__point_opacity_tl, 
+            color   = \tl_use:N \l__point_color_tl,
+            ball~ color = \tl_use:N \l__point_color_tl,
+          }
+        ] coordinates{\seq_item:Nn \l__point_list_seq{##1}} 
+          node[#4] {\seq_item:Nn \l__point_label_seq{##1}};
+      }
     \group_end:
   }
 \NewDocumentCommand\ShowGrid{ O{color=gray, very~ thin, step=1}m }
   {
     \seq_set_split:Nnn \l__grid_param_ii_seq { ; }{#2}
-    \draw[#1] \seq_item:Nn \l__grid_param_ii_seq{1} grid \seq_item:Nn \l__grid_param_ii_seq{2};
+    \draw[#1] \seq_item:Nn \l__grid_param_ii_seq{1} 
+      grid \seq_item:Nn \l__grid_param_ii_seq{2};
   }
 % intersection
 \NewDocumentCommand\ShowIntersection{ omm }
@@ -118,12 +122,14 @@
           \fp_eval:n {\l__polygon_radius_fp*cos(\l_angle_next_fp)}, 
           \fp_eval:n {\l__polygon_radius_fp*sin(\l_angle_next_fp)}
         );
-      % fill polygon path 
+      % fill polygon path
       \int_compare:nNnTF {##1}<{#2}
         {
-          \tl_put_right:Nn \l__ztikz_basic_poly_path_tl {(p##1)--}
+          \tl_put_right:Nn \l__ztikz_basic_poly_path_tl 
+            { (p##1)-- }
         }{
-          \tl_put_right:Nn \l__ztikz_basic_poly_path_tl {(p##1)--cycle}
+          \tl_put_right:Nn \l__ztikz_basic_poly_path_tl 
+            { (p##1)--cycle }
         }
       % mark coordinates
       \coordinate (p##1) at ( 
@@ -137,11 +143,16 @@
     }{
       \fp_set:Nn \l__polygon_fill_opacity_fp {.75}
     }
-    \fill [\tl_use:N \l__polygon_fill_color_tl, fill~opacity=\fp_use:N \l__polygon_fill_opacity_fp] \l__ztikz_basic_poly_path_tl;
+    \fill [
+        \tl_use:N \l__polygon_fill_color_tl, 
+        fill~opacity=\fp_use:N \l__polygon_fill_opacity_fp
+      ] \l__ztikz_basic_poly_path_tl;
     % show markers
-    \int_step_inline:nnn {1}{#2}{
-      \ShowPoint[\l__polygon_marker_option_tl]{(p##1)}
-    }
+    \int_step_inline:nnn {1}{#2}
+      {
+        \ShowPoint[\l__polygon_marker_option_tl]
+          { (p##1) }
+      }
     \end{scope} 
     \group_end:
   }
@@ -198,9 +209,12 @@
   {
     \str_case:NnT \l__tick_type_tl {
       {main}{
-        \dim_set_eq:NN \l__tick_length_dim\l__main_tick_length_dim
-        \tl_set:NV \l__tick_color_tl\l__main_tick_color_tl
-        \tl_set:Nn \l__node_text_tl {\tl_use:N \l__main_tick_label_tl}
+        \dim_set_eq:NN \l__tick_length_dim
+          \l__main_tick_length_dim
+        \tl_set:NV \l__tick_color_tl
+          \l__main_tick_color_tl
+        \tl_set:Nn \l__node_text_tl 
+          { \tl_use:N \l__main_tick_label_tl }
       }
       {sub}{
         \dim_set_eq:NN \l__tick_length_dim\l__sub_tick_length_dim
@@ -231,7 +245,8 @@
       {below}{
         \draw[\tl_use:N \l__tick_color_tl] (#1, 0) 
           -- ++(0, \dim_eval:n {-\l__tick_length_dim/2}) 
-          node[\tl_use:N \l__main_tick_label_position_tl=\dim_use:N \l__tick_label_shift_dim] 
+          node[\tl_use:N \l__main_tick_label_position_tl
+            =\dim_use:N \l__tick_label_shift_dim] 
           {
             \textcolor{\tl_use:N \l__main_tick_label_color_tl}
               {\tl_use:N \l__node_text_tl}
@@ -248,7 +263,8 @@
     \ztikz_keys_set:nn { axis } { #1 }
     \seq_set_split:Nnn \l__points_seq { ; }{#2}
     \begin{scope}[rotate=\fp_use:N \l__axis_rotate_angle]
-    \draw[->, \tl_use:N \l__axis_color_tl] \seq_item:Nn \l__points_seq{1} 
+    \draw[->, \tl_use:N \l__axis_color_tl] 
+      \seq_item:Nn \l__points_seq{1} 
       -- \seq_item:Nn \l__points_seq{2};
     % draw ticks
     \fp_step_inline:nnnn 
@@ -330,7 +346,8 @@
 
 % stairs plot
 \seq_new:N \l__statistic_option_tl
-\NewDocumentCommand\StairsPlot{ O{plot-left;jump-left}O{color=black}O{}m }
+\NewDocumentCommand\StairsPlot
+  { O{plot-left;jump-left}O{color=black}O{}m }
   {
     \seq_set_split:Nnn \l__statistic_option_tl { ; }{#1}
     \str_case:enF {\seq_item:Nn \l__statistic_option_tl{1}}{
@@ -339,7 +356,8 @@
       {plot-mid}{\tl_set:Nn \l__tmpa_tl {const~plot~mark~mid}}
       {}{\tl_set:Nn \l__tmpa_tl {}}
     }{ 
-      \msg_new:nnn {ztikz}{ztikz-stairs-plot}{current~stairs~plot~type~is:~'#1'~,~ invalide}
+      \msg_new:nnn {ztikz}{ztikz-stairs-plot}
+        {current~stairs~plot~type~is:~'#1'~,~ invalide}
       \msg_error:nn {ztikz}{ztikz-stairs-plot}
     }
     \str_case:enF {\seq_item:Nn \l__statistic_option_tl{2}}{
@@ -348,10 +366,12 @@
       {jump-mid}{\tl_set:Nn \l__tmpb_tl {jump~mark~mid}}
       {}{\tl_set:Nn \l__tmpb_tl {}}
     }{ 
-      \msg_new:nnn {ztikz}{ztikz-stairs-plot}{current~stairs~jump~type~is:~'#1'~,~ invalide}
+      \msg_new:nnn {ztikz}{ztikz-stairs-plot}
+        {current~stairs~jump~type~is:~'#1'~,~ invalide}
       \msg_error:nn {ztikz}{ztikz-stairs-plot}
     }
-    \ztikz_statistic_plot_cs:ennn {\l__tmpa_tl,\l__tmpb_tl}{#2}{#3}{#4}
+    \ztikz_statistic_plot_cs:ennn {\l__tmpa_tl,\l__tmpb_tl}
+      {#2}{#3}{#4}
   }
 % stem plot
 \NewDocumentCommand\StemPlot{ O{x}O{color=black}O{}m }
@@ -362,7 +382,8 @@
       {o}{\tl_set:Nn \l__tmpa_tl {polar~ comb}}
       {}{\tl_set:Nn \l__tmpa_tl  {ycomb}}
     }{ 
-      \msg_new:nnn {ztikz}{ztikz-stem-plot}{current~stem~plot~type~is:~'#1'~,~ invalide}
+      \msg_new:nnn {ztikz}{ztikz-stem-plot}
+        {current~stem~plot~type~is:~'#1'~,~ invalide}
       \msg_error:nn {ztikz}{ztikz-stem-plot}
     }
     \ztikz_statistic_plot_cs:ennn {\l__tmpa_tl}{#2}{#3}{#4}
@@ -377,7 +398,8 @@
       {yc}{\tl_set:Nn \l__tmpa_tl {xbar~ interval}}
       {}{\tl_set:Nn \l__tmpa_tl  {ybar}}
     }{ 
-      \msg_new:nnn {ztikz}{ztikz-bar-plot}{current~bar~plot~type~is:~'#1'~,~ invalide}
+      \msg_new:nnn {ztikz}{ztikz-bar-plot}
+        {current~bar~plot~type~is:~'#1'~,~ invalide}
       \msg_error:nn {ztikz}{ztikz-bar-plot}
     }
     \ztikz_statistic_plot_cs:ennn {\l__tmpa_tl}{#2}{#3}{#4}
