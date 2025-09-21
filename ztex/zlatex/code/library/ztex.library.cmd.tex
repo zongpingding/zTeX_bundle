@@ -1,0 +1,155 @@
+\ProvidesExplFile{ztex.library.cmd.tex}
+  {2025/09/21}{\ztex@versi@n}
+  {cmd~library~for~ztex}
+
+
+% scratch variables setup:
+\tl_new:N \l__ztex_cmd_args_tl
+\int_new:N \l__ztex_cmd_argcnt_int
+\str_new:N \l__ztex_cmd_name_str
+
+% ztex cmd kernel
+\cs_set_eq:NN \fpuse  \fp_to_tl:n
+\cs_set_eq:NN \intuse \int_eval:n
+\cs_set_eq:NN \dimuse \dim_eval:n
+\cs_set:Npn   \clistuse #1#2 
+  {
+    \clist_item:Nn #1{#2}
+  }
+\cs_set_eq:NN \cmdvar \use:c
+\cs_new_protected:Npn \ztex_cmd_create:nnnn #1#2#3#4
+  {% #1:cmd name; #2:arg-spec(default as 'tl'); #3:code; #4:cmd-type
+    % parse arg-spec
+    \int_set:Nn \l__ztex_cmd_argcnt_int {\clist_count:n {#2}}
+    \str_set:Nn \l__ztex_cmd_name_str {#1}
+    % create cmd
+    \cs_generate_from_arg_count:ccnn {#1}{#4}{1}
+      {
+        \group_begin:
+        \keyval_parse:NNn
+          \__ztex_cmd_extract_var:n
+          \__ztex_cmd_extract_var_default:nn
+          { #2 }
+        \keys_set:nn { ztex/cmd/#1 }{ ##1 }
+        #3
+        \group_end:
+      }
+  }
+\cs_generate_variant:Nn \cs_generate_from_arg_count:NNnn {ccnn}
+\cs_set:Npn \__ztex_cmd_extract_var:n #1
+  {
+    % \exp_after:wN \def\cs:w#1\cs_end:{}
+    \__ztex_cmd_arg_type_check:n { #1 }
+    \__ztex_cmd_keys_parser:een 
+      { \exp_not:N \__ztex_cmd_arg_name:w \l__ztex_cmd_args_tl \scan_stop: }
+      { \exp_not:N \__ztex_cmd_arg_type:w \l__ztex_cmd_args_tl \scan_stop: }
+      { zCMD@EMPTY }
+  }
+\cs_set:Npn \__ztex_cmd_extract_var_default:nn #1#2
+  {% #1=<name>:<type>
+    \__ztex_cmd_arg_type_check:n { #1 }
+    \__ztex_cmd_keys_parser:een 
+      { \exp_not:N \__ztex_cmd_arg_name:w \l__ztex_cmd_args_tl \scan_stop: }
+      { \exp_not:N \__ztex_cmd_arg_type:w \l__ztex_cmd_args_tl \scan_stop: }
+      { #2 }
+  }
+\cs_new:Npn \__ztex_cmd_arg_type_check:n #1 
+  {
+    \tl_set_rescan:Nne \l__ztex_cmd_args_tl 
+      { 
+        \cctab_select:N \c_document_cctab
+        \char_set_catcode_letter:n { 58 } 
+      }{ #1 }
+    \tl_set:Ne \l__ztex_cmd_args_tl 
+      { 
+        \l__ztex_cmd_args_tl
+        \ztex_colon_if_in:eF {\l__ztex_cmd_args_tl}{:tl}
+      }
+  }
+\cs_new:Npn \__ztex_cmd_arg_name:w #1:#2\scan_stop:
+  { #1 }
+\cs_new:Npn \__ztex_cmd_arg_type:w #1:#2\scan_stop:
+  { #2 }
+\cs_generate_variant:Nn \clist_map_function:nN { nc, vc }
+\cs_new:Npn \__ztex_cmd_keys_parser:nnn #1#2#3
+  {% #1:key-name; #2:type; #3:default
+  \exp_args:Nee \keys_define:nn { ztex/cmd/\l__ztex_cmd_name_str }
+    {
+      \ztex_head_tail_token_if_eq:ennTF {#2}{[}{]}
+        {
+          #1 .code:n      = 
+            {
+              \cs_set:Npn \exp_not:c {#1} ####1
+                {
+                  \exp_not:N \clist_item:en
+                    {
+                      \exp_not:N \__zcmd_list_arg_handle:nn 
+                        { ##1 }{ #2 }
+                    }{####1}
+                }
+            },
+        }{
+          #1 .#2_set:c  = { #1 },
+        }
+      #1 .initial:n = { #3 },
+    }
+  }
+\cs_generate_variant:Nn \__ztex_cmd_keys_parser:nnn {ee}
+% vector(list) syntax for ztexcmd arg-spec
+\cs_set:Npn \__zcmd_list_arg_handle:nn #1#2 
+  {% #1:list; #2:type
+    \clist_map_function:nc {#1}
+      {
+        __zcmd_list_arg_
+        \ztex_token_strip_both:n {#2}
+        :n
+      }
+  }
+\cs_set:Npn \__zcmd_list_arg_int:n #1
+  { \int_eval:n {#1}, }
+\cs_set:Npn \__zcmd_list_arg_fp:n #1
+  { \fp_eval:n {#1}, }
+\cs_set:Npn \__zcmd_list_arg_str:n #1
+  { \tl_to_str:n {#1}, }
+\cs_set:Npn \__zcmd_list_arg_dim:n #1
+  { \dim_eval:n {#1}, }
+\cs_set:Npn \__zcmd_list_arg_tl:n #1
+  { #1, }
+
+
+% ==> users' interface
+% TOTAL 8 types in theory --> 
+%   (set, new) x (fragile, robust) 
+%   x (long, short) x (local, global);
+% NOTE: all of the commands defined by `\ztexdef' is 
+% 1. robust,
+% 2. long,
+\cs_set_protected:Npn \znewcmd #1#2#3
+  {
+    \cs_if_exist:NT {#1}
+      {
+        \ztex_msg_set:nn {znewcmd@exist}
+          {
+            command~\string#1~already~exsits!
+          }
+        \ztex_msg_error:n {znewcmd@exist}
+      }
+    \exp_args:Ne \ztex_cmd_create:nnnn {\cs_to_str:N #1}{#2}
+      {
+        #3
+      }{cs_new:Npn}
+  }
+\cs_set_protected:Npn \zsetcmd #1#2#3
+  {
+    \exp_args:Ne \ztex_cmd_create:nnnn {\cs_to_str:N #1}{#2}
+      {
+        #3
+      }{cs_set:Npn}
+  }
+\cs_set_protected:Npn \zgsetcmd #1#2#3
+  {
+    \exp_args:Ne \ztex_cmd_create:nnnn {\cs_to_str:N #1}{#2}
+      {
+        #3
+      }{cs_gset:Npn}
+  }

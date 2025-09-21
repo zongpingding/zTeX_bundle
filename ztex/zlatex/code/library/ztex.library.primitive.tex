@@ -1,6 +1,32 @@
 \ProvidesExplFile{ztex.library.primitive.tex}
-  {2025/09/02}{\ztex@versi@n}
+  {2025/09/20}{\ztex@versi@n}
   {primitive~library~for~ztex}
 
 
 %% collect primitives from different engines
+% avoid pdf compression
+% 1. https://tex.stackexchange.com/a/483040/294585
+% 2. https://tex.stackexchange.com/a/454235/294585
+\NewDocumentCommand{\uncompressPDF}{}
+  {
+    % >> from expl3:
+    \pdf_uncompress:
+
+    % >> manually set:
+    % \sys_if_engine_pdftex:T
+    %   {
+    %     \tex_pdfcompresslevel:D = 0
+    %     \tex_pdfobjcompresslevel:D = 0
+    %   }
+    % \sys_if_engine_xetex:T
+    %   {
+    %     \special{dvipdfmx:config~z~0}
+    %     \special{dvipdfmx:config~C~0x40}
+    %   }
+    % \sys_if_engine_luatex:T
+    %   {
+    %     \tex_pdfvariable:D~compresslevel = 0
+    %     \tex_pdfvariable:D~objcompresslevel = 0
+    %   }
+  }
+\@onlypreamble\uncompressPDF

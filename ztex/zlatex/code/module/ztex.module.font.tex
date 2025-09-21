@@ -1,5 +1,5 @@
 \ProvidesExplFile{ztex.module.font.tex}
-  {2025/09/03}{\ztex@versi@n}
+  {2025/09/18}{\ztex@versi@n}
   {font~module~for~ztex}
 
 
@@ -112,7 +112,8 @@
     feat / other           .initial:n  = {  },  % other fontspec config
   }
 
-\ztex_msg_set:nn { fontcfg / lang }{ Current~font~type~supported~are:'en',~'CJK'. }
+\ztex_msg_set:nn { fontcfg / lang }
+  { Current~font~type~supported~are:'en',~'CJK'. }
 \cs_set:Npn \__ztex_fontcfg_newfamily_copy:nnnnn #1#2#3#4#5 
   {% #1:font cmd; #2:font file path(format 'Path=xxx,'); 
    % #3:font file name; #4:font feat;  #5:en/CJK
@@ -202,27 +203,34 @@
   }
 
 
-% TARGET: \zfontset{en={main=, sans=}, CJK={main=, mono=}}
-% Is this interface too complex ???
-\ztex_keys_define:nn { fontcfg / set }
-  {
-    lang    .multichoices:nn = {en, CJK}{},
-  }
-\cs_new_protected:Npn \__ztex_docfont_set:nn #1#2
-  {% #1: roman,sans,mono; #2:font family
-    \__ztex_fontcfg_setfamily_copy:ooooo 
-      { #1 }{ #2 }{}{}{}
-  }
+% set document main fontfamily
 \NewDocumentCommand{\zfontfamilyset}{O{en}m}
-  { }
+  {
+    \clist_map_inline:nn { #1 }
+      {
+        \keyval_parse:nnn
+          { \use_none:n }
+          { \__ztex_fontcfg_setfamily_aux:nnn {##1} }
+          { #2 }
+      }
+  }
 \ztex_msg_set:nn { fontcfg / family }
   { Valid~family~options~are:'main',~'sans'~and~'mono'. }
-\cs_set:Npn \__ztex_fontcfg_setfamily_copy:nnnn #1#2#3#4
-  {% #1:lang, #2:family, #3:font, #4: font features
+\cs_set:Npn \__ztex_fontcfg_setfamily_aux:nnn #1#2#3
+  {% #1:lang, #2:family, #3:{font}{font features}
     \tl_if_in:nnF {en, CJK}{#1}
       { \ztex_msg_error:n { fontcfg / lang } }
     \tl_if_in:nnF {main, sans, mono}{#2}
       { \ztex_msg_error:n { fontcfg / family } }
-    \cs:w set #1 #2 font\cs_end: {#3}{#4}
+    \ltx_main_fontfamily_set:eee
+      { \str_case:nn {#1}{{en}{}{CJK}{CJK}} #2 }
+      { \use_i:nn #3  }
+      { \use_ii:nn #3 }
   }
-\cs_generate_variant:Nn \__ztex_fontcfg_setfamily_copy:nnnn {oooo}
+\cs_new_protected:Npn \ltx_main_fontfamily_set:nnn #1#2#3
+  {
+    \cs:w set #1 font\cs_end:
+      { #2 }[ #3 ]
+  }
+\cs_generate_variant:Nn \ltx_main_fontfamily_set:nnn
+  { eee }
