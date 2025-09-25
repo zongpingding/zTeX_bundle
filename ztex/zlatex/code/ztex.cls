@@ -35,7 +35,7 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \ExplSyntaxOn
 \NeedsTeXFormat{LaTeX2e}
-\gdef\ztex@d@te{2025/09/21}
+\gdef\ztex@d@te{2025/09/23}
 \gdef\ztex@versi@n{1.1.3}
 \tl_const:Nn \c__ztex_class_name_tl           {ztex}
 \tl_const:Nn \c__ztex_class_version_tl        {\ztex@versi@n}
@@ -43,7 +43,7 @@
 \clist_const:Nn \c__ztex_lang_support_clist   {en, cn}
 \tl_const:Nn    \c__ztex_class_description_tl  
   {
-    A~pre-release~latex3~document~class~for~article,~book,~or~slides;~
+    A~pre-release~universal~document~class~for~article,~book,~and~slides;~
     Support~languages:\clist_use:Nn \c__ztex_lang_support_clist{,~}
   }
 \ProvidesExplClass{\c__ztex_class_name_tl}         % Class name
@@ -237,12 +237,14 @@
   lang            .usage:n      = load,
   hyper           .bool_gset:N  = \g__ztex_hyperref_bool,
   hyper           .initial:n    = { false },
+  hyper           .default:n    = { true },
   hyper           .usage:n      = load,
   hyper-suppress  .clist_gset:N = \g__ztex_hyper_suppress_clist,
   hyper-suppress  .initial:n    = { toc },
   hyper-suppress  .usage:n      = load,
   fancy           .bool_gset:N  = \g__ztex_fancy_bool,
   fancy           .initial:n    = { false },
+  fancy           .default:n    = { true },
   fancy           .usage:n      = load,
   cref-backend    .str_gset:N   = \g__ztex_cref_backend_str,
   cref-backend    .initial:n    = { zref-clever },

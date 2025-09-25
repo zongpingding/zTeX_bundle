@@ -1,5 +1,5 @@
 \ProvidesExplFile{ztex.module.counter.tex}
-  {2025/09/18}{\ztex@versi@n}
+  {2025/09/23}{\ztex@versi@n}
   {counter~module~for~ztex}
 
 
@@ -22,3 +22,22 @@
   }
 \cs_generate_variant:Nn \zcnt_to_arabic:N { c }
 
+% create counter safely
+\cs_new_protected:Npn \zcnt_safe_new:nn #1#2
+  {
+    \cs_if_exist:cF { c@#1 }
+      {
+        \tl_if_empty:nTF { #2 }
+          {
+            \newcounter{ #1 }
+          }{
+            \newcounter{ #1 }[ #2 ]
+          }
+      }
+  }
+\cs_generate_variant:Nn \zcnt_safe_new:nn
+  { oo, ee }
+\NewDocumentCommand{\zcntnew}{mO{}}
+  {
+    \zcnt_safe_new:nn {#1}{#2}
+  }

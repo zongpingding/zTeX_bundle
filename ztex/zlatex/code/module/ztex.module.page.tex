@@ -1,5 +1,5 @@
 \ProvidesExplFile{ztex.module.page.tex}
-  {2025/09/18}{\ztex@versi@n}
+  {2025/09/23}{\ztex@versi@n}
   {page~module~for~ztex}
 
 
@@ -70,6 +70,7 @@
       {
         \cleardoublepage
         \@mainmattertrue
+        \pagestyle{plain}
         \setcounter{chapter}{0}
         \def\thechapter{\Alph{chapter}}
         \renewcommand\theHchapter{Appendix-\thechapter}
@@ -377,6 +378,20 @@
 
 % ==> doc info
 \gdef\@abspage@last{-1}
+% TODO: consider this new implement ?
+\ztex_msg_set:nn { pageall@wrong }
+  {
+    Current~total~page~number~is~wrong,~
+    Rerun~to~correct~this.
+  }
+% \ztex_hook_doc_end:n
+%   {
+%     \int_compare:nNnF
+%       { \@abspage@last } = { \g_shipout_readonly_int }
+%       {
+%         \ztex_msg_warn:n { pageall@wrong }
+%       }
+%   }
 \newcommand{\ztexpageall}
   {
     \bool_lazy_any:nTF
@@ -385,7 +400,7 @@
         { \int_compare_p:n {\@abspage@last < 0}      }
       }{ \c_empty_tl }{ \@abspage@last }
   }
-\ztex_hook_preamble_last:n 
+\ztex_hook_preamble_last:n
   {
     \let\ztextitle\@title
     \let\ztexauthor\@author
