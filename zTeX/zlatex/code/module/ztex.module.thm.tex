@@ -1,5 +1,5 @@
 \ProvidesExplFile{ztex.module.thm.tex}
-  {2025/09/06}{\ztex@versi@n}
+  {2025/09/23}{\ztex@versi@n}
   {thm~module~for~ztex}
 
 
@@ -87,115 +87,157 @@
 }
 \tl_if_exist:NF \g__ztex_lang_math_tl 
   {
-    \tl_set_eq:cc {g__ztex_lang_math_tl}{g__ztex_lang_str}
+    \tl_set_eq:cc
+      { g__ztex_lang_math_tl }
+      { g__ztex_lang_str     }
   }
 \NewDocumentCommand{\zthmnameset}{mm}
   {
-    \prop_gput_from_keyval:cn {g__ztex_thm_name_#1_prop} {#2}
+    \prop_gput_from_keyval:cn 
+      { g__ztex_thm_name_#1_prop }
+      { #2 }
   }
-
 
 
 % ==> thm module tools
 \NewDocumentCommand{\zthmlang}{m}
   {
     \tl_gset:Nn \g__ztex_lang_math_tl {#1}
-    \prop_set_eq:cc 
-      {g__ztex_thm_name_prop}
-      {g__ztex_thm_name_\g__ztex_lang_math_tl _prop}
+    \prop_set_eq:cc
+      { g__ztex_thm_name_prop }
+      { g__ztex_thm_name_\g__ztex_lang_math_tl _prop }
   }
-\@onlypreamble\zthmlang
+% \@onlypreamble\zthmlang
 \prop_new:c {g__ztex_thm_name_prop}
 \prop_gclear:c {g__ztex_thm_name_prop}
-\ztex_hook_preamble_last:n 
+\ztex_hook_preamble_last:n
   {
-    \prop_set_eq:cc 
-      {g__ztex_thm_name_prop}
-      {g__ztex_thm_name_\g__ztex_lang_math_tl _prop}
+    \prop_set_eq:cc
+      { g__ztex_thm_name_prop }
+      { g__ztex_thm_name_\g__ztex_lang_math_tl _prop }
   }
 \tl_new:N \g__ztex_thm_theorem_title_tl
-\def\zthmtitle{\@ifstar\@zthmtitle\@@zthmtitle}
+\protected\def\zthmtitle{\@ifstar\@zthmtitle\@@zthmtitle}
 \def\@zthmtitle{\__ztex_thm_theorem_title:}
 \def\@@zthmtitle{\tl_use:N \g__ztex_thm_theorem_title_tl}
 \bool_new:N \g__ztex_thm_title_inline_bool
 \NewDocumentCommand{\zthmtitleswitch}{s}
   {
     \IfBooleanTF{#1}
-      { \bool_gset_true:N \g__ztex_thm_title_inline_bool }
-      { \bool_gset_false:N \g__ztex_thm_title_inline_bool}
+      { \bool_gset_true:N \g__ztex_thm_title_inline_bool  }
+      { \bool_gset_false:N \g__ztex_thm_title_inline_bool }
   }
 \cs_new:Npn \__ztex_thm_color_set_check:nn #1#2 
   {
     \clist_clear:N \l_tmpa_clist
     \clist_put_right:NV \l_tmpa_clist \g__ztex_thm_theorem_clist
     \clist_put_right:NV \l_tmpa_clist \g__ztex_thm_proof_clist
-    \ztex_msg_set:nn {thm-color-set}{
-      Your~color~spec~key~'#1'~is~not~in~the~thm~env~list,~please~check~it~again.
-    }
     \clist_if_in:NnF \l_tmpa_clist {#1}
       { \ztex_msg_error:n {thm-color-set} }
   }
+\ztex_msg_set:nn {thm-color-set}
+  {
+    Your~color~spec~key~'#1'~is~not~in~the~
+    thm~env~list,~please~check~it~again.
+  }
 \NewDocumentCommand{\zthmcolorset}{m}
   {
-    % the checker may lower the performance ???
-    \ztex_label_hook_preamble_last:nn {ztex-thmcolor-setup-user}{
-      \keyval_parse:nnn 
-        { \use_none:n }
-        { \__ztex_thm_color_set_check:nn }
-        { #1 }
-      \ztex_keys_set:nn {color}{#1}
-    }
+    \ztex_label_hook_preamble_last:nn 
+      { ztex-thmcolor-setup-user }
+      {
+        \keyval_parse:nnn
+          { \use_none:n }
+          { \__ztex_thm_color_set_check:nn }
+          { #1 }
+        \ztex_keys_set:nn {color}{#1}
+      }
   }
 \DeclareHookRule{env/document/before}
   {ztex-thmcolor-setup-user}
   {>}
-  {ztex-thmall-setup-user}
+  {ztex-thmenv-setup-user}
 \@onlypreamble\zthmcolorset
 
 
-% create new thm env
-\cs_new:Npn \__ztex_mid_first:w #1|#2\q_stop {#1}
-\cs_new:Npn \__ztex_thm_color_set:w #1\q_stop #2|#3\q_stop 
-  { 
-    \tl_if_empty:eTF {#3}
-      {\ztex_keys_set:nn {color}{#1=black}} 
-      {\ztex_keys_set:nn {color}{#1=#3}} 
+% create new thm env(init related variables)
+\ztex_keys_define:nn { thmnew }
+  {
+    name    .tl_set:N = \l__zthm_new_name_tl,
+    color   .tl_set:N = \l__zthm_new_color_tl,
+    tocsym  .tl_set:N = \l__zthm_new_tocsym_tl,
+  }
+\cs_new:Nn \__zthm_new_keyval_clear:
+  {
+    \tl_clear:N \l__zthm_new_name_tl
+    \tl_clear:N \l__zthm_new_color_tl
+    \tl_clear:N \l__zthm_new_tocsym_tl
+  }
+\cs_new:Npn \__ztex_thm_color_set:nn #1#2
+  {
+    \tl_if_empty:eTF { #2 }
+      { \ztex_keys_set:nn {color}{#1=black} }
+      { \ztex_keys_set:nn {color}{#1=#2}    }
   }
 \cs_new:Npn \__ztex_color_keyval_add:n #1 
   {
-    \ztex_keys_define:nn {color}
+    \ztex_keys_define:nn { color }
       {
         #1 .tl_set:c  = { l__ztex_#1_color_tl },
         #1 .initial:n = { black },
         #1 .code:n    = { \ztex_color_set:n {##1} },
       }
   }
-\cs_new:Npn \__ztex_thm_create__:nn #1#2 
+\cs_new:Npn \__zthm_envnew_var_init:Nnn #1#2#3
   {
-    \ztex_thm_create:nn {#1}{#2}
-    \__ztex_color_keyval_add:n {#2}
-    \prop_gput_from_keyval:cn {g__ztex_thm_name_prop}{#2=#2}
+    \ztex_thm_create:nn {#2}{#3}
+    \__ztex_color_keyval_add:n {#3}
+    \prop_gput:Nnn #1 { #3 }{ #3 }
+    \prop_gput:Nnn \g_ztex_thm_toc_symbols_prop
+      { #3 }{ #3 }
   }
-\cs_new:Npn \__ztex_thm_create__:nnn #1#2#3 
+\cs_new:Npn \__zthm_envnew_var_init:Nnnn #1#2#3#4
   {
-    \ztex_thm_create:ne {#1}{\use_i:nn {#2}{#3}}
-    \__ztex_color_keyval_add:n {#2}
-    \exp_last_unbraced:Ne \__ztex_thm_color_set:w {#2}\q_stop #3\q_stop
-    \prop_gput:cee {g__ztex_thm_name_prop}
-      { #2 }
-      {\exp_last_unbraced:Ne \__ztex_mid_first:w #3\q_stop}
-  }
-\NewDocumentCommand{\zthmnew}{O{theorem}m}
-  {
-    \ztex_label_hook_preamble_last:nn {ztex-thmall-setup-user}
+    \ztex_thm_create:nn {#2}{#3}
+    \__ztex_color_keyval_add:n {#3}
+    \ztex_keys_set:nn { thmnew }{ #4 }
+    \exp_args:Nno \__ztex_thm_color_set:nn
+      { #3 }{ \l__zthm_new_color_tl }
+    \tl_if_empty:NTF \l__zthm_new_name_tl
       {
-        \keyval_parse:nnn
-          { \__ztex_thm_create__:nn {#1}  }
-          { \__ztex_thm_create__:nnn {#1} }
-          { #2 }
+        \prop_gput:Nnn #1
+          { #3 }{ #3 }
+      }{
+        \prop_gput:Nno #1
+          { #3 }{ \l__zthm_new_name_tl }
+      }
+    \tl_if_empty:NTF \l__zthm_new_tocsym_tl
+      {
+        \prop_gput:Nnn \g_ztex_thm_toc_symbols_prop
+          { #3 }{ #3 }
+      }{
+        \prop_gput:Nno \g_ztex_thm_toc_symbols_prop
+          { #3 }{ \l__zthm_new_tocsym_tl }
+      }
+    \__zthm_new_keyval_clear:
+  }
+\cs_new_protected:Npn \zthm_envnew_var_init:Nnn #1#2#3
+  {
+    \keyval_parse:nnn
+      { \__zthm_envnew_var_init:Nnn  #1{#2} }
+      { \__zthm_envnew_var_init:Nnnn #1{#2} }
+      { #3 }
+  }
+\NewDocumentCommand{\zthmenvnew}{O{theorem}m}
+  {
+    \ztex_label_hook_preamble_last:nn 
+      { ztex-thmenv-setup-user }
+      {
+        \zthm_envnew_var_init:Nnn
+          \g__ztex_thm_name_prop
+          { #1 }{ #2 }
       }
   }
-\@onlypreamble\zthmnew
+\@onlypreamble\zthmenvnew
 
 
 % ==> new thm style interface
@@ -218,7 +260,7 @@
           % NOTE:
           % 1. thm preamble can be only set by one style
           % 2. '\g__ztex_thm_style_tl' need to be set 
-          %       before '\ztexloadlib{theme}'
+          %    before '\ztexloadlib{theme}'
           \tl_if_eq:cnT {g__ztex_thm_style_tl}
             { #1 }{ ##1 }
         },
@@ -240,8 +282,10 @@
 %             when create new thm style
 \ztex_msg_set:nn {mathEnv-dependency}
   {
-    MathEnv~style:'\g__ztex_thm_style_tl'~requires~package~'tcolorbox'~and~'tikz',~and~
-    either~of~which~hasn't~been~loaded~in~your~preamble.~Reset~to~default~'plain'~style~now.
+    MathEnv~style:'\g__ztex_thm_style_tl'~requires~
+    package~'tcolorbox'~and~'tikz',~and~either~of~
+    which~hasn't~been~loaded~in~your~preamble.~
+    Reset~to~default~'plain'~style~now.
   }
 \cs_new:Nn \__ztex_thm_tcolorbox_warning: 
   {
@@ -298,18 +342,21 @@
 % ==> thm format and style setup
 \ztex_msg_set:nn {mathEnv-style}
   {
-    You~use~an~incorrect~MathEnv~style:~'\g__ztex_thm_style_tl',~All~
-    valid~styles~are:'plain',~'leftbar',~'background',~'fancy',~'shadow',~
-    'paris',~'lapsis',~'tcb',~'obsidian',~and~'elegant'.
+    You~use~an~incorrect~MathEnv~style:~
+    '\g__ztex_thm_style_tl',~
+    All~valid~styles~are:'plain',~'leftbar',~
+    'background',~'fancy',~'shadow',~'paris',~
+    'lapsis',~'tcb',~'obsidian',~and~'elegant'.
   }
 % thm counter
 \bool_new:N \g__ztex_thm_cntshare_bool
 \ztex_keys_define:nn {thm/cnt} 
   {
     share     .bool_gset:N = \g__ztex_thm_cntshare_bool,
-    share     .default:n   = true,
+    share     .initial:n   = { false },
+    share     .default:n   = { true  },
     parent    .tl_gset:N   = \g__ztex_thm_cntparent_tl,
-    parent    .initial:n   = section,
+    parent    .initial:n   = { section },
   }
 \NewDocumentCommand{\zthmcnt}{m}
   {
@@ -319,35 +366,43 @@
   }
 \@onlypreamble\zthmcnt
 % thm env warper
-\cs_new:Npn \__ztex_thm_warp_start:nnn #1#2#3 
+\cs_new:Npn \__ztex_thm_wrap_start:nnn #1#2#3 
   {
-    \def\thm@tmp@color{\tl_use:c {l__ztex_#1_color_tl}}
     \def\thm@tmp@name{#1}
+    \def\thm@tmp@color{\tl_use:c {l__ztex_#1_color_tl}}
     \__ztex_thm_theorem_title_gen:nnn {#1}{#2}{#3}
-    \tl_if_exist:cTF {g__ztex_thm_style_\g__ztex_thm_style_tl _option_tl}
-      {\tl_use:c {g__ztex_thm_style_\g__ztex_thm_style_tl _option_tl}}
-      {\ztex_msg_error:n {mathEnv-style}}
-    \tl_if_exist:cTF {g__ztex_thm_style_\g__ztex_thm_style_tl _begin_tl}
-      {\tl_use:c {g__ztex_thm_style_\g__ztex_thm_style_tl _begin_tl}}
-      {\ztex_msg_error:n {mathEnv-style}}
+    \tl_if_exist:cTF
+      { g__ztex_thm_style_\g__ztex_thm_style_tl _option_tl }
+      { \tl_use:c {g__ztex_thm_style_\g__ztex_thm_style_tl _option_tl} }
+      { \ztex_msg_error:n {mathEnv-style} }
+    \tl_if_exist:cTF
+      { g__ztex_thm_style_\g__ztex_thm_style_tl _begin_tl }
+      { \tl_use:c {g__ztex_thm_style_\g__ztex_thm_style_tl _begin_tl} }
+      { \ztex_msg_error:n {mathEnv-style} }
   }
 \tl_new:N \l__ztex_thm_toc_prefix_tl
 \newcommand\zthmtocprefix[1]
   {
-    \tl_set:Nn \l__ztex_thm_toc_prefix_tl {\exp_not:n {#1}}
+    \tl_set:Nn \l__ztex_thm_toc_prefix_tl
+      { \exp_not:n {#1} }
   }
 \@onlypreamble\zthmtocprefix
-\cs_new:Npn \__ztex_thm_warp_end:n #1 
+\cs_new:Npn \__ztex_thm_wrap_end:n #1 
   {
-    \tl_if_exist:cTF {g__ztex_thm_style_\g__ztex_thm_style_tl _end_tl}
-      {\tl_use:c {g__ztex_thm_style_\g__ztex_thm_style_tl _end_tl}}
-      {\ztex_msg_error:n {mathEnv-style}}
+    \tl_if_exist:cTF 
+      { g__ztex_thm_style_\g__ztex_thm_style_tl _end_tl }
+      { \tl_use:c {g__ztex_thm_style_\g__ztex_thm_style_tl _end_tl} }
+      { \ztex_msg_error:n {mathEnv-style} }
     \zsect_add_theorem_line:eeoe
       { \g__ztex_thm_toc_level_tl }
-      { 
+      {
         {
           \exp_not:N \l__ztex_thm_toc_prefix_tl
-          \exp_not:n {\prop_item:Nn \g_ztex_thm_toc_symbols_prop {#1}}
+          \exp_not:n 
+            { 
+              \prop_item:Nn \g_ztex_thm_toc_symbols_prop
+                { #1 }
+            }
         }
         { \g__ztex_thm_theorem_title_tl }
       }
@@ -359,24 +414,31 @@
 \NewHook{ztex/thm-theorem/titleformat}
 \cs_new:Npn \__ztex_thm_theorem_title_gen:nnn #1#2#3 
   {% #1:env-name; #2:note; #3:separator
-    \tl_set:Nn \l_tmpa_tl { \exp_not:n {#2} }
-    \cs_set:Npn \zthmname 
+    \cs_set:Npn \zthmname
       {
         {\prop_item:cn {g__ztex_thm_name_prop}{#1}}
       }
     \cs_set:Npn \zthmnote ##1##2
       {
         \tl_if_empty:nF {#2}
-          {##1\exp_not:n {\l_tmpa_tl}##2}
+          { ##1
+            \exp_not:n {\exp_not:n {#2}}
+          ##2 }
       }
     \bool_if:NTF \g__ztex_thm_cntshare_bool
-      {\cs_set:Npn \zthmnumber {
-        \cs:w the\g__ztex_thm_cntparent_tl\cs_end:
-          .\arabic{ztex@thm@sharecnt}}
-        \refstepcounter{ztex@thm@sharecnt}
-      }{\cs_set:Npn \zthmnumber {
-        \cs:w the\g__ztex_thm_cntparent_tl\cs_end:
-          .\arabic{#1}}
+      {
+        \cs_set:Npn \zthmnumber 
+          {
+            \cs:w the\g__ztex_thm_cntparent_tl
+              \cs_end:.\arabic{ztex@thm@sharecnt}
+          }
+          \refstepcounter{ztex@thm@sharecnt}
+      }{
+        \cs_set:Npn \zthmnumber 
+          {
+            \cs:w the\g__ztex_thm_cntparent_tl
+              \cs_end:.\arabic{#1}
+          }
         \refstepcounter{#1}
       }
     \tl_gset:Nn \g__ztex_thm_theorem_title_tl 
@@ -400,13 +462,16 @@
 \NewHook{ztex/thm-proof/titleformat}
 \cs_new:Npn \__ztex_thm_proof_title_gen:nn #1#2 
   {% #1:env-name; #2:separator
-    \cs_set:Npn \zthmname {
+    \cs_set:Npn \zthmname 
+      {
         {\prop_item:cn {g__ztex_thm_name_prop}{#1}}
       }
-    \def\thmproof@tmp@color{\tl_use:c {l__ztex_#1_color_tl}}
-    \tl_gset:Nn \g__ztex_thm_proof_title_tl {
-      \zthmname #2
-    }
+    \def\thmproof@tmp@color
+      { \tl_use:c {l__ztex_#1_color_tl} }
+    \tl_gset:Nn \g__ztex_thm_proof_title_tl
+      {
+        \zthmname #2
+      }
     \UseHook{ztex/thm-proof/titleformat}
   }
 \cs_new:Npn \__ztex_thm_proof_title: 
@@ -419,14 +484,16 @@
 % users' interface of thm title format
 \tl_new:N \g__ztex_thm_proof_title_before_tl
 \tl_new:N \g__ztex_thm_theorem_title_before_tl
-\tl_gset:Nn \g__ztex_thm_proof_title_before_tl {\noindent}
-\tl_gset:Nn \g__ztex_thm_theorem_title_before_tl {\noindent}
+\tl_gset:Nn \g__ztex_thm_proof_title_before_tl 
+  { \noindent }
+\tl_gset:Nn \g__ztex_thm_theorem_title_before_tl 
+  { \noindent }
 \NewDocumentCommand{\zthmtitlebefore}{O{theorem}m}
   {
     \tl_gset:cn {g__ztex_thm_#1_title_before_tl} 
       { #2 }
   }
-\newcommand{\ztex@title@before}[1]
+\newcommand{\zthm@title@before}[1]
   {
     \tl_use:c {g__ztex_thm_#1_title_before_tl}
   }
@@ -461,8 +528,8 @@
 \newcommand\zthmnotemptyTF[2]
   {
     \tl_if_empty:eTF {\zthmnote{}{}}
-      {#1}
-      {#2}
+      { #1 }
+      { #2 }
   }
 
 
@@ -530,7 +597,13 @@
   }
 \NewDocumentCommand{\zthmtocsym}{m}
   {
-    \prop_set_from_keyval:Nn \g_ztex_thm_toc_symbols_prop {#1}
+    \ztex_label_hook_preamble_last:nn 
+      { ztex-thmtocsym-setup-user }
+      {
+        \prop_gput_from_keyval:Nn 
+          \g_ztex_thm_toc_symbols_prop 
+          { #1 }
+      }
   }
 \NewDocumentCommand{\zthmtocsymrm}{}
   { 
@@ -542,9 +615,46 @@
 
 % ==> thm env definition
 % theorem-like env
-\ztex_label_hook_preamble_last:nn {ztex-thmptheorem-setup-inner}
+\cs_new_protected:Npn \zthm_theorem_env_setup:n #1
+  {% #1:env name; #2:env title seperator
+    \zcnt_safe_new:oo { #1 }
+      { \g__ztex_thm_cntparent_tl }
+    \exp_after:wN \def\cs:w the#1\cs_end:
+      {
+        \cs:w the\g__ztex_thm_cntparent_tl\cs_end:
+          .\arabic{#1}
+      }
+    \__ztex_cref_math_env:n { #1 }
+    \DeclareDocumentEnvironment{#1}{O{}}
+      {
+        \UseHook{ztex/thm-theorem/before}
+        \UseHook{ztex/thm-theorem-#1/before}
+        \__ztex_thm_wrap_start:nnn {#1}{##1}{\ }
+        \MakeLinkTarget*{zthm@#1.\zthmnumber}
+        \bool_if:NT \g__ztex_thm_title_inline_bool 
+          {
+            \group_begin:
+              \zthm@title@before{theorem}
+              \__ztex_thm_theorem_title:
+            \group_end:
+          }
+        \UseHook{ztex/thm-theorem/begin}
+        \UseHook{ztex/thm-theorem-#1/begin}
+        \tl_trim_spaces:n
+      }{
+        \UseHook{ztex/thm-theorem/end}
+        \UseHook{ztex/thm-theorem-#1/end}
+        \__ztex_thm_wrap_end:n {#1}
+        \UseHook{ztex/thm-theorem/after}
+        \UseHook{ztex/thm-theorem-#1/after}
+      }
+  }
+\ztex_label_hook_preamble_last:nn 
+  { ztex-thmptheorem-setup-inner }
   {
-    \newcounter{ztex@thm@sharecnt}[\g__ztex_thm_cntparent_tl]
+    \zcnt_safe_new:oo
+      { ztex@thm@sharecnt }
+      { \g__ztex_thm_cntparent_tl }
     \def\theztex@thm@sharecnt
       {
         \cs:w the\g__ztex_thm_cntparent_tl\cs_end:
@@ -552,56 +662,77 @@
       }
     \clist_map_inline:Nn \g__ztex_thm_theorem_clist 
       {
-        \newcounter{#1}[\g__ztex_thm_cntparent_tl]
-        \exp_after:wN \def\cs:w the#1\cs_end:
-          { 
-            \cs:w the\g__ztex_thm_cntparent_tl\cs_end:
-              .\arabic{#1}
-          }
-        \__ztex_cref_math_env:n {#1}
-        \DeclareDocumentEnvironment{#1}{O{}}
-          {
-            \UseHook{ztex/thm-theorem/before} \UseHook{ztex/thm-theorem-#1/before}
-            \__ztex_thm_warp_start:nnn {#1}{##1}{\ }
-            \MakeLinkTarget*{zthm@#1.\zthmnumber}
-            \bool_if:NT \g__ztex_thm_title_inline_bool { 
-              \group_begin: 
-                % \show \__ztex_thm_theorem_title: 
-                \ztex@title@before{theorem}
-                \__ztex_thm_theorem_title:
-              \group_end:
-            }   
-            \UseHook{ztex/thm-theorem/begin} \UseHook{ztex/thm-theorem-#1/begin}
-            \tl_trim_spaces:n            
-          }{
-            \UseHook{ztex/thm-theorem/end}   \UseHook{ztex/thm-theorem-#1/end}
-            \__ztex_thm_warp_end:n {#1}
-            \UseHook{ztex/thm-theorem/after} \UseHook{ztex/thm-theorem-#1/after}
-          }
+        \zthm_theorem_env_setup:n {#1}
       }
   }
+
 % proof-like env
 \newcommand{\qedsymbol}{\ensuremath{\square}}
-\ztex_label_hook_preamble_last:nn {ztex-thmprooof-setup-inner}
+\cs_new_protected:Npn \zthm_proof_env_setup:n #1
+  {% #1:env name; #2:env title seperator
+    \DeclareDocumentEnvironment{#1}{O{}}
+      {
+        \UseHook{ztex/thm-proof/before}
+        \UseHook{ztex/thm-proof-#1/before}
+        \__ztex_thm_proof_title_gen:nn {#1}{\,} 
+        \group_begin:
+          \zthm@title@before{proof}
+          \__ztex_thm_proof_title:
+        \group_end:
+        \UseHook{ztex/thm-proof/begin}
+        \UseHook{ztex/thm-proof-#1/begin}
+        \tl_set:Nn \l__thm_proof_name_tl {#1} 
+        \tl_trim_spaces:n
+      }{
+        \UseHook{ztex/thm-proof/end}
+        \UseHook{ztex/thm-proof-#1/end}
+        \str_if_eq:VnTF \l__thm_proof_name_tl 
+          { proof }
+          { \hfill\qedsymbol\par }
+          { \par }
+        \UseHook{ztex/thm-proof/after}
+        \UseHook{ztex/thm-proof-#1/after}
+      }
+  }
+\ztex_label_hook_preamble_last:nn
+  { ztex-thmprooof-setup-inner }
   {
     \clist_map_inline:Nn \g__ztex_thm_proof_clist 
       {
-        \DeclareDocumentEnvironment{#1}{O{}}
-          {
-            \UseHook{ztex/thm-proof/before} \UseHook{ztex/thm-proof-#1/before}
-            \__ztex_thm_proof_title_gen:nn {#1}{\,} 
-            \group_begin:
-              \ztex@title@before{proof} \__ztex_thm_proof_title:
-            \group_end:
-            \UseHook{ztex/thm-proof/begin} \UseHook{ztex/thm-proof-#1/begin}
-            \tl_set:Nn \l__thm_proof_name_tl {#1} 
-            \tl_trim_spaces:n
-          }{
-            \UseHook{ztex/thm-proof/end} \UseHook{ztex/thm-proof-#1/end}
-            \str_if_eq:VnTF \l__thm_proof_name_tl {proof}{\hfill\qedsymbol\par}{\par}
-            \UseHook{ztex/thm-proof/after} \UseHook{ztex/thm-proof-#1/after}
-          }
+        \zthm_proof_env_setup:n { #1 }
       }
+  }
+
+% create thm env manually
+\cs_new:Nn \__zthm_env_setup:nn
+  {
+    \exp_args:Nno \use:c
+      { zthm_#1_env_setup:n  }
+      { #2 }
+  }
+\cs_new:Nn \__zthm_env_setup:nnn
+  {
+    % NOTE: '#3' has been dropped.
+    \exp_args:Nno \use:c
+      { zthm_#1_env_setup:n  }
+      { #2 }
+  }
+\NewDocumentCommand{\zthmenvset}{mm}
+  {
+    \zcmd_if_preamble:TF
+      {
+        \exp_args:Nc \zthm_envnew_var_init:Nnn
+          { g__ztex_thm_name_\g__ztex_lang_math_tl _prop }
+          { #1 }{ #2 }
+      }{
+        \zthm_envnew_var_init:Nnn
+          \g__ztex_thm_name_prop
+          { #1 }{ #2 }
+      }
+    \keyval_parse:nnn
+      { \__zthm_env_setup:nn  {#1} }
+      { \__zthm_env_setup:nnn {#1} }
+      { #2 }
   }
 
 
@@ -623,7 +754,7 @@
 % specific thm hook
 \clist_map_inline:nn {theorem, proof}
   {
-    \clist_map_inline:cn {g__ztex_thm_#1_clist} 
+    \clist_map_inline:cn { g__ztex_thm_#1_clist } 
       {
         \NewHook{ztex/thm-#1-##1/before}
         \NewHook{ztex/thm-#1-##1/begin}
@@ -634,34 +765,42 @@
       }
   }
 \cs_generate_variant:Nn \hook_gput_code:nnn {ne}
-\cs_new_protected:Npn \__ztex_thm_hook_add:nnn #1#2#3
-  {% #1:if-star; #2:hook-type(theorem/proof); #3:env name; 
-    \IfBooleanTF{#1}
+\cs_new_protected:Npn \__ztex_thm_hook_parser_setup:nnn #1#2#3
+  {% #1:boolean; #2:hook-type(theorem/proof); #3:env name
+    \bool_if:nTF { #1 }
       {
         \cs_set:Npn \__ztex_thm_hook_parser:nn ##1##2
           {
-            \IfValueTF{#3}{
-              \int_gincr:c {g__ztex_thm_#2_#3_hook_index_int}
-              \hook_gput_code:nen {ztex/thm-#2-#3/##1}
-                {thm-#2-#3-hook.\int_use:c {g__ztex_thm_#2_#3_hook_index_int}}
-                {##2}
-            }{
-              \int_gincr:c {g__ztex_thm_#2_hook_index_int}
-              \hook_gput_code:nen {ztex/thm-#2/##1}
-                {thm-#2-hook.\int_use:c {g__ztex_thm_#2_hook_index_int}}
-                {##2}
-            }
+            \tl_if_empty:nTF { #3 }
+              {
+                \int_gincr:c {g__ztex_thm_#2_hook_index_int}
+                \hook_gput_code:nen 
+                  { ztex/thm-#2/##1 }
+                  {
+                    thm-#2-hook.
+                      \int_use:c {g__ztex_thm_#2_hook_index_int}
+                  }{ ##2 }
+              }{
+                \int_gincr:c {g__ztex_thm_#2_#3_hook_index_int}
+                \hook_gput_code:nen 
+                  { ztex/thm-#2-#3/##1 }
+                  {
+                    thm-#2-#3-hook.
+                      \int_use:c {g__ztex_thm_#2_#3_hook_index_int}
+                  }{ ##2 }
+              }
           }
       }{
         \cs_set:Npn \__ztex_thm_hook_parser:nn ##1##2
           {
-            \IfValueTF{#3}{
-              \int_gincr:c {g__ztex_thm_#2_#3_hook_index_int}
-              \hook_gput_next_code:nn {ztex/thm-#2-#3/##1}{##2}
-            }{
-              \int_gincr:c {g__ztex_thm_#2_hook_index_int}
-              \hook_gput_next_code:nn {ztex/thm-#2/##1}{##2} 
-            }
+            \tl_if_empty:nTF { #3 }
+              {
+                \int_gincr:c {g__ztex_thm_#2_hook_index_int}
+                \hook_gput_next_code:nn {ztex/thm-#2/##1}{##2} 
+              }{
+                \int_gincr:c {g__ztex_thm_#2_#3_hook_index_int}
+                \hook_gput_next_code:nn {ztex/thm-#2-#3/##1}{##2}
+              }
           }
       }
   }
@@ -669,34 +808,50 @@
 % users' interface of thm hook
 \NewDocumentCommand{\zthmhook}{sO{theorem}m}
   {
-    \__ztex_thm_hook_add:nnn {#1}{theorem}{#2}
-    \keyval_parse:NNn 
+    \exp_args:Neee \__ztex_thm_hook_parser_setup:nnn
+      { \IfBooleanTF{#1}{\c_true_bool}{\c_false_bool} }
+      { theorem }
+      { \IfValueT{#2}{#2} }
+    \keyval_parse:NNn
       \use_none:n
-      \__ztex_thm_hook_parser:nn {#3}
+      \__ztex_thm_hook_parser:nn
+      { #3 }
   }
 \NewDocumentCommand{\zthmproofhook}{sO{proof}m}
   {
-    \__ztex_thm_hook_add:nnn {#1}{proof}{#2}
-    \keyval_parse:NNn 
+    \exp_args:Neee \__ztex_thm_hook_parser_setup:nnn
+      { \IfBooleanTF{#1}{\c_true_bool}{\c_false_bool} }
+      { proof }
+      { \IfValueT{#2}{#2} }
+    \keyval_parse:NNn
       \use_none:n
-      \__ztex_thm_hook_parser:nn {#3}
+      \__ztex_thm_hook_parser:nn 
+      { #3 }
   }
-\hook_gput_code:nnn {ztex/thm-theorem/before}{thm-theorem-before-par}{\par}
-\hook_gput_code:nnn {ztex/thm-proof/before}{thm-proof-before-par}{\par}
+\hook_gput_code:nnn {ztex/thm-theorem/before}
+  {thm-theorem-before-par}{\par}
+\hook_gput_code:nnn {ztex/thm-proof/before}
+  {thm-proof-before-par}{\par}
 \NewDocumentCommand{\zthmbefore}{O{theorem}+m}
   {
-    \hook_gremove_code:nn {ztex/thm-#1/before}{thm-#1-before-par}
-    \hook_gput_code:nnn {ztex/thm-#1/before}{thm-#1-before}{#2}
+    \hook_gremove_code:nn {ztex/thm-#1/before}
+      {thm-#1-before-par}
+    \hook_gput_code:nnn {ztex/thm-#1/before}
+      {thm-#1-before}{#2}
   }
 \@onlypreamble\zthmbefore
 
 
 % ==> ztex thm hooks seq order
 \DeclareHookRule{env/document/before}
-  {ztex-thmall-setup-user}
+  {ztex-thmenv-setup-user}
   {<}
   {ztex-thmptheorem-setup-inner}
 \DeclareHookRule{env/document/before}
-  {ztex-thmall-setup-user}
+  {ztex-thmenv-setup-user}
   {<}
   {ztex-thmprooof-setup-inner}
+\DeclareHookRule{env/document/before}
+  {ztex-thmenv-setup-user}
+  {<}
+  {ztex-thmtocsym-setup-user}

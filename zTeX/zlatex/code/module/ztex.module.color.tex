@@ -1,5 +1,5 @@
 \ProvidesExplFile{ztex.module.color.tex}
-  {2025/09/03}{\ztex@versi@n}
+  {2025/09/24}{\ztex@versi@n}
   {color~module~for~ztex}
 
 
@@ -26,7 +26,10 @@
   }
 
 % all colors
-% How to use the clist in "thm" module ???
+% NOTE:
+% 1. to make use of '\ztex_color_set:n', color
+%    name must be 'ztex@color@<key>'.
+% 2. this module is highly experimental. 
 \definecolor{ztex@color@royalred}{RGB}{157, 16, 45}
 \definecolor{ztex@color@axiom}{HTML}{000000}
 \definecolor{ztex@color@definition}{HTML}{bdc3c7}
@@ -36,17 +39,16 @@
 \definecolor{ztex@color@proposition}{HTML}{f39c12}
 \definecolor{ztex@color@remark}{HTML}{c92a2a}
 
-% slide color
+% slide and structure color
 \definecolor{zslide@title@color}{HTML}{d9d9d9}
+\definecolor{ztex@color@fancychap}{HTML}{7f8184}
+
 
 % ==> structure theme
 \ztex_keys_define:nn {color}{
-  chapter         .tl_set:N     =  \l__ztex_chapter_color_tl,
-  chapter         .initial:n    =  { ztex@color@royalred },  
-  chapter         .code:n       =  { \ztex_color_set:n {#1} },
-  chapter-rule    .tl_set:N     =  \l__ztex_chapter_rule_color_tl,
-  chapter-rule    .initial:n    =  { black },
-  chapter-rule    .code:n       =  { \ztex_color_set:n {#1} },
+  fancychap       .tl_set:N     =  \l__ztex_fancy_chap_color_tl,
+  fancychap       .initial:n    =  { ztex@color@fancychap },
+  fancychap       .code:n       =  { \ztex_color_set:n {#1} },
 }
 
 
@@ -113,8 +115,11 @@
     unknown         .code:n       =  
       { 
         \ztex_metakey_msg_warning:nn {color}
-          {link, cite, url, chapter, chapter-rule, axiom, definition, 
-          theorem, lemma, corollary, proposition, remark} 
+          {
+            link, cite, url, chapter, chapter-rule,
+            axiom, definition, theorem, lemma, corollary,
+            proposition, remark
+          } 
       }
   }
 
@@ -135,7 +140,7 @@
         \ztex_keys_set:nn {color}{#1}
         \bool_if:NT \g__ztex_hyperref_bool 
           {
-            \hypersetup 
+            \hypersetup
               {
                 colorlinks = true,
                 urlcolor   = \tl_use:N \l__ztex_url_color_tl,
@@ -146,4 +151,11 @@
       }
   }
 \@onlypreamble\zcolorset
-\zcolorset{link=purple, cite=blue, url=ztex@color@royalred}
+
+% init color setup:
+\zcolorset
+  {
+    link=purple,
+    cite=blue,
+    url=ztex@color@royalred,
+  }

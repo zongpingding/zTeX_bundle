@@ -1,5 +1,5 @@
 \ProvidesExplFile{ztex.module.cmd.tex}
-  {2025/09/21}{\ztex@versi@n}
+  {2025/09/23}{\ztex@versi@n}
   {cmd~module~for~ztex}
 
 
@@ -7,6 +7,18 @@
 \RequirePackage{etoolbox}
 \NewDocumentCommand\ztexverb{O{\texttt}v}
   { #1{#2} }
+
+
+% ==> preamble check
+\prg_new_conditional:Npnn \zcmd_if_preamble: 
+  { p, T, F, TF }
+  {
+    \ifx\@onlypreamble\@notprerr 
+      \prg_return_false:
+    \else 
+      \prg_return_true:
+    \fi
+  }
 
 
 % ==> tex command copy
@@ -298,13 +310,13 @@
 % ==> token check and manipulations tools 
 % NOTE: all of these macros are expandable
 % token generate
-\cs_new:Npn \zcmd_token_gen:nn #1#2
+\cs_new:Npn \ztex_token_gen:nn #1#2
   {
     \char_generate:nn {#1}{#2}
   }
-\newcommand{\zcmdgentoken}[2]
+\newcommand{\ztexgentoken}[2]
   {
-    \zcmd_token_gen:nn {#1}{#2}
+    \ztex_token_gen:nn {#1}{#2}
   }
 
 % tl strip left / right / both:

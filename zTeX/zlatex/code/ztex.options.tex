@@ -20,8 +20,12 @@
   sysfont         .default:n    = { true },
   doc             .choice:,
   doc / ptmx      .code:n       = {
-    \RequirePackage{mathptmx}
-    \RequirePackage{newtxtext}
+    \ztex_label_hook_preamble_last:nn
+      { ztex-docfont-ptmx }
+      {
+        \RequirePackage{mathptmx}
+        \RequirePackage{newtxtext}
+      }
     \DeclareSymbolFont{letters}{OML}{ntxmi}{m}{it}
     \DeclareMathAlphabet{\mathbf}{OT1}{ntxtlf}{b}{it}
     \DeclareSymbolFont{CMMletters}{OML}{cmm}{m}{it}
@@ -40,8 +44,12 @@
       }
   },
   doc / newtx    .code:n       = {
-    \RequirePackage{newtxtext}
-    \RequirePackage{newtxmath}
+    \ztex_label_hook_preamble_last:nn
+      { ztex-docfont-newtex }
+      {
+        \RequirePackage{newtxtext}
+        \RequirePackage{newtxmath}
+      }
   },
   doc / lmm       .code:n      = {
     \sys_if_engine_pdftex:TF 
@@ -58,19 +66,35 @@
       }
   },
   text            .choice:,
-  text / times    .code:n       = { \RequirePackage{newtxtext} },
+  text / times    .code:n       = {
+    \ztex_label_hook_preamble_last:nn
+      { ztex-textfont-newtex }
+      {
+        \RequirePackage{newtxtext}
+      }
+  },
   doc / texgyre   .code:n       = {  },  % TODO: implement it !!
   math            .choice:,
   math / newtx    .code:n       = {
-    \ztex_hook_preamble_last:n { \RequirePackage{newtxmath} } 
+    \ztex_hook_preamble_last:n 
+      { 
+        \RequirePackage{newtxmath}
+      } 
   },
   math / mtpro2   .code:n       = { 
-    \ztex_hook_preamble_last:n { 
-      \RequirePackage[lite, subscriptcorrection, slantedGreek, nofontinfo]{mtpro2} 
-    } 
+    \ztex_hook_preamble_last:n 
+      {
+        \RequirePackage[
+          lite, subscriptcorrection,
+          slantedGreek, nofontinfo
+        ]{mtpro2} 
+      } 
   },
   math / euler    .code:n       = { 
-    \ztex_hook_preamble_last:n { \RequirePackage[OT1, euler-digits]{eulervm} } 
+    \ztex_hook_preamble_last:n 
+      {
+        \RequirePackage[OT1, euler-digits]{eulervm}
+      } 
   },
   math / var-euler .code:n       = {
     \usepackage[OT1]{eulervm}
@@ -92,15 +116,25 @@
     \ztex_msg_warn:n {option-font-math}
   },
   math / mathpazo .code:n       = { 
-    \let\rmbefore\rmdefault
-    \ztex_hook_preamble_last:n { \RequirePackage{mathpazo} } 
-    \let\rmdefault\rmbefore
+    \ztex_hook_preamble_last:n 
+      {
+        \let\cmrrmdefault\rmdefault
+        \let\cmrsfdefault\sfdefault
+        \let\cmrttdefault\ttdefault
+        \RequirePackage{mathpazo}
+        \let\rmdefault\cmrrmdefault
+        \let\sfdefault\cmrsfdefault
+        \let\ttdefault\cmrttdefault
+      }
   },
   math / unknown  .code:n       = { 
-    \ztex_metakey_msg_warning:nn {option-mathSpec-font}{newtx, mtpro2, euler, mathpazo} 
+    \ztex_metakey_msg_warning:nn 
+      {option-mathSpec-font}
+      {newtx, mtpro2, euler, mathpazo} 
   },
   unknown         .code:n      = { 
-    \ztex_metakey_msg_warning:nn {option-font}
+    \ztex_metakey_msg_warning:nn 
+      { option-font }
       {
         sysfont(<bool>:false), 
         doc(<choice>:newtx,ptmx), 
@@ -115,8 +149,10 @@
 \ztex_keys_define:nn { layout }{
   margin          .bool_gset:N  = \g__ztex_margin_bool,
   margin          .initial:n    = { false },
+  margin          .default:n    = { true },
   slide           .bool_gset:N  = \g__ztex_slide_bool,
   slide           .initial:n    = { false },
+  slide           .default:n    = { true },
   aspect          .tl_gset:N    = \g__ztex_aspectratio_tl,
   aspect          .initial:n    = { 12|9 },
   theme           .str_gset:N   = \g__ztex_slide_theme_str,
@@ -132,6 +168,7 @@
 \ztex_keys_define:nn { mathSpec }{
   alias            .bool_gset:N  = \g__ztex_math_alias_bool,
   alias            .initial:n    = { false },
+  alias            .default:n    = { true },
   envStyle         .tl_gset:N    = \g__ztex_thm_style_tl,
   envStyle         .initial:n    = { plain },
   font             .choice:,
