@@ -1,11 +1,14 @@
 \ProvidesExplFile{ztex.module.graphics.tex}
-  {2025/09/20}{\ztex@versi@n}
+  {2025/09/30}{\ztex@versi@n}
   {graphics~module~for~ztex}
 
 
 %%%%%     graphics module for ztex     %%%%%
 \RequirePackage{graphicx}
-\RequirePackage{l3graphics}
+\cs_if_exist:NF \graphics_include:nn
+  {
+    \RequirePackage{l3graphics}
+  }
 
 
 % graphics path
