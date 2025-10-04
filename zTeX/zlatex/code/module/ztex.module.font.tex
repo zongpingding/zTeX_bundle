@@ -1,5 +1,5 @@
 \ProvidesExplFile{ztex.module.font.tex}
-  {2025/09/18}{\ztex@versi@n}
+  {2025/09/30}{\ztex@versi@n}
   {font~module~for~ztex}
 
 
@@ -146,19 +146,20 @@
         \ztex_msg_error:n { fontcfg / new }
       }
   }
-\cs_generate_variant:Nn \__ztex_fontcfg_newfamily_copy:nnnnn {ooooo}
+\cs_generate_variant:Nn \__ztex_fontcfg_newfamily_copy:nnnnn 
+  { ooooo, eeeee }
 \cs_new_protected:Npn \__ztex_sysfont_new:nnn #1#2#3
   {% #1:en/cn; #2:cmd; #3:key-value(font cfg args)
     \ztex_keys_set:nn { fontcfg / new } {#3}
-    \__ztex_fontcfg_newfamily_copy:ooooo 
+    \__ztex_fontcfg_newfamily_copy:eeeee 
       { #2 }
-      { 
-        \tl_if_empty:VF \l__ztex_fontcfg_new_path_tl 
+      {
+        \tl_if_empty:NF \l__ztex_fontcfg_new_path_tl 
           { Path=\l__ztex_fontcfg_new_path_tl, }
       }
       { \l__ztex_fontcfg_new_name_tl }
       {
-        \tl_if_empty:VF \l__ztex_fontcfg_new_ext_tl
+        \tl_if_empty:NF \l__ztex_fontcfg_new_ext_tl
           { Extension   = \l__ztex_fontcfg_new_ext_tl, }
         UprightFont = \l__ztex_fontcfg_new_up_tl,
         BoldFont    = \l__ztex_fontcfg_new_bd_tl,
