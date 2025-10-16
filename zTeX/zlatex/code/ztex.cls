@@ -28,14 +28,16 @@
 %                    ztex.module.sect.tex,                                    %
 %                    ztex.module.thm.tex,                                     %
 % and the libraries: ztex.library.alias.tex,                                  %
+%                    ztex.library.cmd.tex,                                    %
 %                    ztex.library.slide.tex,                                  %
 %                    ztex.library.thm.tex,                                    %
 %                    ztex.library.primitive.tex,                              %
 %                    ztex.library.fancy.tex.                                  %
+%                    ztex.library.pratt.tex.                                  %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \ExplSyntaxOn
 \NeedsTeXFormat{LaTeX2e}
-\gdef\ztex@d@te{2025/09/23}
+\gdef\ztex@d@te{2025/10/14}
 \gdef\ztex@versi@n{1.1.3}
 \tl_const:Nn \c__ztex_class_name_tl           {ztex}
 \tl_const:Nn \c__ztex_class_version_tl        {\ztex@versi@n}
