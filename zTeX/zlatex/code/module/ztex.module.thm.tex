@@ -1,5 +1,5 @@
 \ProvidesExplFile{ztex.module.thm.tex}
-  {2025/09/23}{\ztex@versi@n}
+  {2025/10/18}{\ztex@versi@n}
   {thm~module~for~ztex}
 
 
@@ -538,6 +538,11 @@
 \NewDocumentCommand\zthmtocstop{}
   {
     \ztoc_stop_table:n { lom }
+  }
+\cs_if_exist:NF \zsect_add_theorem_line:nnnn
+  {
+    \cs_set_protected:Nn \zsect_add_theorem_line:nnnn
+      { }
   }
 \cs_generate_variant:Nn \zsect_add_theorem_line:nnnn 
   { eeoe, nnee, nnoe }
