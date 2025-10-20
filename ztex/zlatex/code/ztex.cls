@@ -37,8 +37,8 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \ExplSyntaxOn
 \NeedsTeXFormat{LaTeX2e}
-\gdef\ztex@d@te{2025/10/14}
-\gdef\ztex@versi@n{1.1.3}
+\gdef\ztex@d@te{2025/10/18}
+\gdef\ztex@versi@n{1.1.5}
 \tl_const:Nn \c__ztex_class_name_tl           {ztex}
 \tl_const:Nn \c__ztex_class_version_tl        {\ztex@versi@n}
 \tl_const:Nn \c__ztex_class_date_tl           {\ztex@d@te}
@@ -389,15 +389,15 @@
 \__ztex_load_module_library:nn {module}{sclist}
 \__ztex_load_module_library:nn {module}{cmd}
 \__ztex_load_module_library:nn {module}{box}
-\__ztex_load_module_library:nn {module}{page}
-\__ztex_load_module_library:nn {module}{thm}
 \__ztex_load_module_library:nn {module}{counter}
+\__ztex_load_module_library:nn {module}{sect}
+\__ztex_load_module_library:nn {module}{thm}
 \__ztex_load_module_library:nn {module}{ref}
 \__ztex_load_module_library:nn {module}{color}
 \__ztex_load_module_library:nn {module}{font}
-\__ztex_load_module_library:nn {module}{sect}
 \__ztex_load_module_library:nn {module}{graphics}
 \__ztex_load_module_library:nn {module}{item}
+\__ztex_load_module_library:nn {module}{page}
 
 
 
