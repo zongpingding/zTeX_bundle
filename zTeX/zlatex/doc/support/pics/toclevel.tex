@@ -1,0 +1,84 @@
+% NOTE: last toc example from CUS
+\InputIfFileExists{ztex_doc-cfg.tex}{}{}
+\documentclass[
+  lang=cn,
+  class=l3doc,
+  classOption={11pt}
+]{../code/ztex}
+\geometry{hmargin=3cm, vmargin=1in}
+\pagestyle{empty}
+\setcounter{tocdepth}{4}
+\ztocenable[toc=../../ztex_interface]
+
+
+\begin{document}
+\ExplSyntaxOn
+\clist_set:Nn \l_tmpa_clist { 0pt, 1.5em, 2.3em, 3.2em }
+\cs_new:Npn \__accum_skip:n #1
+  {
+    \exp_args:Ne \dim_eval:n
+      {
+        \int_step_tokens:nn {#1}
+          { \__get_dim:n }
+        0pt
+      }
+  }
+\cs_new:Npn \__get_dim:n #1
+  { \clist_item:Nn \l_tmpa_clist {#1} }
+% \edef\TTT{\__accum_skip:n {3}}
+% \show\TTT
+
+
+\newcommand{\nbraket}
+  { \makebox[0pt]{\rule[-7.5pt]{.75pt}{19pt}} }
+\newcommand{\ubraket}
+  {
+    \makebox[0pt]{
+      \rule[-7pt]{.75pt}{10pt}
+    }
+    \makebox[0pt][l]{
+      \kern-.375pt\raise3pt\hbox{\rule{3pt}{.75pt}}
+    }
+  }
+\newcommand{\bbraket}
+  {
+    \makebox[0pt]{ \rule[3pt]{.75pt}{10pt} }
+    \makebox[0pt][l]
+      { \kern-.375pt\raise3pt
+      \hbox{\rule{3pt}{.75pt}} }
+  }
+\newcommand{\showbar}
+  {
+    \prg_replicate:nn {\ztocdepth - 2}
+      { \kern20pt \nbraket }
+    \kern20pt \ztociffirst { \ubraket }
+      { \ztociflast{\bbraket}{\nbraket} }
+  }
+\ztocformat{\section, \subsection, \subsubsection}
+  {
+    % name.before = \llap{\smash{\showbar}},
+    % space.left=0pt,
+    % leader.content=,
+    explicit=true,
+    code = {
+      \noindent
+      \prg_replicate:nn {\ztocdepth-1}
+        {
+          \hskip 20pt\relax
+        }
+      \llap{\smash{\showbar}}
+      \kern10pt
+      \ztoctitle\par
+    }
+  }
+\ExplSyntaxOff
+
+{
+  {
+    \ztocformat\subsection{ignore.name={10.}}
+    \ztocformat\subsubsection{ignore.name={10.}}
+    \multicolcontents{2}
+  }
+  \clearpage
+}
+\end{document}

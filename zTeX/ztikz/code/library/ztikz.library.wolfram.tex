@@ -41,7 +41,7 @@
     \__ztikz_addto_script:ee {\wolfram@tmp@file.wls}{Export["\wolfram@tmp@file.#2", #3]}
     \ztikz_if_run_again:nenTF { \c_false_bool }{ \l__ztikz_current_hash_tl }{ #4 }   
       {
-        \edef\wolfram@cmd
+        \edef\wolfram@script
           {
             \g__ztikz_wolfram_engine_tl\space
             \bool_if:NT \g__ztikz_wolfram_cloud_bool {-cloud\space}
@@ -53,7 +53,7 @@
             \g__ztikz_wolfram_engine_tl\space~is~running~on:
               '\wolfram@tmp@file.wls'...\iow_newline:
           }
-        \ztool_shell_escape:e { \wolfram@cmd }
+        \ztool_shell_escape:e { \wolfram@script }
       }{
         % remove the skip wolframscript file and result
         \clist_if_in:NnT \g__ztikz_library_loaded_clist {cache}
@@ -151,7 +151,7 @@
 
 % --> wolfram table (extended the interface of 'latexalpha2')
 \cs_set:Npn \__table_item_handle:n #1 
-  {% the inner '\cs{exp_not:N}' prevent expansion from 'tabularray'.
+  {% the inner '\exp_not:N' prevent expansion from 'tabularray'.
     \exp_not:n {
       \exp_not:N \__wolfram_table_cell_cmd:n {#1}
     },

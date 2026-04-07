@@ -1,0 +1,28 @@
+\documentclass{standalone}
+\usepackage{ztikz}
+
+
+\begin{document}
+\begin{tikzpicture}[>=Latex, font=\small, scale=1.25]
+    % basic
+    \clip (-2, -2) rectangle (10, 4);
+    \ShowAxis{(-2, 0); (12, 0)}
+    \ShowAxis{(0, -2); (0, 4)}
+
+    % functions
+    \Plot[-5:12][red]               {log(x)}
+    \Plot[0:12][blue]               {(x-1)/x}
+    \Plot[0:12][teal]               {2*(x-1)/(x+1)}
+    \Plot[-1:12][purple]            {6*(x-1)/(2*x+5)}
+    \Plot[-5:12][gray]              {x/exp(1)}
+    \Plot[0.1:12][orange]           {0.5*(x-1/x)}
+    \Plot[-5:12]                    {x-1}
+    \Plot[-5:12][green]             {x**2-x}
+    \ContourPlot[-5:12;-6:6][dashed]{y-1}
+    % points
+    \ShowPoint[color=red, radius=1pt]
+            {(1, 0);(2.71828, 1)}
+            [$A$; $B$]
+            [above left]
+\end{tikzpicture}
+\end{document}

@@ -1,0 +1,58 @@
+\makeatletter
+\long\def\texhigh@underline#1{\leavevmode\setbox\z@\hbox{{#1}}%
+  \hb@xt@\wd\z@{\@tempdima.05em\kern\@tempdima
+    \vrule height-.25ex depth.4ex width\dimexpr\wd\z@-2\@tempdima \kern\@tempdima
+    \llap{\unhbox\z@}}}
+
+\if@texhighload@color
+  \relax
+\fi
+\@ifpackageloaded{tikz}{\@texhighload@tikztrue}{}
+\newbox\texhigh@picturebox 
+\if@texhighload@tikz
+  \RequirePackage{tikz}
+  \usetikzlibrary{shadings}
+  \usetikzlibrary{fill.image}
+  \protected\def\texhigh@shadetext#1#2{%
+    \setbox\texhigh@picturebox=\hbox{{\texhigh@pdfliteral{7 Tr }#2}}%
+    \tikz[baseline=0,line width=0pt]\path\pgfextra{\rlap{\copy\texhigh@picturebox}}
+      [#1] (0,-\dp\texhigh@picturebox) rectangle (\wd\texhigh@picturebox,\ht\texhigh@picturebox);}
+
+  \tikzset{texhigh/.is family,
+    texhigh/gradient primitive/.style={left color=blue,right color=cyan},
+    texhigh/gradient ?/.style={left color=red,right color=blue},
+    texhigh/gradient-style/.style={texhigh/gradient #1}}
+  \THSaveStyle{tikz.gradient}{%
+    \THSetCS{latex}{\texhigh@underline{\THcolor{purple}\bfseries#1#2}}
+    \THSetCS{primitive}
+      {\texhigh@shadetext{texhigh/gradient-style=primitive}{\bfseries #1#2}}%
+    \THSetCS{?}{\texhigh@shadetext{texhigh/gradient-style=?}{#1#2}}%
+  }
+\fi
+
+\@ifpackageloaded{tcolorbox}{
+  \tcbuselibrary{listings@core}
+  \def\tcb@texhigh@file#1#2{%
+    {\edef\tcb@temp{\texhighfile[{\unexpanded\expandafter{#1}}]}\tcb@temp{#2}}}
+  \def\tcb@texhigh@uselistinglisting{\tcb@texhigh@file\kvtcb@texhighoptions\kvtcb@listingfile}
+  \def\tcb@texhigh@usetemplisting{\tcb@texhigh@file\kvtcb@texhighoptions\kvtcb@tempfile}
+  \def\tcb@texhigh@doc@usetemplisting{\tcb@texhigh@file\kvtcb@doctexhighoptions\kvtcb@tempfile}
+%
+  \tcbset{
+    texhigh options/.code=\edef\kvtcb@texhighoptions{\unexpanded{#1}},
+    texhigh options=,
+    texhigh options pre/.code=\edef\kvtcb@texhighoptions{\unexpanded{#1},\unexpanded\expandafter{\kvtcb@texhighoptions}},
+    texhigh options app/.code=\edef\kvtcb@texhighoptions{\unexpanded\expandafter{\kvtcb@texhighoptions,#1}},
+    texhigh gobble/.style={texhigh options app={gobble=#1}},
+    texhigh gobble/.default=auto,
+    texhigh config file/.style={texhigh options app={config-file={#1}}},
+    texhigh ctab file/.style={texhigh options app={ctab-file={#1}}},
+    texhigh use ctab/.style={texhigh options app={use-ctab={#1}}},
+    texhigh style/.style={texhigh options app={style={#1}}},
+    texhigh detect catcodes/.style={texhigh options app={lexer-catcode={#1}}},
+    listing engine/texhigh/.code={\let\tcbuselistinglisting\tcb@texhigh@uselistinglisting
+      \let\tcbusetemplisting\tcb@texhigh@usetemplisting
+      \let\tcb@doc@usetemplisting\tcb@texhigh@doc@usetemplisting},
+  }
+}{}
+\makeatother

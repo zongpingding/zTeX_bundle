@@ -1,0 +1,10 @@
+This is a generated file for the l3build validation system.
+Don't change this file in any respect.
+============================================================
+TEST 1: unknown-font-key-handle
+============================================================
+Class zlatex Warning: You use an invalid key "math" or key assign for it in the meta key "font", Valid options are:config(<bool>:false); Assignment Ignored and zLaTeX default font settings substitute.
+============================================================
+=======================================
+CLASS-font-OPTIONS-PASSING-CORRECTLY
+=======================================

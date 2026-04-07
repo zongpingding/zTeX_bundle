@@ -1,0 +1,25 @@
+\InputIfFileExists{ztex_doc-cfg.tex}{}{}
+\documentclass[
+  lang=cn, 
+  hyper=true,
+  class=l3doc, 
+  classOption={11pt},
+]{../code/ztex}
+\input{ztex_interface_preamble.tex}
+\ztocenable[toc=ztex_interface]
+\title{\texorpdfstring{\zTeX{}}{zTeX} 宏集目录制作示例}
+\author{Eureka~%
+  \texorpdfstring{\rlap{\wscale*{7.5em}{\normalfont\small\sffamily\color{gray}zongpingding5(at)outlook(dot)com}}}%
+  {zongpingding5(at)outlook(dot)com}}
+\date{\textsf{\today}}
+\begin{document}
+% source code lineno
+\docsourcelinenotostr
+
+% general doc
+\input{doc_source/cover.toc_new.tex}
+
+\newgeometry{left=2.4cm, right=2.5cm}
+\fancyheadoffset{0pt}
+\input{doc_source/mod.sect_new.tex}
+\end{document}

@@ -1,5 +1,5 @@
 \ProvidesExplFile{ztex.module.thm.tex}
-  {2025/10/18}{\ztex@versi@n}
+  {2026/02/12}{\ztex@versi@n}
   {thm~module~for~ztex}
 
 
@@ -342,11 +342,11 @@
 % ==> thm format and style setup
 \ztex_msg_set:nn {mathEnv-style}
   {
-    You~use~an~incorrect~MathEnv~style:~
-    '\g__ztex_thm_style_tl',~
-    All~valid~styles~are:'plain',~'leftbar',~
-    'background',~'fancy',~'shadow',~'paris',~
-    'lapsis',~'tcb',~'obsidian',~and~'elegant'.
+    You~use~an~incorrect~MathEnv~style:~'\g__ztex_thm_style_tl',~
+    All~of~the~pre-defined~styles~are:'plain',~'leftbar',~
+    'background',~'fancy';And~styles~defined~inside~'thm'~
+    library(load~it~by~command~'\token_to_str:N\ztexloadlib{thm}')~are:~
+    'shadow',~'paris',~'lapsis',~'tcb',~'obsidian',~and~'elegant'.
   }
 % thm counter
 \bool_new:N \g__ztex_thm_cntshare_bool
@@ -574,6 +574,7 @@
       { \zthmtoc@tmp@target }
     \group_end:
   }
+
 \tl_new:N \g__ztex_thm_toc_level_tl
 \tl_set:Nn \g__ztex_thm_toc_level_tl {subsection}
 \NewDocumentCommand{\zthmtoclevel}{m}
@@ -581,10 +582,11 @@
     \tl_gset:Nn \g__ztex_thm_toc_level_tl {#1}
   }
 \@onlypreamble\zthmtoclevel
-\NewDocumentCommand{\zthmtoc}{O{1}}
+\NewDocumentCommand{\zthmtoc}{O{}}
   {
     \group_begin:
-    \renewcommand{\baselinestretch}{#1}\normalsize
+    \exp_after:wN \exp_args:Nc \exp_after:wN \ztocformat
+      \exp_after:wN { \g__ztex_thm_toc_level_tl }{ #1 }
     \ztoc_table_typeset:Nn \g_ztoc_lom_seq {  }
     \group_end:
   }

@@ -1,0 +1,20 @@
+\input{regression-test.tex}
+\documentclass{article}
+\usepackage{ztikz}
+\ztikzloadlibrary{python}
+
+
+\begin{document}
+\START
+\BEGINTEST{ztikz-module-python-pyfig}
+\begin{pyfig}[width=.45\linewidth]{pycode.py}
+import matplotlib
+matplotlib.use('Agg')
+from matplotlib import pyplot as plt
+x = [1, 2, 3]
+y = [1, 2, 3]
+plt.plot(x, y)
+\end{pyfig}
+\ENDTEST
+\END
+\end{document}

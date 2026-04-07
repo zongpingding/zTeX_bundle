@@ -1,0 +1,31 @@
+\clearpage
+\InsertMark{ztex-right}{}
+\section{\texorpdfstring{\ztex{}}{zTeX} 库}
+本节主要介绍 \ztex{} 中的各类库(library): 这些库旨在优化 \LaTeX{} 文档的撰写与呈现效果, 
+其中有些还对 \ztex{} 的原始功能进行了进一步扩展. 但在加载这些库后, 文档的编译速度势必会减慢, 
+请酌情加载 \ztex{} 提供的库.
+
+\ztex{} 中任何一个库均不会自动加载，用户需要使用 \cmd{\ztexloadlib}\texttt{\marg{library name}} 手动加载, 
+所有可用的 \meta{library name} 列表如下:
+
+\begin{itemize}
+  \item \file{ztex.library.fancy.tex}
+  \item \file{ztex.library.alias.tex}
+  \item \file{ztex.library.slide.tex}
+  \item \file{ztex.library.thm.tex}
+  \item \file{ztex.library.cmd.tex}
+  \item \file{ztex.library.pratt.tex}
+  \item \file{ztex.library.primitive.tex}
+\end{itemize}
+
+\ztex{} 所提供库的加载方式如下:
+\begin{DocExample}
+% \documentclass{ztex}
+\ztexloadlib{fancy}
+\ztexloadlib{alias}
+\ztexloadlib{slide}
+\ztexloadlib{thm}
+\ztexloadlib{cmd}
+\ztexloadlib{pratt}
+\ztexloadlib{primitive}
+\end{DocExample}

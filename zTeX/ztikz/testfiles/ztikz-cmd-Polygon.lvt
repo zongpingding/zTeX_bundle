@@ -1,0 +1,21 @@
+\input{regression-test.tex}
+\documentclass{article}
+\usepackage{ztikz}
+
+
+\begin{document}
+\START
+\BEGINTEST{ztikz-cmd-Polygon}
+\begin{tikzpicture}
+  \Polygon [
+    radius=2,
+    shift={(3,0)},
+    rotate=60,
+    marker={type=ball, color=red},
+    edgeColor=teal,
+    fillColor=red,
+  ]{3}
+\end{tikzpicture}
+\ENDTEST
+\END
+\end{document}

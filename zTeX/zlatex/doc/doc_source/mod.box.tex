@@ -1,0 +1,389 @@
+\clearpage
+\InsertMark{ztex-4th}{}
+\subsection{\titlepkg{box} 模块}
+本模块封装的命令主要涵盖以下功能：跨页盒子、盒子的线性变换以及内容对齐.
+其中，盒子的变换与对齐命令依赖于 \pkg{ztool} 宏包，跨页盒子的功能则基于 \pkg{framed} 
+与 \pkg{framedmulticol} 宏包实现。\pkg{box} 模块仅对 \pkg{framed} 宏包进行了基础封装，
+如需更复杂的使用方式，请参考该宏包的官方文档. \vskip2em
+
+\noindent{\color{red}\sffamily NOTE: \pkg{framed} 宏包在实际使用中可能会遇到一些问题，比如浮动体、
+页脚命令、边注命令失效、颜色泄露(参考 \pkg{colorframed} 宏包)；而且它无法正确处理分页多栏文本，因此
+和 \pkg{multicol} 等宏包不兼容. 这种情况下，可以考虑用本宏集已经加载的 \pkg{framedmulticol} 宏包
+来替代(可参见 \CusTeX{} 中的 \env{Framed} 环境).}
+
+
+\begin{function}[added=2025-07-10]{\getwd, \getht, \getdp}
+  \begin{syntax}
+    \cs{getwd}\meta{dim}\Arg{content}
+    \cs{getwd}*\meta{dim}\Arg{content}
+    \cs{getht}\meta{dim}\Arg{content}
+    \cs{getht}*\meta{dim}\Arg{content}
+    \cs{getdp}\meta{dim}\Arg{content}
+    \cs{getdp}*\meta{dim}\Arg{content}
+  \end{syntax}
+  此系列命令用于获取盒子的尺寸信息, \meta{dim} 为一个 dim 寄存器, 可以由 \cs{newdimen} 或 \cs{newlength} 
+  命令进行声明; 带有 ``\texttt{*}'' 命令的赋值是全局的.
+\end{function}
+\vskip1.25em\relax
+\begin{DocExample}*
+\newlength\lenA
+\newlength\lenB
+\newlength\lenC
+\getwd\lenA{XyX} \getht\lenB{XyX} \getdp\lenC{XyX}
+\the\lenA, \the\lenB, \the\lenC.
+\end{DocExample}
+
+
+\begin{function}[added=2025-07-10]{\zraise, \zlower}
+  \begin{syntax}
+    \cs{zraise}\Arg{dim}\Arg{content}
+    \cs{zlower}\Arg{dim}\Arg{content}
+  \end{syntax}
+  这系列命令与原始的 \cs{raise}, \cs{lower} 命令类似, 但 \cs{zraise}, \cs{zlower} 
+  中的 \meta{content} 不必是一个盒子.
+\end{function}
+\begin{DocExample}*
+{\setlength{\fboxsep}{0pt}
+  raise: \fbox{XXX}\zraise{.5em}{\fbox{XXX}},
+  lower: \fbox{XXX}\zlower{.5em}{\fbox{XXX}},
+}
+\end{DocExample}
+
+
+\begin{function}[added=2025-07-10]{\wscale, \hscale}
+  \begin{syntax}
+    \cs{wscale}\Arg{dim}\Arg{content}
+    \cs{wscale}*\Arg{dim}\Arg{content}
+    \cs{hscale}\Arg{dim}\Arg{content}
+    \cs{hscale}*\Arg{dim}\Arg{content}
+  \end{syntax}
+  这系列的命令用于盒子的缩放, 当给定的 \meta{dim} 大于该 \meta{content} 自的 \meta{dim} 时, \meta{content}
+  会被原样输出; \cs{wscale} 调整盒子的宽度, \cs{hscale} 用于调整盒子的高度; 带有 ``\texttt{*}'' 的命令仅
+  对盒子的单个维度进行调整, 另一个维度保持不变. 若用户需使用更加复杂的变换, 可以参考后续
+  \cs{ztoolboxaffine} 命令.
+  \textbf{注意}: 这系列的命令不依赖于 \pkg{graphicx} 宏包; 这系列命令不会对盒子的深度进行调整.
+\end{function}
+\begin{DocExample}*
+{\setlength{\fboxsep}{0pt}
+  w set:\fbox{XXX}\wscale{1em}{\fbox{XXX}},
+  w scale:\fbox{XXX}\wscale*{1em}{\fbox{XXX}}\par
+  h scale:\fbox{XXX}\hscale{1em}{\fbox{XXX}},
+  h scale:\fbox{XXX}\hscale*{1em}{\fbox{XXX}},
+  h scale:\fbox{XXX}\hscale*{.5em}{\fbox{XXX}}\par
+}
+\end{DocExample}
+
+
+\begin{function}[added=2025-07-11]{\zrotate}
+  \begin{syntax}
+    \cs{zrotate}\Arg{angle}\Arg{content}
+  \end{syntax}
+  此命令用于旋转盒子, 其并不依赖于 \pkg{graphicx} 宏包. 若用户需使用更加复杂的变换, 可以参考后续
+  \cs{ztoolboxaffine} 命令.
+\end{function}
+\begin{DocExample}*
+{\setlength{\fboxsep}{0pt}
+  \fbox{X}\fbox{\zrotate{90}{X}}\fbox{X}
+}
+\end{DocExample}
+
+
+\begin{function}[added=2025-07-10]{\hidetext}
+  \begin{syntax}
+    \cs{hidetext}\oarg{keyval}\Arg{content}
+  \end{syntax}
+  此命令用于将 \meta{content} 替换为对应的 ``方框'', 从而实现文字的隐藏;
+  \meta{keyval} 用于设置 ``方框'' 的样式, 可选值请参见下述说明:
+\end{function}
+
+
+\begin{keyval}[parent=ztex/box/hidetext]{map, fill, frame, killdp, separator, cmd}
+  \begin{syntax}
+    map       = \meta{\textbf{tl}|str} > \dval{tl}
+    fill      = \meta{color} > \dval{black}
+    frame     = \meta{color} > \dval{black}
+    killdp    = \meta{true|\textbf{false}} > \dval{false}
+    separator = \meta{code} > \dval{\textbackslash-}
+    cmd       = \meta{cmd} > \dval{无}
+  \end{syntax}
+  \meta{map} 用于指定遍历的方式; \meta{fill} 用于指定填充颜色; \meta{frame} 用于指定边框颜色(暂时不可用),
+  用户可以通过指定 \cs{fboxrule} 来设置 \cs{fbox} 的边框宽度;
+  \meta{killdp} 用于控制是否忽略盒子的深度(这样一来, 所有 ``方框'' 的底部就对齐了); \meta{separator}
+  用于指定 ``方框'' 的分割元素, 默认为 ``\texttt{\textbackslash -}''; \meta{cmd} 用于自定义 ``方框'' 格式.
+\end{keyval}
+\begin{DocExample}*
+{\setlength{\fboxsep}{0pt}
+Lorem ipsum dolor sit amet, consectetuer adipiscing elit. Ut purus elit, vestibulum%
+ut, placerat ac, adipiscing vitae, felis. Curabitur dictum gravida mauris.
+
+xyf:\hidetext[cmd=\fbox{#1}, fill=red]{xyf{xy}{xf}o},
+xyf:\hidetext[killdp, fill=blue, separator=\hskip5pt\relax]{xyf{xy}{xf}o}
+
+\hidetext[map=str]{Lorem ipsum dolor sit amet, consectetuer adipiscing elit. Ut purus elit, vestibulum%
+ut, placerat ac, adipiscing vitae, felis. Curabitur dictum gravida mauris.}
+}
+\end{DocExample}
+
+
+
+\begin{function}[added=2025-07-10]{framed}
+  此环境来自 \pkg{framed} 宏包, 用于排版可跨页的带框盒子.
+\end{function}
+\begin{DocExample}*
+\begin{framed}
+劳仑衣普桑，认至将指点效则机，最你更枝。想极整月正进好志次回总般，段然取向使张规军证回，世市总李率英茄持伴。
+\end{framed}
+\end{DocExample}
+
+
+\begin{function}[updated=2025-04-25]{\ztexframe, \ztexframeend}
+  \begin{syntax}
+    \cs{ztexframe}\oarg{keyval}
+    \cs{ztexframeend}
+  \end{syntax}
+  这两个命令基于 \pkg{framed} 宏包, 用于创建可跨页的(盒子)环境, 它类似于 MarkDown 中的引用环境. 
+  \meta{keyval} 用于设置该环境的一系列排版参数, 具体方法请参见下述说明:
+\end{function}
+
+
+\begin{keyval}[parent=ztex/box/framed-user]{rulewidth, rulecolor, padding, bg, adj}
+  \begin{syntax}
+    rulewidth = \Arg{dim} > \dval{5pt}
+    rulecolor = \Arg{color} > \dval{red}
+    padding   = \Arg{dim} > \dval{5pt}
+    bg        = \Arg{color} > \dval{gray!10}
+    adj       = \Arg{dim}  > \dval{0pt}
+  \end{syntax}
+  \meta{rulewidth} 用于设置左侧 rule 的宽度; \meta{rulecolor} 左侧 rule 的颜色;
+  \meta{padding} 用于设置左侧的空白间距; \meta{bg} 用于设置右侧文本的背景色;
+  \meta{adj} 用来调整这个盒子的 \cs{hsize}, 简单来说: 就是在左右两边各加上 $\meta{adj}/2$,
+  然后居中排版.
+\end{keyval}
+
+
+\begin{DocExample}*
+\NewDocumentEnvironment{envA}{}
+  {\ztexframe[rulewidth=10pt, adj=2cm]}
+  {\ztexframeend}
+\begin{envA}
+Lorem ipsum dolor sit amet, consectetuer adipiscing elit.
+Ut purus elit, vestibulum ut,
+placerat ac, adipiscing vitae, felis. Curabitur dictum gravida mauris.
+\end{envA}
+\end{DocExample}
+
+
+\begin{function}[added=2025-07-10]{\startmulticolumns, \stopmulticolumns}
+  \begin{syntax}
+    \cs{startmulticolumns}\oarg{keyval}
+    \cs{stopmulticolumns}
+  \end{syntax}
+  这两个命令来自 \pkg{framedmulticol} 宏包, 用于排版带框、可跨页的多栏文本. 此宏包可以结合之前的 
+  \pkg{longfbox} 宏包使用, 指定 \meta{framed}\texttt{ = lfbox} 即可, 其配置参数通过 \meta{framed-options}
+  键进行指定. \textbf{注意}: \pkg{framedmulticol} 宏包来自 \CusTeX{} 宏集, 其具体用法请参考其源码. \vskip1.5em
+  \noindent{\sffamily\color{red}NOTE: \texttt{framed=\meta{type}} 这一设置在 $\meta{cols} \ge 2$ 时才生效,
+  当 $\meta{col} = 1$ 时, 可以使用 \pkg{framed} 宏包提供的 \env{framed} 环境.}
+\end{function}
+
+\begin{DocExample}*
+\startmulticolumns[
+  sep = 30pt,
+  rule-width = 5pt,
+  rule-color = blue,
+  framed = fbox,
+] \zhlipsum[1]
+\stopmulticolumns
+\end{DocExample}
+
+
+\begin{function}[added=2025-09-14]{\zmbox}
+  \begin{syntax}
+  \cmd{\zmbox}\Arg{material}
+  \end{syntax}
+  此命令与 \hologo{LaTeX2e} 中的 \cmd{\mbox} 命令作用相同, 但 \cmd{\zmbox}
+  的``参数'' \meta{material} 中可以包含 \verb|\verb| 等命令. 
+\end{function}
+
+
+\begin{function}[added=2026-02-05]{\zfbox}
+  \begin{syntax}
+  \cmd{\zfbox}\oarg{keyval}\Arg{material} 
+  \end{syntax}
+  次命令与 \hologo{LaTeX2e} 中的 \cmd{\fbox} 命令类似, 但它的 ``参数'' \meta{material} 中可以包含 \verb|\verb| 等特殊命令,
+  且该命令还提供了诸多样式定制接口, 由 \meta{keyval} 指定. \textbf{注意}: 该命令仅限于单行文本内容, 且不能包含 \verb|\par| 等命令.\vskip.6em\relax
+  \noindent{\sffamily\color{red}NOTE: 此命令不依赖 PGF/TikZ, 其仅用到了 \hologo{LaTeX2e} 原生的 \texttt{picture} 环境和 \pkg{pict2e} 宏包, 用户只需手动加载 \pkg{ztool} 的 \pkg{zdraw} 库即可.}
+
+\vskip.6em\relax
+\noindent 该命令的一个简单使用案例:
+\end{function}
+\begin{DocExample}*
+% \documentclass{ztex}
+% \ztoolloadlib{zdraw}
+AyC-1p3:\fbox{AyC-1p3}:\zfbox{AyC-1p3}:\zfbox[fill=gray!25, draw=blue, arc=10]{AyC-1p3}\vskip1em\relax 
+
+{
+  \fboxrule=10pt\relax
+  \fboxsep=4pt\relax
+  AyC-1p3:%
+  \fbox{AyC-1p3}:%
+  \zfbox[arc=3, draw=green, fill=pink]{Ayc-1p3}:% 
+  \zfbox[arc=3, draw=green, fill=pink, text={\sffamily}]{\verb|% $*&^_#\alpha@=-!`|} 
+}
+\end{DocExample}
+
+
+\begin{keyval}[parent=ztex/box/enhance-fbox]{draw, fill, arc, text}
+  \begin{syntax}
+    draw = \meta{color} > \dval{black} 
+    fill = \meta{color} > \dval{none}
+    arc  = \meta{浮点数} > \dval{1}
+    text = \meta{code}  > \dval{空}
+  \end{syntax}
+  上述参数说明: \meta{draw} 用于控制边框的颜色, \meta{fill} 用于控制填充颜色, \meta{arc} 用于指定边框的圆角半径, \meta{text} 用于指定 \meta{material} 内容的打印样式(建议将一些字体控制命令置于其中)； 除此之外, 边框线的粗细以及边框内容四周的间距由 \hologo{LaTeX2e} 中的 \cmd{\fboxrule} 和 \cmd{\fboxsep} 控制. \textbf{注意}: 参数 \meta{arc} 不宜过大, 当此值超过矩形边框长宽最小值的一半时, \meta{arc} 会自动调整为二者的最小值. 
+\end{keyval}
+
+
+\begin{function}[added=2025-09-13]{\zboxcollect, \zboxcollectcustom}
+  \begin{syntax}
+    \cmd{\zboxcollect}\Arg{material}
+    \cmd{\zboxcollectcustom}\Arg{box spec}\oarg{pre code}\oarg{post code}\Arg{material}
+  \end{syntax}
+  这两个命令用于将 \meta{material} 中的内容搜集到 \cmd{\ztexcollectbox} 这个水平盒子(\cmd{\hbox})中, 然后将其排版出来, 排版方式由 \cmd{\zboxcollect@typeset} 指定. \meta{material} 中可以包含 \verb|\verb| 等命令;AyC-1p3-
+
+  命令 \cmd{\zboxcollectcustom} 可以通过 \meta{box spec} 参数自定义排版样式, \meta{pre code} 会被置于 \cmd{\ztexcollectbox} 内容的最前面, \meta{post code} 会被置于 \cmd{\ztexcollectbox} 内容的最后面, \meta{pre code} 和 \meta{post code} 二者默认为空, 其中一般放置一些与字体控制相关的命令. \textbf{备注}: 这两个命令都是健壮的, 这里的 \meta{material} 并不是宏参数. 这两个命令的基本使用方法如下:
+\end{function}
+\vskip1.25em\relax
+\begin{DocExample}*
+\zboxcollect{\textbf{AAA}-BBB},
+\zboxcollectcustom
+  {\fcolorbox{blue}{gray!30}{\box\ztexcollectbox}}%
+  {\sffamily CCC-\verb|\beta|}
+\end{DocExample}
+
+
+\begin{function}[added=2025-09-13, updated=2026-02-05]{\zbox_item_collect:nnnw}
+  \begin{syntax}
+  \cmd{\zbox_item_collect:nnnw} \Arg{box spec}\Arg{pre code}\Arg{post code}\Arg{material}
+  \end{syntax}
+  此命令和上述的 \cmd{\zboxcollect} 类似, 这里不再重复说明. \textbf{备注}:
+  由于 \TeX{} 的 tokenize 机制, 这里的 \meta{material} 并不是宏参数.
+\end{function}
+
+
+\begin{function}[updated=2025-05-12]{\zboxitemalign}
+  \begin{syntax}
+    \cs{zboxitemalign}\oarg{key-value}\marg{width}\marg{content}
+  \end{syntax}
+  此命令用于对盒子内容进行对齐, \meta{width} 为排版盒子的宽度, \meta{content} 为盒子中的内容. 
+  \meta{key-value} 用于设置对齐方式与样式. \textbf{注意}: \meta{content} 中的空格会被忽略,
+  如果需要空格，请使用 ``\texttt{\char92\vsp}'' 或 ``\;\,\texttt{\~}'' 替代.
+\end{function}
+
+
+\begin{keyval}[parent=ztex/box/align]{cmd, type, custom}
+  \begin{syntax}
+    cmd    =  \meta{cmd}>\dval{空}
+    type   =  \meta{left|\textbf{center}|right|scatter|tower}>\dval{center}
+    custom =  \meta{cmd}>\dval{空}
+  \end{syntax}
+  \meta{cmd} 和 \meta{custom} 均为一个命令; 前者可以接受一个参数, 其会应用于 \meta{content} 中的每一个 token;
+  后者须为一个无参数的命令. \meta{type} 用于设置对齐方式, 可选值有: \texttt{left}, \texttt{center}, 
+  \texttt{right}, \texttt{scatter}. 默认对齐方式为 ``\texttt{center}(居中对齐)'',  \texttt{scatter} 为分散对
+  齐(此时两端没有空格), \texttt{tower} 对齐方式: \texttt{content} 中每一个 \texttt{item(token)} 对应的对齐参考点为 
+  \texttt{hc/b}, 其横坐标计算方法如下: 
+  \[
+    \text{\ttfamily\meta{width}}\times
+    \frac{\text{\ttfamily\meta{item index}}}
+      {\text{\ttfamily\meta{item total}} + 1}.
+  \]
+  在 \texttt{custom} 对应的命令中可以使用 \cs{total@width} 来获取 \meta{width} 的值, \cs{align@cmd} 来获取
+  \meta{cmd} 的内容, \cs{align@object} 来获取 \meta{content} 的内容, \cs{align@format} 来获取 \meta{format} 的值.
+  变量 \cs{l__ztool_boxitem_seq} 中保存了 \meta{content} 中的所有 token, 其索引从 1 开始.
+\end{keyval}
+
+一个基本的使用案例如下:
+\begin{DocExample}*
+  \def\blueit#1{\textcolor{blue}{|#1|}}
+  \underline{%
+    \zboxitemalign[cmd=\blueit, type=scatter]{15em}{{Tom}{Amy}{Jennery}}%
+  }\par
+  \underline{%
+    \zboxitemalign[cmd=\blueit]{15em}{{Tom} {Amy}\ {Jennery}}%
+  }
+\end{DocExample}
+
+
+关于 \texttt{custom} 和 \texttt{tower} 的基本使用案例如下:\vskip2em\relax
+
+\begin{DocExample}*[!!]
+% 1. 'tower' style
+\zboxitemalign[type=tower]{\linewidth}{A}\par
+\zboxitemalign[type=tower]{\linewidth}{AA}\par
+\zboxitemalign[type=tower]{\linewidth}{AAA}\par
+
+% 2. use 'custom' to archieve 'tower' style
+\ExplSyntaxOn\makeatletter
+\def\customType{
+  \edef\seqCount{\seq_count:N \l__ztool_boxitem_seq}
+  \seq_map_inline:Nn \l__ztool_boxitem_seq
+    {
+      \edef\item@width{\dim_eval:n {\total@width/(\seqCount+1)}}
+      \hskip\item@width\clap{##1}
+    }\hskip\item@width\hss
+}
+\makeatother\ExplSyntaxOff
+\def\itemCmd#1{\textcolor{blue}{\sffamily(#1)}}
+\dotfill\par
+\zboxitemalign[
+  type=custom, 
+  cmd=\itemCmd, 
+  custom=\customType
+]{\linewidth}{AAAAAA}
+\end{DocExample}
+
+
+
+\begin{function}[added=2025-05-12]{\ztoolboxaffine}
+  \begin{syntax}
+    \cs{ztoolboxaffine}\oarg{key-value}\marg{content}\marg{matrix}
+  \end{syntax}
+  上述 \meta{content} 表示仿射变换作用的对象; \meta{matrix} 为一个 $2\times 2$ 的矩阵, 表示
+  对应的仿射变换矩阵. 若 \meta{matrix} $ = \{a, b, c, d\}$, 则其对应的仿射变换矩阵 $\Lambda$ 如下:
+  \[
+    \Lambda = \begin{bmatrix}
+      a & c \\
+      b & d
+    \end{bmatrix}.
+  \]
+  若 $\det\Lambda = 0$, 则此变换无意义, \ztex{} 会在终端输出一条警告, 最后将 \meta{content} 中的内容
+  原样输出到 PDF; \meta{keyval} 设置请参见下述 ``\texttt{ztool/affine}'' 说明. 
+\end{function}
+
+
+\begin{keyval}[parent=ztool/affine]{debug, pole-1, pole-2, xoffset, yoffset}
+  \begin{syntax}
+    debug   = \meta{true|\textbf{false}}>\dval{false}
+    pole-1  = \meta{coffin's pole}>\dval{l}
+    pole-2  = \meta{coffin's pole}>\dval{b}
+    xoffset = \meta{number}>\dval{0pt}
+    yoffset = \meta{number}>\dval{0pt}
+  \end{syntax}
+  \meta{debug} 用于调试, 如果设置为 \texttt{true}, 则会在 PDF 中输出一些中间变量信息, 用于调试; 
+  其中 \meta{xoffset}, \meta{yoffset} 为水平和垂直方向的偏移量, 默认值均为 \texttt{0pt}; 
+  \meta{pole-1}, \meta{pole-2} 用于设置打印 coffin 时的参考点, 二者必须相交. 关于后四个 \meta{kye} 的详细使用
+  方法可以参见 \pkg{l3coffins} 的说明.
+\end{keyval}
+
+
+命令 \cs{ztoolboxaffine} 的一些基本使用样例如下:
+\begin{DocExample}*
+Original Text: XXX\par
+$\det(A) = 0$: \ztoolboxaffine{XXX}{0, 0, 0, 2}\par % det(A) = 0
+Unit Matrix: \ztoolboxaffine{XXX}{1, 0, 0, 1}\par % unit matrix
+Scale Matrix: \ztoolboxaffine[pole-2=vc]{XXX}{2, 0, 0, 2}\par % scale
+$x$-scale Matrix: \ztoolboxaffine{XXX}{2, 0, 0, 1}\par % x-scale
+$y$-scale Matrix: \ztoolboxaffine{XXX}{1, 0, 0, 2}\par % y-scale
+$x$-shear Matrix: \ztoolboxaffine{XXX}{1, 0, 1, 1}\par % x-shear
+$y$-shear Matrix: \ztoolboxaffine{XXX}{1, 1, 0, 1}\par % y-shear
+Image Test: \rule{2em}{2em}~\ztoolboxaffine{\rule{2em}{2em}}{1, 0, .5, 1}
+\end{DocExample}

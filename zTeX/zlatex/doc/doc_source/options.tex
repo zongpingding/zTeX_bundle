@@ -1,0 +1,193 @@
+\clearpage
+\section{文档类选项}\label{sec:classoption}
+\ztex{} 的文档类选项可以在加载文档类时指定, 也可以后续通过 \cmd{\ztexset} 命令设置. 
+\ztex{} 中的 \meta{key-value} 被划分为两个层级: 第一层中的 \zkey{layout, mathSpec, sect, packageOption, classOption, font, bib\_index} 
+具有自己的独立子键, 我们称它们为元键(meta key); 其余的键则比较简单, 可以直接指定. 
+\cls{ztex.cls} 中的键值关系请参见节首图示.
+
+总体而言，\ztex{} 的文档类选项相对较为复杂。对于刚接触该文档类的用户而言，无需掌握所有配置选项；
+在默认设置下，\ztex{} 即可生成视觉效果良好的文档。
+
+接下来，我们将详细介绍 \ztex{} 中各个 \meta{key} 的设置方式及其具体含义。在进入正题之前，我们先约定
+一组符号和格式规则，以便更好地理解后续内容:
+
+\begin{itemize}
+  \item 名字后带有 \zclassArg{} 号的选项，只能作为宏包/文档类选项，需要在引入宏包/文档类的时候指定;
+  \item 名字后带有 \zcmdArg{} 号的选项，只能通过 \ztex{} 宏集提供的用户接口 \cmd{\ztexset} 来设定;
+  \item 名字后不带有特殊符号的选项，既可以作为宏包/文档类选项，也可以通过 \cmd{\ztexset} 来设定.
+\end{itemize}
+
+
+\clearpage
+\begin{keyval}[rEXP, updated=2024-11-05]{lang}
+  \begin{syntax}
+    lang = \meta{\textbf{en}|cn}>\dval{en}
+  \end{syntax}
+  \ztex{} 目前仅对中英文做了适配，对于法语有部分的支持. 根据不同的文档类语言设置, \ztex{} 会加载不同的(和语言相关的)
+  宏包\index{language packages}; 在不同的 \meta{lang} 设置下, 语言类宏包的详细加载情况如下:
+  \begin{itemize}
+    \item \texttt{lang = en}: \pkg{inputenc}(若使用\hologo{pdfTeX}), \pkg{fontenc}, \pkg{babel}, \pkg{microtype};
+    \item \texttt{lang = cn}: \pkg{fontspec}, \pkg{ctex};
+  \end{itemize}
+\end{keyval}
+
+\noindent{\sffamily\color{red}NOTE: 目前 \cls{ztex} 文档类已移除如下配置}
+\begin{DocExample}
+\sys_if_engine_pdftex:T 
+  { \RequirePackage[utf8]{inputenc} }
+\RequirePackage[english]{babel}
+\ztex_hook_preamble_last:n 
+  {
+    \RequirePackage{csquotes}
+    \RequirePackage{microtype}
+  }
+\end{DocExample}
+
+
+\begin{keyval}[rEXP, updated=2025-07-07]{hyper, hyper-suppress}
+  \begin{syntax}
+    hyper          = \meta{true|\textbf{false}}>\dval{false}
+    hyper-suppress = \meta{clist}>\dval{toc}
+  \end{syntax}
+  是否开启文档内部的超链接以及 PDF 书签，默认为\texttt{false}. 建议在最后的成稿中启用此选项，在草稿
+  阶段置为 \texttt{false} 可以加快文档的编译速度; \meta{hyper-suppress} 用于禁用 \pkg{hyperref} 
+  的 Patch(es), 默认禁用对目录的 Patch;  \meta{hyper-suppress} 的可选值有: 
+  ``\texttt{footnote, amsmath@tag, counter, mathenv, caption, longtable, bib, thm}''.
+\end{keyval}
+
+
+\begin{keyval}[rEXP, updated=2024-11-05]{fancy}
+  \begin{syntax}
+    fancy = \meta{true|\textbf{false}}>\dval{false}
+  \end{syntax}
+  此选项用于控制文档的外观，包括章节样式，定理类环境样式，默认为\texttt{false}. 
+\end{keyval}
+
+
+\begin{keyval}[rEXP, updated=2025-09-05, parent=ztex/sect]{load, style, dump-ptable}
+  \begin{syntax}
+    load  = \meta{\textbf{true}|false} > \dval{true}
+    style = \meta{\textbf{ltx}|fancy} > \dval{ltx}
+    dump-ptable  = \meta{\textbf{false}|true} > \dval{false}
+  \end{syntax}
+  因 \ztex{} 的 \pkg{sect} 模块重新重写了章节命令和目录相关的接口, 所以该模块提供了
+  此选项用于禁用这些更改; 当 ``\texttt{load = false}'' 时, 便可成功禁用(定理目录之类的目录命
+  令也将会失效); \meta{style} 用于指定章节命令的样式, \ztex{} 仅提供了 ``\texttt{ltx}'' 
+  一种样式(其余样式需要用户自定义), \ztex{} 默认使用 ``\texttt{ltx}'' 样式; 
+  \meta{dump-ptable} 用于控制是否生成相应的 ``\texttt{*.p\meta{table}}'' 文件,
+  此选项主要用于调试, `\texttt{*.p\meta{table}}' 内数据的存储结构请参见: \cref{outer-toc:custom_file}; 
+  当 \texttt{dump-ptable = true} 时生成相应文件, 比如 ``\texttt{*.ptoc, *.plot, ...}''
+  \vskip1em\relax
+  \noindent{\sffamily\color{red}NOTE: \pkg{sect} 模块和 \ztex{} 中的部分模块或库目前处于耦合状态, 请慎用 ``\texttt{sect/load=false}'' 设置.}
+\end{keyval}
+
+
+\begin{keyval}[rEXP, updated=2024-11-05]{class}
+  \begin{syntax}
+    class = \meta{\textbf{article}|bool|ctexbook}>\dval{article}
+  \end{syntax}
+  此选项用于指定加载的基文档类，默认为 \cls{article}. 加载不同的文档类, 用户可以使用不同的命令:
+  比如 \cls{ctexbook} 提供了 \cmd{\ctexset} 命令进行章节样式设置.
+  \par\vspace{1.5em}
+  \noindent{\sffamily\color{red}NOTE: 命令 \cmd{\ctexset} 或 \pkg{ctex} 宏包中 heading 部分的设置可能与 \pkg{sect} 模块相冲突，请谨慎加载.}
+\end{keyval}
+
+
+\begin{keyval}[rEXP, updated=2024-11-05]{classOption}
+  \begin{syntax}
+    classOption >\dval*{oneside, 12pt}
+  \end{syntax}
+  此选项接受一个逗号分隔的列表, 用于传递基文档类选项，针对默认的 \cls{article} 文档类，
+  此项为\texttt{oneside, 12pt}.
+\end{keyval}
+
+
+\begin{keyval}[rEXP, updated=2024-11-20]{packageOption}
+  \begin{syntax}
+    packageOption=\meta{key-value} 
+  \end{syntax}
+  此选项接受一个键值对, 用于向目标宏包传递选项, 一个基本的使用样例如下:
+\end{keyval}
+\begin{DocExample}
+  \documentclass[
+    packageOption={
+      fontspec=quiet, 
+      ctex={scheme=plain, punct=quanjiao},
+    },
+  ]{ztex}
+\end{DocExample} 
+
+
+
+\begin{keyval}[updated=2024-12-06, parent=ztex/font]{sysfont, doc, math, text}
+  \begin{syntax}
+    sysfont = \meta{true|\textbf{false}}>\dval{false}
+    doc     = \meta{lmm|ptmx|newtx}>\dval{cm}
+    math    = \meta{euler|var-euler|newtx|mtpro2|mathpazo}>\dval{cmm}
+    text    = \meta{times}>\dval{cm}
+  \end{syntax}
+  此选项主要用于文档的字体配置, 用户可以通过此键来分别定义文档中的正文或数学字体. 
+  \textbf{注意}: 其中的子键 \meta{sysfont} 默认为\texttt{false}, 在启用此选项后，\ztex{} 会自动加载
+  \pkg{fontspec} 宏包，此时需更换引擎为\hologo{XeTeX} 或者 \hologo{LuaTeX}. 
+\end{keyval}
+
+
+\begin{keyval}[rEXP, updated=2024-11-05, parent=ztex/layout]{margin, slide, aspect, theme}
+  \begin{syntax}
+    margin = \meta{true|\textbf{false}}>\dval{false}
+    slide  = \meta{true|\textbf{false}}>\dval{false}
+    aspect = \meta{浮点数|浮点数}>\dval{12|9}
+    theme  = \meta{主题名}>\dval*{AnnArborDefault}
+  \end{syntax}
+  设置文档布局，如果设置 \meta{slide}\texttt{ = true}, 那么此时 \ztex{} 会自动加载 \pkg{slide} 库, 
+  最终的文档将变为一个演示文档.
+\end{keyval}
+
+
+\begin{keyval}[updated=2024-12-05, parent=ztex/bib_index]{load, source, backend}
+  \begin{syntax}
+    load    = \meta{true|\textbf{false}}>\dval{false}
+    source  = \meta{字符串}>\dval{ref.bib}
+    backend = \meta{biber|bibtex}>\dval{biber}
+  \end{syntax}
+  此选项用于控制索引与参考文献的生成; \meta{load} 用于指定是否加载 \pkg{biblatex} 宏包, 默认为 \texttt{false}; 
+  \meta{source} 用于指定参考文献源文件, 默认为: \file{ref.bib}; \meta{backend} 用于指定处理参考文献的后端，
+  默认为\texttt{biber}.
+\end{keyval}
+
+
+\begin{keyval}[updated=2024-11-05, parent=ztex/mathSpec]{alias, envStyle, font}
+  \begin{syntax}
+    alias    = \meta{true|\textbf{false}}>\dval{false}
+    envStyle = \meta{主题名}>\dval{plain}
+    font     = \meta{euler|var-euler|newtx|mtpro2|mathpazo}>\dval{cmm}
+  \end{syntax}
+  此键用于配置数学排版相关的选项。其中，\meta{alias} 默认为 \texttt{false}；当设为 \texttt{true} 时，\ztex{} 将自动
+  加载 \pkg{alias} 库。该库提供了一系列与数学符号, 微分算子, 矩阵相关的简写命令，例如：使用 \cmd{\ZZ} 代替 \verb|\mathbb{Z}|,
+  \cs{mat} 用于快速输入矩阵, ... 最后，\meta{envStyle} 用于指定数学环境的样式，默认值为 \texttt{plain}。
+\end{keyval}
+
+出于编译速度的考虑，虽然 \ztex{} 预定义了一系列定理环境样式，但它们并不会默认加载。其中部分样式被移
+入了 \pkg{thm} 库中，用户按需加载即可。\ztex{} 中预定义的定理类环境样式包括以下几种：
+
+\noindent\parbox[t]{.5\linewidth}{
+\noindent \textbf{\pkg{thm} module 定义样式}:
+\begin{itemize}
+  \item plain 
+  \item background
+  \item leftbar 
+  \item fancy 
+\end{itemize}}%
+\parbox[t]{.5\linewidth}{
+\noindent \textbf{\pkg{thm} library 定义样式}:
+\begin{itemize}
+  \item shadow
+  \item paris 
+  \item tcb
+  \item elegant
+  \item obsidian
+  \item lapsis
+\end{itemize}}
+
+\meta{font} 用于指定数学公式字体，预定义的字体有: \texttt{newtx, euler, var-euler, mtpro2, mathpazo, ptmx}. 
+其中 \texttt{mtpro2} 为付费字体，需用户自行安装.

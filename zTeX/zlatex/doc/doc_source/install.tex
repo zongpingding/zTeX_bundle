@@ -1,0 +1,93 @@
+\clearpage
+\section{安装使用}
+\subsection{在线模板}
+为了让部分用户可以直接使用到 \ztex{}，免去``繁杂''的环境配置.我已将本模板部署在 \TeX{}Page 上，
+地址为: \href{https://www.texpage.com/share/e420ac8364a640b78231d65c9d5d7090}{TeXPgae \ztex{}  Project}，
+直接打开此地址即可体验. Github 上的项目地址为:
+
+\begin{center}
+  \fbox{https://github.com/zongpingding/zTeX\_bundle}
+\end{center}
+
+仓库中包含本手册以及 \zTikZ{} 宏集(由于技术原因，\zTikZ{} 请在本地体验)的源码, 用户手册以及部分的使用示例; 
+当前宏集的稳定版本于2025年09月发布, 最新的开发版请切换到 ``dev'' 分支; 本手册适用于当前最新的开发版.
+
+
+\subsection{本地安装}
+\ztex{} 宏集目前还未上传 CTAN, 因为还没有开发完成. 本文档类使用的部分
+\LaTeX3 命令在老版本的 \TeX{}Live 下并不存在, 若用户的 \TeX{}Live 版本过低，则无法正常使用本宏集. 
+目前 \ztex{} 文档类在各平台的兼容情况如下:
+
+\hspace*{12em}\parbox{8cm}{
+\begin{itemize}
+  \item[Windows]: \TeX{}Live 最低版本 2024
+  \item[Linux]: \TeX{}Live 最低版本 2024
+  \item[MacOS]: Mac{}\TeX{} 还未测试
+\end{itemize}}
+
+因 \ztex{} 还未传入 CTAN(未来可能会考虑), 所以想要使用此文档类，只有如下两种方法:
+\begin{itemize}
+    \item 把此宏集 -- \file{ztex} 目录中的所有内容放入当前项目文件夹下;
+    \item 在命令行运行命令: \file{kpsewhich -var-value=TEXMFHOME}, 在 Windows 上这个路径一般是: \texttt{C:/Users/\meta{name}/texmf/}, 
+      在Linux下一般是: \file{~/texmf/}; 具体路径以自己的实际情况为准. 在此路径下新建文件夹 \file{tex/latex/ztex}; 此文件夹对应的路径
+      我们记为 \meta{z\TeX}, 随后把 \file{ztex} 目录中的所有内容放入 \meta{z\TeX} 下即可.
+\end{itemize}
+
+在本手册后续，我们使用 \meta{z\TeX} 表示本宏集的根目录.
+
+% \vskip1.5em
+% \noindent{\color{red}\sffamily NOTE: 如果用户不需要使用 \pkg{alias} 库, 那么一些比较老 \TeX{}Live 也能运行此宏集.}
+
+
+\clearpage
+\subsection{快速开始}\label{mwe}
+本节展示 \ztex{} 的最小工作示例\Footnote{导言区的配置可能需要根据自己的实际情况加以调整，详细配置请参见后文}:
+首先是中文写作示例，\ztex{} 默认加载 \cls{article} 文档类, 如果用户希望使用 \cls{book} 文档类，可以在加载文档类时
+指定文档类选项: \texttt{class = book}.
+\begin{DocExample}
+% !TeX program = XeLaTeX
+\documentclass[lang=cn]{ztex}
+
+\begin{document}
+% some preface
+% \tableofcontents
+
+% writing your document here ...
+\end{document}
+\end{DocExample}
+  
+其次是英文写作示例, 更改基文档类 -- \texttt{ class = book}, 更改语言选项 -- \texttt{lang = en}(此为默认选项),
+然后使用 \hologo{pdfLaTeX} 引擎编译此文档:
+
+\begin{DocExample}
+% !TeX program = pdfLaTeX 
+\documentclass[class=book]{ztex}
+
+\title{Title}
+\author{Author}
+\date{\today}
+\begin{document}
+\maketitle
+\frontmatter
+% some preface
+% \tableofcontents
+% some claim etc.
+\mainmatter
+
+% writing your document here ...
+\end{document}
+\end{DocExample}
+
+在使用 \cls{book} 文档类时, 需要在特定的位置调用 \cmd{\frontmatter} 和 \cmd{\mainmatter} 两个命令, 否则
+之后文档的页眉, 页脚格式可能会不正确. 有时甚至会破坏相关的超链接跳转.
+\restoregeometry
+
+
+\newgeometry{vmargin=0pt}
+\thispagestyle{empty}
+\begin{center}
+  \mbox{}\vfill
+  \includegraphics[width=.95\paperheight, angle=90]{./support/pics/ztex_options.pdf}
+  \vfill\mbox{}
+\end{center}
+\restoregeometry

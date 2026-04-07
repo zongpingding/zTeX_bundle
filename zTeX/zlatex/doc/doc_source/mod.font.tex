@@ -1,0 +1,408 @@
+\clearpage
+\subsection{\titlepkg{font} 模块}
+本模块主要用于配置 \ztex{} 的字体, 尽管 \pkg{fontspec} 和 \pkg{unicode-math} 已经在很大程度上
+简化了字体的配置，但是对于一些用户来说，仍然会感到困惑. 本模块的目的就是为了简化字体的配置，让普通的
+\LaTeX{} 用户也能够方便的配置字体, 用上自己喜欢的字体. 
+
+
+\subsubsection{字体机制}
+一个很经典的问题: 当调用一个新字体时, 我到底是使用 font name(字体名) 还是 file name(文件名) ? \pkg{fontspec} 宏包中
+记录着此问题的详细解答:
+\begin{itemize}
+  \item 当通过 font name(字体名) 调用系统字体时: 诸如 \verb|~/Library/Fonts|(MacOS), \verb|C:\Windows\Fonts|(Windows)
+    这样的默认搜索路径(search path), 其下的字体可以直接使用 \hologo{XeTeX} 或 \hologo{LuaTeX} 通过字体名调用.
+    需要注意的是: 任何系统中, \textsc{texmf} 下的字体都可以通过 \hologo{LuaTeX} 直接调用; 对于 \hologo{XeTeX}, 
+    Windows 或 Linux 的 \textsc{texmf} 路径下的字体能通过字体名直接调用. 通过字体名调用字体有一个好处:
+    \pkg{fontspec} 能(如果对应的字体文件存在)自动完成斜体，加粗等 font face 配置. 
+  \item 当通过 file name(文件名) 调用字体时:此时在 \texttt{/usr/local/texlive/2025/}\\ \texttt{texmf-dist/fonts/opentype/public} 
+    下的字体仅可以通过文件名的形式让 \hologo{XeTeX} 调用, 然而 \hologo{LuaTeX} 则没有这样的限制.  且对于在\textbf{默认搜索路径}%
+    或\textbf{当前路径}下的字体文件, 在调用时不用指明路径; 此时请尽量给出完整的字体名, 如 \texttt{lmroman10-regular.otf}. ( 其实也可以仅给出 \texttt{lmroman10-regular},
+    但是此时请给出 \texttt{Path} 这个键 -- 无论是否赋值, 这样 \pkg{fontspec} 会自动去查找字体文件而非字体名.)
+    % 如果字体格式为 \texttt{.otf}, 那么此时可仅给出文件名(但还是请尽量写上), 例如 \texttt{lmroman10-regular},
+    % 其余情况下请给出对应的字体格式(通过 \texttt{Extension} 参数进行指定). 
+\end{itemize}
+
+本节中所有命令参数中的 \meta{font} 既可以是字体名(font name), 也可以是字体文件名(file name), 用户需要根据自己的实际情况
+选择适合自己的方式.\par
+\vskip1.5em
+\noindent{\sffamily\color{red}NOTE: 请尊重字体版权, 不要随意发布和传播商用字体 !!!}
+
+
+\clearpage
+怎么查看 font name ? \TeX{}Live 提供了 \texttt{otfinfo} 这一命令行工具, 比如我们想要查看 Latin Modern Roman 字体, 其对应的
+命令为: \texttt{otfinfo -i `kpsewhich lmroman10-regular.otf`}. 命令的运行结果如下(Linux 下):
+\def\exampleUR{}
+\begin{DocExample}[@@]
+> otfinfo -i `kpsewhich lmroman10-regular.otf`
+Family:              LM Roman 10
+Subfamily:           Regular
+Full name:           LMRoman10-Regular
+PostScript name:     LMRoman10-Regular
+Preferred family:    Latin Modern Roman
+Preferred subfamily: 10 Regular
+Mac font menu name:  LM Roman 10 Regular
+Version:             Version 2.004;PS 2.004;hotconv 1.0.49;makeotf.lib2.0.14853
+Unique ID:           2.004;UKWN;LMRoman10-Regular
+Trademark:           Please refer to the Copyright section for the font trademark attribution notices.
+Copyright:           Copyright 2003, 2009 B. Jackowski and J. M. Nowacki (on behalf of TeX users groups). This work is released under the GUST Font License --  see http://tug.org/fonts/licenses/GUST-FONT-LICENSE.txt for details.
+Vendor ID:           UKWN
+Permissions:         Unknown (12)
+\end{DocExample}
+
+\clearpage
+\hologo{XeTeX} 通常使用 \file{fontconfig} 库查找和调用字体，因此, 可以用 \texttt{fc-list} 命令显示可用的字体. 一个基本的查找示例如下:
+\begin{DocExample}[@@]
+> fc-list | grep adobe  
+/usr/share/fonts/adobe-source-code-pro/SourceCodePro-BlackIt.otf: Source Code Pro,Source Code Pro Black:style=Black Italic,Italic
+/usr/share/fonts/adobe-source-code-pro/SourceCodeVF-Upright.otf: SourceCodeVF:style=Semibold
+/usr/share/fonts/adobe-source-code-pro/SourceCodePro-LightIt.otf: Source Code Pro,Source Code Pro Light:style=Light Italic,Italic
+/usr/share/fonts/adobe-source-code-pro/SourceCodeVF-Upright.otf: SourceCodeVF:style=Medium
+/usr/share/fonts/adobe-source-code-pro/SourceCodeVF-Italic.otf: SourceCodeVF:style=Medium Italic
+/usr/share/fonts/adobe-source-code-pro/SourceCodePro-Bold.otf: Source Code Pro:style=Bold
+\end{DocExample}
+\resetExampleUR
+
+
+
+\newpage
+\subsubsection{默认字体族}
+\begin{function}[added=2025-04-26]{\rmdefault, \sfdefault, \ttdefault}
+  \begin{syntax}
+    \cs{rmdefault}>\dval{rm}
+    \cs{sfdefault}>\dval{sf}
+    \cs{ttdefault}>\dval{tt}
+  \end{syntax}
+  这三个命令保存了西文字体的默认字体族. 更改这三个默认字体族即可改变文档中的西文字体, 
+  一个基本的使用示例如下(将文档更改为类 Times 字体风格):
+\end{function}
+\begin{DocExample}
+\renewcommand{\rmdefault}{ptm}
+\renewcommand{\sfdefault}{phv}
+\renewcommand{\ttdefault}{pcr}
+\end{DocExample}
+
+
+\begin{function}[added=2025-04-26]{\CJKrmdefault, \CJKsfdefault, \CJKttdefault}
+  \begin{syntax}
+    \cs{CJKrmdefault}>\dval{rm}
+    \cs{CJKsfdefault}>\dval{sf}
+    \cs{CJKttdefault}>\dval{tt}
+  \end{syntax}
+  这三个命令和上述西文字体中的三个变量类似, 但其保存了 CJK 字体三个默认字体族的名称.
+\end{function}
+
+
+\begin{function}[added=2025-04-26]{\familydefault, \CJKfamilydefault}
+  前者保存了 \cs{textnormal}, \cs{normalfont} 中西文字体所使用的字体族, 后者保存了对应的 CJK 字体的默认字体族.
+\end{function}
+
+
+\begin{function}[added=2025-04-26]{\setmainfont, \setsansfont, \setmonofont}
+  \begin{syntax}
+    \cs{setmainfont}\marg{font}\oarg{font features}
+    \cs{setsansfont}\marg{font}\oarg{font features}
+    \cs{setmonofont}\marg{font}\oarg{font features}
+  \end{syntax}
+  这三个命令来自 \pkg{fontspec} 宏包, 用于设置西文字体的默认字体族(\cs{setmainfont} 用于设置正文罗马族的西文字体).
+\end{function}
+
+
+\begin{function}[added=2025-04-26]{\setCJKmainfont, \setCJKsansfont, \setCJKmonofont}
+  \begin{syntax}
+    \cs{setCJKmainfont}\marg{font}\oarg{font features}
+    \cs{setCJKsansfont}\marg{font}\oarg{font features}
+    \cs{setCJKmonofont}\marg{font}\oarg{font features} 或
+    \cs{setCJKmainfont}\oarg{font features}\marg{font}
+    \cs{setCJKsansfont}\oarg{font features}\marg{font}
+    \cs{setCJKmonofont}\oarg{font features}\marg{font}
+  \end{syntax}
+  这三个命令来自 \pkg{xeCJK} 宏包, 用于设置 CJK 字体的默认字体族(\cs{setCJKmainfont} 用于设置正文罗马族的 CJK 字体). 
+\end{function}
+
+
+
+\subsubsection{新建字体族}
+\begin{function}[added=2025-04-26]{\newfontfamily, \setfontfamily, \renewfontfamily, \providefontfamily}
+  \begin{syntax}
+    \cs{newfontfamily}\meta{cmd}\marg{font}\oarg{font features}
+    \cs{setfontfamily}\meta{cmd}\marg{font}\oarg{font features}
+    \cs{renewfontfamily}\meta{cmd}\marg{font}\oarg{font features}
+    \cs{providefontfamily}\meta{cmd}\marg{font}\oarg{font features}
+  \end{syntax}
+  这系列命令来自 \pkg{fontspec} 宏包, \cs{newfontfamily} 会检查字体族是否存在，如果不存在则创建一个新的字体族,
+  如果存在则抛出错误; \cs{setfontfamily} 无论字体族存在与否，都会创建一个新的字体族, 如果存在则覆盖原字体族;
+  \cs{renewfontfamily} 会检查字体族是否存在，如果存在则覆盖原字体族, 如果不存在则抛出错误; \cs{providefontfamily}
+  会检查字体族是否存在，如果存在则不做任何操作, 如果不存在则创建一个新的字体族. 
+\end{function}
+
+
+\begin{function}[added=2025-04-26]{\newCJKfontfamily, \setCJKfamilyfont}
+  \begin{syntax}
+    \cs{newCJKfontfamily}\oarg{family}\meta{cmd}\marg{font}\oarg{font features}
+    \cs{setCJKfamilyfont}\marg{family}\marg{font}\oarg{font features}
+  \end{syntax}
+  这两个命令来自 \pkg{xeCJK} 宏包, 用于创建一个新的 CJK 字体族, 作用和上述的 \cs{newfontfamily} 和 \cs{setfontfamily} 类似.
+  事实上, \cs{newCJKfontfamily} 是 \cs{setCJKfamilyfont} 和 \cs{CJKfamily} 的合并, 例如, 下面的两种写法等价:
+\end{function}
+\begin{DocExample}
+\newCJKfontfamily[song]\songti{SimSun}
+
+\setCJKfamilyfont{song}{SimSun}
+\newcommand*{\songti}{\CJKfamily{song}}
+\end{DocExample}
+
+\begin{keyval}[added=2025-04-26, parent=xeCJK/options]{AutoFakeBold, AutoFakeSlant}
+  \begin{syntax}
+    AutoFakeBold  = \marg{\textbf{true}|false|浮点数}>\dval{true}
+    AutoFakeSlant = \marg{\textbf{true}|false|浮点数}>\dval{true}
+  \end{syntax}
+  局部启用或禁用当前字体族的伪粗和伪斜属性, 如果没有在局部给出这些选项，将使用全局设定. \textbf{注意}:%
+  当把 \texttt{\meta{AutoFakeBold}} 和 \texttt{\meta{AutoFakeSlant}} 设置为 \texttt{浮点数} 时, 此时将启用
+  伪粗和伪斜; 此种方式和后续的\meta{EmboldenFactor} 和 \meta{SlantFactor} 来设置伪粗和伪斜属性是等价的;
+  如果伪粗和伪斜二者均启用了, 那么后续的粗斜体也将启用此伪属性; 在西文字体的设置下, 以下两种设置等价:
+\end{keyval}
+\begin{DocExample}
+  \fontspec[AutoFakeBold=1.5]{Charis SIL}
+  \fontspec[BoldFeatures={FakeBold=1.5}]{Charis SIL}
+\end{DocExample}
+
+
+\begin{keyval}[added=2025-04-26, parent=xeCJK/options]{EmboldenFactor, SlantFactor}
+  \begin{syntax}
+    EmboldenFactor = \marg{浮点数|\textbf{4}}>\dval{4}
+    SlantFactor    = \marg{浮点数|\textbf{0.167}}>\dval{0.167}
+  \end{syntax}
+  全局设置当前字体族的伪粗和伪斜属性, 如果没有在局部给出这些选项，将使用全局设定.
+  伪斜因子取值范围为: $[-0.99, 0.99]$.
+\end{keyval}
+
+
+\subsubsection{切换字体}
+\begin{function}[added=2025-04-26]{\newfontface}
+  \begin{syntax}
+    \cs{newfontface}\marg{cmd}\marg{font name}\oarg{font features}
+  \end{syntax}
+  此命令来自 \pkg{fontspec} 宏包, 用于给西文字体创建单一 font face 的字体族, 仅在某一个 font face 对应的指令
+  (比如仅在 \cs{textit}) 下有效果(此时 \cs{textbf}\cs{textit} 等组合命令只能得到其中一个轴上的效果).
+\end{function}
+
+
+\begin{function}[added=2025-04-26]{\fontspec, \CJKfontspec}
+  \begin{syntax}
+    \cs{fontspec}\marg{font}\oarg{font features}
+    \cs{CJKfontspec}\marg{font}\oarg{font features} 或 
+    \cs{CJKfontspec}\oarg{font features}\marg{font}
+  \end{syntax}
+  此二命令, 前者来自 \pkg{fontspec} 宏包, 用于临时切换字体. 后者来自 \pkg{XeCJK} 宏包, 作用和前者类似. 
+  此二命令多用于测试, 普通用户不应该在正文中使用
+\end{function}
+
+
+\clearpage
+\subsubsection{\texorpdfstring{\ztex{}}{zTeX} 接口}
+\begin{function}[added=2025-07-14]{\resetfont}
+  \begin{syntax}
+    \cs{resetfont}[\textbf{cm}|lm]
+  \end{syntax}
+  此命令用于切换回默认的 Computer Modern 或 Latin Modern 字体(\hologo{XeTeX}/\hologo{LuaTeX} 下的默认西文字体), 
+  默认切换到 Computer Modern 字体.
+\end{function}
+
+
+\begin{function}[added=2025-04-26]{\zfontfamilynew}
+  \begin{syntax}
+    \cs{zfontfamilynew}\oarg{lang}\meta{cmd}\marg{key-value}
+  \end{syntax}
+  当 \meta{sysfont}\texttt{=true} 时可用(此时需更换 \hologo{XeTeX} 或 \hologo{LuaTeX} 引擎). 此命令用于创建一个新的字体族, 其整合了西文
+  字体族和中日韩字体族设置的接口; \textcolor{red}{\sffamily 如果对应的字体族已存在, 则它会被覆盖掉}. \meta{lang} 用于指定
+  生成的字体族对应的语言, 默认为 \texttt{en/CJK}(同时设置中英文, 用户需确保当前字体兼具中英文对应的 glyph), 另有可选值 \texttt{en}, \texttt{CJK}.
+  \meta{cmd} 用于调用新建立的字体族. \meta{key-value} 用于指定新字体族的一系列属性, 目前支持的属性有请参见后续说明. 
+  \textbf{注意}: 由此命令生成的字体族无法由 \texttt{AutoFakeBold, AutoFakeSlant} 等选项来设置伪粗和伪斜属性,
+  因为此命令生成的字体族中已经默认设置了 \texttt{BoldFont, ItalicFont, SlantedFont} 等为原始的 Regular 字体.
+\end{function}
+
+
+\begin{keyval}[parent=ztex/fontcfg/new]{name, path}
+  \begin{syntax}
+    name = \meta{字体名|文件名}>\dval{无}
+    path = \meta{字体路径}>\dval{\meta{默认路径}}
+  \end{syntax}
+  \meta{name}(必要参数): 用于指定字体的字体名或文件名, 如 \texttt{Times New Roman} 或 \file{times.ttf}.
+  字体设置时和 \pkg{fontspec} 中提供的命令相同, 也支持缩写; 可以使用 \texttt{*} 表示当前字体文件名, 即 \meta{name} 的值. 
+  用户可以通过命令 \texttt{fc-list} 来查看当前可供 \hologo{XeTeX} 或 \hologo{LuaTeX} 调用的字体, 用法参见本节导言.
+  \meta{path}: 字体文件的路径, 默认为当前文档目录以及 \hologo{XeTeX} 或 \hologo{LuaTeX} 的默认搜索目录.
+\end{keyval}
+
+
+\begin{keyval}[parent=ztex/fontcfg/new/feat]{ext, up, bd, it, sc, sl, bdit, bdsl, other}
+  \begin{syntax}
+    ext  = \meta{字体格式}>\dval{无}
+    up   = \meta{字体名|文件名}>\dval{*}
+    bd   = \meta{字体名|文件名}>\dval{*}
+    it   = \meta{字体名|文件名}>\dval{*}
+    sc   = \meta{字体名|文件名}>\dval{*}
+    sl   = \meta{字体名|文件名}>\dval{*}
+    bdit = \meta{字体名|文件名}>\dval{*}
+    bdsl = \meta{字体名|文件名}>\dval{*}
+    other= \meta{其他设置}>\dval{空}
+  \end{syntax}
+  \meta{feat} 用于设置字体的一系列属性, 其中包含的子键有: \zkey{up, bd, it, sl, sc, bdit, bdsl, other}, 分别表示
+  \texttt{upright, bold, italic, slant, bold italic, boldslant} 7种字体特性 + 额外的字体特性. \meta{ext}
+  用于指定字体文件的后缀(字体格式), 当 \meta{name} 中已经含有了后缀时, 此时 \meta{ext}
+  可以省略也可以再次给出. 更多的字体特性设置可以通过 \meta{other} 键进行设置, 详情请参见 \pkg{fontspec} 
+  和 \pkg{XeCJK} 的宏包文档. 
+  \textbf{注意}: 字体名和文件名不可在同一个字体声明命令的过程中混用; 当 \meta{name} 为字体名时，请不要设置 \meta{ext}
+  的值, 这会导致无法找到字体.
+\end{keyval}
+
+
+\begin{keyval}[parent=ztex/../feat]{Extension, UprightFont, BoldFont, ItalicFont, SmallCapsFont, SlantedFont, BoldItalicFont, BoldSlantedFont}
+  \begin{syntax}
+    Extension       = \meta{字体格式}>\dval{无}
+    UprightFont     = \meta{字体名|文件名}>\dval{*}
+    BoldFont        = \meta{字体名|文件名}>\dval{*}
+    ItalicFont      = \meta{字体名|文件名}>\dval{*}
+    SmallCapsFont   = \meta{字体名|文件名}>\dval{*}
+    SlantedFont     = \meta{字体名|文件名}>\dval{*}
+    BoldItalicFont  = \meta{字体名|文件名}>\dval{*}
+    BoldSlantedFont = \meta{字体名|文件名}>\dval{*}
+  \end{syntax}
+  \meta{feat} 中含有字体的一系列属性, \pkg{fontspec} 宏包中的原始接接口.
+\end{keyval}
+
+
+关于 \cs{zfontnew} 命令的一个简单使用样例如下:
+\vskip1.25em\relax
+\begin{DocExample}*[@@]
+%% \zfontset{sysfont}
+%% begin preamble
+\zfontfamilynew\YaHei{
+  name = msyh.ttc,
+  path = ./support/Fonts/, 
+  feat = { ext=.ttc, bd=*bd } 
+}
+\zfontfamilynew[en]\Arial{
+  name = arial.ttf,
+  path = ./support/Fonts/,
+  feat = {Extension=.ttf, ItalicFont=*i}
+}
+\zfontfamilynew[en]\SourceCodePro{
+  name = Source Code Pro,
+  feat = { bd=Source Code Pro Bold }
+}
+%% end preamble
+{\YaHei 你好世界 Hello world,\bfseries 你好世界 Hello world.}\par
+{\Arial Hello world,\itshape Hello world.}\par
+{Hello world,\SourceCodePro Hello world,\bfseries Hello world.}
+\end{DocExample}
+\noindent\textbf{注意事项}: 
+\begin{itemize}
+  % \item 原 \pkg{fontspec} 中的 \meta{Extension} 这一 font feature 配置参数需要在给定字体名时给出(此时通过文件名调用), 
+  %   也就是说:此时 \meta{name} 必须指定为 \file{times.ttf} 而不是 \file{times}.
+  \item 在 \pkg{fontspec} 中, \meta{BoldFont} 和 \meta{ItalicFont} 也是必要参数, 但 \zTeX{} 已经帮用户默认配置了这两个选项, 
+    默认为当前 UprightFont 对应的字体.
+  \item \textcolor{red}{\sffamily 不能在声明一个字体族时混用 font name 和 file name, 否则 \pkg{fontspec} 会因字体无法找到而报错}.
+\end{itemize}
+
+
+\begin{function}[added=2024-04-26]{\zfontset}
+  \begin{syntax}
+    \cs{zfontset}\marg{key-value}
+  \end{syntax}
+  此命令用于统一设置整个文档中的西文, 中文以及数学字体.
+\end{function}
+
+
+\begin{keyval}[parent=ztex/font]{sysfont}
+  \begin{syntax}
+    sysfont = \meta{true|\textbf{false}}>\dval{false}
+  \end{syntax}
+  此选项用于控制 \ztex{} 是否启用系统字体配置, 默认为 \texttt{false}, 即默认不启用.
+  当设置 \texttt{\meta{sysfont}=true} 时, 此时需使用 \hologo{XeTeX} 或 \hologo{LuaTeX} 引擎编译文档.
+\end{keyval}
+
+
+\begin{keyval}[parent=ztex/font/doc]{lmm, newtx, ptmx}
+  \begin{syntax}
+    lmm   >\nval
+    newtx >\nval 
+    ptmx  >\nval
+  \end{syntax}
+  这三个选项会同时设置整个文档中的正文字体和数学字体, 目前仅在 \hologo{pdfTeX} 下可用.
+  \textbf{注意}: 如果在设置了此选项的同时也设置了后续的 \meta{text} 或 \meta{math} 选项, 
+  那么此时后续的字体配置会覆盖前面的配置. \pkg{newtxtext} 字体宏包目前并不推荐使用, \meta{newtx} 
+  选项仅作为一个备用设置.
+\end{keyval}
+
+
+
+\begin{keyval}[parent=ztex/font/text]{cmr, times}
+  \begin{syntax}
+    cmr   >\nval
+    times >\nval
+  \end{syntax}
+  \meta{cmr} 即为文档在 \hologo{pdfTeX} 下的默认字体, \meta{times} 用于设置文档中的正文字体为 Times 
+  风格.
+\end{keyval}
+
+
+\begin{keyval}[parent=ztex/font/math]{euler, newtx, mtpro2, mathpazo}
+  \begin{syntax}
+    euler  >\nval
+    newtx   >\nval
+    mtpro2  >\nval
+    mathpazo>\nval
+  \end{syntax}
+  \meta{euler} 用于设置文档中的数学字体为 Euler 风格, 使用 \pkg{euler} 宏包; \meta{newtx} 用于设置文档中的数学字体为 NewTx 
+  风格, 使用 \pkg{newtxmath} 宏包; \meta{mtpro2} 用于设置文档中的数学字体为 MTPro2 风格, 使用 \pkg{mtpro2} 宏包; 
+  \meta{mathpazo} 用于设置文档中的数学字体为 Palatino 风格, 使用的宏包为 \pkg{mathpazo}.
+\end{keyval}
+
+
+
+\begin{function}[updated=2025-09-18]{\zfontfamilyset}
+  \begin{syntax}
+    \cs{zfontfamilyset}\oarg{lang}\marg{key-value}
+  \end{syntax}
+  此命令用于设置整个文档的字体族, 其整合了西文字体族和中日韩字体族设置的接口.
+  \meta{lang} 为一个逗号分割列表, 默认为 ``\texttt{en}'', 可选值有: ``\texttt{en, CJK}''.
+  \textbf{注意}: 目前此命令还未进行完整的测试, 可能存在一些潜在的问题.
+  此命令只能在导言区使用, 基本使用方法如下:
+\end{function}
+
+\begin{DocExample}
+\zfontfamilyset
+  {
+    main={Times New Roman}{},
+    mono={Latin Modern Mono}{SlantedFont=Latin Modern Mono Slanted},
+    sans={Arial}{},
+  }
+\zfontfamilyset[en, CJK]
+  {
+    % overwrite the above 'sans' setting:
+    sans={STSong}{BoldFont=FangSong},
+  }
+\end{DocExample}
+
+
+
+\clearpage
+\subsubsection{杂项}
+\begin{function}[added=2025-09-03]{\removeCJKecglue, \restoreCJKecglue}
+  命令 \cmd{\removeCJKecglue} 用于取消原始的 CJKecglue,
+  命令 \cmd{\restoreCJKecglue} 用于恢复原始的 CJKecglue 设置.
+\end{function}
+
+
+\begin{function}[updated=2025-04-25]{\cinzel}
+  \begin{syntax}
+    \cmd{\cinzel}
+  \end{syntax}
+  本命令用于临时切换 Cinzel 字体(此时需使用 \hologo{XeTeX} 或 \hologo{LuaTeX} 引擎), 本字体
+  在 \meta{fancy}\texttt{=true} 时，会自动应用于 chapter 页的字体.
+\end{function}
+
+
+\begin{function}[updated=2024-12-05]{\blacktriangleright}
+本命令(符号)来自 \file{AMSa} 字体, \meta{slot}\texttt{=\string"49}. 主要用于在 \meta{slide}\texttt{=true} 时对此符号进行 Patch.
+\end{function}

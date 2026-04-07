@@ -1,0 +1,17 @@
+\input{regression-test.tex}
+\documentclass{article}
+\usepackage{ztikz}
+\ztikzloadlibrary{wolfram}
+
+
+\begin{document}
+\START
+\BEGINTEST{ztikz-module-wolfram-wolframGraphics}
+\begin{wolframGraphics}[width=.4\linewidth]{MMATEST.wls}
+fp = Plot[Sin[x], {x, 0, 2}];
+figure = Show[fp];
+Export["./ztikz_output/mma_data/MMATEST.wls.pdf", figure];
+\end{wolframGraphics}
+\ENDTEST
+\END
+\end{document}

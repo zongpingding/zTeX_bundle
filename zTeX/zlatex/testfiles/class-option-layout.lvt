@@ -1,0 +1,20 @@
+\input{regression-test.tex}
+\documentclass[
+  layout={margin=false, slide, aspect=12|9}
+]{zlatex}
+
+
+\begin{document}
+\ExplSyntaxOn
+\START
+\TEST{unknown-layout-key-handle}{
+  \zlatex_metakey_msg_warning:nn {layout}
+    {margin(<bool>:false), slide, aspect}
+}
+
+\NEWLINE
+\TYPE{=======================================}
+\TYPE{CLASS-layout-OPTIONS-PASSING-CORRECTLY}
+\TYPE{=======================================}
+\END
+\end{document}

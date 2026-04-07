@@ -1,0 +1,260 @@
+\clearpage
+\subsection{\titlepkg{page} 模块}
+本模块提供的接口主要用于设置页面布局, 页眉页脚, 页面水印等基本元素. 本模块包含与页面生成
+以及页面标注相关(页眉页脚)的命令, 如 \cmd{\maketitle}, \cmd{\zpagemask}; 为了实现页眉页脚的定制, 
+\ztex{} 使用 new mark mechanism 对 mark 相关的接口进行了重写; 通过本模块，用户可以方便地自定义
+页面样式以及添加水印.
+
+
+\subsubsection{页面布局}
+\ztex{} 对 \pkg{geometry} 宏包中的部分命令进行了封装, 以实现页面尺寸的自定义.
+除此之外, \ztex{} 还提供了一系列的页面样式定制接口, 如 \cs{zpagestyleset} 命令, 
+目前它们基于 \pkg{fancyhdr} 宏包.
+
+\begin{function}[added=2025-04-21]{\geometry}
+  \begin{syntax}
+    \cmd{\geometry}\marg{key-value}
+  \end{syntax}
+  此命令来自 \pkg{geometry} 宏包, 用户可以直接在导言区使用, 详细的使用方法请参见 \pkg{geometry} 宏包 
+  文档.\par
+  \noindent \textbf{注意}: 如果用户在导言区更改了页面布局, 请在其后加上 \verb|\fancyheadoffset{0pt}|,
+  这会让 \pkg{fancyhdr} 重新计算页眉/页脚的宽度.
+\end{function}
+
+
+
+\begin{function}[added=2025-08-21]{\zpage_set_style:nnn}
+  \begin{syntax}
+    \cs{zpage_set_style:nnn} \Arg{newstyle}\Arg{oldstyle}\Arg{spec}
+  \end{syntax}
+  此命令用于创建页面样式, 基于 \pkg{fancyhdr} 中的 \cs{fancypagestyle} 命令.
+  \meta{oldstyle} 表示 \meta{newstyle} 继承的样式, 可以置为空, 若不为空, 
+  则其必须为 \pkg{fancyhdr} 声明的样式; \meta{spec} 用于自定义页面样式; 新建立
+  页面样式可通过命令: \verb|\pagestyle|\texttt{\Arg{newstyle}} 进行调用.
+\end{function}
+
+
+\begin{function}[added=2025-08-21]{\zpagestyleset}
+  \begin{syntax}
+    \cs{zpagestyleset}\oarg{oldstyle}\Arg{newstyle}\Arg{spec}
+  \end{syntax}
+  此命令由上述 \cs{zpage_set_style:nnn} 命令封装而来, 具体用法请参见 \cs{zpage_set_style:nnn} 
+  的使用说明. \textbf{备注}: 在默认情况下, 用户可能会在控制台看到很多关于 \texttt{right mark} 为空的警告.
+  可以参考下述的代码以实现 \hologo{LaTeX} 风格的页眉:
+\end{function}
+\vskip.75em\relax
+\begin{DocExample}
+\zpagestyleset[fancy]{mystyle}
+  {
+    \fancyhead[R]{\rightmark}
+  }
+\pagestyle{mystyle}
+\end{DocExample}
+
+
+
+\clearpage
+\InsertMark{ztex-right}{sect 模块}
+\subsubsection{页眉页脚}
+用户可以使用 \pkg{ltmarks} 模块提供的 \cs{NewMarkClass}, \cs{InsertMark}, 
+\cs{TopMark}, \cs{FirstMark}, \cs{LastMark}, \cs{IfMarksEqualTF} 等命令; \ztex{} 目前并
+没有增加新的 \meta{region}, 可用的 \meta{region} 有 \texttt{page, previous-page, column} 等;
+关于 new mark mechanism 的详细使用说明请参考: \href{https://www.latex-project.org/help/documentation/ltmarks-doc.pdf}{ltmarks-doc.pdf}. 
+
+\vskip1.5em
+\noindent{\color{red}\sffamily NOTE:
+\begin{enumerate}
+  \item 本节的命令由 \pkg{sect} 模块提供, 但因为它们与页面设置相关, 故而放置于此; 
+  \item mark 相关接口的实现使用了 \pkg{ltmarks} 的内部变量 \verb|\g__mark_classes_seq|.
+\end{enumerate}
+}
+
+\begin{function}[added=2025-08-21]{ztex-1st, ztex-left, ztex-right, ztex-right-nonempty, ztex-4th}
+  此为 \ztex{} 文档类提供的一系列的 mark class, \ztex{} 并没有使用内置 \texttt{2e-left, 2e-right, 2e-right-nonempty}
+  这几个 class. \texttt{ztex-1st} 记录了 \texttt{part} 层级的 marks; \texttt{ztex-4th} 在不同的文档类中
+  所记录的标题层级不同, 比如在 \cls{article} 文档类中, 其记录了 \texttt{subsubsection} 相关的 marks.
+\end{function}
+
+
+\begin{function}[added=2025-08-31]{\leftmark, \rightmark}
+  \ztex{} 重定义了原始的 \cs{leftmark} 和 \cs{rightmark} 命令, 但其意义仍然与
+  原始命令相同. 更推荐用户使用 \cs{ztexleftmark} 和 \cs{ztexrightmark} 命令.
+\end{function}
+
+
+\begin{function}[added=2025-08-21]{\ztexleftmark, \ztexrightmark, \robustleftmark, \robustrightmark}
+  在这一系列命令中保存了一组 mark 值。与原始 \hologo{LaTeX2e} 提供的 \cs{leftmark} 和 \cs{rightmark} 相比，
+  \ztex{} 的实现更加健壮且实用. \cs{robustleftmark} 同 \cs{ztexleftmark}, \cs{robustrightmark} 同 
+  \cs{ztexrightmark}.
+\end{function}
+
+
+\begin{function}[added=2025-08-21]{\markright, \markboth}
+  \begin{syntax}
+    \cs{markright}\Arg{right mark}
+    \cs{markboth}\Arg{left mark}\Arg{right mark}
+  \end{syntax}
+  \ztex{} 重定义了原始的 \cs{markright} 和 \cs{markboth} 命令, 用户应该尽量避免使用这两个命令. \par 
+  \noindent\textbf{注意}: 因 \ztex{} 没有使用原始的 mark class, 当用户需要手动添加 mark 时, 请尽量不要
+  使用 \cs{markboth}, \cs{markright} 命令, 部分情况下可能会导致 \ztex{} 中的部分 mark class 
+  无法同步更新.
+\end{function}
+
+
+\begin{function}[added=2025-08-21]{\chaptermark, \sectionmark, \subsectionmark}
+  \begin{syntax}
+    \cs{chaptermark}\Arg{mark}
+    \cs{sectionmark}\Arg{mark}
+    \cs{subsectionmark}\Arg{mark}
+  \end{syntax}
+  用户除了可以使用原始的 \cs{markright} 和 \cs{markboth} 命令外, 还可以使用 \ztex{} 提供
+  的这两个命令. 它们的用法和作用与 \hologo{LaTeX2e} 中一致, 用户还可参见命令: \cs{zsectmarkinsert}.
+\end{function}
+
+
+\begin{function}[added=2025-09-24]{\zsect_marker_form:n, \zsect_marker_form:o, \zsect_marker_form:e}
+  \begin{syntax}
+  \cmd{\zsect_marker_form:n} \Arg{format}
+  \end{syntax}
+  此命令用于定义页眉(页脚)中的 mark 样式, 使用说明请参见后续 \cmd{\zsectmarkform}
+  命令.
+\end{function}
+
+
+\begin{function}[added=2025-09-24]{\zsectmarkform}
+  \begin{syntax}
+  \cmd{\zsectmarkform}\Arg{format}
+  \end{syntax}
+  此命令用于定义页眉(页脚)中的 mark 样式, 只能在导言区使用. \meta{format} 中的可以使用
+  的宏包括: \cmd{\zsecclass}, \cmd{\zsecnum}, \cmd{\zsecname}, \cmd{\zsectocnum} 
+  和 \cmd{\zsectocHnum}, 它们的具体含义请参见后续: \cref{sect:keyval}. 一些简单的
+  使用案例如下:
+\end{function}
+
+\begin{DocExample}
+\ExplSyntaxOn
+\zsectmarkform
+  {
+    \bfseries
+    {\fboxsep0pt\fbox{\zsecnum}}\enskip
+    % Method I:
+    \exp_args:Ne \ztexlink
+      {\zsecclass.\zsectocHnum}
+      {\zsecname}
+    % Method II: relies on toc file
+    \exp_args:Noo \ztexlinkclass{\zsecclass}
+      {\zsecname}{\zsecname}
+  }
+\ExplSyntaxOff
+\end{DocExample}
+
+
+\begin{function}[added=2025-08-21, updated=2025-09-24]{\zsectmarkinsert}
+  \begin{syntax}
+    \cs{zsectmarkinsert}\Arg{class}\Arg{content}
+  \end{syntax}
+  此命令用于更新 mark 列表, 和 \hologo{LaTeX2e} 中的 \cs{markright}, \cs{markboth} 作用类似.
+  \meta{class} 表示标题的类型, 可以选择 \texttt{chapter, section, subsection} 等; \meta{content}
+  为自定义的 mark 内容.\par
+  \noindent\textbf{注意}: 在 \cls{article} 中, \verb|\zsectmarkinsert{section}{content}| 的作用相当于原始的 
+  \verb|\markboth{content}{}| 命令; 但是在 \cls{book} 文档类中, 其作用相当于 \verb|\markright{content}| 命令.
+\end{function}
+
+
+\clearpage
+\InsertMark{ztex-right}{page 模块}
+\subsubsection{页面水印}
+\begin{function}[updated=2025-04-25]{\zpagemask, \zpagemask*}
+  \begin{syntax}
+    \cs{zpagemask}\oarg{key-value}\marg{item}
+  \end{syntax}
+  命令 \cmd{\zpagemask} 用于给当前页面添加水印，\cmd{\zpagemask*} 用于给当前页面及其之后的所有
+  页面添加水印. \meta{item} 可以为一段文字，也可以为一系列的图片(需要使用\cmd\includegraphics 进行导入). 
+  \par\vskip1.53em\relax
+  \noindent{\sffamily\color{red}NOTE: 使用 \hologo{XeTeX} 时，\pkg{tikz} 中与透明度相关的设置在 \texttt{layer=background} 时可能会失效.}
+\end{function}
+
+
+\begin{keyval}[parent=ztex/page/mask]{layer, label, anchor, position}
+  \begin{syntax}
+    layer    = \meta{foreground|\textbf{backgroud}}>\dval{backgroud}
+    label    = \marg{标签}>\dval{DEFAULT}
+    anchor   = \meta{X}\meta{Y}>\dval{c}
+    position = (\meta{dim1}, \meta{dim2})>\dval*{(.5\string\zpw, .5\string\zph)}
+  \end{syntax}
+  其中\meta{position}以页面的左下角为原点，向上向右为正方向. \meta{anchor} 中 \texttt{XY} 两个字符(也可以只填入单个字符 \texttt{c}): 
+  一个表示水平位置 -- \texttt{X}, 另一个表示垂直位置 -- \texttt{Y}. 其中水平位置包括: 左(\texttt{l})、中(\texttt{c})、右(\texttt{r})、
+  内侧(\texttt{i})、外侧(\texttt{o}); 垂直位置包括：顶部(\texttt{t})、中部(\texttt{m})、底部(\texttt{b}). \par
+  \textbf{注意}: \pkg{transparent} 宏包仅能在 \hologo{pdfTeX} 或 \hologo{LuaTeX} 引擎下正常工作. 下面是一个简单的示例, 用于给当前页面
+  添加水印:
+\end{keyval}
+\vskip1.25em\relax
+\begin{DocExample}*[@@]
+  % \usepackage{tikzlings}
+  \zpagemask[anchor=bl, position={(0pt, 0pt)}]{
+    % \transparent{.5} % avaliable in 'luatex'
+    \includegraphics{./support/pics/latex-logo.pdf}
+  }
+  \zpagemask[anchor=tr, position={(\zpw, \zph)}]{
+    \begin{tikzpicture}[scale=2]
+      \marmot
+    \end{tikzpicture}
+  }
+\end{DocExample}
+
+
+
+\begin{function}[updated=2025-09-18]{\zpagemaskrm}
+  \begin{syntax}
+    \cs{zpagemaskrm}\marg{label}
+  \end{syntax}
+  此命令用于移除由 \cmd{\zpagemask} 命令添加的页面水印, \meta{label} 即为 \cmd{\zpagemask} 键值参数
+  中 \meta{label} 对应的 \meta{标签}. 如果 \meta{label} 对应的水印并不存在, \ztex{} 会抛出警告.
+\end{function}
+
+
+
+\begin{function}[added=2025-09-18]{\zpagemaskrule}
+  \begin{syntax}
+  \cmd{\zpagemaskrule}\Arg{label_1}\Arg{relation}\Arg{label_2}
+  \end{syntax}
+  此命令用于调整不同水印之间的遮盖关系. \meta{label_1} 和 \meta{lable_2}
+  为两水印的标签, 它们必须属于同一个 \meta{layer}; \meta{relation}
+  可以为 ``\verb|>(after), <(before), voids|'' 等: ``\verb|<|'' 表示 \meta{lable_1} 对应的水印代码置于
+  \meta{lable_2} 对应的水印代码之前, 后者相反. \par
+  \noindent \textbf{备注}: 如果 \meta{label_1} 或 \meta{label_2} 中的任何一个不存在, 则此命令不会执行任何操作;
+  如果希望 \meta{label_1} 在 \meta{label_2} 图层上方, 将 \meta{relation} 设为 ``\verb|>|'' 即可.
+\end{function}
+
+
+
+\begin{function}[updated=2025-04-25]{\ztex_page_annotate:nnnnn}
+  \begin{syntax}
+    \cmd{\ztex_page_annotate:nnnnn} \marg{foreground|background}
+      \qquad\marg{position}\marg{anchor}
+      \qquad\marg{object}\marg{hook range}
+  \end{syntax}
+  此命令为 \cmd{\zpagemask} 的底层命令, 用户可以依据此命令创建更加具有针对性的水印命令.
+\end{function}
+
+
+\clearpage
+\subsubsection{杂项}
+\begin{function}[updated=2025-04-25]{\maketitle}
+  \begin{syntax}
+    \cs{maketitle}
+    \cs{maketitle*}
+    \cs{maketitle}\oarg{dim}
+  \end{syntax}
+  \ztex{} 对原始的 \cs{maketitle} 进行了重定义，以适应不同的文档类和页面布局. \cs{maketitle*} 为
+  \LaTeX{} 中的 \cs{maketitle} 的原始定义. \cs{maketitle}\texttt{\oarg{dim}} 会忽略所有的文档类选项或者是页面布局,
+  在新的页面布局中插入 \LaTeX{} 中 \cmd{\maketitle} 的原始定义, \meta{dim} 表示新的页面布局的 margin 的
+  宽度, 默认为空, 可以接受一个合法的长度.
+\end{function}
+
+
+\begin{function}[updated=2025-04-25]{\frontmatter, \mainmatter, \appmatter, \backmatter}
+  此系列命令用于分割文档, 当加载的 \meta{class} 为 \cls{book} 或 \cls{ctexbook} 时, 这系列命令
+  会自动处理页眉页脚, 计数器和超链接等相关设置. \textbf{备注}: 这些命令中均含有 \cmd{\pagestyle}
+  命令, 若用户希望更改页面样式, 可以重定义它们.
+\end{function}

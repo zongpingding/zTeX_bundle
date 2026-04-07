@@ -1,0 +1,739 @@
+\clearpage
+\subsection{\titlepkg{thm} 模块}
+本模块主要用于定理类以及证明类数学环境定制. 本模块提供了丰富的接口以及选项，与此同时本模块提供了丰富的
+Hook, 方便用户直接对环境进行操作.
+
+\pkg{thm} 提供的数学环境主要分为两类:
+\begin{itemize}
+  \item 定理类: \env{axiom, definition, theorem, lemma, corollary, proposition, remark};
+  \item 证明类: \env{proof, exercise, example, solution, problem}
+\end{itemize}
+
+所以请区分 ``定理类'' 和 ``证明类'' 两类环境, 以便于正确地使用 \pkg{thm} 提供的各个命令. \ztex{} 的 \pkg{thm} module 
+中的部分命令或变量也许没有显式地含有 \textcolor{red}{\sffamily theorem} 字样, 但是这些命令或变量仍然是属于 ``定理类'' 的; 应用于
+``证明类'' 环境的命令或变量均显式地含有 \textcolor{red}{\sffamily proof} 字样.
+
+
+\clearpage
+\subsubsection{用户接口}
+\begin{function}[updated=2024-11-05]{\qedsymbol}
+  \begin{syntax}
+    \cs{qedsymbol}
+  \end{syntax}
+  此命令用于输出证明环境的结束符号, 默认为 $\square$.
+\end{function}
+
+
+\begin{function}[updated=2025-04-25]{\zthmlang}
+  \begin{syntax}
+    \cs{zthmlang}\marg{lang}
+  \end{syntax}
+  此命令用于设置定理类环境的语言(从而会影响到其标题名称), 目前支持 \texttt{cn, en, fr} 三种语言, 仅能在文档的导言区使用.\par
+  一个使用样例如下\zchcmd:
+\end{function}
+\vskip1.25em\relax
+\begingroup
+\begin{DocExample}*
+  \begin{theorem}[zthmlang-1]
+    This is a chinese zthmlang-1.
+  \end{theorem}
+  \zthmlang{fr}
+  \begin{theorem}[zthmlang-2]
+    This is a france zthmlang-2.
+  \end{theorem}
+  \zthmlang{en}
+  \begin{theorem}[zthmlang-3]
+    This is a english zthmlang-3.
+  \end{theorem}
+\end{DocExample}
+\endgroup
+
+
+\begin{function}[updated=2025-04-25]{\zthmnameset}
+  \begin{syntax}
+    \cs{zthmnameset}\marg{lang}\marg{key-value}
+  \end{syntax}
+  此命令用于设置数学环境的名称, 包括 ``定理类'' 和 ``证明类'', 仅能在文档的导言区使用. 预定义的 \meta{lang} 值有: \texttt{en, cn, fr}. 除预定义的
+  这三种语言外, 用户可以使用此命令自行声明(\meta{lang}), 然后使用命令 \cs{zthmlang}\texttt{\{\meta{lang}\}} 进行切换.% 
+  \textbf{注意}:此命令需应用于 \cs{zthmlang} 命令之前, 否则此命令的相关设置将不会生效; 此命令无法控制由 \cmd{\zthmenvnew} 
+  或 \cmd{\zthmenvset} 创建的环境标题.
+\end{function} 
+
+\vspace{2em}
+\noindent\fbox{\parbox{1\linewidth}{下面我们采用键值对的方式对 \meta{key-value} 这一项参数进行描述: \texttt{zthmnameset/} 
+表示它是此 \meta{key-value} 参数的父级命令; 后续为了行文的方便，我们在描述一个(父级)命令之后，使用 \texttt{../} 
+来表示其缩写形式(\texttt{../} 有时也用于表示任意的键名, 即由用户定义的键名).\par
+\textbf{注意}:虽然它的设置方法和 \texttt{key-value} 这样的数据结构类似, 但是用户不能将 \cs{keys_define:nn} 这样的
+命令应用于这类键值对, 而应使用其父级命令 \cs{zthmnameset} 对其进行设置.}}
+
+\begin{keyval}[parent=zthmnameset]{
+    axiom, definition, theorem, lemma, corollary, proposition, remark,
+    proof, exercise, example, solution, problem
+  }
+  \begin{syntax}
+    axiom       = \marg{名称}>\dval{Axiom}
+    definition  = \marg{名称}>\dval{Definition}
+    theorem     = \marg{名称}>\dval{Theorem}
+    lemma       = \marg{名称}>\dval{Lemma}
+    corollary   = \marg{名称}>\dval{Corollary}
+    proposition = \marg{名称}>\dval{Proposition}
+    remark      = \marg{名称}>\dval{Remark}
+    proof       = \marg{名称}>\dval{Proof}
+    exercise    = \marg{名称}>\dval{Exercise}
+    example     = \marg{名称}>\dval{Example}
+    solution    = \marg{名称}>\dval{Solution}
+    problem     = \marg{名称}>\dval{Problem}
+  \end{syntax}
+  当 \meta{lang}\texttt{ = en} 时, 命令 \cs{zthmnameset} 中 \meta{key-value} 的设置情况.
+\end{keyval}
+
+\begin{keyval}[parent=..]{
+    axiom, definition, theorem, lemma, corollary, proposition, remark,
+    proof, exercise, example, solution, problem
+  }
+  \begin{syntax}
+    axiom       = \marg{名称}>\dval{Axiome}
+    definition  = \marg{名称}>\dval{Définition}
+    theorem     = \marg{名称}>\dval{Théorème}
+    lemma       = \marg{名称}>\dval{Lemme}
+    corollary   = \marg{名称}>\dval{Corollaire}
+    proposition = \marg{名称}>\dval{Proposition}
+    remark      = \marg{名称}>\dval{Remarque}
+    proof       = \marg{名称}>\dval{Preuve}
+    exercise    = \marg{名称}>\dval{Exercice}
+    example     = \marg{名称}>\dval{Exemple}
+    solution    = \marg{名称}>\dval{Solution}
+    problem     = \marg{名称}>\dval{Problème}
+  \end{syntax}
+  当 \meta{lang}\texttt{ = fr} 时, 命令 \cs{zthmnameset} 中 \meta{key-value} 的设置情况.
+\end{keyval}
+
+
+\begin{keyval}[parent=..]{
+    axiom, definition, theorem, lemma, corollary, proposition, remark,
+    proof, exercise, example, solution, problem
+  }
+  \begin{syntax}
+    axiom       = \marg{名称}>\dval{公理}
+    definition  = \marg{名称}>\dval{定义}
+    theorem     = \marg{名称}>\dval{定理}
+    lemma       = \marg{名称}>\dval{引理}
+    corollary   = \marg{名称}>\dval{推论}
+    proposition = \marg{名称}>\dval{命题}
+    remark      = \marg{名称}>\dval{备注}
+    proof       = \marg{名称}>\dval{证明}
+    exercise    = \marg{名称}>\dval{练习}
+    example     = \marg{名称}>\dval{示例}
+    solution    = \marg{名称}>\dval{解}
+    problem     = \marg{名称}>\dval{问题}
+  \end{syntax}
+  当 \meta{lang}\texttt{ = cn} 时, 命令 \cs{zthmnameset} 中 \meta{key-value} 的设置情况.
+\end{keyval}
+一个基本的使用案例如下\zchcmd:
+\begin{DocExample}*
+  \zthmnameset{cn}{
+    theorem=新定理,
+    proof=证
+  }
+  \zthmlang{cn} % update thm title name
+  \begin{theorem}[zthmnameset-1]
+    This is a theorem zthmnameset-1.
+  \end{theorem}
+  \begin{proof}
+    This is a proof.
+  \end{proof}
+\end{DocExample}
+
+
+\zthmstyle{background}
+\begin{function}[added=2025-09-23]{\zthmenvnew}
+  \begin{syntax}
+    \cs{zthmenvnew}\oarg{type}\marg{key-value}
+  \end{syntax}
+  根据第二个参数中的 \meta{key-value} 创建一系列类型为 \meta{type} 的定理环境, 仅可在导言区使用; 
+  如果对应的环境已存在，则覆盖其原有的定义. \meta{type} 可选 \texttt{theorem, proof} 两种类型, 默认
+  为 \texttt{theorem}. 键值 \meta{key-value} 的语法请参见下面的样例:
+  \textcolor{red}{\bfseries 例 \inteval{\theDocExample+1}}.
+  % \textbf{注意}: 上述格式中的 `\texttt{\string|}' 不可以省略, 否则会导致解析错误.\par
+  % 一个基本的使用案例如下\zchcmd:
+\end{function}
+
+
+\begin{keyval}[parent=ztex/thmnew]{name, color, tocsym}
+  \begin{syntax}
+    name   = \meta{title} > \dval{\meta{name}}
+    color  = \meta{color} > \dval{black}
+    tocsym = \meta{code} > \dval{\meta{name}}
+  \end{syntax}
+  \meta{title} 为新环境对应的名称, 可以省略, 默认以此环境的名称为标题; 
+  \meta{color} 为合法的 \ztex{} 色彩格式, 可以省略, 默认为 ``\texttt{black}'';
+  \meta{tocsym} 为该环境在定理目录中的前缀, 若为空或未设置此键, 则默认为此环境的名称.
+  \textbf{备注}: 用户也可以使用 \cmd{\zthmtocsym} 命令来设置新环境的 \meta{tocsym}.
+\end{keyval}
+
+
+\begin{function}[added=2025-09-23]{\zthmenvset}
+  \begin{syntax}
+    \cmd{\zthmenvset}\Arg{type}\Arg{key-value}
+  \end{syntax}
+  此命令和上述的 \cmd{\zthmenvnew} 类似, 但此命令会覆盖原有的环境定义, 且可以在导言区或正文中使用.
+\end{function}
+
+
+\begin{DocExample}*
+\zthmenvnew{
+  Zaxiom, 
+  Ztheorem={name=Thm, color={HTML}{a0d911}, tocsym=\textbf{ZT}\;},
+  Zproposition={name=Prop, color=blue},
+}
+\zthmenvnew[proof]{
+  Zproof={color={cyan}},
+  Zexample={name=EXAMPLE, color=red},
+  Zsolution={name=Solution},
+}
+\begin{Zproof}[zthmenvnew-1]
+  This is a Zproof zthmenvnew-1.
+\end{Zproof}
+\begin{Zexample}[zthmenvnew-2]
+  This is a Zexample zthmenvnew-2.
+\end{Zexample}
+\begin{Ztheorem}[zthmenvnew-3]
+  This is a Ztheorem zthmenvnew-3
+\end{Ztheorem}
+\end{DocExample}
+\zthmstyle{plain}
+
+
+\begin{function}[updated=2025-04-25]{\zthmcnt}
+  \begin{syntax}
+    \cs{zthmcnt}\marg{key-value}
+  \end{syntax}
+  此命令用于定义数学类环境的计数器, 仅能在导言区使用.
+\end{function}
+
+
+\begin{keyval}[parent=..]{parent, share}
+  \begin{syntax}
+    parent = \meta{counter}>\dval{section}
+    share  = \meta{true|\textbf{false}}>\dval{false}
+  \end{syntax}
+  \meta{parent} 用于指定定理类环境计数器的父计数器, 默认父计数器为 \texttt{section}; 当父计数器更新时，此环境
+  的计数器便会重置; \meta{share} 用于控制所有的定理类环境是否共用一个计数器，默认为 \texttt{false}. \textbf{注意}:%
+  若指定所有定理类环境公用计数器，此时 \cs{cref} 对应的共同名称为 ``result'' 或 ``结果'', 具体取决于 \cs{zthmlang} 的设置.
+\end{keyval}
+
+
+\begin{function}[updated=2025-04-25]{\zthmstyle}
+  \begin{syntax}
+    \cs{zthmstyle}\marg{style}
+  \end{syntax}
+  此命令用于设置定理类环境的样式, 仅能在导言区使用. \textbf{注意}:\textcolor{red}{\sffamily 由于技术原因, 当用户需要加载
+  \pkg{thm} library 时, 必须将命令 \cs{zthmstyle}\texttt{\marg{style}} 置于 \cs{ztexloadlib}\zarg{thm} 之前}. 
+\end{function}
+
+
+\begin{keyval}[parent=ztex/thm/style]{plain, leftbar, background, fancy}
+  \begin{syntax}
+    plain > \nval
+    leftbar > \nval
+    background > \nval
+    fancy > \nval
+  \end{syntax}
+\end{keyval}
+一个基本的使用样例如下\zchcmd:
+\begin{DocExample}*
+  \zthmstyle{plain}
+  \begin{theorem}[zthmstyle-1]
+    A `plain' style zthmstyle-1.
+  \end{theorem}
+  \zthmstyle{leftbar}
+  \begin{theorem}[zthmstyle-2]
+    A `leftbar' style zthmstyle-2.
+  \end{theorem}
+  \zthmstyle{background}
+  \begin{theorem}[zthmstyle-3]
+    A `background' style zthmstyle-3.
+  \end{theorem}
+  \zthmstyle{fancy}
+  \begin{theorem}[zthmstyle-4]
+    A `fancy' style zthmstyle-4.
+  \end{theorem}
+\end{DocExample}
+\zthmstyle{plain}
+
+
+\begin{function}[updated=2025-04-25]{\zthmcolorset}
+  \begin{syntax}
+    \cs{zthmcolorset}\marg{key-value}
+  \end{syntax}
+  此命令和 \cmd{\zcolorset} 类似，但其仅用于对数学环境的色彩设置(比如, 你不能在此命令中设置 \meta{link} 对应的色彩)，
+  且仅能在导言区使用. 此命令仅能用于数学类环境的色彩自定义, 如果出现除数学(包括由命令 \cs{zthmnew} 所创建的)环境以外色彩设置，
+  那么 \ztex{} 会抛出错误;
+\end{function}
+
+
+\begin{keyval}[parent=..]{
+    axiom, definition, theorem, lemma, corollary, proposition, remark,
+    proof, exercise, example, solution, problem
+  }
+  \begin{syntax}
+    axiom       = \meta{color spec}>\dval{ztex@color@axiom}
+    definition  = \meta{color spec}>\dval{ztex@color@definition}
+    theorem     = \meta{color spec}>\dval{ztex@color@theorem}
+    lemma       = \meta{color spec}>\dval{ztex@color@lemma}
+    corollary   = \meta{color spec}>\dval{ztex@color@corollary}
+    proposition = \meta{color spec}>\dval{ztex@color@proposition}
+    remark      = \meta{color spec}>\dval{ztex@color@remark}
+    ...
+  \end{syntax}
+  \meta{color spec} 为一个合法的 \ztex{} 色彩格式. ``\texttt{proof, exercise, ..., problem}''
+  的默认值均为 ``\texttt{black}''.
+\end{keyval}
+
+
+
+\clearpage
+\subsubsection{定理目录}
+本节的命令依赖于 \ztex{} 的 \pkg{zsect} 模块, 欲使用本节的命令, 请务必加载 \pkg{sect} 模块. 在加载 \pkg{sect} 模块后, 定理目录样式的定制请参考 \pkg{sect} 模块的文档.
+
+\begin{function}[updated=2026-02-12]{\zthmtoc}
+  \begin{syntax}
+    \cs{zthmtoc}\oarg{keyval}
+  \end{syntax}
+  此命令用于打印定理类环境对应的目录, 可选参数 \meta{keyval} 用于自定义定理目录的样式, 配置方法请参见 \cref{ss2:toc} 的文档说明, 默认为空. \textbf{备注}: 定理目录的默认层级为 ``\texttt{subsection}'', 证明类环境不会计入定理目录; 此命令依赖于 \pkg{sect} 模块. 该命令的一个简单使用样例如下:
+\end{function}
+\begin{DocExample}*
+\zthmtoc[
+  page.format+ = \texttt,
+  hyper.title  = true,
+]
+\begin{proposition}[zthmtoc-1]proposition zthmtoc-1\end{proposition}
+\begin{lemma}[zthmtoc-2]lemma zthmtoc-2\end{lemma}
+\begin{corollary}[zthmtoc-3]corollary zthmtoc-3\end{corollary}
+\end{DocExample}
+
+
+\begin{function}[updated=2025-04-25]{\zthmtocadd}
+  \begin{syntax}
+    \cs{zthmtocadd}\oarg{class}\marg{key-value}
+  \end{syntax}
+  此命令用于向定理类环境目录中添加条目, \meta{class} 表示该条目在目录中的层级,  默认为 ``\texttt{section}''. 其它的可选值有: \texttt{chapter}, \texttt{subsection} 等.
+  \textbf{备注}: 此命令依赖于 \pkg{sect} 模块.
+\end{function}
+
+\begin{keyval}[parent=..]{name}
+  \begin{syntax}
+    name = \marg{条目名称}>\dval{无}
+  \end{syntax}
+  目前的键仅有 \texttt{name}, 后续可能有变动.
+\end{keyval}
+一个简单的使用样例如下:
+\begin{DocExample}*
+\zthmtocadd[section]{name=New:Added Thm ITEM}
+\end{DocExample}
+
+
+
+\begin{function}[updated=2025-09-04]{\zthmtocstop}
+  \begin{syntax}
+    \cs{zthmtocstop}
+  \end{syntax}
+  此命令用于停止向定理类环境目录中添加条目, 用户也可以使用 \cmd{\ztocstop}\texttt{[lom]} 替代此命令. \textbf{备注}: 此命令依赖于 \pkg{sect} 模块.
+\end{function}
+
+
+
+\begin{function}[updated=2025-04-25]{\zthmtoclevel}
+  \begin{syntax}
+    \cs{zthmtoclevel}\marg{class}
+  \end{syntax}
+  此命令用于设置定理目录中各条目的层级, 仅能在导言区使用, \meta{class} 可以为 ``\texttt{chapter, section, subsection, ...}'' 等. \textbf{备注}: 目前暂不支持将不同的定理类环境名设置为不同的层级.
+\end{function}
+
+
+\begin{function}[updated=2025-04-25]{\zthmtocprefix}
+  \begin{syntax}
+    \cs{zthmtocprefix}\marg{prefix}
+  \end{syntax}
+  此命令用于所有定理类环境目录中所有条目的共同前缀, 默认为空. 
+\end{function}
+
+
+\begin{function}[updated=2025-04-25]{\zthmtocsym}
+  \begin{syntax}
+    \cs{zthmtocsym}\marg{key-value}
+  \end{syntax}
+  此命令用于分别设置所有定理类环境名在目录中的前缀, 仅能在导言区使用.
+\end{function}
+
+\begin{keyval}[parent=..]{axiom, definition, theorem, lemma, corollary, proposition, remark}
+  \begin{syntax}
+    axiom       = \meta{前缀}>\dval{A\char92\vsp }
+    definition  = \meta{前缀}>\dval{D\char92\vsp }
+    theorem     = \meta{前缀}>\dval{T\char92\vsp }
+    lemma       = \meta{前缀}>\dval{L\char92\vsp }
+    corollary   = \meta{前缀}>\dval{C\char92\vsp }
+    proposition = \meta{前缀}>\dval{P\char92\vsp }
+    remark      = \meta{前缀}>\dval{R\char92\vsp }
+  \end{syntax}
+  其中 \meta{前缀} 为任意合法的 \LaTeX{} 代码.
+\end{keyval}
+此命令的大致使用方法如下:
+\begin{DocExample}
+\zthmtocsym{
+  axiom        =  AA,
+  definition   =  DD,
+  theorem      =  TT,
+  lemma        =  LL,
+  corollary    =  CC,
+  proposition  =  PP,
+  remark       =  RR,
+}
+\end{DocExample}
+
+
+\begin{function}[updated=2025-04-25]{\zthmtocsymrm}
+  此命令用于清除所有由命令 \cmd{\zthmtocsym} 添加在目录中的前缀, 仅能在导言区使用. 
+  \textbf{注意}:此命令不能清除由 \cmd{\zthmtocprefix} 指定的前缀.
+\end{function}
+
+
+
+\clearpage
+\subsubsection{高级接口}
+\begin{function}[added=2025-09-03]{\zthmremoveCJKecglue, \zthmrestoreCJKecglue}
+  命令 \cmd{\zthmremoveCJKecglue} 用于取消原始的 CJKecglue,
+  命令 \cmd{\zthmrestoreCJKecglue} 用于恢复原始的 CJKecglue 设置.
+\end{function}
+
+\begin{function}[EXP, updated=2024-11-05]{\zthmnumber}
+  此命令表示对应环境的编号, 类似于 \pkg{amsthm} 中的 \cmd{\thmnumber}. 用户不应在除 \cmd{\zthmtitleformat} 外的
+  任何地方使用, 在命令 \cs{zthmtitleformat} 之外, 此命令输出的内容无任何实际意义.
+\end{function}
+
+\begin{function}[EXP, updated=2024-11-05]{\zthmname}
+  此命令表示对应环境的名称, 类似于 \pkg{amsthm} 中的 \cmd{\thmname}. 用户不应在除 \cmd{\zthmtitleformat} 外的
+  任何地方使用, 在命令 \cs{zthmtitleformat} 之外, 此命令输出的内容无任何实际意义.
+\end{function}
+
+\begin{function}[EXP, updated=2024-12-05]{\zthmnote}
+  \begin{syntax}
+    \cs{zthmnote}\marg{prefix}\marg{suffix}
+  \end{syntax}
+  此命令表示对应环境的注释, 类似于 \pkg{amsthm} 中的 \cmd{\thmnote}. 用户不应在除 \cmd{\zthmtitleformat} 外的
+  任何地方使用, 在命令 \cs{zthmtitleformat} 之外, 此命令输出的内容无任何实际意义.
+\end{function}
+
+
+\begin{function}[updated=2025-04-25, EXP]{\thm@tmp@name}
+  此命令用于临时保存定理类环境的名称, 用户可以在自定义定理类环境样式时使用. \textbf{注意}: 此命令和前述的
+  \cmd{\zthmname} 不同, 因 \cs{thm@tmp@name} 只能取值于合法的定理类环境名称集合, 而 \cmd{\zthmname}
+  是 \cs{thm@tmp@name} 的格式化版本, 可能包含 \cs{bfseries}, \cs{sffamily} 等格式化命令.
+\end{function}
+
+
+\begin{function}[updated=2025-04-25, EXP]{\thm@tmp@color, \thmproof@tmp@color}
+  此二命令用于临时保存定理类环境和证明类环境的色彩, 用于在 \cmd{\zthmtitleformat} 中进行色彩切换.%
+  \textbf{注意}:普通用户在使用这两个命令时, 请将其置于 \cs{makeatletter} 和 \cs{makeatother} 之间.
+\end{function}
+
+
+\begin{function}[EXP, updated=2024-11-05]{\zthmtitle, \zthmtitle*}
+  \cs{zthmtitle} 命令为定理类环境纯文本标题, 包含 \cmd{\zthmnumber}, \cmd{\zthmname}, \cmd{\zthmnote} 三
+  部分以及一些其它文本. \cs{zthmtitle*} 为 \cs{zthmtitle} 的格式化版本(取消了 CJKecglue, 且可能包含 
+  \cs{bfseries}, \cs{sffamily} 等文本格式化命令); 用户在自定义定理类环境样式时应优先使用 \cs{zthmtitle*}, 
+  此命令生成的定理类环境标题才能被 \cs{zthmtitleformat} 控制. 此二命令中文本的具体格式可以使用 
+  后续的 \cmd{\zthmtitleformat} 命令进行修改.
+\end{function}
+% \clearpage
+
+
+\begin{function}[updated=2025-04-25]{\zthmtitleswitch, \zthmtitleswitch*}
+  命令 \cmd{\zthmtitleswitch} 用于隐藏定理类环境的标题, 命令 \cmd{\zthmtitleswitch*} 用于显示标题; 在自定义环境
+  样式时比较有用. 用户不应该在正文中对此命令进行直接的调用.\par 
+  一个基本的使用案例如下\zchcmd:
+\end{function}
+\vskip1.25em\relax
+\begin{DocExample}*
+  \begin{theorem}[zthmtitleswitch-1]
+    A theorem zthmtitleswitch-1.
+  \end{theorem}
+  \zthmstylenew{
+    ZZZ={begin=, end=, option=\zthmtitleswitch},
+  }
+  \zthmstyle{ZZZ}
+  \begin{theorem}[zthmtitleswitch-2]
+    A theorem zthmtitleswitch-2.
+  \end{theorem}
+\end{DocExample}
+关于命令 \cmd{\zthmstyle} 的使用可以参见下面的说明.
+
+
+\zthmstyle{plain}
+\begin{function}[updated=2025-04-25]{\zthmtitleformat, \zthmtitleformat*}
+  \begin{syntax}
+    \cs{zthmtitleformat}\oarg{type}\marg{format}
+  \end{syntax}
+  此命令用于修改类型为 \meta{type} 的数学类环境的标题格式(即命令 \cmd{\zthmtitle*} 中的内容), 仅能在导言区使用.%
+  \meta{type} 可选值有\texttt{theorem, proof}, 默认值为 \texttt{theorem}.%
+  命令 \cs{zthmtitleformat} 仅应用于之后的第一个(类型为 \meta{type} 的)数学类环境标题样式, 而 \cs{zthmtitleformat*} 则应
+  用于之后的所有(类型为 \meta{type} 的)数学类环境. \textbf{注意}: 如果 \meta{type} 为 \texttt{proof}, 那么
+  在 \meta{format} 中仅有 \cs{zthmname} 和 \cs{thmproof@tmp@color} 可用.\par
+  \noindent \textbf{注意}: 此命令默认取消定理类或证明类环境标题中的 CJKecglue, 若用户需要保留这些 glue, 请在格式化代码最前面加上:
+  ``\verb|\zthmrestoreCJKecglue|''.
+\end{function}
+此命令的一个简单使用案例如下\zchcmd:
+\ExplSyntaxOn
+\tl_set:Nn \l__ztex_proof_color_tl {blue!50}
+\ExplSyntaxOff
+\begin{DocExample}*
+\zthmcolorset{proof=blue!50}
+\makeatletter
+\zthmtitleformat{\bfseries\color{\thm@tmp@color}\zthmname\zthmnote{\{}{\}}\zthmnumber\ }
+\zthmtitleformat[proof]{\bfseries\color{\thmproof@tmp@color}[:\zthmname :]\ }
+\makeatother
+\begin{theorem}[zthmtitleformat-1]
+  A theorem zthmtitleformat-1.
+\end{theorem}
+\begin{proof}
+  This is a proof.
+\end{proof}
+\end{DocExample}
+\ExplSyntaxOn
+\tl_set:Nn \l__ztex_proof_color_tl {black}
+\ExplSyntaxOff
+
+此外, 还可以参见命令 \cs{zthmnotemptyTF} 中的使用示例. 
+
+
+\begin{function}[rEXP, updated=2025-04-29]{\zthmnotemptyTF}
+  \begin{syntax}
+    \cs{zthmnotemptyTF}\marg{true code}\marg{false code}
+  \end{syntax}
+  此命令用于判断 \cmd{\zthmnote} 是否为空, 如果为空则执行 \meta{true code}, 否则执行 \meta{false code}.
+  这个命令在自定义 \cmd{\zthmtitle} 时很有用.\par 
+  一个使用样例(\ztex{} 内置的 \texttt{obsidian} 定理样式对应的大致格式, 具体效果可以参见: \cref{sec:theme-library-obsidian}):
+\end{function}
+\begin{DocExample}
+\zthmtitleformat*{\bfseries
+  \zthmname\ \zthmnumber
+  \zthmnotemptyTF{}{\\}
+  \zthmnote{}{}
+}
+\end{DocExample}
+
+
+
+\begin{function}[updated=2025-04-25]{\zthmstylenew}
+  \begin{syntax}
+    \cs{zthmstylenew}\marg{key-value}
+  \end{syntax}
+  此命令用于定义新的定理类环境样式, 仅能在导言区使用.
+\end{function}
+
+
+\begin{keyval}[parent=ztex/..]{begin, end, option, preamble}
+  \begin{syntax}
+    begin     = \meta{code}>\dval{无}
+    end       = \meta{code}>\dval{无}
+    option    = \meta{code}>\dval{无}
+    preamble  = \meta{code}>\dval{无}
+  \end{syntax}
+  其中 \meta{code} 为任意合法的 \LaTeX{} 代码, 这些代码会被置于对应定理类环境的样式代码中.
+  \meta{begin} 和 \meta{end} 即为这个新样式对应环境的开头和结尾; \meta{option} 中的代码
+  在 \meta{begin} 之后, 也在环境的开头, 常用于放置一些控制代码; \meta{preamble} 中的代码
+  会被 \ztex{} 置于文档的导言区, 常用于放置一些用于定理类环境标题格式化的代码.\par
+  当用户声明对应的 \meta{style} 后, 可以在导言区使用命令: \cmd{\zthmstyle}\texttt{\marg{style}} 进行加载.
+\end{keyval}
+此命令的基本调用格式如下:
+\begin{DocExample}[++]
+\zthmstylenew
+  {
+    \ES{\meta{style A}} =
+      {
+        begin=\ES{\meta{begin code 1}}, 
+        end=\ES{\meta{end code 1}}, 
+        option=\ES{\meta{option code 1}},
+        preamble=\ES{\meta{preamble code 1}}
+      },
+    \ES{\meta{style B}} =
+      {
+        begin=\ES{\meta{begin code 2}}, 
+        end=\ES{\meta{end code 2}}, 
+        option=\ES{\meta{option code 2}},
+        preamble=\ES{\meta{preamble code 2}}
+      },
+    ...
+  }
+\end{DocExample}
+
+
+\clearpage
+\subsubsection{环境钩子}
+\begin{function}[added=2025-05-05]{
+    ztex/thm-theorem/before,
+    ztex/thm-theorem/begin,
+    ztex/thm-theorem/end,
+    ztex/thm-theorem/after,
+  }
+  这四个通用的钩子会将代码添加到所有的 \textbf{定理类} 环境中, 更一般的钩子机制请参见后续
+  的 \cmd{\zthmhook} 或 \cmd{\zthmproofhook} 命令.
+\end{function}
+
+
+\begin{function}[added=2025-05-05]{
+    ztex/thm-proof/before,
+    ztex/thm-proof/begin,
+    ztex/thm-proof/end,
+    ztex/thm-proof/after,
+  }
+  这四个通用的钩子会将代码添加到所有的 \textbf{证明类} 环境中, 更一般的钩子机制请参见后续
+  的 \cmd{\zthmhook} 或 \cmd{\zthmproofhook} 命令.
+\end{function}
+
+
+\begin{function}[added=2025-05-05]{ztex/thm-theorem/titleformat, ztex/thm-proof/titleformat}
+  这两个钩子主要用于修改定理(证明)类环境的标题样式, 前述的 \cmd{\zthmtitleformat} 命令基于这里的
+  \texttt{ztex/thm-theorem/titleformat} 钩子.
+\end{function}
+
+
+\begin{function}[updated=2025-04-25]{\zthmhook, \zthmhook*}
+  \begin{syntax}
+    \cs{zthmhook}\oarg{name}\marg{key-value}
+    \cs{zthmhook*}\oarg{name}\marg{key-value}
+  \end{syntax}
+  此命令用于给已有的(名称为 \meta{name} 的)定理类环境 Hook 中添加代码, \meta{name} 的默认值为 \texttt{theorem}. 
+  已有的 Hook: \zkey{ztex/thm/before, ztex/thm/begin, ztex/thm/end, ztex/thm/after}. \cs{zthmhook} 只应用于下
+  一个定理类环境, \cs{zthmhook*} 会应用于接下来的所有定理类环境. \texttt{(wrapper begin)} 和 \texttt{(thm-title)}
+  相关的钩子请参见 \cs{zthmbefore} 和 \cs{zthmtitlebefore} 命令.  各个 Hook 的位置分布如下:
+\end{function}
+\def\exampleUR{}
+\begin{DocExample}[@@]
+(ztex/thm/before) --> (wrapper begin) --> (thm-title) 
+  --> (ztex/thm/begin) --> 
+      (thm-content) 
+  --> (ztex/thm/end) --> 
+(wrapper end) --> (ztex/thm/after)
+\end{DocExample}
+\resetExampleUR
+
+这两个命令不支持手动设置\meta{label}, 针对于 \cmd{\zthmhook*}, \ztex{} 会自动设置 \meta{label}, 其格式
+为 \cmd{thm-hook.\meta{Hook Index}}. 
+
+
+\begin{keyval}[parent=..]{before, begin, end, after}
+  \begin{syntax}
+    before = \meta{code}>\dval{无}
+    begin  = \meta{code}>\dval{无}
+    end    = \meta{code}>\dval{无}
+    after  = \meta{code}>\dval{无}
+  \end{syntax}
+  其中 \meta{code} 为合法的 \LaTeX{} 代码片段.
+\end{keyval}
+一个简单的使用案例如下:
+\begin{DocExample}*
+\begin{theorem}[zthmhook-1]
+  This is a theorem zthmhook-1.
+\end{theorem}
+\zthmhook{before=ZZa\ , begin=ZZb\ ,}
+\begin{theorem}[zthmhook-2]
+  This is a theorem zthmhook-2.
+\end{theorem}
+\end{DocExample}
+
+
+\begin{function}[updated=2025-04-25]{\zthmproofhook, \zthmproofhook*}
+  \begin{syntax}
+    \cs{zthmproofhook}\oarg{name}\marg{key-value}
+    \cs{zthmproofhook*}\oarg{name}\marg{key-value}
+  \end{syntax}
+  此命令用于给已有的(名称为 \meta{name} 的)证明类环境 Hook 中添加代码, \meta{name} 的默认值为 \texttt{proof}.
+  已有的 Hook: \zkey{ztex/proof/before, ztex/proof/begin, ztex/proof/end, ztex/proof/after}. 
+  \cs{zthmproofhook} 只应用于下一个证明类环境, \cs{zthmproofhook*} 会应用于接下来的所有证明类环境.
+  各个 Hook 的位置分布如下:
+\end{function}
+\def\exampleUR{}
+\begin{DocExample}[@@]
+(ztex/proof/before) --> (proof-title)  
+  --> (ztex/proof/begin) --> 
+      (proof-content) 
+  --> (ztex/proof/end)   -->
+(env icon) --> (ztex/proof/after)
+\end{DocExample}
+\resetExampleUR
+
+和 \cs{zthmhook}, \cs{zthmhook*} 类似, 此二命令会自动设置对应的 \meta{label}, 无需用户手动指定.
+
+
+\begin{keyval}[parent=..]{before, begin, end, after}
+  \begin{syntax}
+    before = \meta{code}>\dval{无}
+    begin  = \meta{code}>\dval{无}
+    end    = \meta{code}>\dval{无}
+    after  = \meta{code}>\dval{无}
+  \end{syntax}
+  其中 \meta{code} 为合法的 \LaTeX{} 代码片段.
+\end{keyval}
+一个简单的使用样例如下:
+\begin{DocExample}*
+\zthmproofhook*[solution]{
+  before=\noindent\textbf{\color{red}BEFORE},
+  begin=\textbf{\color{red}BEGIN},
+  end=\textbf{\color{red}END},
+  after=\textbf{\color{red}AFTER},
+}
+\begin{proof}
+  This is a proof.
+\end{proof}
+\begin{solution}
+  This is solution I.
+\end{solution}
+\begin{solution}
+  This is solution II.
+\end{solution}
+\end{DocExample}
+
+
+
+\begin{function}[updated=2025-04-25]{\zthmbefore}
+  \begin{syntax}
+    \cs{zthmbefore}\oarg{type}\marg{code}
+  \end{syntax}
+  此命令用于把 \meta{code} 置于每个类别为 \meta{type} 的数学环境(如果 \meta{type} 为 \texttt{theorem}, 也就是
+  命令 \cmd{\__ztex_thm_warp_start:nnn}; 如果 \meta{type} 为 \texttt{proof}, 那么就是 \cs{__ztex_thm_proof_title:} )之前.
+  \meta{type} 的可选值有: \texttt{theorem, proof}, 默认值为 \texttt{theorem}. \meta{code} 默认为 \cs{par}, 用户可以
+  把 \meta{code} 置为空, 或设置为 \cs{noindent} 以取消段落缩进.\par 
+  一个简单的使用样例如下:
+\end{function}
+\begin{DocExample}*
+\zthmbefore{}
+Inline item:%
+\begin{theorem}[zthmbefore-1]
+  This is a theorem.%
+\end{theorem}%
+\begin{proposition}[zthmbefore-2]
+  This is proposition I.
+\end{proposition}
+\begin{proof}
+  This is a proof.
+\end{proof}
+\end{DocExample}
+\zthmbefore{\par}
+
+
+\begin{function}[updated=2025-04-25]{\zthmtitlebefore}
+  \begin{syntax}
+    \cs{zthmtitlebefore}\oarg{type}\marg{code}
+  \end{syntax}
+  此命令用于把 \meta{code} 置于每个类型为 \meta{type} 的数学环境标题之前. \meta{type} 的可选值有: \texttt{theorem, proof}, 默认
+  值为 \texttt{theorem}. \meta{code} 默认为 \cs{noindent}, 用户可以把 \meta{code} 置为空以保留段落缩进.\par 
+  一个简单的使用样例如下:
+\end{function}
+\begin{DocExample}*
+\zthmtitlebefore[proof]{[PRF-LIKE]}
+\begin{solution}
+  This is solution zthmtitlebefore.
+\end{solution}
+\end{DocExample}
+\zthmtitlebefore[proof]{\noindent}

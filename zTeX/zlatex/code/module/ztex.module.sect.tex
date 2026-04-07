@@ -1,7 +1,7 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% This is file 'ztex.module.sect.tex' of ztex bundle.           %
 %% The following code is experimental and will likely change.    %
-%% Copyright 2024, 2025 Zongping Ding.                           %
+%% Copyright 2024, 2025, 2026 Zongping Ding.                     %
 %                                                                %
 % This work may be distributed and/or modified under the         %
 % conditions of the LaTeX Project Public License, either         %
@@ -16,7 +16,7 @@
 % The Current Maintainer of this work is Zongping Ding.          %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \ProvidesExplFile{ztex.module.sect.tex}
-  {2025/10/14}{\ztex@versi@n}
+  {2026/03/03}{\ztex@versi@n}
   {sect~module~for~ztex}
 
 
@@ -77,6 +77,7 @@
 \newdimen\zsect@dim@c
 \box_new:N \l__ztoc_name_box
 \box_new:N \l__ztoc_title_box
+\box_new:N \@zsectmpboxa
 \scan_new:N \s__ztoc_ignore_empty_mark
 
 \tl_new:N \l__zsect_level_keyval_tl
@@ -150,7 +151,7 @@
     lot,  % list  of tables
     lof,  % list  of figures
     lom,  % list  of theorems
-    log,  % list  of glossary
+    tog,  % table of glossary('.log' is already used.)
     loa,  % list  of algorithm
     lol,  % list  of listings
   }
@@ -161,7 +162,7 @@
     table      = lot,
     theorem    = lom,
     algorithm  = loa,
-    glossary   = log,
+    glossary   = tog,
     lstlisting = lol,
   }
 % leagcy sec class prop
@@ -379,7 +380,7 @@
 
 % ==> leagcy toc interface
 % NOTE: 
-% 1. redef these commands at last to prevent them from being modified;
+% 1. re-def these commands at last to prevent them from being modified;
 % 2. '\numberline' has been deprecated in 'zsect'.
 \ztex_hook_preamble_last:n
   {
@@ -399,6 +400,16 @@
           { #1 } 
         \csname l@#1\endcsname {#2}{#3}
       }
+  }
+\cs_new_protected:Npn \zsect_hang_from:n #1
+  {
+    \setbox\@zsectmpboxa\hbox{{#1}}
+    \hangindent\wd\@zsectmpboxa
+    \noindent\box\@zsectmpboxa
+  }
+\cs_new_protected:Npn \zsec_normal_text:n #1
+  {
+    {\normalsize\normalfont\normalcolor #1}
   }
 \cs_new_protected:Npn \zsect_leaders:nnnnn #1#2#3#4#5
   {% #1:type, #2:repeat, #3:width, #4:raise, #5:skip
@@ -581,7 +592,7 @@
   }
 \cs_new_protected:Npn \zsect_add_glossary_line:nnnn #1#2#3#4 
   {
-    \zsect_add_to_table:nn { log }
+    \zsect_add_to_table:nn { tog }
       {
         \token_to_str:N \contentsline{#1}{#2}{#3}{#4}
           \c_percent_str
@@ -1312,10 +1323,10 @@
     \hb@xt@\l__ztoc_width_page_dim
       {
         \hss
-        \l__ztoc_page_format_tl
-        \l__ztoc_page_format_p_tl 
         \l__ztoc_format_tl
         \l__ztoc_format_p_tl
+        \l__ztoc_page_format_tl
+        \l__ztoc_page_format_p_tl 
         {
           \l__ztoc_page_before_tl
           #1
@@ -1458,7 +1469,7 @@
               % NOTE: to support command '\texorpdfstring' in '#2', the
               %       original '\exp_not:n {#2}' has been removed, you
               %       need to add macro '\protect' manually !
-              \exp_args:Nne \tl_if_empty:nTF { #2 }
+              \exp_args:Nne \tl_if_empty:oTF { #2 } % add 'o'-expand to test if '\zsectocname' etc are empty
                 { #3 }{ #2 }
             }
           }
@@ -1858,7 +1869,7 @@
                     { \exp_not:n {#3} }
                     { \exp_not:n {#4} }
                     { \exp_not:n {#5} }
-                  }
+                 }
       }
     \cs_undefine:N \ztoc@keyvalparser@nametitle
     \zsect_restore_protect:
@@ -2339,7 +2350,7 @@
     leader.type    .code:n = { \gdef\ztoc@leader@type{#1} },
     leader.sep     .code:n = { \setlength\ztoc@leader@sep  {#1} },
     leader.raise   .code:n = { \setlength\ztoc@leader@raise{#1} },
-    leader.content .code:n = { \setlength\ztoc@leader@content{#1} },
+    leader.content .code:n = { \def\ztoc@leader@content{#1} },
   }
 \NewDocumentCommand{\ztocset}{ m }
   {
@@ -2456,7 +2467,7 @@
 %       according to 'glossaries' package.
 \DeclareDocumentCommand{\printglossaries}{}
   {
-    \ztoc_table_typeset:Nn \g_ztoc_log_seq 
+    \ztoc_table_typeset:Nn \g_ztoc_tog_seq 
       {}
   }
 \DeclareCommandCopy{\listofglossaries}
@@ -2609,7 +2620,7 @@
 \ztex_declare_template_interface:nnnn {sect}{default}{4}
   {
     type            : tokenlist,
-    hang            : boolean   = { false },
+    hang            : boolean   = { true },
     break           : tokenlist,
     pagestyle       : tokenlist,
     afterindent     : boolean   = { false },
@@ -2657,7 +2668,7 @@
 \ztex_declare_template_code:nnnnn {sect}{default}{4}
   {
     type            = \l__zsect_title_type_tl,
-    hang            = \l__zsect_title_hang_bool,     % TODO: implement it !
+    hang            = \l__zsect_title_hang_bool,
     break           = \l__zsect_title_break_tl,      % TODO: implement it !
     pagestyle       = \l__zsect_title_pagestyle_tl,
     afterindent     = \l__zsect_title_afterindent_bool,
@@ -2709,7 +2720,8 @@
     %   #4: sec-content
     % NOTE: 
     % 1. sectioning hooks will be added by 'lthooks.dtx'.
-    % 2. '\refstepcounter' can NOT be inside a group, and 
+    % 2. these groups aim to set TemplateKeys-related variables locally.
+    % 3. '\refstepcounter' can NOT be inside a group, and 
     %    should be after '\__zsect_title_pagespec_before:'.
     \group_begin:
       \AssignTemplateKeys
@@ -2751,6 +2763,7 @@
       }
     % alias for users' interface:
     \cs_set_nopar:Npn \zsecclass   { #1 }
+    \cs_set_nopar:Npn \zsectocname { #3 }
     \cs_set_nopar:Npn \zsecname    { #4 }
     \cs_set_nopar:Npn \zsecnum     { \zsect@num }
     \cs_set_nopar:Npn \zsectocnum  { \zsect@tocnum }
@@ -2773,10 +2786,7 @@
           }
         \__zsect_title_space_before:
         \__zsect_title_space_left:
-        \group_begin:
-          \__zsect_title_body:nnn 
-            { #1 }{ #2 }{ #4 }
-        \group_end:
+        \__zsect_title_body:nnn { #1 }{ #2 }{ #4 }
         \__zsect_title_space_after:
       }
   }
@@ -2798,7 +2808,7 @@
               {
                 \__zsect_title_bookmark_cmd:n
                   {
-                    \tl_if_empty:nTF {#2}{#3}{#2}
+                    \tl_if_empty:oTF {#2}{#3}{#2}
                   }
               }
           \zsect_restore_protect:
@@ -2903,6 +2913,7 @@
 % title body
 \cs_new:Npn \__zsect_title_body:nnn #1#2#3
   {% #1:class; #2:bool; #3:name
+    \group_begin: % this group make these formats act locally.
     \l__zsect_title_format_tl
     \l__zsect_title_format_p_tl
     \l__zsect_title_before_tl
@@ -2918,28 +2929,33 @@
             { \prop_item:Nn \c_zsect_level_prop {#1} }
         }
       }{
-        {
-          \l__zsect_title_num_format_tl
-          \l__zsect_title_num_format_p_tl
+        \bool_if:NT \l__zsect_title_hang_bool { \zsect_hang_from:n }
           {
-            \l__zsect_title_num_before_tl
-              \zsect@num
-            \l__zsect_title_num_after_tl
+            \l__zsect_title_num_format_tl
+            \l__zsect_title_num_format_p_tl
+            {
+                \l__zsect_title_num_before_tl
+                  { \zsect@num }
+                \l__zsect_title_num_after_tl
+            }
+            \hskip \l__zsect_title_num_sep_dim\relax
           }
-        }
-        \hskip \l__zsect_title_num_sep_dim\relax
       }
     {
       \l__zsect_title_name_format_tl
       \l__zsect_title_name_format_p_tl
       {
         \l__zsect_title_name_before_tl
-          #3
+          { #3 }
         \l__zsect_title_name_after_tl
       }
+      \hskip \l__zsect_title_name_sep_dim\relax
+      \zsec_normal_text:n { \l__zsect_title_after_tl }
+      % NOTE: add this '\par' to make current paragraph be processed,
+      %       thus, '\centering'-like commands will make sense. 
+      \bool_if:NF \l__zsect_title_inline_bool {\par} 
     }
-    \hskip \l__zsect_title_name_sep_dim\relax
-    \l__zsect_title_after_tl
+    \group_end:
   }
 % --->    inner components of title above   <----
 

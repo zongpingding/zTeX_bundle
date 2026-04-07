@@ -1,0 +1,124 @@
+\clearpage
+\InsertMark{ztex-4th}{}
+\subsection{\titlepkg{color} 模块}
+本模块主要用于文档色彩定制，在本模块中定义了一系列的颜色主题，这系列主题可以应用于文章中的各个元素，包括但不限于
+章节标题, 定理环境, 超链接跳转，(子)目录样式.
+
+在颜色指定上，\ztex{} 实现了一套自己的颜色指定方式 -- 指定颜色时可以不必要提前定义. \ztex{} 将文档中的元素分为如下的 3 类:
+
+\begin{itemize}
+  \item 章节标题类: \texttt{fancychap};
+  \item 超链接类: \texttt{link, cite, url};
+  \item 数学环境类: \env{axiom, definition, theorem, lemma, corollary, proposition, remark, proof, exercise, example, solution, problem}.
+\end{itemize}
+
+
+\ztex{} 的(部分)默认配色如下表所示:\Footnote{其余颜色设置请参见后续 \cmd{\zcolorset} 命令的说明.}%\Footnote{zchapColor 还未整理, 目前只能单独重定义}如下:
+\def\tablecellenv#1{\clap{\env{#1}}}
+\begin{table}[H]
+  \begin{tblr}{
+    colspec={|X[1.4, c]|X[1.1, c]|X[1.85, c]|X[1.2, c]|X[.9, c]|X[1.65, c]|X[2, c]|X[1.6, c]|},
+    rowspec={|Q[m]|Q[m]|Q[m]|Q[m]|},
+    cells={cmd=\small\tablecellenv}
+  }
+    \textrm{Struct}  & link           & url                          & cite         & & fancychap                    & & \\
+    \textrm{Color}   & \block{purple} & \block{ztex@color@royalred}  & \block{blue} & & \block{ztex@color@fancychap} & & \\
+    \textrm{MathEnv} & axiom & definition & theorem & lemma & corollary & proposition & remark \\  
+    \textrm{Color}   & \block{ztex@color@axiom} & \block{ztex@color@definition} & \block{ztex@color@theorem} & 
+    \block{ztex@color@lemma}& \block{ztex@color@corollary}& \block{ztex@color@proposition}& \block{ztex@color@remark}\\
+  \end{tblr}
+  \caption{\ztex{} 文档类默认配色}
+  \label{tab:ztex-default-color}
+\end{table}
+
+
+\clearpage
+\begin{function}[updated=2025-04-25]{\zcolorset}
+  \begin{syntax}
+    \cs{zcolorset}\marg{key-value}
+  \end{syntax}
+  此命令可以用于设置文档中各种元素的色彩, 此命令仅可在导言区使用. 当 \meta{hyper}\texttt{=true} 时, 可以设置超链接相关的颜色.
+  \textbf{备注}: 在指定特定键的色彩时: 一方面可以为普通的预定义色彩名, 如 \texttt{red, orange} 等; 另一方面, 
+  也可以是 \ztex{} 新定义的色彩格式(后续称此为 \ztex{} 色彩格式). 一个具体的设置样例如下: 
+\end{function}
+\begin{DocExample}
+  \zcolorset{
+    fancychap = red,
+    link = {HTML}{d9d9d9},
+    theorem = {RGB}{136, 63, 214}
+  }
+\end{DocExample}
+
+
+\setlength{\dvalWidth}{4em}
+\setlength{\dvalwidth}{3.75em}
+\begin{keyval}[parent=ztex/color]{fancychap}
+  \begin{syntax}
+    fancychap = \meta{color spec}>\dval{ztex@color@fancychap}
+  \end{syntax}
+  其中 \meta{color spec} 为一个合法的 \ztex{} 色彩格式.
+\end{keyval}
+
+
+\begin{keyval}[parent=ztex/color]{link, cite, url}
+  \begin{syntax}
+    link = \meta{color spec}>\dval{purple}
+    cite = \meta{color spec}>\dval{blue}
+    url  = \meta{color spec}>\dval{ztex@color@royalred}
+  \end{syntax}
+  其中 \meta{color spec} 为一个合法的 \ztex{} 色彩格式.
+\end{keyval}
+
+
+\begin{keyval}[parent=ztex/color]{axiom, definition, theorem, lemma, corollary, proposition, remark}
+  \begin{syntax}
+    axiom       = \meta{color spec}>\dval{ztex@color@axiom}
+    definition  = \meta{color spec}>\dval{ztex@color@definition}
+    theorem     = \meta{color spec}>\dval{ztex@color@theorem}
+    lemma       = \meta{color spec}>\dval{ztex@color@lemma}
+    corollary   = \meta{color spec}>\dval{ztex@color@corollary}
+    proposition = \meta{color spec}>\dval{ztex@color@proposition}
+    remark      = \meta{color spec}>\dval{ztex@color@remark}
+  \end{syntax}
+  其中 \meta{color spec} 为一个合法的 \ztex{} 色彩格式. 定理类环境的色彩保存于变量 \cmd{ztex@color@\meta{name}} 中, 
+  其中 \meta{name} 为对应环境的名称. 不推荐用户使用命令 \cmd{\definecolor}, \cmd{\colorlet} 直接对这类色彩变量进行
+  重定义, \ztex{} 鼓励用户通过 \cmd{\zcolorset} 命令进行色彩的重定义.\par
+  \textbf{注意}: 后续的 \cmd{\zthmcolorset} 仅能用于数学类环境的色彩自定义, 所以如果出现 \zkey{link, chapter} 等键,
+  那么此时 \ztex{} 会抛出错误; 此时推荐使用 \cmd{\zcolorset} 命令进行色彩设置.
+\end{keyval}
+
+
+\begin{keyval}[parent=ztex/color]{proof, exercise, example, solution, problem}
+  \begin{syntax}
+    proof     = \meta{color spec}>\dval{ztex@color@proof}
+    exercise  = \meta{color spec}>\dval{ztex@color@exercise}
+    example   = \meta{color spec}>\dval{ztex@color@example}
+    solution  = \meta{color spec}>\dval{ztex@color@solution}
+    problem   = \meta{color spec}>\dval{ztex@color@problem}
+  \end{syntax}
+  其中 \meta{color spec} 为一个合法的 \ztex{} 色彩格式. \ztex{} 对证明类环境的颜色处理与定理类环境相同,
+  这里不再说明.
+\end{keyval}
+
+
+\begin{function}[updated=2025-04-25]{\ztex_color_set:n}
+  \begin{syntax}
+    \cmd{\ztex_color_set:n} \marg{color spec}
+  \end{syntax}
+  此命令可以自动解析 \meta{color spec}, 并以此创建或定义对应的色彩. \meta{color spec} 可以为普通的
+  预定义色彩名，如 \texttt{red, orange} 等. 亦或者是 \texttt{HTML, RGB, CMYK} 等色彩模型，但此时的格式略有
+  不同。此命令仅能在 \cmd{\keys_define:nn} 中使用，新定义的色彩名为: \verb|ztex@color@\l_keys_key_str|. 
+  下面是关于这个命令的一个简单应用案例:
+\end{function}
+\begin{DocExample}*
+  \ExplSyntaxOn
+  \keys_define:nn {colorTest}{
+    keyA    .tl_set:N     =  \l__ztex_keyA_color_tl,
+    keyA    .code:n       =  { \ztex_color_set:n {#1} },
+  }
+  \keys_set:nn {colorTest}{keyA={HTML}{d9d9d9}}
+  \textcolor{ztex@color@keyA}{This~is~a~test.}
+  \ExplSyntaxOff
+\end{DocExample}
+\setlength{\dvalWidth}{2.25em}
+\setlength{\dvalwidth}{2em}

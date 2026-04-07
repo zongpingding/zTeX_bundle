@@ -1,0 +1,504 @@
+\clearpage
+\subsection{\titlepkg{slide} 库}
+此 library 用于将文档切换到 slide 模式, 无需用户对文档源码进行大的改动, 仅需在导言区加载此 library 即可,
+\ztex{} 会自动处理文档的分页, 浮动体等细节.
+
+由于此 library 内部 patch 了很多的 \LaTeX{} 内部命令, 所以请谨慎加载. 另外, 加载此 library 并不会牺牲太多的编译速度. 
+
+zslide 中的坐标系统:在不另加说明的情况下, zslide 中的坐标系统均以当前页面的左上角为原点，取向上向右为正方向. 这就意味着你的纵坐标
+往往为负值，横坐标往往为正值.
+
+\vskip1em
+\noindent{\color{red}\sffamily NOTE:\pkg{slide} 库 Patch 了大量的原始命令, 可能与部分宏包中的设置相冲突;
+\pkg{slide} 库中没有使用 \pkg{fancyhdr} 定义任何的页面样式.} 
+\vskip1em
+
+\pkg{slide} 库的使用方法是非常简单的, 一个基本的使用样例如下:
+\vskip1.25em\relax
+\begin{DocExample}
+\documentclass[
+  layout={slide, aspect=16|9},
+]{ztex}
+\title{Rounded corner style Title Page}
+\author{Eureka\quad and \quad \ztex{} Eureka}
+\date{\today}
+\begin{document}
+\maketitle
+\section{FIRST}
+The FIRST section.
+\end{document}
+\end{DocExample}
+
+上述代码的编译产生的 slide 结果如下:
+\begin{center}
+  \setlength{\fboxsep}{0pt}
+  \fbox{\includegraphics[height=8em]{./support/pics/zslide_example-1.pdf}}
+  \fbox{\includegraphics[height=8em]{./support/pics/zslide_example-2.pdf}}
+\end{center}
+
+
+\clearpage
+\subsubsection{颜色主题}
+\begin{function}[updated=2025-04-25]{\zslidethemeuse}
+  \begin{syntax}
+    \cs{zslidethemeuse}\oarg{key-value}\marg{name}
+  \end{syntax}
+  此命令仅能在导言区使用, 其会根据 \meta{spec} 对颜色主题 \meta{name} 中的部分配置进行重写，然后再应用 \meta{name} 
+  这一 slide 主题. \meta{key-value} 列表请参见后续 \cs{zslideset} 命令. \par
+  \textbf{注意}:为了编译速度考虑，\ztex{} 仅加载一个主题; 所以用户应在加载 \cls{ztex} 时便通过键 \meta{theme} 指定 slide 的主题.
+  且命令 \cs{zslidethemeuse} 更大程度上是出于方便用户修改预定义主题中的某一特定项目这一目的而提供的.
+\end{function}
+
+
+\begin{function}[updated=2025-04-25]{\zslidethemenew}
+  \begin{syntax}
+    \cs{zslidethemenew}\marg{name}\marg{key-value}
+  \end{syntax}
+  此命令会按照 \meta{key-value} 创建名为 \meta{name} 的 slide \textbf{颜色主题}, 仅可在导言区使用. 具体的可调整选项请参见
+  命令 \cmd{\zslideset} 中的 \meta{key-value} 参数说明.  
+\end{function}
+
+
+\begin{function}[updated=2024-11-05]{AnnArborDefault}
+  \begin{syntax}
+    \verb!\documentclass[layout={slide, theme=AnnArborDefault}]{ztex}!
+    \cs{zslidethemeuse}\oarg{spec}\zarg{AnnArborDefault}
+  \end{syntax}  
+  可以在加载文档类时选择此主题, 还可以使用命令 \cs{zslidethemenew} 根据 \meta{spec} 对此主题进行部分配置进行重定义. 本主题具体效果
+  请前往 Beamer Theme Matrix 查看.
+\end{function}
+
+
+\begin{function}[updated=2024-11-05]{AnnArborBeaver}
+  \begin{syntax}
+    \verb!\documentclass[layout={slide, theme=AnnArborBeaver}]{ztex}!
+    \cs{zslidethemeuse}\oarg{key-value}\zarg{AnnArborBeaver}
+  \end{syntax}  
+  可以在加载文档类时选择此主题, 还可以使用上述命令根据 \meta{key-value} 对此主题进行部分配置进行重定义. 本主题具体效果
+  请前往 Beamer Theme Matrix 查看.
+\end{function}
+
+\begin{function}[updated=2024-11-05]{AnnArborAlbatross}
+  \begin{syntax}
+    \verb!\documentclass[layout={slide, theme=AnnArborAlbatross}]{ztex}!
+    \cs{zslidethemeuse}\oarg{key-value}\zarg{AnnArborAlbatross}
+  \end{syntax}  
+  可以在加载文档类时选择此主题, 还可以使用上述命令根据 \meta{key-value} 对此主题进行部分配置进行重定义. 本主题具体效果
+  请前往 Beamer Theme Matrix 查看.
+\end{function}
+
+\begin{function}[updated=2024-11-05]{AnnArborSeahorse}
+  \begin{syntax}
+    \verb!\documentclass[layout={slide, theme=AnnArborSeahorse}]{ztex}!
+    \cs{zslidethemeuse}\oarg{key-value}\zarg{AnnArborSeahorse}
+  \end{syntax}  
+  可以在加载文档类时选择此主题, 还可以使用上述命令根据 \meta{key-value} 对此主题进行部分配置进行重定义. 本主题具体效果
+  请前往 Beamer Theme Matrix 查看.
+\end{function}
+
+
+\begin{function}[updated=2024-12-05]{AnnArborSpruce}
+  \begin{syntax}
+    \verb!\documentclass[layout={slide, theme=AnnArborSpruce}]{ztex}!
+    \cs{zslidethemeuse}\oarg{key-value}\zarg{AnnArborSpruce}
+  \end{syntax}  
+  可以在加载文档类时选择此主题, 还可以使用上述命令根据 \meta{key-value} 对此主题进行部分配置进行重定义. 本主题具体效果
+  请前往 Beamer Theme Matrix 查看.
+\end{function}
+
+
+\clearpage
+\subsubsection{页面信息}
+\begin{function}[updated=2025-04-25]{\zslideset}
+  \begin{syntax}
+    \cs{zslideset}\oarg{key}\marg{spec}
+  \end{syntax}
+  在加载 \pkg{slide} 库后, 此命令用于调整 \ztex{} 关于 slide 的默认配置. \meta{key} 表示 \ztex{} 中属于 zslide 库
+  的键名, 默认为空, 此时即为根目录.
+\end{function}
+
+
+\begin{keyval}[parent=ztex/../zslide]{doc, sec, UL, UR, BL, BC, BR, toc}
+  \begin{syntax}
+    doc  = \marg{key-value}
+    sec  = \marg{key-value}
+    UL   = \marg{key-value}
+    ...
+    BR   = \marg{key-value}
+    toc  = \marg{key-value}
+  \end{syntax}
+  上述的每一个键均为元键 (Meta Key), 接受的值需为键值对.
+\end{keyval}
+
+
+\begin{keyval}[parent=ztex/../doc]{bg-color, text-color, text-style}
+  \begin{syntax}
+    bg-color   = \meta{颜色}>\dval{white}
+    text-color = \meta{颜色}>\dval{black}
+    text-style = \meta{rmdefault|sfdefault|ttdefault}>\dval{sfdefault}
+  \end{syntax}
+  \meta{bg-color} 和 \meta{text-color} 分别表示背景色和文本颜色, 默认情况下分别为 \texttt{white, black}; 
+  \meta{text-style} 表示 slide 里文本的样式, 其可选值为: \texttt{rmdefault, sfdefault, ttdefault}.
+\end{keyval}
+
+\begin{keyval}[parent=ztex/../sec]{bg, fg, prefix, suffix}
+  \begin{syntax}
+    fg       = \meta{颜色}>\dval{Ann-default-I}
+    bg       = \meta{颜色}>\dval{Ann-default-III}
+    prefix   = \meta{文本}>\dval{空}
+    suffix   = \meta{文本}>\dval{空}
+  \end{syntax}
+  \meta{fg} 和 \meta{bg} 分别表示 section 栏的文本颜色和背景色, 默认情况下分别
+  为 \texttt{Ann-default-I, Ann-default-II}; \meta{文本} 用于设置 slide 页面
+  中 section 标题的前后缀.
+\end{keyval}
+
+
+\begin{keyval}[parent=ztex/../UL]{bg, fg, text}
+  \begin{syntax}
+    fg   = \meta{颜色}>\dval{Ann-default-II}
+    bg   = \meta{颜色}>\dval{Ann-default-I}
+    text = \meta{文本}>\dval{\cs{zslideUL}}
+  \end{syntax}
+  \meta{fg} 和 \meta{bg} 分别表示 slide 页面中 UL 的文本颜色和背景色, 默认情况下分别
+  为 \texttt{Ann-default-II, Ann-default-I}; \meta{text} 用于设置 slide 左上角(Upper Left) 
+  导航栏对应的文本, 默认为 \cs{zslideUL}. \texttt{UR, BL, BC, BR} 这几个元键的属性完全一致，这里不再一一说明.
+\end{keyval}
+
+
+\begin{keyval}[parent=ztex/../toc]{label, suffix, leftmargin}
+  \begin{syntax}
+    label      = \marg{key-value}
+    suffix     = \marg{key-value}
+    leftmargin = \marg{key-value}
+  \end{syntax}
+  上述的每一个键均为元键, 需要用接受的值也为键值对; \meta{label} 表示目录页各层级的 label 格式设置;
+  \meta{suffix} 中的内容将追加到表示目录条目尾部; \meta{leftmarin} 表示不同层级距离页边距的距离. 因为三者的属性
+  完全类似, 所以我们这里只对 \meta{leftmargin} 这个元键加以说明.
+\end{keyval}
+
+
+\begin{keyval}[parent=ztex/../leftmargin]{chapter, section, subsection}
+  \begin{syntax}
+    chapter    = \marg{长度}>\dval{1.9em}
+    section    = \marg{长度}>\dval{1.5em}
+    subsection = \marg{长度}>\dval{3.8em}
+  \end{syntax}
+  这三个距离中的 \meta{长度} 接受一个长度参数, 其默认值分别为 \texttt{1.9em, 1.5em, 3.8em}.\par
+  \textbf{注意}: 此系列键值在处理不同文档类时兼容性不太好, 而且该设置是全局的; 因它们由 \cs{ztocformat} 命令提供, 
+  所以建议用户直接使用 \cs{ztocformat} 命令进行目录格式定制; 
+\end{keyval}
+在特定的子目录, 如 \meta{key}\texttt{=doc} 或 \meta{key}\texttt{=toc/leftmargin} 时, 
+一个设置样例如下:
+\vskip1.25em\relax
+\begin{DocExample}[@@]
+\zslideset[doc]{
+  bg-color=yellow!20,
+  text-color=red
+}
+\zslideset[toc/leftmargin]{
+  chapter=1em,
+  section=4em,
+}
+\end{DocExample}
+
+
+\begin{function}[updated=2025-04-25]{\zslidelogo}
+  \begin{syntax}
+    \cs{zslidelogo}\oarg{key-value}\marg{picture}
+  \end{syntax}
+  此命令用于设置 slide 的 logo 图标，仅可在导言区使用.
+\end{function}
+
+\begin{keyval}[parent=ztex/slide/logo]{position, width, exclude}
+  \begin{syntax}
+    width    = \meta{长度}>\dval{2.5em}
+    exclude  = \meta{逗号分割列表}>\dval{1}
+    position = \parg{长度1, 长度2}>\dval*{(\cs{paperwidth}-\cs{_ztex_quad_dim}, 1.5em)}
+  \end{syntax}
+  \meta{position} 表示 logo 图标在页面中的位置, 默认为右上角; \meta{width} 表示 logo 图标的宽度, 默认为 2.5em;
+  \meta{exclude} 表示 logo 图标在 slide 页面中排除的页码范围, 默认为 1.
+\end{keyval}
+
+
+\begin{function}[added=2025-05-09]{\zslideframetitle}
+  \begin{syntax}
+    \cs{zslideframetitle}\marg{title}
+  \end{syntax}
+  此命令用于在没有 \cs{section} 命令出现时手动创建 slide 页面对应的标题, 和 \cls{beamer} 中的 \cs{frametitle} 命令类似. \par
+  \textbf{注意}: 此命令会自动换页, 即自动插入 \cs{newpage} 命令.
+\end{function}
+
+
+\begin{function}[updated=2025-04-25]{\zslidetitle, \zslideauthor, \zslidedate}
+  此三个命令用于分别保存导言区 \cmd{\@title}, \cmd{\@author}, \cmd{\@date} 三个变量的值, 
+  用户可以在正文部分使用此三个变量.\par \textbf{注意}: 如果在 slide 模式下未定义这三个变量, 那么
+  \zTeX{} 会抛出错误.
+\end{function}
+
+
+\begin{function}[updated=2025-04-25]{\zslidedocolor}
+  \begin{syntax}
+    \cs{zslidedocolor}\oarg{layer}\marg{color}
+  \end{syntax}
+  此命令用于覆盖原本的 slide 文本或背景色, \meta{layer} 可选值有: \texttt{fg, bg}; 
+  \meta{bg} 默认的 \meta{color} 为 \texttt{white}, \meta{fg} 默认的 \meta{color} 为 \texttt{black}. \par
+  \textbf{注意}:一次只能设置一个 \meta{layer}, 且用户不应该滥用此命令.
+\end{function}
+
+
+\begin{function}[updated=2025-04-25]{\zslideUL, \zslideUR, \zslideBR}
+  这三个命令分别表示 slide 模式下, \texttt{UL, UR, BR} 位置处默认的文本信息.
+\end{function}
+
+
+\begin{function}[updated=2025-04-25]{zslide:titlepage, zslide:lastpage}
+  \begin{syntax}
+    \cmd{\pageref}\zarg{zslide:titlepage}
+    \cmd{\pageref}\zarg{zslide:lastpage}
+  \end{syntax}
+  引用当前文档的最后一页, 用于 slide 制作时的页码引用. 使用样例如下:
+\end{function}
+
+
+\begin{function}[updated=2024-11-05]{zslide@titlepage, zslide@lastpage}
+  \begin{syntax}
+    \cs{hyper@link}\marg{context}\zarg{zslide@titlepage}\marg{link text}
+    \cs{hyper@link}\marg{context}\zarg{zslide@lastpage}\marg{link text}
+  \end{syntax}
+  上述两 Targets 由命令 \cs{hyper@anchor} 设置, 分别应用于引用当前文档的第一页和最后一页, 在 zslide 中, 标题页的页码为 0.\par
+  \textbf{注意}:普通用户不应该直接使用这两个 Targets，此二 Targets 主要提供给模板的开发者, 用户应使用位于首页和尾页
+  的 \texttt{zslide:titlepage} 和 \texttt{zslide:lastpage} 两 label.
+\end{function}
+
+
+\begin{function}[updated=2025-04-25]{zslide@title@color}
+  \begin{syntax}
+    \cs{color}\zarg{zslide@title@color}\meta{item}
+    \cs{textcolor}\zarg{zslide@title@color}\marg{item}
+  \end{syntax}
+  此颜色用于设置 slide 模式下 title 的背景色, 默认为: \texttt{HTML:d9d9d9}(即 \zlower{.25em}{\block{zslide@title@color}}).
+\end{function}
+
+
+\begin{function}[updated=2025-04-25]{\zslideframeind}
+  \begin{syntax}
+    \cs{zslideframeind}
+  \end{syntax}
+  用户可以在自定义导航栏时使用此命令, 此命令在每一页 Frame 中会返回其在这个 section 中对应的 Frame Index. 比如在
+  某个 section 中第 1 页, 其返回的 Frame Index 为 1.
+\end{function}
+
+
+\begin{function}[updated=2025-04-25]{\zslideframeall}
+  \begin{syntax}
+    \cs{zslideframeall}\marg{name}
+  \end{syntax}
+  用户可以在自定义导航栏时使用此命令, 此命令可以根据 \meta{name} 来获取 \ztexverb{\jobname.aux} 中变
+  量 \cmd{\zsec@\meta{name}@cnt} 的值. \meta{name} 一般为大写罗马数字: I, II, III, ... 等, 其默认返回当前 section 下
+  的 Frame 总数; 第一次编译亦或者是变量 \cmd{\zsec@\meta{name}@cnt} 不存在时, 命令 \cs{zslideframeall} 将会返回 \cmd{??}.
+\end{function}
+
+
+\begin{function}[updated=2025-04-25]{\zslidenavsym}
+  \begin{syntax}
+    \cs{zslidenavsym}\oarg{target symbol}\oarg{other symbol}
+  \end{syntax}
+  此命令为内部命令 \cmd{\zslide_nav_sym:nnnn} 的一个具体实现. \meta{target symbol} 默认为 $\bullet$, 
+  \meta{other symbol} 默认为 $\circ$. 这两个 symbol 的详细说明请参见后续的 \cmd{\zslide_nav_sym:nnnn} 命令.
+\end{function}
+
+
+\begin{function}[updated=2025-04-25]{\zslidepageTF}
+  \begin{syntax}
+    \cs{zslidepageTF}\marg{formula}\marg{true code}\marg{false code}
+  \end{syntax}
+  此命令此命令在自定义 slide 的元信息时很有用, 其会自动比较当前页码与 \meta{formula} 的关系，然后执行对应的分支. 
+  一个使用样例如下:
+\end{function}
+\begin{DocExample}
+\zslidethemeuse[
+  UR={text=\zslidepageTF{=1}{}{\zslideUR:\ \zslidenavsym}},
+]{AnnArborSpruce}
+\end{DocExample}
+
+
+\clearpage
+\subsubsection{编程接口}
+
+\begin{function}[updated=2025-04-25]{\zslide_nav_sym:nnnn}
+  \begin{syntax}
+    \cmd{\zslide_nav_sym:nnnn} \marg{range}\marg{target}\marg{target symbol}\marg{other symbol}
+  \end{syntax}
+  此命令用于创建 slide 中的导航栏, \meta{range} 接受一个正整数，表示 frame 的总数; \meta{target} 为接受一个
+  在 $0\sim \meta{range}$ 内的正整数，表示选定的编号. \meta{target symbol} 为选定的编号的符号, \meta{other symbol} 为
+  其它编号的符号.\par
+  \textbf{注意}:此命令需放入 \cmd{shipout/background} 或 \cmd{shipout/foreground} 这两个 Hook 中; 普通用户不应该直接调用此命令，此命令主要提供给模板的开发者.
+\end{function}
+
+
+
+\begin{function}[updated=2025-04-25]{\zslide_framecnt_aux:nn}
+  \begin{syntax}
+    \cs{zslide_framecnt_aux:nn} \marg{name}\marg{number}
+  \end{syntax}
+  此命令会向文件 \ztexverb{\jobname.aux} 中写入一个变量, 其名称为: \cmd{\zsec@\meta{name}@cnt}, 其值为:
+  \meta{number}; \meta{name} 一般为一大写罗马数字, 如 I, II, III, IV 等. 此命令在制作进度条或向后搜集文档内容时
+  是十分有用的.
+\end{function}
+
+
+\begin{function}[updated=2025-04-25]{\zslide_status_bar:nnnn}
+  \begin{syntax}
+    \cmd{\zslide_status_bar:nnnn} \marg{type}\marg{coordinate}\marg{width}\marg{height}
+  \end{syntax}
+  此命令用于创建 slide 的页面背景色块, 为方便叙述，我们称其为 \meta{BOX}. 其中 \meta{coordinate} 表示 \meta{BOX} 左下角坐标, 形如
+  \ztexverb{(10pt, -.1\paperwidth)}, 以当前页面的左上角为原点, 取向上向右为正方向; \meta{type} 为状态栏类型, 目前所有可选值有:\cmd{UR}, \cmd{UL}, 
+  \cmd{BL}, \cmd{BC}, \cmd{BR}, \cmd{sec}; \meta{width} 为宽度, 接受一个浮点数, 默认以 \cmd{\paperwidth} 为单位. \meta{height} 为状态栏的高度，
+  接受一个合法的 \texttt{dim} 类型值, 如 \texttt{10pt, 2em} 等.\par
+  \textbf{注意}:此命令需放入 \cmd{shipout/background} 或 \cmd{shipout/foreground} 这两个 Hook 中; 普通用户不应该直接调用此命令，
+  此命令主要提供给模板的开发者.
+\end{function}
+
+
+\begin{function}[updated=2025-04-25]{\zslide_status_info:nnnn}
+  \begin{syntax}
+    \cs{zslide_status_info:nnnn} \marg{type}\marg{coordinate}\marg{width}\marg{content}
+  \end{syntax}
+  此命令用于创建 slide 的页面元信息, 其被置于一个 box 中，为方便叙述，我们称其为 \meta{BOX}. 其中 \meta{type} 表示 \meta{BOX} 在页面上的
+  位置, 可选值有: \cmd{foot}, \cmd{head}; \cs{g_zslide_status_info_head_B_dim} 和 \cs{g_zslide_status_info_foot_B_dim} 两个寄存器存放了 head 
+  和 foot 中文字基线的纵坐标. \meta{coordinate} 表示 \meta{BOX} 的左下角坐标, 接受一个浮点数, 以 \cmd{\paperwidth} 为单位. 此参数以当前页面的
+  左上角为原点, 取向上向右为正方向; \meta{width} 为当前 \meta{BOX} 的(弹性)宽度, 接受一个浮点数, 以 \cmd{\paperwidth} 为单位. \meta{content} 
+  表示 \meta{BOX} 中存放的文本或图片内容.\par
+  \textbf{注意}:此命令需放入 \cmd{shipout/background} 或 \cmd{shipout/foreground} 这两个 Hook 中; 普通用户不应该直接调用此命令，此命令主要提供给模板的开发者.
+\end{function}
+
+
+
+\begin{function}[updated=2025-04-25]{\zslide_meta:n}
+  \begin{syntax}
+    \cmd{\zslide_meta:n} \marg{key}
+  \end{syntax}
+  此命令可以根据 \meta{key} 获取 slide 的 status info 中对应的元信息. \par
+  \textbf{注意}:普通用户不应该直接调用此命令，此命令主要提供给模板的开发者.
+\end{function}
+
+
+\begin{function}[added=2025-01-14]{
+  \g_zslide_status_info_sec_L_dim, 
+  \g_zslide_status_info_sec_C_dim,
+  \g_zslide_status_info_head_C_dim, 
+  \g_zslide_status_info_foot_C_dim}
+  \begin{syntax}
+    \cs{g_zslide_status_info_sec_L_dim}>\dval{1cm}
+    \cs{g_zslide_status_info_sec_C_dim}>\dval{-1.7em}
+    \cs{g_zslide_status_info_head_C_dim}>\dval{-0.35em}
+    \cs{g_zslide_status_info_foot_C_dim}>\dval*{-\string\zph+0.35em}
+  \end{syntax}
+  \cs{g_zslide_status_info_sec_L_dim} 中存放了 section 文本距离页面左边界的距离, 默认值为 \texttt{1cm}; 
+  \cs{g_zslide_status_info_sec_C_dim} 中存放了 section 文本竖直方向对称轴的纵坐标, 默认值为 \texttt{-1.7em}.
+  最后两个寄存器存放了 head 和 foot 中文本竖直方向对称轴的纵坐标, 前者的默认值为 \texttt{-0.35em}, 后者的默认值
+  为 \ztexverb{-\paperheight+0.35em}. \par
+  \textbf{注意}:普通用户不应该直接修改此系列寄存器, 此命令主要提供给模板的开发者.
+\end{function}
+
+
+\begin{function}[added=2025-01-14]{
+  \g_zslide_status_bar_head_H_dim, 
+  \g_zslide_status_bar_foot_H_dim, 
+  \g_zslide_status_bar_sec_H_dim, 
+  \g_zslide_status_bar_sec_B_dim}
+  \begin{syntax}
+    \cs{g_zslide_status_bar_head_H_dim}>\dval{.7em}
+    \cs{g_zslide_status_bar_foot_H_dim}>\dval{.7em}
+    \cs{g_zslide_status_bar_sec_H_dim}>\dval{2em}
+    \cs{g_zslide_status_bar_sec_B_dim}>\dval{-2.7em}
+  \end{syntax}
+  前两个寄存器存放了 slide 中 head 和 foot 对应背景色块的高度, 默认值均为 \texttt{.7em}, 其对应的背景矩形色块底边的纵坐标均为 \texttt{.7em}; 
+  \cs{g_zslide_status_bar_sec_H_dim} 中存放了 section 的背景色块的高度, 默认值为 \texttt{2em}; \cs{g_zslide_status_bar_sec_B_dim} 中存放了 section 
+  的背景矩形色块底边对应的纵坐标, 默认值为 \texttt{-2.7em}; 当改变此此三个寄存器的值时, 对应色块的基线保持不变，其高度会做出相应的改变.\par
+  \textbf{注意}:普通用户不应该直接修改此系列寄存器，此命令主要提供给模板的开发者.
+\end{function}
+
+\newgeometry{left=2.5cm, right=2.5cm}
+最后, 我们展示如何利用上述的编程接口复刻 beamer 主题: XiaoShan. 复刻效果如下:
+
+\vskip5em\relax
+% \includepdf[pages=1-4,nup=2x2,frame,delta=2mm 2mm]{./support/pics/slide_xiaoshan.pdf}
+\noindent\includegraphics[width=1\linewidth]{./support/pics/slide_xiaoshan.pdf}
+
+
+\clearpage
+\begin{dxample}[0]
+% 'xiaoshan' beamer theme
+\documentclass[layout={slide=true, theme=AnnArborSpruce}]{ztex}
+\usepackage{pgfornament-han}
+\usepackage{lipsum}
+\zslidethemeuse[
+  UL={bg=white, text=}, 
+  UR={bg=white, text=},
+  BL={bg=white, text=},
+  BC={bg=white, text=},
+  BR={bg=white, text=\thepage/\pageref{zslide:lastpage}},  
+]{AnnArborSpruce}
+\ExplSyntaxOn\makeatletter
+\zsecformat\subsection
+  {
+    explicit = true,
+    code     = {
+      \vskip.5em\relax
+      \par\noindent
+      {\bfseries \zsecnum\kern2pt\relax \zsecname}
+      \par\vskip.5em\relax
+    },
+  }
+% dim config
+\dim_gset:Nn \g_zslide_status_info_sec_C_dim {-1em}
+\dim_gset:Nn \g_zslide_status_bar_sec_B_dim  {-2em}
+\dim_gset:Nn \g_zslide_status_info_head_C_dim {-2.25em}
+\dim_gset:Nn \g_zslide_status_info_foot_C_dim { -\zph+0.75em }
+% navigator
+\AddToHook{shipout/foreground}
+  {
+    \zslide_status_info:nnnn {head}{0}{1}
+      {
+        { \color{green!25!gray}\rule[-3pt]{\paperwidth}{.51em} }
+        \kern-\paperwidth\relax
+        { 
+          \exp_args:Ne \__status_ornament_single:nn 
+            {\paperwidth/\tl_if_empty:NTF \ztexpageall{1}{(\ztexpageall-1)}*\thepage}
+            {teal!60!black}
+        }
+      }
+  }
+\cs_set:Npn \__status_ornament_single:nn #1#2
+  {
+    \hbox_to_wd:nn { \dim_eval:n { #1 } }
+      {
+        \leaders\hbox{\pgfornamenthan[color=#2, scale=0.05]{39}}
+          \hfill
+      }
+  }
+\makeatother\ExplSyntaxOff
+\title{xiaoshan beamer theme}
+\author{Eureka}
+\date{\today}
+\begin{document}
+\maketitle
+\section{Fisrt Section}
+\lipsum[1][1-3]
+
+\section{Second Section}
+\lipsum[1][1-3]
+
+\section{Third Section}
+\subsection{First subsection}
+\lipsum[2][1-4]
+
+\section{Fourth Section}
+\lipsum[3][1-4]
+\subsection{Second subsection}
+\lipsum[3][1-4]
+\end{document}
+\end{dxample}
+\restoregeometry

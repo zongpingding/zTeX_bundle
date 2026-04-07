@@ -1,0 +1,123 @@
+% \InsertMark{ztex-4th}{}
+\clearpage
+\subsection*{\titlepkg{cmd} 库}
+\ztex{} 的 \pkg{cmd} 库提供了一种新的命令定义方式: 类似 Python 中的 
+\texttt{def fun (\meta{arg-spec}) \marg{code}}; 该库目前很不成熟, 请谨慎使用.
+
+
+\begin{function}[added=2025-06-19, updated=2025-09-30]{\znewcmd, \zsetcmd, \zgsetcmd}
+  \begin{syntax}
+    \cs{znewcmd}\meta{cmd}\marg{arg-spec}\marg{code}
+  \end{syntax}
+  用户可以使用这三个命令创建控制序列, 新创建的控制序列名称为 \meta{cmd}. \meta{arg-spec} 的格式为: \texttt{\meta{var}:\meta{type}=\meta{default}};
+  其中 \meta{var} 为\textbf{局部}变量的名称, 可以使用数字, 下划线(但此时需使用 \cs{zcmdvar} 命令进行引用); \meta{type} 用于
+  指定变量 \meta{var} 的类型, 可以省略; 目前 \meta{type} 的可选值有 ``\texttt{tl, str, int, fp, clist, dim, \oarg{type}}'',  
+  其中 ``\texttt{tl}'' 为默认类型, \texttt{\oarg{type}} 用于表示数组, 数组中元素的类型均为(元素类型必须相同) \meta{type}; \meta{default} 
+  用于指定变量 \meta{var} 的默认值, 可以省略; \meta{code} 即为函数体. \par
+  \textbf{备注}: 在函数体中, 所有的局部变量均为完全可展的.
+  % 数组变量中的每个元素均被包含于 \cmd{\exp_not:n} 中, 普通变量则保留为用户的原始输入形式.
+\end{function}
+
+
+
+\begin{function}[added=2025-09-30]{\ztex_cmd_create:nnnnn}
+  \begin{syntax}
+    \cmd{\ztex_cmd_create:nnnnn}
+    ~~~~\Arg{cmd}\Arg{arg-parser}\Arg{code}
+    ~~~~\Arg{setup}\Arg{boolean}
+  \end{syntax}
+  此命令用于创建类似 \cmd{\znewcmd}, \cmd{\zsetcmd} 的命令. \meta{cmd} 为函数名, 不包含 ``\texttt{\char92}'';
+  \meta{arg-spec} 用于解析命令参数; \meta{code} 为函数的具体执行内容, 可以在其中使用已声明的命令参数; \meta{setup}
+  表示 \meta{cmd} 的创建方式, 可以使用 ``\texttt{cs_new:Npn}'' , ``\texttt{cs_set:Npn}'' 等; \meta{boolean}
+  为一个布尔值, 用于控制命令参数是否需要计算. \textbf{备注}: 此命令的使用方法可以参考下述 \cmd{\znewcmd} 的定义:
+\end{function}
+\begin{DocExample}
+\cs_set_protected:Npn \znewcmd #1#2#3
+  {
+    \cs_if_exist:NT {#1}
+      {
+        \ztex_msg_set:nn {znewcmd@exist}
+          {
+            command~\string#1~already~exsits!
+          }
+        \ztex_msg_error:n {znewcmd@exist}
+      }
+    \exp_args:Ne \ztex_cmd_create:nnnnn {\cs_to_str:N #1}{#2}
+      {
+        #3
+      }{cs_new:Npn}{\c_false_bool}
+  }
+\end{DocExample}
+
+
+
+\begin{function}[added=2025-06-19, EXP]{\fpuse, \intuse, \dimuse, \clistuse}
+  \begin{syntax}
+    \cs{fpuse}\marg{var}
+    \cs{intuse}\marg{var}
+    \cs{dimuse}\marg{var}
+    \cs{clistuse}\meta{var}\marg{index}
+  \end{syntax}
+  在 \cs{znewcmd}, \cs{zsetcmd}, \cs{zgsetcmd} 所定义控制序列对应的 \meta{code} 中, 部分的变量并不能直接使用,
+  需要使用 \cs{fpuse}, \cs{dimuse} 等命令进行引用.
+\end{function}
+
+
+\begin{function}[added=2025-12-02, EXP]{\cmdvar}
+  \begin{syntax}
+    \cs{cmdvar}\marg{var}
+  \end{syntax}
+  此命令用于引用已经声明的变量, 如果被引用的变量含有数字, 横线, 下划线等特殊字符,
+  建议使用该命令.
+\end{function}
+
+\newgeometry{left=3cm, right=3cm}
+最后，我们在这里给出命令 \cmd{\znewcmd} 的一些使用案例, 以供用户参考:
+\begin{DocExample}*
+\ExplSyntaxOn
+\cs_set_eq:NN \tlEQNnTF \tl_if_eq:NnTF
+\ExplSyntaxOff
+% new command
+\znewcmd\CMDA{argA=argA-val, argB:str=argB-val, argC}
+  { 
+    \tlEQNnTF \argA {argA-val}{argA~EQUALS}{argA~not~EQUALS}\par
+    \tlEQNnTF \argB {argB-val}{argB~EQUALS}{argB~not~EQUALS}\par
+    \string\argC=\argC\par
+  }
+\CMDA{argB=argB-val-new}
+% set command
+\dotfill\par
+\zsetcmd\CMDB{
+  argA = {``Group variable range Test''},
+  argF:fp = 3.1415926,
+  argG:int = 100,
+  argH:dim = 12pt+1em,
+  argI:clist = {AA, BB, CC},
+}{
+  \string\argF=\fpuse{\argF};
+  \string\argG=\intuse\argG;
+  \string\argH=\dimuse\argH;
+  \string\argI=\clistuse\argI{2}.
+  \par\dotfill\par
+  Argument of \string\CMDA(local variable test):
+  \string\argA=\argA\par
+}
+\CMDB{argF=6.2830178, argG=200}
+% group test
+\dotfill\par
+\begingroup
+\zsetcmd\CMDA{arg-1=aaa}{CODE=\cmdvar{arg-1}}
+INNER: \CMDA{};
+\endgroup
+OUTER: \CMDA{}
+% vector type
+\dotfill\par
+\znewcmd\CMDD{argA:[int]={1, 2, 3, 4}, argB:[str], argC:[tl]}
+  { 
+    CODE 1=(\argA{1}), (\argA{4})\par
+    CODE 2=(\argB{1}), (\argB{-1})\par
+    CODE 3=(\argC{1})
+  }
+\CMDD{argA={5.55, 6, 7, 8}, argB={AAA, BBB, CCC}}
+\end{DocExample}
+\restoregeometry

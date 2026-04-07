@@ -1,0 +1,207 @@
+\clearpage
+\InsertMark{ztex-4th}{}
+\subsection{\titlepkg{sclist} 模块}
+Semicolon (comma) list(简称为 \texttt{sclist}) 与 \pkg{expl3} 中的 ``\texttt{clist}'' 类似, 第一层分隔符为 ``\texttt{;}'', 第二层分隔符
+可以为 ``\texttt{,}''; \ztex{} 创建此模块是为了在处理以 ``\texttt{;}'' 划分的数据时维持相关操作的 ``\textbf{可展性}''; \ztex{} 
+的 \pkg{sclist} 库提供了以下的一些命令:
+
+
+\begin{function}[added=2025-06-20]{\sclist_new:N, \sclist_new:c}
+  \begin{syntax}
+    \cs{sclist_new:N} \meta{sclist~var}
+  \end{syntax}
+  该命令与原始的 \cs{clist_new:N} 命令类似.
+\end{function}
+
+\begin{function}[added=2025-06-20]
+  {
+    \sclist_const:Nn, \sclist_const:Ne,
+    \sclist_const:cn, \sclist_const:ce
+  }
+  \begin{syntax}
+    \cs{sclist_const:Nn} \meta{sclist~var} \Arg{semicolon list}
+  \end{syntax}
+  该命令与原始的 \cs{clist_cont:Nn} 命令类似.
+\end{function}
+
+\begin{function}[added=2025-06-20]
+  {\sclist_clear:N, \sclist_clear:c, \sclist_gclear:N, \sclist_gclear:c}
+  \begin{syntax}
+    \cs{sclist_clear:N} \meta{sclist~var}
+  \end{syntax}
+  该命令与原始的 \cs{clist_clear:N} 命令类似.
+\end{function}
+
+\begin{function}[added=2025-06-20]
+  {
+    \sclist_clear_new:N,  \sclist_clear_new:c,
+    \sclist_gclear_new:N, \sclist_gclear_new:c
+  }
+  \begin{syntax}
+    \cs{sclist_clear_new:N} \meta{sclist~var}
+  \end{syntax}
+  该命令与原始的 \cs{clist_clear_new:N} 命令类似.
+\end{function}
+
+
+\begin{function}[added=2025-06-20]
+  {
+    \sclist_set_eq:NN,  \sclist_set_eq:cN,
+    \sclist_set_eq:Nc,  \sclist_set_eq:cc,
+    \sclist_gset_eq:NN, \sclist_gset_eq:cN,
+    \sclist_gset_eq:Nc, \sclist_gset_eq:cc
+  }
+  \begin{syntax}
+    \cs{sclist_set_eq:NN} \meta{sclist~var_1} \meta{sclist~var_2}
+  \end{syntax}
+  该命令与原始的 \cs{clist_set_eq:NN} 命令类似.
+\end{function}
+
+
+\begin{function}[added=2025-06-20]
+  {
+    \sclist_set:Nn,  \sclist_set:NV, \sclist_set:Ne,
+    \sclist_set:No,
+    \sclist_set:cn,  \sclist_set:cV, \sclist_set:ce,
+    \sclist_set:co,
+    \sclist_gset:Nn, \sclist_gset:NV, \sclist_gset:Ne,
+    \sclist_gset:No,
+    \sclist_gset:cn, \sclist_gset:cV, \sclist_gset:ce,
+    \sclist_gset:co
+  }
+  \begin{syntax}
+    \cs{sclist_set:Nn} \meta{sclist~var} \{\meta{item_1}; ...; \meta{item_n}\}
+  \end{syntax}
+  该命令与原始的 \cs{clist_set:Nn} 命令类似.
+\end{function}
+
+
+\begin{function}[added=2025-06-20, EXP, pTF]
+  { 
+    \sclist_if_empty:N,
+    \sclist_if_empty:c,
+  }
+  \begin{syntax}
+    \cs{sclist_if_empty_p:N} \meta{sclist~var}
+    \cs{sclist_if_empty:NTF} \meta{sclist~var} \Arg{true code} \Arg{false code}
+  \end{syntax}
+  该命令与原始的 \cs{clist_if_empty:NTF} 命令类似.
+\end{function}
+
+
+\begin{function}[added=2025-06-20, EXP, pTF]
+  { 
+    \sclist_if_empty:N,
+    \sclist_if_empty:c,
+  }
+  \begin{syntax}
+    \cs{sclist_if_empty_p:n} \meta{sclist~var}
+    \cs{sclist_if_empty:nTF} \Arg{semicolon list} \Arg{true code} \Arg{false code}
+  \end{syntax}
+  该命令与原始的 \cs{clist_if_empty:nTF} 命令类似.
+\end{function}
+
+
+\begin{function}[rEXP, added=2025-06-20]
+  {
+    \sclist_map_function:NN, \sclist_map_function:cN, 
+    \sclist_map_function:nN, \sclist_map_function:eN
+  }
+  \begin{syntax}
+    \cs{sclist_map_function:NN} \meta{sclist~var} \meta{function}
+  \end{syntax}
+  此系列命令与原始的 \cs{clist_map_function:NN} 命令类似.
+\end{function}
+
+
+\begin{function}[rEXP, added=2025-06-20]
+  {
+    \sclist_map_tokens:Nn, 
+    \sclist_map_tokens:cn, 
+    \sclist_map_tokens:nn, 
+  }
+  \begin{syntax}
+    \cs{sclist_map_tokens:Nn} \meta{sclist~var} \Arg{code}
+  \end{syntax}
+  此系列命令与原始的 \cs{clist_map_tokens:Nn} 命令类似.
+\end{function}
+
+
+\begin{function}[EXP, added = 2025-06-20]
+  {
+    \sclist_count:N, \sclist_count:c, 
+    \sclist_count:n, \sclist_count:e
+  }
+  \begin{syntax}
+    \cs{sclist_count:N} \meta{sclist~var}
+  \end{syntax}
+  该命令与原始的 \cs{clist_count:N} 命令类似.
+\end{function}
+
+
+\begin{function}[added = 2025-06-20, EXP]
+  {
+    \sclist_item:Nn, \sclist_item:cn, 
+    \sclist_item:nn, \sclist_item:en
+  }
+  \begin{syntax}
+    \cs{sclist_item:Nn} \meta{sclist~var} \Arg{int expr}
+  \end{syntax}
+  该命令与原始的 \cs{clist_item:Nn} 命令类似.
+\end{function}
+
+
+
+\begin{function}[added = 2025-06-20]{\sclist_show:N, \sclist_show:c}
+  \begin{syntax}
+    \cs{sclist_show:N} \meta{sclist~var}
+  \end{syntax}
+  该命令与原始的 \cs{clist_show:N} 命令类似.
+\end{function}
+
+
+\begin{function}[added = 2025-06-20]{\sclist_show:n}
+  \begin{syntax}
+    \cs{sclist_show:n} \Arg{tokens}
+  \end{syntax}
+  该命令与原始的 \cs{clist_show:n} 命令类似.
+\end{function}
+
+
+\begin{function}[added = 2025-06-20]{\sclist_log:N, \sclist_log:c}
+  \begin{syntax}
+    \cs{sclist_log:N} \meta{sclist~var}
+  \end{syntax}
+  该命令与原始的 \cs{clist_log:N} 命令类似.
+\end{function}
+
+
+\begin{function}[added = 2025-06-20]{\sclist_log:n}
+  \begin{syntax}
+    \cs{sclist_log:n} \Arg{tokens}
+  \end{syntax}
+  该命令与原始的 \cs{clist_log:n} 命令类似.
+\end{function}
+
+
+\newgeometry{left=2.5cm, right=2.5cm}
+下面这个案例展示了 \pkg{sclist} 中的 \cs{sclist_map_tokens:nn} 和 \cs{sclist_map_tokens:Nn} 
+两个命令的基本使用方法:
+\begin{DocExample}*
+\ExplSyntaxOn
+\sclist_new:N \l_tmpc_sclist 
+\sclist_set:Nn \l_tmpc_sclist {1;23;456;} 
+\cs_set:Npn \__test_sclist_map:nn #1#2 {[#1](#2)|}
+\def\TTTa{
+  \sclist_map_tokens:nn {a;bc;def}
+    { \__test_sclist_map:nn {XX} }
+}
+\def\TTTb{
+  \sclist_map_tokens:Nn \l_tmpc_sclist
+    { \__test_sclist_map:nn {YY} }
+}
+\detokenize\expandafter{\expanded{\TTTa}}\par
+\detokenize\expandafter{\expanded{\TTTb}}
+\ExplSyntaxOff
+\end{DocExample}
+\restoregeometry

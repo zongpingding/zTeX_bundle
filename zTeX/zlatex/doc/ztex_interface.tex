@@ -1,0 +1,62 @@
+% \DocumentMetadata{lang=cn} 
+\InputIfFileExists{ztex_doc-cfg.tex}{}{}
+\documentclass[
+  lang=cn, 
+  hyper=true,
+  class=l3doc, 
+  classOption={11pt},
+]{../code/ztex}
+\input{ztex_interface_preamble.tex}
+\ztocenable[toc, lom, lot, lof]
+\title{\texorpdfstring{\zTeX{}}{zTeX} 接口文档}
+\author{Eureka~%
+  \texorpdfstring{\rlap{\wscale*{7.5em}{\normalfont\small\sffamily\color{gray}zongpingding5(at)outlook(dot)com}}}%
+  {zongpingding5(at)outlook(dot)com}}
+\date{\textsf{\today}}
+\begin{document}
+\thmCommandRestore
+
+% source code lineno
+% \docsourcelinenotostr
+
+% general doc
+\input{doc_source/cover.toc.tex}
+\input{doc_source/intro.tex}
+\input{doc_source/install.tex}
+\input{doc_source/basic.cmd.tex}
+\input{doc_source/options.tex}
+\input{doc_source/status.tex}
+
+
+% module doc
+\input{doc_source/mod.intro.tex}
+\input{doc_source/mod.font.tex}
+\input{doc_source/mod.ref.tex}
+\input{doc_source/mod.page.tex}
+\input{doc_source/mod.color.tex}
+\input{doc_source/mod.thm.tex}
+\input{doc_source/mod.box.tex}
+\input{doc_source/mod.cmd.tex}
+\input{doc_source/mod.sect.tex}
+\input{doc_source/mod.sclist.tex}
+\input{doc_source/mod.graphics.tex}
+\input{doc_source/mod.counter.tex}
+
+
+% library doc
+\input{doc_source/lib.intro.tex}
+\input{doc_source/lib.fancy.tex}
+\input{doc_source/lib.cmd.tex}
+\input{doc_source/lib.alias.tex}
+\input{doc_source/lib.slide.tex}
+\input{doc_source/lib.thm.tex}
+
+
+% ztool doc
+\input{doc_source/ztool.tex}
+
+
+% todo, implement and index
+\input{doc_source/todo.tex}
+\input{doc_source/impl.ind.tex}
+\end{document}

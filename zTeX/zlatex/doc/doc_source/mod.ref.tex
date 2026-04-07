@@ -1,0 +1,240 @@
+\clearpage
+\subsection{\titlepkg{ref} 模块}
+本模块主要用于配置文档的索引、参考文献及超链接功能，用户可通过其提供的命令更方便地
+定制索引、参考文献和超链接的格式.
+
+
+% \makeatletter
+\subsubsection{超链接}
+\begin{function}[added=2024-12-05]{\hyper@anchor}
+  \begin{syntax}
+    \cs{hyper@anchor}\marg{destination name}
+  \end{syntax}
+  此命令用于创建一个超链接锚点, \meta{destination name} 作为后续超链接命令的跳转目标.
+\end{function}
+
+
+\begin{function}[added=2024-12-05]{\hyper@link}
+  \begin{syntax}
+    \cmd{\hyper@link}\marg{context}\marg{destination name}\marg{link text}
+  \end{syntax}
+  此命令用于创建一个超链接, \meta{link text} 本身作为一个超链接对象，点击 \meta{link text} 即可跳转到对
+  应的 \meta{destination name}. \meta{context} 表示此链接所属的类型, 默认有: \texttt{link, url, cite} 三种类型.
+\end{function}
+
+
+\begin{function}[added=2025-09-13]{\ztexlink}
+  \begin{syntax}
+    \cs{ztexlink}\Arg{destination name}\Arg{link text}
+    \cs{ztexlink}*\Arg{destination name}\Arg{link material}
+  \end{syntax}
+  此命令用于创建超链接文本. \meta{destination name} 为超链接锚点;
+  \meta{link text} 表示对应的文本, 可以为多行文本. \cs{ztexlink*} 的 \meta{link material}
+  中可以包含 \verb|\verb| 等命令, 而 \meta{link text} 中不能包含; \meta{link material}
+  中不支持直接输入多行文本(可以插入 \cmd{\parbox} 等命令实现). 一个简单的使用样例如下:
+\end{function}
+\vskip1.25em\relax
+\begin{DocExample}*
+% \usepackage{lipsum}
+\ztexlink{subsection.6.2}{\pkg{ref} 模块};\par
+\ztexlink{subsection.6.2}{\lipsum[1][1-2]};\par
+\ztexlink*{subsection.6.2}{\verb|\pkg{ref} 模块|}.
+
+\ztexlink{subsection.6.2}{\fbox{\parbox{.25\linewidth}{\raggedright\lipsum[1][1]}}}
+\hskip5em\relax
+\ztexlink*{subsection.6.2}{\fbox{\parbox{.25\linewidth}{\raggedleft\lipsum[1][1]}}}
+\end{DocExample}
+
+
+
+\begin{function}[added=2025-09-20]{\ztexlinkclass}
+  \begin{syntax}
+    \cmd{\ztexlinkclass}\Arg{class}\Arg{title}\Arg{link text}
+    \cmd{\ztexlinkclass*}\Arg{class}\Arg{title}\Arg{link material}
+  \end{syntax}
+  此命令会给 \meta{content} 创建超链接, 跳转到由 \meta{class} 和 \meta{title}
+  确定的章节标题处. \cmd{\ztexlinkclass*} 中的 \meta{link material} 可以包含
+  \verb!\verb! 等命令. \textbf{备注}: 此命令依赖于目录文件, 当目录不存在时, 此命令无效.
+\end{function}
+
+
+
+\begin{function}[added=2024-12-05]{\hyper@linkstart}
+  \begin{syntax}
+    \cmd{\hyper@linkstart}\marg{context}\marg{destination name}
+  \end{syntax}
+  此命令用于开启一个超链接\textbf{域}, 此\textbf{域}中的内容可以是任意的文本或其它图片对象. 此命令需结合后续的
+  \cmd{\hyper@linkend} 命令使用，此二命令结合使用时基本和上述的 \cmd{\hyper@link} 命令基本等效.
+\end{function}
+
+
+\begin{function}[added=2024-12-05]{\hyper@linkend}
+  用于结束由 \cmd{\hyper@linkstart} 开启的\textbf{域}.
+\end{function}
+
+
+\begin{function}[added=2024-12-05]{\hyper@linkfile}
+  \begin{syntax}
+    \cmd{\hyper@linkfile}\marg{link text}\marg{filename}\marg{destname}
+  \end{syntax}
+  此命令用于创建一个超链接, 点击\meta{link text} 即可跳转到对应的 \meta{filename} 文件中的 \meta{destname} 处.
+\end{function}
+
+\begin{function}[added=2024-12-05]{\MakeLinkTarget,\MakeLinkTarget*}
+  \begin{syntax}
+  \cs{MakeLinkTarget}\oarg{prefix}\marg{counter}
+  \cs{MakeLinkTarget}*\marg{target}
+  \end{syntax}
+  此二命令用于在用户层面创建超链接跳转目标，其中 \meta{prefix} 和 \meta{counter} 可以作为命令
+  \cmd{\hyper@link} 的参数使用. \meta{counter} 可以为 \texttt{chapter, section, subsection} 等.
+  针对 \cs{MakeLinkTarget*}, 其中 \meta{target} 可以为任意的 Unicode 文本(但为了兼容性考虑，请尽量使用 ASCII 字符).
+\end{function}
+
+
+
+\begin{function}[added=2025-05-15]{\zsetHcnt}
+  \begin{syntax}
+    \cs{zsetHcnt}\marg{counter}\marg{content}
+  \end{syntax}
+  此命令用于设置 \cs{theH\meta{counter}} 的值为 \meta{content}, 其在制作一些附录相关的
+  内容时是十分有用的.
+\end{function}
+
+
+\begin{function}[added=2024-12-05]{\NextLinkTarget}
+  \begin{syntax}
+    \cs{NextLinkTarget}\marg{target}
+  \end{syntax}
+  此命令设置下一个由 \cs{MakeLinkTarget} 或 \cs{refstepcounter} 创建的 target. 此命令的作用
+  和 \cs{hypersetup} 中的 \cmd{next-anchor} 类似.
+\end{function}
+% \makeatother
+
+
+\begin{function}[added=2024-12-05]{\SetLinkTargetFilter}
+  \begin{syntax}
+    \cs{SetLinkTargetFilter}\marg{filter}
+  \end{syntax}
+  此命令用于给当前文档中所有的 Link Target 添加一个前缀，此命令在合并多个不同的 PDF 时是十分有用的. 
+\end{function}
+
+
+\begin{function}[added=2024-12-05]{\LinkTargetOn, \LinkTargetOff}
+  \begin{syntax}
+    \cs{LinkTargetOn}
+    \cs{LinkTargetOff}
+  \end{syntax}
+  此命令常在一个局部中用于取消由 \cs{MakeLinkTarget} 或 \cs{refstepcounter} 创建的 Target. 在
+  使用 \cs{LinkTargetOff} 后，你仍然可以在一个局部里重新启用超链接然后创建对应的 Target, 示例如下:
+\end{function}
+\vskip2em\relax
+\begin{DocExample}
+\LinkTargetOff  % suppress anchor in internal refstepcounter
+...
+\refstepcounter{...}
+...
+{\LinkTargetOn\MakeLinkTarget*{mytarget}} % create manual anchor for future reference
+...
+\LinkTargetOn
+\end{DocExample}
+
+
+
+\clearpage
+\subsubsection{标签与引用}
+\begin{function}[added=2025-04-21]{\cref}
+  \begin{syntax}
+    \cs{cref}\marg{labels}
+    \cs{cref}\oarg{options}\marg{labels}
+  \end{syntax}
+  \zTeX{} 基于 \pkg{cleveref} 和 \pkg{zref-clever} 宏包提供 ``聪明引用'' 命令 \cs{cref}. 为统一命令, 
+  \zTeX{} (仅)将 \pkg{zref-clever} 中的 \cmd{\zcref} 重定义为 \cmd{\cref}, 方便用户的使用. \textbf{注意:} 尽管二者名称相同但各命令的
+  需要的参数格式是不同的，其余命令同理, 详情请参考对应的手册. 用户可以通过本文档类的 \meta{cref-backend} 选项进行后端的设置, 默认后端为 
+  \pkg{zref-clever} 一个简单的设置样例如下:
+\end{function}
+\begin{DocExample}
+\documentclass[cref-backend=zref-clever]{ztex}
+\end{DocExample}
+
+\vskip1.5em
+\noindent{\color{red}\sffamily NOTE: 目前\pkg{cleveref} 宏包的维护情况不太明朗, 且和 \pkg{ctex} 宏包中的部分设置冲突. 于是, \zTeX{} 预设了二者的配置.}
+
+
+\begin{function}[added=2025-08-23, EXP]{\ztexpageall}
+  此命令返回当前文档的总页数, 与 \verb|\pageref{ztex:lastpage}| (或 \pkg{slide} 库中的 \verb|\pageref{zslide:lastpage}|)
+  命令不同. 使用该命令时一定要检查其返回值(使用 \verb|\tl_if_empty:NTF| 命令), 如果返回值为 \verb|\c_empty_tl|, 
+  则表示该结果不可信; 反之, 则表示该结果正确.
+\end{function}
+\begin{DocExample}*
+  \ExplSyntaxOn
+  \tl_if_empty:NTF \ztexpageall
+    {Wrong}{Correct:\ztexpageall}
+  \ExplSyntaxOff
+\end{DocExample}
+
+
+
+\begin{function}[added=2025-09-20]{\RecordProperties}
+  \begin{syntax}
+    \cmd{\RecordProperties}\Arg{label}\Arg{clist}
+  \end{syntax}
+  此命令来自 expl3 的 \pkg{ltproperties} 模块. 它将 \meta{clist} 中的一系列属性写入 ``\texttt{.aux}'' 文件, 
+  它们的标签为 \meta{label}. \meta{clist} 中可以包含的值有: \texttt{abspage, page, pagenum, label,
+  title, target, pagetarget, counter}.
+\end{function}
+
+
+
+\begin{function}[added=2025-09-20, EXP]{\RefProperty}
+  \begin{syntax}
+    \cmd{\RefProperty}\Arg{label}
+  \end{syntax}
+  此命令来自 \pkg{ltproperties} 宏包, 用于获取 \meta{label} 对应的属性(值).
+\end{function}
+
+
+
+\begin{function}[added=2025-09-20]{\zrefsavepos}
+  \begin{syntax}
+    \cmd{\zrefsavepos}\Arg{label}
+  \end{syntax}
+  此命令会保存当前的位置信息, 留待之后使用.
+\end{function}
+
+
+
+\begin{function}[added=2025-09-20, EXP]{\zrefgetpos}
+  \begin{syntax}
+    \cmd{\zrefgetpos}\Arg{label}\Arg{xpos|ypos}
+  \end{syntax}
+  此命令用于取得之前由 \cmd{\zrefsavepos} 保存的位置信息, 返回浮点数, 其单位为 ``\texttt{pt}''.
+\end{function}
+
+
+
+\clearpage
+\subsubsection{杂项}
+\begin{function}[updated=2025-04-25]{ztex:titlepage, ztex:lastpage}
+  \begin{syntax}
+    \cmd{\pageref}\zarg{ztex:titlepage}
+    \cmd{\pageref}\zarg{ztex:lastpage}
+  \end{syntax}
+  引用当前文档的最后一页, 可以在制作页眉页脚格式时使用. 但对应的超链接跳转也许并不正确, 此时
+  应使用 \texttt{ztex@lastpage} 这一 anchor. 一个基本的使用样例如下:
+\end{function}
+\begin{DocExample}*
+  \pageref{ztex:titlepage}--\pageref{ztex:lastpage}
+\end{DocExample}
+
+
+\begin{function}[updated=2025-04-25]{ztex@titlepage, ztex@lastpage}
+  \begin{syntax}
+    \cs{hyper@link}\marg{context}\zarg{ztex@titlepage}\marg{link text}
+    \cs{hyper@link}\marg{context}\zarg{ztex@lastpage}\marg{link text}
+  \end{syntax}
+  上述两 Targets 由命令 \cs{hyper@anchor} 设置, 分别应用于引用当前文档的第一页和最后一页, 在 \ztex{} 中, 标题页的页码为 1.
+
+  \textbf{注意}:普通用户不应该直接使用这两个 Targets，此二 Targets 主要提供给模板的开发者, 用户应使用位于首页和尾页的 \texttt{ztex:titlepage} 
+  和 \texttt{ztex:lastpage} 两 label.
+\end{function}
+

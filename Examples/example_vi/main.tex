@@ -1,0 +1,50 @@
+\documentclass[
+  hyper,
+  lang = cn,
+  class = book,
+  layout = margin,
+]{ztex}
+\usepackage{zhlipsum}
+\ztocenable
+
+\ExplSyntaxOn
+\zsecformat\chapter 
+  {
+    explicit = true,
+    code = 
+      {
+        \thispagestyle{plain}
+        % update toc and bookmark
+        \__zsect_title_toc_add:nnn { chapter }{ \zsectocname }{ \zsecname }
+        \__zsect_bookmark_update:nnn { chapter }{ \zsectocname }{ \thechapter-\zsecname }
+        \mbox{}\vskip-9em
+        \hfill{\huge\sffamily \zsecname}
+        \;\;\rlap{\rule[-3pt]{1pt}{8em}\;\,\zlower{3pt}{\scalebox{3}{\bfseries \zsecnum}}}
+        \vskip14em
+      },
+  }
+\ExplSyntaxOff
+
+
+\begin{document}
+\setcounter{chapter}{6}
+\mainmatter
+\chapter{数学和显示框}
+\marginpar{%
+  {\ztocformat\section{leader.sep=2.5pt, page.width=6pt}%
+  \zlocaltoc{chapter}{1}}%
+  这里是一个局部侧边目录, 你可以使用任何的东西.
+}
+\zhlipsum[1]
+
+
+\section{基本原则}
+\marginpar{一些无意义的废话, 巴拉巴拉, 巴拉巴拉, 巴拉巴拉, 巴拉巴拉.}
+\section{Boxes \& Custom Environments}
+很多的时候，我们需要的并不是一个很复杂的模板，我们仅仅只是想要一个 ``够用'' 的模板, 那么何为够用 ?
+
+这个问题也许很难回答, 何谓易用 ? $\sum^{\infty}_{i=1} h(x)<\tau(1)$ 吗 ?
+
+
+\section{Experiments}
+\end{document}

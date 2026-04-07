@@ -1,0 +1,101 @@
+\documentclass[lang=cn]{ztex}
+\usepackage{zhlipsum}
+
+
+\setcounter{tocdepth}{6}
+\setcounter{secnumdepth}{6}
+\ztocenable
+%% NOTE: mindmap.lib.tex must load after command '\ztocenable' !!!
+\input{mindmap.lib.tex}
+
+%% rebustfy some cmds:
+\ExplSyntaxOn
+\clist_map_function:nN 
+  { \vec, \bigcup, \mathbb, \mathrm }
+  \zcmd_robustify:N
+
+
+% %% re-define sectioning commands format
+\zsecformat{\section, \subsection, \subsubsection, \paragraph}
+  {
+    explicit=true, code={
+      \exp_args:Nooo \__zsect_title_toc_add:nnn { \zsecclass }{ \zsectocname }{ \zsecname }
+    }
+  }
+\ExplSyntaxOff
+
+
+\begin{document}
+\section{点}
+\subsection{内点}
+\subsubsection{存在 $\vec{x}$ 的一个 $\delta$ 邻域 $O(\vec{x}, \delta)$ 完全落在 $S$ 中}
+\subsubsection{全体的点记作 $\mathrm{int}\, S$ 或 $S^\circ$}
+
+
+\subsection{界点}
+\subsection{外点}
+\subsection{聚点}
+    \subsubsection{定义}
+        \paragraph{定义1： $\vec{x}$ 的任一邻域都包含 $S$ 中无数个点.}
+        \paragraph{定义2： $\vec{x}$ 的任一邻域都包含 $S$ 中的至少一个点.}
+    \subsubsection{全体的点记作: $S^d$ 或 $S'$}
+    \subsubsection{直观理解: 也就是点 $\vec{x}$ 附近是不是聚集了很多 $S$ 中的点.}
+    \subsubsection{内点一定是聚点，界点一定是聚点, 有限集没有聚点.}
+\subsection{孤立点}
+
+
+
+
+\section{点集}
+\subsection{开集}
+\subsection{相对开集}
+\subsection{闭集}
+\subsection{相对闭集}
+\subsection{紧集}
+    \subsubsection{开覆盖}
+        \paragraph{如果 $\mathbb{R}^n$ 的一组开覆盖 $\{U_\alpha\}$ 满足 $\displaystyle\bigcup_{\alpha}U_\alpha \supset S$, 那么称 $\{U_\alpha \}$ 是 $S$ 的一个开覆盖.}
+        \paragraph{设 $E$ 是任何一个度量空间的子集, 为每个 $p\in E$ 选择一个半径 $r_p$（半径可以是不同的）,那么集族 $N_{r_p}(P)|p\in E$ 是 $E$ 的一个开覆盖}
+    \subsubsection{紧集}
+    \subsubsection{Heine-Borel 定理}
+        \paragraph{$\mathbb{R}^n$ 上的点集 $S$ 是紧集的充分必要条件是它为有界闭集}
+        \paragraph{一个测试插入图片: \lower3em\hbox{\includegraphics[width=10em]{example-image-a}}}
+
+
+\section{区域}
+\subsection{开域}
+\subsection{闭域}
+
+
+\section{基本定理}
+    \subsection{闭矩形套定理}
+    \subsection{Cantor 闭区间套定理}
+    \subsection{凝聚定理(Bolzano-Weierstrass 定理): $\mathbb{R}^n$ 中的有界点列一定有收敛子列(有界无限点集一定有聚点).}
+    \subsection{Cauchy 定理:收敛点列 $\leftrightarrow$ 基本点列}
+    \subsection{紧性定理(Heine-Borel 定理): 一个基本测试}
+
+
+% \newpage
+% Insert a new mindmap here, which relies on file: \texttt{mindmap.lib.tex}.
+
+% \tableofcontents
+
+% \newpage
+\pagestyle{empty}
+% \pdfpagewidth 22.5in\relax
+% \pdfpageheight 16.75in\relax
+
+\zhlipsum[1]
+
+
+\begin{figure}[!htbp]
+  \centering
+  \wscale{.75\linewidth}{%
+    \begin{mindmap}
+      \TocTree{\parbox{12em}{\centering\textbf{平面点集}\\($S$ 为 $\mathbb{R}^n$ 上的点集, 其补集 $\mathbb{R}^n\backslash S$ 记作 $S^c$)}}
+    \end{mindmap}}
+  
+  \caption{Mindmap Example}
+  \label{fig:mind-map}
+\end{figure}
+\zhlipsum[2]
+\end{document}

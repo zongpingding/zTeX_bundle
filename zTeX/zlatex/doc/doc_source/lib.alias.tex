@@ -1,0 +1,712 @@
+\clearpage
+\subsection{\titlepkg{alias} 库}
+\pkg{alias} 库为一系列命令定义了别名, 用于简化用户在数学环境中的命令输入, 后文称此为 alias. 此 libray 默认加载 
+\pkg{amssymb}, \pkg{mathrsfs}, \pkg{mathtools} 三个宏包; \pkg{alias} 库建立了以下几个方面的 alias:
+\begin{itemize}
+  \item 数学字体命令
+  \item 各类箭头
+  \item 各类数学算符
+  \item 其余常见符号
+  \item 自动括号命令(试验阶段)
+  \item (偏)微分算子
+  \item 矩阵
+\end{itemize}
+
+对于自动括号命令，目前还很不成熟，如果不清楚该命令的原理, 还请不要使用. 针对此特性, 推荐用户使用 \pkg{pyhsics2} 
+宏包. 除此之外, \pkg{alias} 库并没有对 \pkg{mathtools} 中的 \cs{mathclap}, \cs{mathllap} 等命令进行封装.
+
+\vskip2em
+\noindent\textcolor{red}{\sffamily WARNING: 尽管 \zTeX{} 已经可以把所有的 alias 限制于一个局部组内, 但由于%
+\pkg{alias} 库自定义的命令数量实在庞大, 所以仍然可能会与部分已有命令冲突.}
+
+
+\begin{function}[updated=2026-02-12]{\zaliasOn, \zaliasOff}
+  \begin{syntax}
+    \cs{zaliasOn}\oarg{prefix}>\dval{OLD}
+  \end{syntax}
+  此二命令用于临时启用或关闭 \ztex{} 的 \pkg{alias} 库中的命令别名; \meta{prefix} 用于设置当前文档中已存在的(外部)
+  命令前缀, 默认为 ``OLD''; 如果在此二命令之外使用 \pkg{alias} 库中的别名命令, 那么 \zTeX{} 会抛出错误; \textbf{注意}: 此二命令并不会产生编组.
+\end{function}
+\begin{DocExample}*[@@]
+% \usepackage{ascii} % for \FF{} 
+\FF{} from `ascii' package, \S{} from \LaTeX{};
+\zaliasOn[XXX]
+Inline math $\B{Q} \cong \B{Z}$;
+\begin{align*}
+  \int \FF{o(x)}\cdot a^{h(x)\dd x}\cdot\XXXhom(\S{F}(x))\XXXdiv g(x)\dd x\\
+  \dd y/\dd x = \text{\XXXFF} = \text{\XXXS}
+\end{align*}
+\zaliasOff
+\end{DocExample}
+
+
+\begin{function}[updated=2025-04-25]{zalias}
+  \begin{syntax}
+    \cs{begin}\zarg{zalias}\oarg{prefix} ... \cs{end}\zarg{zalias}
+  \end{syntax}
+  此环境与上述的 \cs{zaliasOn} 和 \cs{zaliasOff} 命令作用类似, 其会形成一个局部组. 在这个组中, 所有的 alias 均有效;
+  \meta{prefix} 用于设置当前文档中已存在的(外部)命令前缀,  默认为 ``OLD'';%
+  \textbf{注意}: 在正文中可以多次或嵌套使用此环境, 但必须成对出现, 否则将会导致编组不匹配, 编译出错.
+\end{function}
+\begin{DocExample}*
+\begin{zalias}
+$\B{Q} \cong \B{Z} \OLDdiv 1 = 0$
+\end{zalias}
+\end{DocExample}
+
+\vskip1em
+\noindent\textcolor{red}{\sffamily NOTE:为了本节后续行文的简洁性, 我们默认所有示例代码中的别名命令均位于上述
+的 \cs{zaliasOn} 和 \cs{zaliasOff} 命令之间亦或者是 \env{zalias} 环境中.}
+\ExplSyntaxOn
+\bool_gset_true:N \g__ztex_math_alias_switch_bool
+\__zalias_cmd_create:n {OLD}
+\char_set_mathcode:nn {"2F}{"413D}
+\ExplSyntaxOff
+
+
+\subsubsection{数学字体}
+\begin{function}[updated=2024-12-05]{\F, \R, \K, \C, \B, \S, \FF}
+  \begin{syntax}
+    \cs{F}\marg{tokens}
+    \cs{R}\marg{tokens}
+    \cs{K}\marg{tokens}
+    \cs{C}\marg{tokens}
+    \cs{B}\marg{tokens}
+    \cs{S}\marg{tokens}
+    \cs{FF}\marg{tokens}
+  \end{syntax}
+  以上各命令的原始定义: \cmd{\F} 为 \cmd{\boldsymbol}, \cmd{\R} 为 \cmd{\mathrm}, 
+  \cmd{\K} 为 \cmd{\mathfrak}, \cmd{\C} 为 \cmd{\mathcal}, \cmd{\B} 为 \cmd{\mathbb},
+  \cmd{\S} 为 \cmd{\mathscr}, \cs{FF} 为 \cmd{\mathbf}.
+\end{function}
+\vskip1.25em\relax
+\begin{DocExample}*
+Normal Version: $\mathbf{A} + \mathrm{A} + \mathfrak{a} + \mathcal{A} + \mathbb{A} + \mathscr{A} + \mathbf{A}$ \\
+Alias Version: $\F{A} + \R{A} + \K{a} + \C{A} + \B{A} + \S{A} + \FF{A}$
+\end{DocExample}
+
+
+\subsubsection{数学箭头}
+\noindent 此 library 定义的一系列箭头命令遵循如下的规则:
+\begin{itemize}
+  \item 首字母重复表示对应箭头的加长,
+  \item 首字母大写表示对应箭头的双线版本,
+  \item 前置 \texttt{n} 或 \texttt{N} 表示对应箭头的否定.
+\end{itemize}
+
+
+\begin{function}[updated=2024-12-05]{\ma, \mma}
+  以上各命令的原始定义: \cmd{\ma} 为 \cs{mapsto}, \cmd{\mma} 为 \cs{longmapsto}. 注意: 此命令及其
+  后续类似命令均表示该命令在未来可能会有改动, 比如未来其可能会接受参数.
+\end{function}
+\begin{DocExample}*
+Normal Version: $a\mapsto b, a\longmapsto b$ \\
+Alias Version: $a\ma b, a\mma b$
+\end{DocExample}
+
+
+\begin{function}[updated=2024-12-05]{\la, \La, \nla, \Nla, \lla, \Lla}
+  以上各命令的原始定义: \cmd{\la} 为 \cs{leftarrow}, \cmd{\La} 为 \cs{Leftarrow}, 
+  \cmd{\nla} 为 \cs{nleftarrow}, \cmd{\Nla} 为 \cs{nLeftarrow}, \cmd{\lla} 为 \cs{longleftarrow},
+  \cmd{\Lla} 为 \cs{Longleftarrow}.
+\end{function}
+\begin{DocExample}*
+Normal Version: $a\leftarrow b, a\Leftarrow b, a\nleftarrow b, a\nLeftarrow b, a\longleftarrow b, a\Longleftarrow b$ \\
+Alias Version: $a\la b, a\La b, a\nla b, a\Nla b, a\lla b, a\Lla b$.
+\end{DocExample}
+
+\begin{function}[updated=2024-12-05]{\ra, \Ra, \nra, \Nra, \rra, \Rra}
+  以上各命令的原始定义: \cmd{\ra} 为 \cs{rightarrow}, \cmd{\Ra} 为 \cs{Rightarrow}, 
+  \cmd{\nra} 为 \cs{nrightarrow}, \cmd{\Nra} 为 \cs{nRightarrow}, \cmd{\rra} 为 \cs{longrightarrow},
+  \cmd{\Rra} 为 \cs{Longrightarrow}.
+\end{function}
+\begin{DocExample}*
+Normal Version: $a\rightarrow b, a\Rightarrow b, a\nrightarrow b, a\nRightarrow b, a\longrightarrow b, a\Longrightarrow b$ \\
+Alias Version: $a\ra b, a\Ra b, a\nra b, a\Nra b, a\rra b, a\Rra b$.
+\end{DocExample}
+
+\begin{function}[updated=2024-12-05]{\da, \Da, \nda, \Nda, \dda, \Dda}
+  以上各命令的原始定义: \cmd{\da} 为 \cs{leftrightarrow}, \cmd{\Da} 为 \cs{Leftrightarrow}, 
+  \cmd{\nda} 为 \cs{nleftrightarrow}, \cmd{\Nda} 为 \cs{nLeftrightarrow}, \cmd{\dda} 为 \cs{longleftrightarrow},
+  \cmd{\Dda} 为 \cs{Longleftrightarrow}.
+\end{function}
+\begin{DocExample}*
+Normal Version: $a\leftrightarrow b, a\Leftrightarrow b, a\nleftrightarrow b, a\nLeftrightarrow b, a\longleftrightarrow b, a\Longleftrightarrow b$ \\
+Alias Version: $a\da b, a\Da b, a\nda b, a\Nda b, a\dda b, a\Dda b$.
+\end{DocExample}
+
+
+\begin{function}[updated=2024-12-05]{\xla, \xla*, \Xla, \Xla*, \xxla, \xxla*, \xra, \xra*, \Xra, \Xra*, \xxra, \xxra*}
+  \begin{syntax}
+    \cs{xla}\oarg{above}\parg{below}
+    \cs{xla*}\oarg{above}\parg{below}
+    \cs{Xla}\oarg{above}\parg{below}
+    \cs{Xla*}\oarg{above}\parg{below}
+    \cs{xxla}\oarg{above}\parg{below}
+    \cs{xxla*}\oarg{above}\parg{below}
+    \cs{xra}\oarg{above}\parg{below}
+    \cs{xra*}\oarg{above}\parg{below}
+    \cs{Xra}\oarg{above}\parg{below}
+    \cs{Xra*}\oarg{above}\parg{below}
+    \cs{xxra}\oarg{above}\parg{below}
+    \cs{xxra*}\oarg{above}\parg{below}   
+  \end{syntax}
+  以上所有带有 \texttt{*} 命令中的 \meta{above} 和 \meta{below} 参数均会被放入 \cmd{\text} 命令中, 以上命令的原始定义: \cmd{\xla} 为 \cs{xleftarrow}, 
+  \cmd{\Xla} 为 \cs{xLeftarrow}, \cmd{\xxla} 为 \cs{xLongleftarrow}, \cmd{\xra} 为 \cs{xrightarrow}, \cmd{\Xra} 为 \cs{xRightarrow},
+  \cmd{\xxra} 为 \cs{xLongrightarrow}. 
+  使用示例如下:
+\end{function}
+\begin{DocExample}*
+Normal Version: $\xleftarrow[b]{a} + \xLeftarrow[b]{a} + \xLongleftarrow[b]{a} + \xrightarrow[b]{a} + \xRightarrow[b]{a} + \xLongrightarrow[b]{a}$ \\ 
+Alias Version: $\xla[a](b) + \Xla[a](b) + \xxla[a](b) + \xra[a](b) + \Xra[a](b) + \xxra[a](b)$ \\
+Alias Text Version: $\xla*[a](b) + \Xla*[a](b) + \xxla*[a](b) + \xra*[a](b) + \Xra*[a](b) + \xxra*[a](b)$
+\end{DocExample}
+
+
+\begin{function}[updated=2024-12-05]{\hla, \hla*, \hra, \hra*}
+  \begin{syntax}
+    \cs{hla}\oarg{above}\parg{below}
+    \cs{hla*}\oarg{above}\parg{below}
+    \cs{hra}\oarg{above}\parg{below}
+    \cs{hra*}\oarg{above}\parg{below}
+  \end{syntax}
+  以上所有带有 \texttt{*} 命令中的 \meta{above} 和 \meta{below} 参数均会被放入 \cmd{\text} 命令中, 以上命令的原始定义: \cmd{\hla} 为 \cs{xhookleftarrow}, 
+  \cmd{\hra} 为 \cs{xhookrightarrow}.
+\end{function}
+\begin{DocExample}*
+Normal Version: $\xhookleftarrow[b]{a} + \xhookrightarrow[b]{a}$ \\
+Alias Version: $\hla[a](b) + \hra[a](b)$ \\
+Alias Text Version: $\hla*[a](b) + \hra*[a](b)$
+\end{DocExample}
+
+
+
+\clearpage
+\subsubsection{其它符号}
+\begin{function}[updated=2024-12-05]{\A, \E}
+  以上两个命令分别表示``任意 ($\forall$)'' 和 ``存在 ($\exists$)'' 符号.
+\end{function}
+\begin{DocExample}*
+Normal Version: $\forall \varepsilon>0, \exists \delta$ \\
+Alias Version: $\A \varepsilon>0, \E \delta$
+\end{DocExample}
+
+\begin{function}[updated=2024-12-05]{\ns, \se, \sse}
+  以上三个命令的原始定义: \cmd{\ns} 为 \cs{varnothing}, \cs{se} 为 \cs{backsimeq}, \cs{sse} 为 \cs{cong}.
+\end{function}
+\begin{DocExample}*
+Normal Version: $\varnothing, \backsimeq, \cong$ \\
+Alias Version: $\ns, \se, \sse$
+\end{DocExample}
+
+
+\begin{function}[updated=2024-12-05]{\dd}
+  此命令主要用于替代默认的 \ztexverb{\mathrm{d}}, 与此同时，其会自动处理左右间隔, 更加规范的处理可以参见 \pkg{fixdiff}.
+\end{function}
+\begin{DocExample}*[@@]
+Normal Version: $\displaystyle\int x\;\mathrm{d}x = x^{\int x\mathrm{d} x } = \frac12x^2 + \mathrm{C}$ \\
+Alias Version: $\displaystyle\int x\dd x = x^{\int x\dd x } = \frac12x^2 + \R{C}$.
+
+\begin{align*}
+  \int \FF{o(x)}\cdot a^{h(x)\dd x}\cdot\OLDhom(\S{F}(x))\OLDdiv g(x)\dd x\\
+  \dd y/\dd x
+\end{align*}
+\end{DocExample}
+
+
+\begin{function}[updated=2024-12-05]{\CC, \RR, \NN, \ZZ}
+  \begin{syntax}
+    \cs{CC}
+    \cs{RR}
+    \cs{NN}
+    \cs{ZZ}
+  \end{syntax}
+  以上四个命令分别表示复数域，实数域，自然数集以及整数集.
+\end{function}
+\begin{DocExample}*
+Normal Version: $\mathbb{C}, \mathbb{R}, \mathbb{N}, \mathbb{Z}$ \\
+Alias Version: $\CC, \RR, \NN, \ZZ$
+\end{DocExample}
+
+
+\clearpage
+\subsubsection{数学算子}
+\begin{function}[updated=2025-04-24]{\alt, \rot, \div, \curl, \grad, \id, \im, \ker, \cok, \hom, \supp, \sign, \trace}
+  以上所有命令均使用 \cs{DeclareMathOperator} 进行声明, 其会自动处理前后间距, 可以使用命令 \cs{zaliasopset} 进行重定义.
+  一个使用样例如下:
+\end{function}
+\begin{DocExample}*
+Normal Version: $\operatorname{alt}, \operatorname{rot}, \operatorname{div}, \operatorname{curl}, \operatorname{grad}, \operatorname{Id}, \operatorname{Im}, \operatorname{Ker}, \operatorname{Cok}, \operatorname{Hom}, \operatorname{supp}, \operatorname{sign}, \operatorname{trace}$ \\
+Alias Version: $\alt, \rot, \div, \curl, \grad, \id, \im, \ker, \cok, \hom, \supp, \sign, \trace$
+\end{DocExample}
+
+
+\begin{function}[updated=2025-04-25]{\zaliasopset}
+  \begin{syntax}
+    \cs{zaliasopset}\marg{key-value}
+  \end{syntax}
+  此命令用于设置上述各数学算子的名称, 仅可在导言区使用.
+\end{function}
+
+
+\begin{keyval}[parent=..]{alt, rot, div, curl, grad, id, im, ker, cok, hom, supp, sign, trace}
+  \begin{syntax}
+    alt   = \meta{name}>\dval{alt}
+    rot   = \meta{name}>\dval{rot}
+    div   = \meta{name}>\dval{div}
+    curl  = \meta{name}>\dval{curl}
+    grad  = \meta{name}>\dval{grad}
+    id    = \meta{name}>\dval{Id}
+    im    = \meta{name}>\dval{Im}
+    ker   = \meta{name}>\dval{Ker}
+    cok   = \meta{name}>\dval{Cok}
+    hom   = \meta{name}>\dval{Hom}
+    supp  = \meta{name}>\dval{supp}
+    sign  = \meta{name}>\dval{sign}
+    trace = \meta{name}>\dval{trace}
+  \end{syntax}
+  上述为 \ztex{} 默认定义的数学算子, 用户可以修改 \meta{name} 的值来修改其形式.
+\end{keyval}
+一个简单的使用样例如下\zchcmd:
+\begin{DocExample}*
+  \[ \alt, \im \]
+  \zaliasopset{alt=ALT, im=IM}
+  \[ \alt, \im \]
+\end{DocExample}
+
+
+
+\clearpage
+\subsubsection{自动括号}
+\begin{function}[updated=2025-07-13]{\zab}
+  \begin{syntax}
+    \cs{zab}\oarg{size}\meta{type}\meta{content}\meta{type}
+  \end{syntax}
+  此命令用于处理括号的自动缩放, \meta{size} 用于控制括号的大小, 可选值有 ``\verb|\big|, \verb|\Big|, 
+  \verb|\bigg|, \verb|\Bigg|, \verb|*|'', ``\texttt{*}'' 表示不对括号进行缩放; \meta{type}
+  用于表示括号的类型, 可选值有: ``\texttt{(), [], \{\}, ||}, \verb|<>|, 
+  \verb=\|\|=''. \textbf{注意}: 该命令目前处于实验阶段，可能存在一些潜在问题，请谨慎使用. 
+  一个简单的使用样例如下:
+\end{function}
+\vskip1.25em\relax
+\begin{DocExample}*
+\begin{align*}
+  \zab(\frac12) = 0,     && \zab*(\frac12) = 0, &&
+  \zab\big(\frac12) = 0, && \zab\Bigg(\frac12) = 0. \\
+  \zab[\frac12] = 0,     && \zab*(\frac12) = 0, &&
+  \zab\Big<\frac12> = 0, && \zab<\frac12> = 0. \\
+  \zab{\frac12} = 0,     && \zab|\frac12| = 0,  &&
+  \zab\|\frac12\| = 0,   && \zab\Bigg\|\frac12\| = 0.
+\end{align*}
+\begin{align*}
+  \zab{1+\int_0^1 (1+x)^2dx} &&
+  \zab\bigg\|1+\int_0^1 \|1+x\|^2dx\|
+\end{align*}
+\end{DocExample}
+
+\vskip1.5em\relax
+\noindent{\sffamily\color{red}NOTE: 该命令无法处理 ``\verb!|a+|b+c|+d|!'' 这种情况, 其只能
+解析到 ``\texttt{a+}'', 后续的 tokens 将会被忽略; 可以将此命令写为 \verb!\zab|{a+|b+c|+d}|!, 
+这样便能保证参数被正确解析.}
+
+\clearpage
+\subsubsection{微分算子}
+\begin{function}[added=2025-06-19]{\dv, \pdv, \dv*, \pdv*}
+  \begin{syntax}
+    \cs{dv}\{\meta{fun}, \meta{var-1}, \meta{var-2}, ...\}
+    ~~~[\meta{ord-1}, \meta{ord-2}, ...]
+  \end{syntax}
+  \cs{pdv} 命令的用法与 \cs{dv} 命令相同, 含有 ``\texttt{*}'' 的命令将采用 ``$a/b$'' 的格式排版.
+\end{function}
+
+\begin{DocExample}*
+% \dv exampels:
+\begin{align*}
+\dv{, xx, y, \textsf{ww}}[zz, \mathbf{g}, \B{X}]
+  & = \dv{, x, y, z}[, +++\alpha+1, +\xi+3+, \eta+2] \\
+\dv{, x} + \dv{, t}[2] = \dv*{f, \xi}
+  & = \dv{\varphi, x, y, z, \tau}[2, 2, 2, 1] \\
+\dv{, x, y, z}[1, \xi, \eta+2]
+  & = \dv{, (x^1), (x^2), (x^3)}[1, 3, 1]
+\end{align*}
+
+% \pdv exampels:
+\begin{align*}
+\pdv{, x} + \pdv{, t}[2] = \pdv*{f, \xi}
+  & = \pdv{\varphi, x, y, z, \tau}[2, 2, 2, 1] \\
+\pdv{, x, y, z}[1, \xi, \eta+2]
+  & = \pdv{, (x^1), (x^2), (x^3)}[1, 3, 1]
+\end{align*}
+\end{DocExample}
+
+
+\subsubsection{矩阵}
+% 和矩阵相关的命令使用起来有一定的限制, 具体来说就是: 你的 l3kernel 的版本日期必须在 2025-01-15 之后.
+\pkg{alias} 中的这一部分矩阵命令依赖于 \cs{int_step_tokens:nn} 和 \cs{int_step_tokens:nnn} 命令,
+但它们在 2025-01-15 之后才正式被添加到 \pkg{l3int} 中. 如果这些命令不可用, 则它们会被替换为 \ztex{} 实现的 
+\cmd{\ztex_int_step_tokens:nn} 或 \cmd{\ztex_int_step_tokens:nnn} 命令.
+
+
+\begin{function}[added=2025-06-20, updated=2026-02-14]{\mat}
+  \begin{syntax}
+    \cs{mat}\{
+      ~~\meta{item_{11}}, ..., \meta{item_{1n}};
+      ~~~~...
+      ~~\meta{item_{m1}}, ..., \meta{item_{mn}};
+    \}
+  \end{syntax}
+  此命令用于生成矩阵或表格数据(包含 ``\verb|&, \\|'' 等 token), 其维度为 $m\times n$; 用户可以将此命令嵌套在其它的矩阵或表格环境中, \textbf{不可单独使用}; 一些简单的使用案例如下(\cmd{\zmat} 命令的使用方法请参见后续说明):
+\end{function}
+\begin{DocExample}*
+\[ \begin{matrix}
+    \mat{1, 2; 3, 4}
+  \end{matrix} = \begin{vmatrix}
+    \mat{1 , , 3, 4; 4, 5, 6}
+\end{vmatrix} \]
+
+\begin{center}
+  \begin{tabular}{|c|c|c|}
+    \mat{1, 2, 3; 4, 5, 6; 7, 8, 9}
+  \end{tabular} VS
+  \begin{tabular}{|c|c|c|}
+    \zmat[i]{3}
+  \end{tabular}
+\end{center}
+\end{DocExample}
+
+
+
+\begin{function}[added=2025-06-20, updated=2026-02-14]{\omat, \pmat, \bmat, \Bmat, \vmat, \Vmat}
+  \begin{syntax}
+    \cs{omat}\{
+      ~~\meta{item_{11}} \& ... \& \meta{item_{1n}}\textbackslash\textbackslash
+      ~~~~...
+      ~~\meta{item_{m1}} \& ... \& \meta{item_{mn}}\textbackslash\textbackslash
+    \}
+    \cs{omat}*\{
+      ~~\meta{item_{11}}, ..., \meta{item_{1n}};
+      ~~~~...
+      ~~\meta{item_{m1}}, ..., \meta{item_{mn}};
+    \}
+  \end{syntax}
+  这系列命令用于输出排版矩阵, 其维度为 $m\times n$; \pkg{alias} 库提供的这系列矩阵排版命令有两种语法: (1) 传统的表格/矩阵语法 - 不添加 ``\texttt{*}'' 的命令, 使用 \verb|&, \\| 进行行列分割; (2) 简写语法 - 添加 ``\texttt{*}'' 的命令, 使用 ``\texttt{,}'' 和 ``\texttt{;}'' 进行行列分割. 此系列命令可以与后续的 \cmd{\imat}, \cmd{\zmat}, \cmd{\hmat} 等命令配合使用, \pkg{alias} 库也鼓励用户这样去使用. 
+
+\noindent\cmd{\omat}(original matrix) 对应 \env{matrix} 环境;  ``\texttt{p}'' 的含义与 \pkg{amsmath} 宏包中 \verb|\pmatrix| 命令内的 ``\texttt{p}'' 含义相同, ``\texttt{b}, \texttt{v}'' 等参数的含义同理.\par\vskip.75em\relax
+\noindent{\sffamily\color{red}NOTE: 尽管含有 ``\texttt{*}'' 的命令有时可以兼容两种语法(当参数内部的\textcolor{blue}{普通} '\texttt{,}' 和 '\texttt{;}' 已被 ``\verb|{}|'' 包裹时), 但仍然不建议用户混用 !}
+\end{function}
+\vskip.65em\relax
+下面这个示例展示了两种新/旧语法的使用区别:
+\begin{DocExample}*
+% correct syntax:
+$\pmat*{1, 2, 3; 4, 5, 6}$ VS
+$\pmat{1 & 2 & 3\\ 4 & 5 & 6}$
+
+\vskip.75em\relax 
+% wrong syntax(do NOT use):
+$\pmat*{1 & 2 & 3\\ 4 & 5{,;,} & 6}$ VS
+$\pmat{1, 2, 3; 4, 5, 6}$
+\end{DocExample}
+
+此系列命令对应的各种矩阵示意:
+\begin{DocExample}*
+\begin{align*}
+  \text{omat} = \omat*{ 1, , 3; 4, 5, ; , 8, 9 } \qquad
+& \text{mat}  = \begin{Vmatrix}\mat{1, , 3; 4,5,; ,8,9}\end{Vmatrix}\\
+  \text{pmat} = \pmat*{ 1, , 3; 4, 5, ; , 8, 9 } \qquad
+& \text{bmat} = \bmat*{ 1, , 3; 4, 5, ; , 8, 9 } \\
+  \text{Bmat} = \Bmat*{ 1, , 3; 4, 5, ; , 8, 9 } \qquad
+& \text{vmat} = \vmat { 1& & 3 \\ 4& 5& \\ & 7& 8 } \\
+  \text{Vmat-1} = \Vmat*{ 1, , 3; 40.102, 55, ; , 8, 9 } \qquad
+& \text{Vmat-2} = \Vmat*{ 1, , 3; \textsf{xxx}, \mathbb{XX},; ,8,9}
+\end{align*}
+\end{DocExample}
+
+
+\begin{function}[added=2025-06-20]{\imat, \admat}
+  \begin{syntax}
+    \cs{imat} ~\Arg{filler}\{\meta{item_{1}}, ..., \meta{item_{n}}\}
+    \cs{admat} \Arg{filler}\{\meta{item_{1}}, ..., \meta{item_{n}}\}
+  \end{syntax}
+  此二命令用于生成对角矩阵或反对角矩阵, 其维度为 $n\times n$; \meta{filler} 用于指定
+  非对角线元素, \meta{item} 中空值默认为 ``1''.
+  \textbf{注意:} 此命令不能单独使用, 用户需将此命令置于一个矩阵或表格环境中, 或将其置于前述 \cs{mat}, \cs{pmat} 等命令中.
+\end{function}
+\begin{DocExample}*
+\begin{align*}
+  \omat{\imat{0}{1, ,3}} =
+  \pmat{\admat{}{1, 2, , 4, 5}} =
+  \vmat{\imat{\cdot}{1,,,2}}
+\end{align*}
+\end{DocExample}
+
+
+\begin{function}[added=2025-06-20]{\zmat}
+  \begin{syntax}
+    \cs{zmat}\oarg{type}\marg{n}
+  \end{syntax}
+  此命令用于输入零矩阵, 其维度为 $n\times n$; \meta{type} 用于设置该矩阵的样式, 默认为 ``\texttt{i}'',
+  可选值有 ``\texttt{i, a, z}''. 
+  \textbf{注意:} 此命令不能单独使用, 用户需将此命令置于一个矩阵或表格环境中, 或将其置于前述 \cs{mat}, \cs{pmat} 等命令中.
+\end{function}
+\begin{DocExample}*
+\begin{align*}
+  \omat{\zmat{4}} = 
+  \vmat{\zmat[z]{5}} = 
+  \pmat{\zmat[a]{4}}
+\end{align*}
+\end{DocExample}
+
+
+\begin{function}[added=2025-06-20, updated=2026-02-14]{\jmat}
+  \begin{syntax}
+    \cs{jmat}\oarg{style}\{
+    ~~\meta{dep_1},   ..., \meta{dep_m};
+    ~~\meta{indep_2}, ..., \meta{indep_n}
+    \}
+    \cs{jmat}*\oarg{keyval}\{
+    ~~\meta{dep_1},   ..., \meta{dep_m};
+    ~~\meta{indep_2}, ..., \meta{indep_n}
+    \}
+  \end{syntax}
+  此命令用于输入 Jacobian 矩阵, 其维度为 $m\times n$; \meta{dep_i} 表示第 $i$ 个因变量, \meta{indep_i} 表示第 $i$ 个自变量;
+  (1) 针对 \cmd{\jmat} 命令, \meta{style} 用于指定每个元素的排版样式, 默认为 ``\texttt{textstyle}'', \textbf{此时不可单独使用}, 需嵌套于表格或矩阵环境中.
+  (2) 针对 \cmd{\jmat*} 命令, \meta{keyval} 用于指定(矩阵的)排版样式, 用法请参见后续的键值说明, \textbf{此时可以单独使用}, 且通常情况下不应将其嵌套于表格或矩阵环境中;
+  \vskip.6em\relax
+  \noindent{\sffamily\color{red}NOTE: 部分情况下, 用户需手动调整 \cmd{\arraystretch} 的值.}
+\end{function}
+
+
+\begin{function}[added=2025-06-20, updated=2026-02-14]{\hmat}
+  \begin{syntax}
+    \cs{hmat}\oarg{style}\{
+    ~~\meta{dep};
+    ~~\meta{indep_1}, ..., \meta{indep_n}
+    \}
+    \cs{hmat}*\oarg{keyval}\{
+    ~~\meta{dep};
+    ~~\meta{indep_1}, ..., \meta{indep_n}
+    \}
+  \end{syntax}
+  此命令用于输入 Hessian 矩阵, 其维度为 $1\times n$; \meta{dep} 表示因变量, \meta{indep_i} 表示第 $i$ 个自变量;
+  (1) 针对 \cmd{\hmat} 命令, \meta{style} 用于指定每个元素的排版样式, 默认为 ``\texttt{textstyle}'', \textbf{此时不可单独使用}, 需嵌套于表格或矩阵环境中.
+  (2) 针对 \cmd{\hmat*} 命令, \meta{keyval} 用于指定(矩阵的)排版样式, 用法请参见后续的键值说明, \textbf{此时可以单独使用}, 且通常情况下不应将其嵌套于表格或矩阵环境中;
+  \vskip.6em\relax
+  \noindent{\sffamily\color{red}NOTE: 部分情况下, 用户需手动调整 \cmd{\arraystretch} 的值.}
+\end{function}
+
+
+\begin{keyval}[parent=ztex/zalias/jhmat]{b, c, s}
+  \begin{syntax}
+    b = \Arg{border}>\dval{空}
+    c = \Arg{command}>\dval{textstyle}
+    s = \Arg{float}>\dval{1.25}
+  \end{syntax}
+  \meta{b} 用于指定矩阵的 delimiter 样式, 可选值有: ``\texttt{b, p, B, v, V}'';
+  \meta{c} 用于设置矩阵中每个公式的显示方式, 默认为 ``\texttt{textstyle}'';
+  \meta{s} 用于设置 \cs{arraystretch} 这个值, 默认为 ``\texttt{1.25}''.
+\end{keyval}
+
+\begin{DocExample}*
+% \jmat examples:
+\begin{align*}
+  \jmat*{f_1, f_2; x, y} = 
+  \jmat*[c=displaystyle, b=V, s=2]{f, g, h; \textsf{x}, \mathbb{Y}, \F{z}} =
+  \bmat{\jmat{f, g; x, y, z}}
+\end{align*}
+
+% \hmat examples:
+\begin{align*}
+  \hmat*[c=displaystyle, s=2.5]{;x,y,z, {w\textbf{w}}} =
+  { \renewcommand{\arraystretch}{1.5}
+      \vmat{\hmat{g;\textsf{x},\mathbb{K},z}} }
+\end{align*}
+\end{DocExample}
+
+
+
+\begin{function}[added=2025-06-20]{\gmat}
+  \begin{syntax}
+    \cs{gmat} \{\meta{v_1}, ..., \meta{v_n}\}
+  \end{syntax}
+  此命令用于生成 Gram 矩阵, 其维度为 $n\times n$; 此命令仅为后续 \cs{xmat} 命令的一个特例.
+  \textbf{注意:} 此命令不能单独使用, 用户需将此命令置于一个矩阵或表格环境中, 或将其置于前述 \cs{mat}, \cs{pmat} 等命令中.
+\end{function}
+
+
+
+\begin{function}[added=2025-06-20]{\xmat}
+  \begin{syntax}
+    \cs{xmat} \{m, n, \cs{\meta{matcmd}}\}
+  \end{syntax}
+  此命令可以自定义矩阵的生成方式, 其维度为 $m\times n$; 矩阵元素由 \cs{\meta{matcmd}} 指定, 
+  \cs{\meta{matcmd}} 接受两个参数, 分别表示该元素的横坐标与纵坐标.
+  \textbf{注意:} 此命令不能单独使用, 用户需将此命令置于一个矩阵或表格环境中, 或将其置于前述 \cs{mat}, \cs{pmat} 等命令中; 命令 \cs{\meta{matcmd}} 内部的脆弱命令应被保护.
+  \par \vskip1.5em
+  \noindent{\color{red}\sffamily NOTE: 1. 此处的 \cs{xmat} 命令与 \pkg{pyhsics2} 宏包中的 \cs{xmat} 命令不同;\\
+  \hphantom{NOTE:} 2. 此命令的实现在之后可能会被重写.}
+\end{function}
+\begin{DocExample}*
+\protected\def\cmdA#1#2{g^{#1#2}}
+\begin{align*}
+  \begin{bmatrix}
+    \xmat{3, 4, \cmdA}
+  \end{bmatrix} = 
+  \bmat{\gmat{v_1, v_2, v_3, v_4}}
+\end{align*}
+\end{DocExample}
+
+
+
+
+\clearpage
+\subsubsection{编程接口}
+\ztex{} 的 \pkg{alias} 库除了给普通用户提供一系列的命令(接口)外, 还为熟悉 \hologo{LaTeX} 
+编程的用户提供了编程接口.
+
+
+
+\begin{function}[added=2025-06-22]{
+    \zalias_make_cmd_robust:n,
+    \zalias_make_cmd_robust:e,
+    \zalias_make_cmd_robust:o,
+    \zalias_make_cmd_robust:f,
+  }
+  \begin{syntax}
+    \cs{zalias_make_cmd_robust:n} \Arg{command}
+  \end{syntax}
+  此命令用于将命令 \cs{\meta{command}} 变为一个 Robust 命令, \meta{command} 为该命令的名称, 不包含 ``\verb|\|''.
+  \textbf{注意}: 原始的 \cs{\meta{command}} 仅在 \env{zalias} 环境或 \cs{zaliasOn} 与 \cs{zaliasOff} 内
+  被重定义为 Robust, 在此范围之外, 该命令将恢复为其原始定义. 此命令与 \pkg{etoolbox} 提供的 \cs{robustify} 命令不同,
+  请勿混用.
+\end{function}
+
+
+\begin{function}[added=2025-06-22]{\ztex_mathalias_set:nn, \ztex_mathalias_set:ee, \ztex_mathalias_set:oo}
+  \begin{syntax}
+    \cs{ztex_mathalias_set} \Arg{inner}\Arg{outer}
+  \end{syntax}
+  此命令用于设置 \env{zalias} 环境, 或 \cs{zaliasOn} 与 \cs{zaliasOff} 内命令的别名;
+  \meta{outer} 是用户在外部声明的命令, \meta{inner}  为用户在内部使用的命令, 二者均不包含 ``\verb|\|'';
+  在此范围之外, \meta{outer} 将恢复为其原始定义.
+\end{function}
+
+
+\begin{function}[added=2025-06-22, EXP]{
+    \zalias_matrix_from_list:n, 
+    \zalias_matrix_from_list:e, 
+    \zalias_matrix_from_list:o, 
+    \zalias_matrix_from_list:f, 
+  }
+  \begin{syntax}
+    \cs{zalias_matrix_from_list:n} \Arg{list}
+  \end{syntax}
+  此命令会根据 \meta{list} 生成对应的矩阵数据, 是上述 \cs{mat}, \cs{pamt} 等命令的基础; 
+  且此命令完全可展, 所以该命令可以与 \pkg{tabularray} 之类的宏包结合使用.
+\end{function}
+
+
+\begin{function}[added=2025-06-22, EXP]{\z@mat@plain}
+  \begin{syntax}
+    \cmd{\z@mat@plain} \Arg{list}
+  \end{syntax}
+  此命令即为上述的 \cs{zalias_matrix_from_list:n} 命令.
+\end{function}
+
+
+\begin{DocExample}*
+\ExplSyntaxOn
+\edef\MatDataA{\zalias_matrix_from_list:n {1, 2.00, , 4, ; , 6, 7.00, 9, 10 ; , 12, 13.00, , }}
+\ExplSyntaxOff
+\SetTblrOuter{expand=\MatDataA}
+\begin{tblr}
+  {
+    rowspec = {
+      |[2pt,green7]Q|[teal7]Q|[green7]Q|[2pt, green6]
+      Q|[green5]Q|[green4]Q|[green3]Q|[3pt,teal7]
+    }
+  }
+  \MatDataA
+\end{tblr}
+\end{DocExample}
+
+
+
+\begin{function}[added=2025-06-22, EXP]{\zalias_diag_mat_data:nnnn, \zalias_diag_mat_data:nnne}
+  \begin{syntax}
+    \cmd{\zalias_diag_mat_data:nnnn} \Arg{bool}\Arg{other default}
+    ~~~~\Arg{diag default}\Arg{list}
+  \end{syntax}
+  此命令会根据 \meta{list} 生成对应的矩阵数据, 是上述 \cs{imat}, \cs{adamt}, \cs{zmat} 三个命令的基础;
+  \meta{bool} 用于指定对角矩阵的类型, \meta{bool} 为 \cs{c_false_bool} 时, 为反对角矩阵;
+  \meta{other default} 用于指定非对角元素的默认值, \meta{diag default} 用于指定对角线上元素的默认值;
+  且此命令完全可展, 所以该命令可以与 \pkg{tabularray} 之类的宏包结合使用.
+\end{function}
+\begin{DocExample}*
+\ExplSyntaxOn
+\edef\MatDataB{\zalias_diag_mat_data:nnnn {\c_true_bool}{?}{*}{1.00, , 2, 3, , 5}}
+\edef\MatDataC{\zalias_diag_mat_data:nnnn {\c_false_bool}{@}{*}{1.00, , 2, 3, , 5}}
+\ExplSyntaxOff
+\SetTblrOuter{expand={\MatDataB, \MatDataC}}
+\begin{tblr}{ hlines, vlines }
+  \MatDataB
+\end{tblr}
+\quad = \quad 
+\begin{tblr}{ hlines, vlines }
+  \MatDataC
+\end{tblr}
+\end{DocExample}
+
+
+\begin{function}[added=2025-06-22, EXP]{
+    \zalias_jmat_data:nn, 
+    \zalias_jmat_data:ne,
+    \zalias_jmat_data:no, 
+    \zalias_hmat_data:nn,
+    \zalias_hmat_data:ne,
+    \zalias_hmat_data:no,
+  }
+  \begin{syntax}
+    \cmd{\zalias_jmat_data:nn} \Arg{style}\Arg{list}
+    \cmd{\zalias_hmat_data:nn} \Arg{style}\Arg{list}
+  \end{syntax}
+  此二命令会根据 \meta{list} 生成对应的 Jacobian 或 Hessian 矩阵数据, 是上述 \cs{jmat}, 
+  \cs{hmat} 两个命令的基础; \meta{style} 用于指定 Hessian 矩阵中每一项的排版样式, \meta{style} 中
+  不包含 ``\verb|\|''; 且此命令完全可展, 所以该命令可以与 \pkg{tabularray} 之类的宏包结合使用.
+\end{function}
+\begin{DocExample}*
+\ExplSyntaxOn
+\edef\MatDataD{\zalias_jmat_data:nn {displaystyle}{f, g; x, y, z}}
+\edef\MatDataE{\zalias_hmat_data:nn {textstyle}{g; \textsf{x},\mathbb{K},z}}
+\ExplSyntaxOff
+\SetTblrOuter{expand={\MatDataD, \MatDataE}}
+jmat =
+\begin{tblr}{ hlines, vlines, cells={mode=math} }
+  \MatDataD
+\end{tblr}, \qquad 
+hmat =
+\begin{tblr}{ hlines, vlines, cells={mode=math} }
+  \MatDataE
+\end{tblr}
+\end{DocExample}
+
+
+\begin{function}[added=2025-06-22, EXP]{\zalias_xmat_data:nn, \zalias_xmat_data:ne, \zalias_xmat_data:no }
+  \begin{syntax}
+    \cs{zalias_xmat_data:nn} \{\cs{\meta{cmd}}\}\{m, n\}
+  \end{syntax}
+  此命令会根据 \cs{\meta{cmd}} 自动生成对应的矩阵数据, 其维度为 $m\times n$; 该命令是上
+  述 \cs{gmat}, \cs{xmat} 两个命令的基础; \cs{\meta{cmd}} 接受两个参数, 分别代表矩阵中该元素
+  的横坐标与纵坐标; \texttt{m} 为矩阵的行数, \texttt{n} 为矩阵的列数; 且此命令完全可展, 所以
+  该命令可以与 \pkg{tabularray} 之类的宏包结合使用.
+\end{function}
+\begin{DocExample}*
+\ExplSyntaxOn
+\protected\def\cmdA#1#2{g^{#1#2}}
+\edef\MatDataF{\zalias_xmat_data:nn {\cmdA}{3, 4}}
+\ExplSyntaxOff
+\SetTblrOuter{expand=\MatDataF}
+xmat =
+\begin{tblr}{ hlines, vlines, cells={mode=math} }
+  \MatDataF
+\end{tblr}
+\end{DocExample}

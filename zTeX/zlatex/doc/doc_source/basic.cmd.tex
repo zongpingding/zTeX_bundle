@@ -1,0 +1,82 @@
+\clearpage
+\InsertMark{ztex-right}{}
+\section{基本命令}
+在介绍后续命令的具体用法之前, 我们首先约定一套符号和标记规则. 这些约定适用于 \ztex{} 所提供的一
+系列 \hologo{LaTeX2e} 与 \LaTeX3 命令, 它们能够帮助你更清晰、更高效地理解和使用这些命令:
+\begin{itemize}
+  \item 名字后带有 \zFullExp{} 号的命令, 可以在 \texttt{x, e, f} 型参数中被完全展开,
+  \item 名字后带有 \zResExp{} 号的命令, 只能在 \texttt{x, e} 型参数中被完全展开, 无法在 \texttt{f} 型参数中被完全展开;
+\end{itemize}
+
+
+\begin{function}[updated=2024-11-05]{\zTeX, \ztex, \zLaTeX, \zlatex}
+它们用于输出本宏集的标志(logo), 命令名不区分大小写, 并且它们都提供了一个带星号(\texttt{*})的变体.
+\end{function}
+\begin{DocExample}*
+Fancy Style: \LaTeX{} VS \zLaTeX{}; \zLaTeX{} VS \zlatex{}; \zTeX{} VS \ztex{}.
+
+Plain Style: \LaTeX{} VS \zLaTeX*{}; \zLaTeX*{} VS \zlatex*{}; \zTeX*{} VS \ztex*{}.
+
+hologo Package: \hologo{ztex}; \hologo{zTeX}; \hologo{zLaTeX}; \hologo{zlatex}.
+\end{DocExample}
+
+
+\begin{function}[updated=2025-04-25]{\ztexoption}
+  \begin{syntax}
+    \cs{ztexoption}
+  \end{syntax}
+  该命令用于打印 \ztex{} 传入当前文档类的所有选项, 可以在调试模板时使用.
+\end{function}
+\begin{DocExample}*
+  \ztexoption
+\end{DocExample}
+
+
+\begin{function}[updated=2025-04-25]{\ztexset}
+  \begin{syntax}
+    \cs{ztexset}\marg{key-value}
+  \end{syntax}
+  此命令用于配置 \ztex{} 选项, 部分的配置仅可以在加载文档类时指定, 这部分键的使用说明
+  请参照后续: \cref{sec:classoption} -- 文档类选项.
+\end{function}
+
+
+\begin{function}[updated=2025-04-25]{\ztexloadmod, \ztexloadlib}
+  \begin{syntax}
+    \cs{ztexloadmod}\marg{module name}
+    \cs{ztexloadlib}\marg{library name}
+  \end{syntax}
+  \ztex{} 由一系列的模块(module) 和库 (library) 组成, 用户需要使用这两个命令加载 \ztex{} 的模块和库;
+  所有模块默认都会被加载, 而库 (library) 默认则不会自动加载, 需由用户手动指定.
+\end{function}
+
+
+在本小节的后续, 我将介绍一些分散于 \file{ztex.cls}、\pkg{graphics} 模块、\pkg{counter} 模块以及 \pkg{item} 模块中
+的命令. 由于这些命令较为零散, 且缺乏系统性, 我们将其集中在此做统一说明, 以便用户查阅.
+
+
+\begin{function}[added=2024-12-05]{\zpw, \zph}
+  此二命令表示当前纸张的宽和高, 命令原型为 \cs{paperwidth} 和 \cs{paperheight}.
+\end{function}
+
+
+\begin{function}{\c_ztex_quad_dim}
+  此命令表示当前文档中一个空格的宽度.
+\end{function}
+
+
+\begin{function}[added=2025-09-20]{\uncompressPDF}
+  这个命令来自 \pkg{primitive} 库, 可以取消 PDF 压缩(一定程度上提高文档编译速度), 只能在导言区使用. 
+  针对 \hologo{pdfTeX}, \hologo{XeTeX} 以及 \hologo{LuaTeX} 均有适配, 用户无需再介入处理.
+\end{function}
+
+
+\begin{function}[updated=2025-04-25]{\ztextitle, \ztexauthor, \ztexdate}
+  此三个命令用于分别保存导言区 \cmd{\@title}, \cmd{\@author}, \cmd{\@date} 三个变量的值, 
+  用户可以在正文部分使用此三个变量. 一个基本的使用样例如下:
+\end{function}
+\begin{DocExample}*
+  \ztextitle\par
+  \ztexauthor\par
+  \ztexdate
+\end{DocExample}

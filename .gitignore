@@ -55,6 +55,8 @@ ZTEX_INSTALL/
 Fonts/
 *.hd
 testIO.txt
+auto/
+.auctex-auto/
 # debug.*
 # debug/
 

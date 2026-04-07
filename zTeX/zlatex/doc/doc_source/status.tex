@@ -1,0 +1,22 @@
+\clearpage
+\section{状态检测}
+因 \ztex{} 的选项配置比较庞大，其中涉及到诸多的宏包和命令的加载，在文档编译时，我们可能需要对文档的各种状态进行检测;
+于是, \ztex{} 提供了一系列的命令用于检测文档中各个变量以及库的加载情况.
+
+\begin{function}[added=2025-01-15, EXP]{\ztexhyperTF, \ztexfancyTF, \ztexmarginTF, \ztexslideTF, \ztexsysfontTF, \ztexaliasTF, \ztexbibindTF, \ztethmlibTF}
+  \begin{syntax}
+    \cs{ztexhyperTF}\marg{true code}\marg{false code}
+  \end{syntax}
+  此命令用于检测当前文档中是否开启了超链接功能，如果开启了，那么执行 \meta{true code}, 否则执行 \meta{false code}; 
+  其余命令的使用方法同理; 各个检测命令的基本使用样例如下:
+\end{function}
+\begin{DocExample}*
+\ztexhyperTF{Hyperref enable.}{Hyperref does NOT enable.}\par
+\ztexfancyTF{Fancy lib is loaded.}{Fancy lib is NOT loaded.}\par
+\ztexmarginTF{Margin does set.}{Margin does NOT set.}\par
+\ztexslideTF{Slide lib is loaded.}{Slide is NOT loaded.}\par
+\ztexsysfontTF{System Font config is loaded.}{System Font config is NOT loaded.}\par
+\ztexaliasTF{Math alias is loaded.}{Math alias is NOT loaded.}\par
+\ztexbibindTF{Bib index enable.}{Bib index does NOT enable.}\par  
+\ztethmlibTF{Thm lib is loaded.}{Thm lib is NOT loaded.}
+\end{DocExample}

@@ -1,0 +1,33 @@
+\clearpage
+\subsection{\titlepkg{counter} 模块}
+本模块主要设置计数器相关的选项, 目前提供的命令较少.
+
+
+\begin{function}[added=2025-09-23]{\zcntnew}
+  \begin{syntax}
+  \cmd{\zcntnew}\Arg{counter}\oarg{parent}
+  \end{syntax}
+  此命令和 \hologo{LaTeX2e} 中的 \cmd{\newcounter} 命令语法一致, 
+  用于声明一个新的计数器. 不同的是: 当计数器 \cmd{counter} 已存在时,
+  该命令不会执行任何操作. \textbf{备注}: 此命令封装自 \cmd{\zcnt_safe_new:nn}
+  命令.
+\end{function}
+
+
+\begin{function}[added=2025-09-23]{\zcnt_safe_new:nn}
+  \begin{syntax}
+  \cmd{\zcnt_safe_new:nn} \Arg{counter}\Arg{parent}
+  \end{syntax}
+  此命令用于声明一个新的计数器, 当计数器 \cmd{counter} 已存在时, 该命令不会执行任何操作. 
+  \meta{parent} 可以置为空, 当 \meta{parent} 非空时, 其会变为 \meta{counter} 的父计数器.
+\end{function}
+
+
+\begin{function}[updated=2025-04-25]{\ztexcntwith, \counterwithin}
+  \begin{syntax}
+    \cs{ztexcntwith}\marg{child}\marg{parent}
+    \cs{counterwithin}\marg{child}\marg{parent}
+  \end{syntax}
+  这个两个命令作用相同, 均用于给指定的 \meta{child} 计数器添加一个父计数器 \meta{parent}. 
+  当 \meta{parent} 计数器增加时，\meta{child} 计数器会自动重置, 二者均为原始命令 \cmd{\@addtoreset} 的封装.
+\end{function}

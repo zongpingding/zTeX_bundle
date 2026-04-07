@@ -1,0 +1,55 @@
+% intro and quick ref
+\newgeometry{
+  left=3cm, right=3cm, 
+  bottom=3.5cm, top=3.2cm, 
+  headsep=.3cm, footskip=1.5cm, 
+  marginparsep=1em
+}
+% re-calculate the \headwidth
+\fancyheadoffset{0pt}
+
+
+\section{基本介绍}
+\ztex{} 文档类默认基于 \cls{article} 文档类，但是你仍然可以在加载本文档类时选择加载其他的文档类，通过设置选项 \zkey{class} 的值为 
+\cls{article}, \cls{book} 亦或者是 \cls{ctexbook}. 通过更换默认的文档类, \zTeX{} 可以满足使用者的不同需求，目前本模板可以用于以下场景:
+\begin{itemize}
+  \item 撰写书籍或者笔记
+  \item 讨论班的Slide制作%(可以和article无缝切换)
+\end{itemize}
+
+\ztex{} 的制作初衷:让使用者可以方便进行书籍和笔记的撰写以及日常汇报 slide 的无缝切换. \ztex{} 全部由 \LaTeX3 进行编写，
+采用 \meta{key-value} 的方式进行选项和命令的配置，对于作者来说:方便后续的模板拓展和维护；对于用户来说:使用键值对可以减轻用户记忆命令
+参数这一负担, 方便用户使用模板内置命令. 如果用户熟悉\LaTeX{}，那么花费不到10min的时间，用户便可以轻松使用本文档类完成如上任务，
+减少不必要的工作.
+
+\ztex{} 文档类会根据用户指定的选项自动处理和加载对应的宏包，所以 \ztex{} 文档类在不同的导言区选项声明下
+加载的宏包和命令是不同的. 后文详细地介绍了不同导言区配置以及不同编译引擎下的宏包加载情况. 
+
+\ztex{} 一直坚持 ``能自己实现就不依赖外部宏包'' 的原则. 比如，有些用户会用到 \pkg{lastpage} 宏包，
+它提供了一个名为 \texttt{LastPage} 的 label; \ztex{} 也实现了类似功能，提供了 ``\texttt{ztex:lastpage}'' 
+这个 label (在页码正确的情况下，超链接跳转可能并不正确，这种情况下可以使用 \texttt{ztex@lastpage} 这一个 anchor). 
+为了在实现一些复杂 ``盒子'' 样式的同时，尽量保持较快的
+编译速度，\ztex{} 引入了 \pkg{framedmulticol} 宏包。有了它的辅助，用户在不依赖 \pkg{tikz} 或 \pkg{pstricks} 
+的前提下，也能实现比较复杂的盒子排版\Footnote{用户可以参考 \pkg{longfbox} 宏包的文档, 它能够很方便地制作一些精美
+的``盒子'', 十分强大, 而且编译速度很快. 因为它只依赖于 \Hologo{LaTeX2e} 自带的 \env{picture} 环境.}.
+
+\ztex{} 会加载一系列的基本宏包\index{basic packages}\Footnote{加载 \ztex{} 后,用户可以直接使用 \pkg{ctexpatch} 或 \pkg{xpatch} 宏包
+提供的命令.}, 意味着无论用户的导言区如何配置，这部分宏包均会被加载. 具体的宏包加载情况如下:
+
+\begin{table}[!htb]
+  \begin{tblr}{
+    colspec={|X[1.25, c]|X[1, c]|X[1, c]|X[1, c]|},
+    rowspec={|Q[m]|Q[m]|Q[m]|Q[m]|Q[m]|},
+    cells={cmd=\pkg}
+  }
+  geometry  & fancyhdr       & graphicx              & xcolor   \\
+  amsmath   & amsfonts       & esint                 & etoolbox \\
+  framed    & framedmulticol & cleveref/zref-clever  &   \\ 
+  \end{tblr}
+  \caption{\ztex{} 文档类基本宏包}
+  \label{tab:basic-package}
+\end{table}
+
+\ztex{} 默认只加载很少的一部分基础宏包，用户如果想要实现更加个性化的功能还请自行引入相关宏包；
+在默认情况下本模板即可呈现一个比较好的效果，不熟悉\LaTeX{}的用户不用担心本模板配置选项过于复杂. 想要
+马上开始使用本模板? 请参见``\cref{mwe}''的最小写作示例.

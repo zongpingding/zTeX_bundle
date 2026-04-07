@@ -1,0 +1,8 @@
+\begin{tikzpicture}[scale=0.5, >=Latex]
+    % axis
+    \draw[->](-1,0)--(10,0);
+    \draw[->](0,-4)--(0,4);
+    % plot function
+    \draw[domain=-2:2] plot({(\x)^2}, \x);
+    \draw[domain=-2:2] plot(\x+1, \x);
+\end{tikzpicture}

@@ -1,5 +1,5 @@
 \ProvidesExplFile{ztex.module.graphics.tex}
-  {2025/09/30}{\ztex@versi@n}
+  {2026/02/16}{\ztex@versi@n}
   {graphics~module~for~ztex}
 
 
@@ -42,4 +42,12 @@
   {
     \graphics_get_pagecount:nN {#1}
       \zgraphicspageint
+  }
+
+% if exsit graphics include
+\NewDocumentCommand\includegraphicsifexsit{O{width=.75\linewidth}O{example-image-a}m}
+  {
+    \file_if_exist:nTF {#3}
+      { \includegraphics[#1]{#3} }
+      { \includegraphics[#1]{#2} }
   }

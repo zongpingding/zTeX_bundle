@@ -1,0 +1,80 @@
+\documentclass{ztex}
+\usepackage[wolfram = { engine=wolfram }]{ztikz}
+\ztikzloadlib{wolfram, cache, l3draw}
+\usepackage{lipsum}
+% \ztikzHashClean
+
+
+
+\begin{document}
+\def\headrule{
+ \vskip-\baselineskip\vskip4pt
+ \zdrawSetUnit{\textwidth}
+ \zrule[width=.9, height=.001, startColor=blue, endColor=green, step=.1]
+}
+\section{laplace transfrom}
+\lipsum[1]
+\wolfram{LaplaceTransform[t^4 Sin[3*t], t, s]}
+\[
+  \mathcal{L}(t^4\sin(3t)) = \wolframResult
+\]
+
+
+\section{wolfram table}
+\lipsum[2]
+\begin{center}
+\wolframTable*[
+  hdbt-rule, format=cccccccc,
+  header={$x$ & $x^2$ & $x^3$ & $x^4$ & $x^5$ & $x^6$ & $x^7$ & $x^8$},
+]{Table[{i, i^2, i^3, i^4, i^5, i^6, i^7, i^8}, {i, 2, 15}]}
+\end{center}
+\ExplSyntaxOn
+\ExplSyntaxOff
+
+
+\section{wolframTex}
+\lipsum[3]
+\wolframTex{\int_a^b\sin(x)\,dx}
+\[
+\int_a^b \sin(x)\,dx = \wolframResult
+\]
+
+\section{Wolfram Graphics}
+\begin{wolframGraphics}
+FIGURE=Plot[Sin[x], {x, -Pi, Pi}]
+\end{wolframGraphics}
+\edef\figA{\wolframOuputFile}
+
+\begin{wolframGraphics}
+FIGURE=Plot3D[Sin[x y], {x, 0, 3}, {y, 0, 3}, Mesh -> All];
+\end{wolframGraphics}
+\edef\figB{\wolframOuputFile}
+
+\lipsum[4]
+\begin{center}
+\includegraphics[width=.45\linewidth]{\figA}
+\includegraphics[width=.45\linewidth]{\figB}
+\end{center}
+
+
+
+\section{l3draw}
+\lipsum[5][1-5]
+\zdrawSetUnit{em}
+\begin{center}
+\ztoolboxaffine{
+  \zplot[
+    action=shade, 
+    domain={-3.14,.1,6.28}, 
+    startColor=teal, 
+    endColor=red,
+    range={-1, 1}
+  ]{sin(x)}}{3, 0, 0, 3}
+\end{center} 
+
+\lipsum[5][6-10]
+\zdrawSetUnit{em}
+\begin{center}
+ \zrule[width=10, startColor=red, step=.1] 
+\end{center}
+\end{document}

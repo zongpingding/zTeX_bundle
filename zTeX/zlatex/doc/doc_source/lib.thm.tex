@@ -1,0 +1,319 @@
+\clearpage
+\InsertMark{ztex-4th}{}
+\subsection{\titlepkg{thm} 库}\label{sec:theme-library-obsidian}
+本 library 中定义了一系列的定理类主题以及环境图标(icon), 在加载 \pkg{theme} library 的同时，会自动导入 \pkg{tcolorbox}, \pkg{tikz} 和 \pkg{pifont} 
+三个宏包. 同时也会加载 \pkg{tikz} 的 \pkg{fadings}, \pkg{calc} 两个库. 如此数量的宏包导入必然会拖慢整个文档的编译，请酌情考虑加载此 
+library.
+
+\vskip2em
+\noindent\textcolor{red}{\sffamily NOTE: 
+\begin{enumerate}
+  \item 由于技术原因, 当用户需要加载 \pkg{thm} 库时, 必须将命令 \cs{zthmstyle}\texttt{\marg{style}} 置于 \cs{ztexloadlib}\zarg{thm} 之前;
+  \item 若用户在自定义定理类环境样式时需要更改 \ztex{} 的默认配色, 请将 \cs{ztex_keys_set:nn} 或
+    其它基于 \cs{keys_set:nn} 的命令放置于命令 \cs{zthmstylenew} 对应样式的 \meta{preamble} 中而非 \meta{option} 中, 
+    否则 \ztex{} 中的一系列与 \cs{zcolorset} 相关的函数将失去对新定义数学类环境样式的色彩控制能力.
+\end{enumerate}}
+
+
+\clearpage
+\begin{function}[updated=2025-04-25]{\zthmiconset}
+  \begin{syntax}
+    \cs{zthmiconset}\marg{key-value}
+  \end{syntax}
+  此命令用于设置定理类环境的图标, 仅能在导言区使用.
+\end{function}
+
+\begin{keyval}[parent=..]{axiom, definition, theorem, lemma, corollary, proposition, remark}
+  \begin{syntax}
+    axiom       = \meta{icon}>\dval{\ding{118}}
+    definition  = \meta{icon}>\dval{\ding{168}} 
+    theorem     = \meta{icon}>\dval{\(\heartsuit\)} 
+    lemma       = \meta{icon}>\dval{\ding{68}}
+    corollary   = \meta{icon}>\dval{\ding{168}} 
+    proposition = \meta{icon}>\dval{\(\spadesuit\)} 
+    remark      = \meta{icon}>\dval{\ding{102}}
+    proof       = \meta{icon}>\dval{无}
+    exercise    = \meta{icon}>\dval{无}
+    example     = \meta{icon}>\dval{无}
+    solution    = \meta{icon}>\dval{无}
+    problem     = \meta{icon}>\dval{无}
+  \end{syntax}
+  上述键值配置为 \meta{style}\texttt{=paris} 时的样式, 其中 \meta{icon} 为一个合法的图标(文字).
+\end{keyval}
+
+
+一个基本的使用样例如下\zchcmd:
+\begin{DocExample}*
+\zthmiconset        
+  {
+    axiom       = \ding{118},
+    definition  = \ding{168}, 
+    theorem     = \(\heartsuit\), 
+    lemma       = \ding{68},
+    corollary   = \ding{168}, 
+    proposition = \(\spadesuit\), 
+    remark      = \ding{102},
+  }
+\end{DocExample}
+
+
+\begin{function}[updated=2025-04-25]{\zthmiconuse}
+  \begin{syntax}
+    \cs{zthmiconuse}\marg{thm env name}
+  \end{syntax}
+  此命令用于使用定理类环境的图标, \meta{thm env name} 即为所有预定义的定理类环境名. 
+  此命令在自定义定理环境样式时比较有用, 不推荐用户于正文中使用. \par
+  一个基本的使用样例如下\zchcmd:
+\end{function}
+\begin{DocExample}*
+\zthmiconuse{theorem}
+\zthmiconuse{lemma}
+\end{DocExample}
+
+
+\begin{function}[updated=2025-04-25]{\zthmiconrm}
+  \begin{syntax}
+    \cs{zthmiconrm}
+  \end{syntax}
+  此命令会清除所有定理类环境的图标, 不推荐用户在正文中使用.
+\end{function}
+
+
+
+\begin{function}[updated=2024-12-05]{shadow}
+  \begin{syntax}
+    \cs{zthmstyle}\zarg{shadow}
+  \end{syntax}
+  加载此 library 后即可应用上述样式, 样式预览如下: 
+\end{function}
+\begingroup
+\zthmstyle{shadow}
+\begin{DocExample}*
+% \ztexloadlib{alias}
+\begin{remark}[thmstyle-shadow]
+As any dedicated reader can clearly see, the Ideal of practical
+reason is a representation of, as far as I know, the things in themselves; 
+\begin{align}
+\underset{}{\mathbf{v} \bigotimes \mathbf{w}} 
+    & = \sum_{i=1}^3\left(a_{i1}u^iv^1+a_{i2}u^iv^2+a_{i3}u^iv^3\right) \\
+    & = \int x \dd x = \frac12 x^2 + \R{C} 
+  \end{align}  
+As any dedicated reader can clearly see, the Ideal of practical
+reason is a representation of, as far as I know, the things in themselves;%
+\end{remark}
+\end{DocExample}
+\endgroup
+
+
+\begin{function}[updated=2024-12-05]{paris}
+  \begin{syntax}
+    \cs{zthmstyle}\zarg{paris}
+  \end{syntax}
+  加载此 library 后即可应用上述样式, 样式预览如下: 
+\end{function}
+\begingroup
+\zthmstyle{paris}
+\zthmiconset
+  {
+    axiom       = \ding{118},
+    definition  = \ding{168}, 
+    theorem     = \(\heartsuit\), 
+    lemma       = \ding{68},
+    corollary   = \ding{168}, 
+    proposition = \(\spadesuit\), 
+    remark      = \ding{102},
+  }
+\begin{DocExample}*
+% \ztexloadlib{alias}
+\begin{axiom}[thmstyle-paris]
+As any dedicated reader can clearly see, the Ideal of practical
+reason is a representation of, as far as I know, the things in themselves; 
+\begin{align}
+\underset{}{\mathbf{v} \bigotimes \mathbf{w}} 
+    & = \sum_{i=1}^3\left(a_{i1}u^iv^1+a_{i2}u^iv^2+a_{i3}u^iv^3\right) \\
+    & = \int x \dd x = \frac12 x^2 + \R{C} 
+  \end{align}  
+As any dedicated reader can clearly see, the Ideal of practical
+reason is a representation of, as far as I know, the things in themselves;%
+\end{axiom}
+\end{DocExample}
+\endgroup
+
+
+\begin{function}[updated=2024-12-05]{lapsis}
+  \begin{syntax}
+    \cs{zthmstyle}\zarg{lapsis}
+  \end{syntax}
+  加载此 library 后即可应用上述样式, 样式预览如下: 
+\end{function}
+\begingroup
+\zthmtitleformat{\bfseries
+\zthmname\ \zthmnumber
+\zthmnotemptyTF{}{\\}
+\zthmnote{}{}
+}
+\zthmiconset
+  {
+    axiom       = \ding{111},
+    definition  = \ding{118}, 
+    theorem     = \ding{169}, 
+    lemma       = \ding{170},
+    corollary   = \ding{168}, 
+    proposition = \ding{125}, 
+    remark      = \ding{46},
+    proof       = , 
+    exercise    = \ding{45},
+    example     = ,
+    solution    = \ding{45}, 
+    problem     = ,
+  }
+\zthmstyle{lapsis}
+\begin{DocExample}*
+% \ztexloadlib{alias}
+\begin{lemma}[thmstyle-lapsis]
+As any dedicated reader can clearly see, the Ideal of practical
+reason is a representation of, as far as I know, the things in themselves; 
+\begin{align}
+\underset{}{\mathbf{v} \bigotimes \mathbf{w}} 
+    & = \sum_{i=1}^3\left(a_{i1}u^iv^1+a_{i2}u^iv^2+a_{i3}u^iv^3\right) \\
+    & = \int x \dd x = \frac12 x^2 + \R{C} 
+  \end{align}  
+As any dedicated reader can clearly see, the Ideal of practical
+\tcblower
+\begin{align}
+  \int x \dd x = \frac12 x^2 + \R{C}
+\end{align}
+reason is a representation of, as far as I know, the things in themselves;%
+\end{lemma}
+\end{DocExample}
+\endgroup
+
+
+\begin{function}[updated=2024-12-05]{elegant}
+  \begin{syntax}
+    \cs{zthmstyle}\zarg{elegant}
+  \end{syntax}
+  加载此 library 后即可应用上述样式, 样式预览如下: 
+\end{function}
+\begingroup
+\zthmiconset{
+  axiom       = \ding{118},
+  definition  = \ding{168}, 
+  theorem     = \(\heartsuit\), 
+  lemma       = \ding{68},
+  corollary   = \ding{168}, 
+  proposition = \(\spadesuit\), 
+  remark      = \ding{102},
+}
+\ExplSyntaxOn
+\ztex_keys_set:nn {color}{
+  axiom       = {HTML}{2c3e50},
+  definition  = {RGB}{0, 166, 82},
+  theorem     = {RGB}{255, 134, 23},
+  lemma       = {RGB}{255, 134, 23},
+  corollary   = {RGB}{255, 134, 23},
+  proposition = {RGB}{0, 173, 247},
+}
+\ExplSyntaxOff
+\zthmstyle{elegant}
+\begin{DocExample}*
+% \ztexloadlib{alias}
+\begin{definition}[thmstyle-elegant]
+As any dedicated reader can clearly see, the Ideal of practical
+reason is a representation of, as far as I know, the things in themselves; 
+\begin{align}
+\underset{}{\mathbf{v} \bigotimes \mathbf{w}} 
+    & = \sum_{i=1}^3\left(a_{i1}u^iv^1+a_{i2}u^iv^2+a_{i3}u^iv^3\right) \\
+    & = \int x \dd x = \frac12 x^2 + \R{C} 
+  \end{align}  
+As any dedicated reader can clearly see, the Ideal of practical
+reason is a representation of, as far as I know, the things in themselves;%
+\end{definition}
+\end{DocExample}
+\endgroup
+
+
+\begin{function}[added=2025-06-29]{tcb}
+  \begin{syntax}
+    \cs{zthmstyle}\zarg{tcb}
+  \end{syntax}
+  加载此 library 后即可应用上述样式, 样式预览如下: 
+\end{function}
+\begingroup
+\ExplSyntaxOn\makeatletter
+\ztex_keys_set:nn {color}
+  {
+    axiom       = {HTML}{2c3e50},
+    remark      = purple!55!black,
+    definition  = orange!55!black,
+    theorem     = blue!55!black,
+    lemma       = green!55!black,
+    corollary   = green!55!black,
+    proposition = {RGB}{0, 173, 247},
+  }
+\makeatother\ExplSyntaxOff
+\zthmstyle{tcb}
+\begin{DocExample}*
+% \ztexloadlib{alias}
+\begin{theorem}[thmstyle-tcb]
+As any dedicated reader can clearly see, the Ideal of practical
+reason is a representation of, as far as I know, the things in themselves; 
+\begin{align}
+\underset{}{\mathbf{v} \bigotimes \mathbf{w}} 
+    & = \sum_{i=1}^3\left(a_{i1}u^iv^1+a_{i2}u^iv^2+a_{i3}u^iv^3\right) \\
+    & = \int x \dd x = \frac12 x^2 + \R{C} 
+  \end{align}  
+As any dedicated reader can clearly see, the Ideal of practical
+reason is a representation of, as far as I know, the things in themselves;%
+\end{theorem}
+\end{DocExample}
+\endgroup
+
+
+
+\begin{function}[updated=2024-12-05]{obsidian}
+  \begin{syntax}
+    \cs{zthmstyle}\zarg{obsidian}
+  \end{syntax}
+  加载此 library 后即可应用上述样式, 样式预览如下: 
+\end{function}
+\begingroup
+\ExplSyntaxOn\makeatletter
+\zthmtitleformat*{
+  \noindent\sffamily\bfseries\textcolor{\thm@tmp@color}{
+    \__ztex_thm_icon_use:o {\thm@tmp@name}
+    \ \zthmname{\,:\,}\zthmnumber
+  }
+}
+\__ztex_thm_icon_set:n 
+  {
+    axiom       = \ding{111},
+    definition  = \ding{118}, 
+    theorem     = \ding{169}, 
+    lemma       = \ding{170},
+    corollary   = \ding{168}, 
+    proposition = \ding{125}, 
+    remark      = \ding{46},
+    proof       = , 
+    exercise    = \ding{45},
+    example     = ,
+    solution    = \ding{45}, 
+    problem     = ,
+  }
+\makeatother\ExplSyntaxOff
+\zthmstyle{obsidian}
+\begin{DocExample}*
+% \ztexloadlib{alias}
+\begin{proposition}[thmstyle-obsidian]
+As any dedicated reader can clearly see, the Ideal of practical
+reason is a representation of, as far as I know, the things in themselves; 
+\begin{align}
+\underset{}{\mathbf{v} \bigotimes \mathbf{w}} 
+    & = \sum_{i=1}^3\left(a_{i1}u^iv^1+a_{i2}u^iv^2+a_{i3}u^iv^3\right) \\
+    & = \int x \dd x = \frac12 x^2 + \R{C} 
+  \end{align}  
+As any dedicated reader can clearly see, the Ideal of practical
+reason is a representation of, as far as I know, the things in themselves;%
+\end{proposition}
+\end{DocExample}
+\endgroup

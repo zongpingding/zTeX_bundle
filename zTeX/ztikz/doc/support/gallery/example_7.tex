@@ -1,0 +1,41 @@
+\begin{tikzpicture}[font=\small, >=Latex, scale=.65]
+    %% ==> ztikz draw grid(coordinates)
+    \ShowGrid{(-8, -8); (8, 8)}
+    \ShowPoint[opacity=0]{(0, 0)}[$O=(0, 0)$][below right=.5em and 1em]
+    \ShowAxis {(0, -8); (0, 8)}
+    \ShowAxis {(-8, 0); (8, 0)}
+
+    % draw function
+    \Plot[-3:3][orange] {2*x+1}
+    \Plot[-1:7.6][cyan] {-.9*x+7}
+
+    %% ==> ztikz Plot functions
+    % simple 2d-plot
+    \PlotPrecise{plot}{1500}
+    \Plot[-7:7.8]{3*sin(1/x)}
+    \Plot[-1.5:7.5][green, name path=exp] {x*exp(-x)}
+    % param plot
+    \ParamPlot[0:2*pi][red, name path=ellipse]{7*sin(t), 4*cos(t)}
+
+    %%% ==> Fill region 
+    \begin{scope}
+        \clip (2, 0) rectangle (8, 1); 
+        \fill[pattern=north east lines] plot file{\gnudata{4}};
+    \end{scope}
+    \begin{scope}
+        \clip (-6, 0) rectangle (-2, -2);
+        \fill[pattern=crosshatch, pattern color=orange] plot file{\gnudata{3}} -- (-2, 0) -- (-6, 0);
+    \end{scope}
+
+    % default tikz unit
+    \ShowPoint[color=red]{(-4cm, 4em); (-4cm, 4cm)}[$A_1$=(-4cm, 4em); $A_2$=(-4cm, 4cm)][left]
+
+    % plot shape and other properties
+    \ShowPoint[radius=3pt, color=blue, opacity=.5, type=square*, color=cyan] {(-2.380, -3.761)}
+    \ShowPoint[color=orange, opacity=1, radius=2pt] {(1.456, 3.912)}
+
+    % ==> find intersection
+    \ShowIntersection{exp; ellipse}{2}
+    \ShowPoint {(2.068, 5.137); (4.242, 3.181); (6.843, 0.840); (7.324, 0.408)}
+        [$p_1$; $p_2$; $p_3$; $p_4$; $p_5$; $p_6$; $p_7$][above]
+\end{tikzpicture}

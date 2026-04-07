@@ -1,0 +1,15 @@
+\input{regression-test.tex}
+\documentclass{article}
+\usepackage{ztikz}
+\ztikzloadlibrary{gnuplot}
+
+
+\begin{document}
+\START
+\BEGINTEST{ztikz-module-gnuplot-Plot}
+\begin{tikzpicture}
+  \Plot[-1.5*pi:2*pi]{sin(x)}
+\end{tikzpicture}
+\ENDTEST
+\END
+\end{document}

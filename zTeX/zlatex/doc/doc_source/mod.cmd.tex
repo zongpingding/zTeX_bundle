@@ -1,0 +1,656 @@
+\clearpage
+\subsection{\titlepkg{cmd} 模块}
+该模块提供了一些针对内核命令的 patch 或改进, 涉及到的模块有 \pkg{l3clist}, 
+\pkg{l3prop}, \pkg{l3token} 等. 除此之外, \pkg{cmd} 模块还提供了一些工具宏,
+它们会在 \ztex{} 的各个模块或库中被使用. \textbf{注意}: 本模块不是为普通用户准备的,
+普通用户建议直接跳过本节内容.
+
+
+\begin{function}[updated=2025-04-25]{\ztexverb}
+  \begin{syntax}
+    \cs{ztexverb}\oarg{format}\marg{item}
+  \end{syntax}
+  此命令和 \hologo{LaTeX2e} 中的 \cmd{\verb} 类似，用于输出控制序列名称. 和后者类似，此命令也不能作为
+  任何控制序列的参数. \meta{format} 用于指定控制序列的打印格式, 默认为 \cmd{\texttt}. 一个基本的使用
+  样例如下:
+\end{function}
+\vskip1.25em\relax
+\begin{DocExample}*
+  \ztexverb{\alpha + \beta}\par
+  \ztexverb[\textsf]{\alpha + \beta}
+\end{DocExample}
+
+
+\begin{function}[added=2025-09-23, pTF]{\zcmd_if_preamble:}
+  \begin{syntax}
+  \cmd{\zcmd_if_preamble:TF} \Arg{true code}\Arg{false code}
+  \end{syntax}
+  此命令用于用于判断当前是否为导言区, 若为导言区, 则执行 \meta{true code}, 反之.
+\end{function}
+
+
+\begin{function}[added=2025-06-22]{
+    \zcmd_cs_copy:NN, \zcmd_cs_copy:Nc, 
+    \zcmd_cs_copy:cN, \zcmd_cs_copy:cc,
+  }
+  \begin{syntax}
+    \cmd{\zcmd_cs_copy:NN} \meta{cmd_1}\meta{cmd_2}
+  \end{syntax}
+  此命令为 \TeX{} 中 \cs{let} 这一原语的封装, 它使得 \meta{cmd_1} 指向 \TeX{} 内部 Hash 表
+  中 \meta{cmd_2} 所指向的位置; 它的作用是局部的.
+\end{function}
+
+
+\begin{function}[added=2025-06-22]{
+    \zcmd_cs_gcopy:NN, \zcmd_cs_gcopy:Nc, 
+    \zcmd_cs_gcopy:cN, \zcmd_cs_gcopy:cc,
+  }
+  \begin{syntax}
+    \cmd{\zcmd_cs_gcopy:NN} \meta{cmd_1}\meta{cmd_2}
+  \end{syntax}
+  此命令为 \TeX{} 中 \cs{let} 和 \cs{global} 这两个原语的封装, 它使得 \meta{cmd_1} 指向 \TeX{} 内部 Hash 表
+  中 \meta{cmd_2} 所指向的位置; 它的作用是全局的.
+\end{function}
+
+
+
+\clearpage
+\begin{function}[added=2025-09-18, rEXP]{\zcmd_clist_to_tl:n}
+  此命令会将 clist 转为 token list.
+  \vskip.75em\relax\noindent{\sffamily\color{red}\TeX hackers note:返回结果会被包裹在 \cmd{\exp_not:n} 中, 
+  这意味着当这些结果出现在 \texttt{e}-type 或 \texttt{x}-type 参数中时, 返回结果不会进一步展开.}
+\end{function}
+\vskip1em\relax
+\begin{DocExample}*
+\ExplSyntaxOn{\ttfamily
+\def\TTTa{TTTa-val}
+\detokenize\expandafter
+  {
+    \expanded{\zcmd_clist_to_tl:n {cmd-\TTTa, 101, a0b}}
+  }
+}\ExplSyntaxOff
+\end{DocExample}
+
+
+\begin{function}[added=2025-09-18, rEXP]{
+    \zcmd_ints_to_tl:nn,
+    \zcmd_ints_to_tl:oo,
+    \zcmd_ints_to_tl:ee,
+  }
+  \begin{syntax}
+    \cmd{\zcmd_ints_to_tl:nn} \Arg{start}\Arg{end}
+  \end{syntax}
+  此命令生成从 \meta{start} 到 \meta{end} 的所有整数, 然后将其
+  转为 token list. \textbf{备注}: 用户可以将此命令和 \cmd{\tl_map_tokens:nn} 结合,
+  以此模拟 \cmd{\int_step_tokens:nnn} 命令的功能. 一个简单的使用案例如下:
+\end{function}
+\vskip1em\relax
+\begin{DocExample}*
+\ExplSyntaxOn{\ttfamily
+\detokenize\expandafter
+  {
+    \expanded{\zcmd_ints_to_tl:nn {9}{21}}
+  }
+}\ExplSyntaxOff
+\end{DocExample}
+
+
+
+\begin{function}[added=2025-09-21, rEXP]{
+    \ztex_int_step_tokens:nn,
+    \ztex_int_step_tokens:nnn,
+  }
+  \begin{syntax}
+    \cmd{\ztex_int_step_tokens:nn} \Arg{final value}\Arg{code}
+    \cmd{\ztex_int_step_tokens:nnn} \Arg{initial value}\Arg{final value}\Arg{code}
+  \end{syntax}
+  因为 \pkg{l3int} 中的 \cmd{\int_step_tokens:nn} 和 \cmd{\int_step_tokens:nnn} 命令在一些比较老的
+  \TeX{} 发行版中并不存在, 为了兼容性, \ztex{} 使用 \cmd{\tl_map_tokens:nn} 重新实现了它们.\par
+  \noindent\textbf{注意}: 和 \cmd{\tl_map_tokens:nn}(\cmd{\int_step_tokens:nn}) 命令类似, 
+  \meta{code} 中的脆弱命令需要保护.
+\end{function}
+
+
+
+\begin{function}[added=2025-09-03, rEXP]{
+    \zcmd_map_expnot_tl:n,
+    \zcmd_map_expnot_clist:n,
+    \zcmd_map_expnot_sclist:n,
+  }
+  \begin{syntax}
+    \cs{zcmd_map_expnot_tl:n} \Arg{tl}
+    \cs{zcmd_map_expnot_clist:n} \Arg{clist}
+    \cs{zcmd_map_expnot_sclist:n} \Arg{sclist}
+  \end{syntax}
+  \cmd{\zcmd_map_expnot_tl:n} 会将 \meta{tl} 中每个 \meta{token} 变
+  为 \verb|{\exp_not:n |\texttt{\marg{token}\}} 的形式; 后两者与之类似, 
+  只是它们的作用对象不同.
+\end{function}
+\vskip1em\relax
+\begin{DocExample}*
+\ExplSyntaxOn{\ttfamily
+\edef\TTT{\zcmd_map_expnot_tl:n {A{BC}\fbox}}
+\detokenize\expandafter{\TTT}
+}\ExplSyntaxOff
+\end{DocExample}
+
+
+
+\begin{function}[added=2025-09-18, rEXP]{
+    \zcmd_floats_sort_increase:n,
+    \zcmd_floats_sort_decrease:n,
+  }
+  \begin{syntax}
+    \cmd{\zcmd_floats_sort_increase:n} \Arg{float list}
+    \cmd{\zcmd_floats_sort_increase:n} \Arg{float tl}
+  \end{syntax}
+  此而命令用于浮点数排序, 前者升序排列, 后者降序排列. 
+  \meta{float list} 使用逗号 - ``\texttt{,}'' 分割,
+  \meta{float tl} 使用花括号 - ``\verb|{}|'' 分割.
+  使用样例如下:
+\end{function}
+\vskip1em\relax
+\begin{DocExample}*
+\ExplSyntaxOn{\ttfamily
+\detokenize\expandafter
+  {
+    \expanded{
+      \zcmd_floats_sort_increase:n {3, 01, -2, 5, +1};
+      \zcmd_floats_sort_decrease:n {3, 01, -2, 5, +1};
+      \zcmd_floats_sort_decrease:n {{3}{01}{-2}{5}{+1}};
+    }
+  }
+}\ExplSyntaxOff
+\end{DocExample}
+
+
+
+\begin{function}[added=2025-09-18, rEXP]{\zcmd_floats_min:n, \zcmd_floats_max:n}
+  \begin{syntax}
+  \cmd{\zcmd_floats_min:n} \Arg{float list}
+  \cmd{\zcmd_floats_min:n} \Arg{float tl}
+  \end{syntax}
+  此二命令基于上述的 \cmd{\zcmd_floats_sort_decrease:n} 和 \cmd{\zcmd_floats_sort_increase:n}
+  命令, 返回序列的最小(大)值.
+\end{function}
+
+
+
+\begin{function}[added=2025-09-12, rEXP]{
+    \prop_item:nn,
+    \prop_item:no,
+    \prop_item:ne,
+    \prop_item:Vn,
+    \prop_item:Ve,
+    \prop_item:vn,
+    \prop_item:ve,
+    \prop_item:en,
+    \prop_item:ee,
+  }
+  \begin{syntax}
+    \cmd{\prop_item:nn} \Arg{prop content}\Arg{key}
+  \end{syntax}
+  此命令与 \pkg{l3prop} 中的 \cmd{\prop_item:Nn} 类似, 用于取出 \meta{prop content} 中 \meta{key} 对应的值.
+  \vskip.75em\relax\noindent{\sffamily\color{red}\TeX hackers note:返回结果会被包裹在 \cmd{\exp_not:n} 中, 
+  这意味着当这些结果出现在 \texttt{e}-type 或 \texttt{x}-type 参数中时, 返回结果不会进一步展开.}
+\end{function}
+\vskip1.25em\relax
+\begin{DocExample}*
+\ExplSyntaxOn{\ttfamily
+\def\TTT{TTT:val}
+\detokenize\expandafter{
+  \expanded{\prop_item:nn {a=1-\TTT, bb=234}{a}}
+}
+}\ExplSyntaxOff
+\end{DocExample}
+
+
+
+\clearpage
+\begin{function}[added=2025-09-03]{\zcmd_robustify:N, \zcmd_robustify:c}
+  \begin{syntax}
+    \cmd{\zcmd_robustify:N} \meta{control sequence}
+  \end{syntax}
+  这两个命令封装自 \pkg{etoolbox} 宏包, 可以将脆弱命令变为一个 robust 命令.
+\end{function}
+
+
+\begin{function}[added=2025-09-03, pTF]{\zcmd_if_param:N, \zcmd_if_param:c}
+  \begin{syntax}
+    \cs{zcmd_if_param:NTF} \meta{control sequence}\Arg{true code}\Arg{false code}
+  \end{syntax}
+  此系列命令封装自 \pkg{etoolbox} 宏包, 如果 \meta{control sequence} 已经定义且需要参数, 则返回 \texttt{true}.
+\end{function}
+\vskip1.25em\relax
+\begin{DocExample}*
+\def\TTTa{TTT}
+\def\TTTb#1{TTT:#1}
+\ExplSyntaxOn
+\zcmd_if_param:NTF \TTTa {Have}{NOT~Have};\par 
+\zcmd_if_param:NTF \TTTb {Have}{NOT~Have};\par 
+\zcmd_if_param:cTF {TTTa} {Have}{NOT~Have};\par
+\zcmd_if_param:cTF {TTTb} {Have}{NOT~Have}.
+\ExplSyntaxOff
+\end{DocExample}
+
+
+\begin{function}[added=2025-09-03, pTF]{\zcmd_if_protected:N, \zcmd_if_protected:c}
+  \begin{syntax}
+    \cs{zcmd_if_protected:NTF} \meta{control sequence}\Arg{true code}\Arg{false code}
+  \end{syntax}
+  此系列命令封装自 \pkg{etoolbox} 宏包, 如果 \meta{control sequence} 已经定义且在定义时的 prefix 为 
+  \cmd{\protected}, 则返回 \texttt{true}.
+\end{function}
+
+
+\begin{function}[added=2025-09-03, TF]{\zcmd_if_ltxprotect:N, \zcmd_if_ltxprotect:c}
+  \begin{syntax}
+    \cs{zcmd_if_ltxprotect:NTF} \meta{control sequence}\Arg{true code}\Arg{false code}
+  \end{syntax}
+  此系列命令封装自 \pkg{etoolbox} 宏包, 如果 \meta{control sequence} 已经定义且使用了 \LaTeX{} 的 protect 机制
+  (或使用 \cmd{\DeclareRobustCommand} 声明的命令), 则返回 \texttt{true}. \textbf{注意}: 这个命令本身是 robust 的.
+\end{function}
+\vskip1.25em\relax
+\begin{DocExample}*
+\ExplSyntaxOn
+\def\TTTa{TTTa}
+\protected\def\TTTb{TTTb}
+\DeclareRobustCommand\TTTc{TTTc}
+\zcmd_if_protected:NTF \TTTa {Yes}{No};
+\zcmd_if_protected:NTF \TTTb {Yes}{No};
+\zcmd_if_protected:NTF \TTTc {Yes}{No};
+\zcmd_if_ltxprotect:NTF \TTTc {Yes}{No}.
+\ExplSyntaxOff
+\end{DocExample}
+
+
+\begin{function}[added=2025-09-03, pTF]{\token_if_expandable:N, \token_if_expandable:c}
+  此系列命令来自 \pkg{l3token}, 用于测试 \meta{token} 是否可展.
+\end{function}
+
+\begin{function}[added=2025-09-03, pTF]{\token_if_long_macro:N, \token_if_long_macro:c}
+  此系列命令来自 \pkg{l3token}, 用于测试 \meta{token} 是否为一个 long macro.
+\end{function}
+
+\begin{function}[added=2025-09-03, pTF]{\token_if_primitive:N, \token_if_primitive:c}
+  此系列命令来自 \pkg{l3token}, 用于测试 \meta{token} 是否为 primitive(原语).
+\end{function}
+
+
+
+\clearpage
+\subsubsection{列表补丁}
+本小节将介绍 \pkg{cmd} 模块提供的一系列 Patch, 它们往往和 \pkg{clist} 中的命令配合使用;\par
+\vskip2em 
+\noindent{\color{red}\sffamily NOTE: 普通用户不应该使用此小节的系列命令, 这系列的命令主要提供给模板的开发者.}
+
+
+\begin{function}[added=2025-06-21, EXP]
+  {
+    \zclist_count:n, \zclist_count:o, 
+    \zclist_count:e, \zclist_count:f,
+  }
+  \begin{syntax}
+    \cmd{\zclist_count:n} \{\meta{item_1}, ..., \meta{item_n}\}
+  \end{syntax}
+  命令 \cmd{\zclist_count:n} 与 \cs{clist_count:n} 类似, 但此命令会将空的 \meta{item}
+  考虑在内.
+\end{function}
+
+
+\begin{function}[added=2025-06-21, EXP]
+  {
+    \zclist_item:nn, \zclist_item:on,
+    \zclist_item:en, \zclist_item:ee,
+  }
+  \begin{syntax}
+    \cmd{\zclist_item:nn} \{\meta{item_1}, ..., \meta{item_n}\} \marg{index}
+  \end{syntax}
+  命令 \cmd{\zclist_item:nn} 与 \cs{clist_item:nn} 类似, 但此命令会将空的 \meta{item}
+  考虑在内.
+\end{function}
+
+
+\begin{function}[added=2025-06-21, EXP]
+  {
+    \zclist_range:nnn, \zclist_range:enn,
+    \zclist_range:onn,
+  }
+  \begin{syntax}
+    \cmd{\zclist_range:nnn} \{\meta{item_1}, ..., \meta{item_n}\}\marg{start}\marg{end}
+  \end{syntax}
+  命令 \cmd{\zclist_range:nnn} 与 \cs{tl_range:nnn} 类似, 但此命令会将空的 \meta{item}
+  考虑在内. \textbf{注意}: 该命令暂时不支持负数索引.
+\end{function}
+
+下面给出上述 \verb|\zclist_count:n, \zclist_item:nn, \zclist_range:nnn| 这几个命令的使用案例:
+\begin{DocExample}*
+\ExplSyntaxOn
+\setlength{\fboxsep}{3pt}
+\def\clistA {, 1, 2, }
+\zclist_count:o { \clistA };
+\fbox{\zclist_item:on { \clistA }{2}}, \fbox{\zclist_item:on { \clistA }{-1}}; 
+\detokenize\expandafter{\expanded{\zclist_range:onn { \clistA }{1}{3}}}
+\ExplSyntaxOff
+\end{DocExample}
+
+
+
+\begin{function}[added=2025-06-20, updated=2025-09-21, EXP]{
+    \zcmd_clist_patch:nn,
+    \zcmd_clist_patch:ne,
+    \zcmd_clist_patch:no,
+  }
+  \begin{syntax}
+    \cmd{\zcmd_clist_patch:nn} \Arg{replace}\{\meta{item_1}, ... ,\meta{item_n}\}
+  \end{syntax}
+  该命令会自动将空的 \meta{item} 替换为 ``\meta{replace}''.
+  \vskip.75em\relax\noindent{\sffamily\color{red}\TeX hackers note:返回结果会被包裹在 \cmd{\exp_not:n} 中, 
+  这意味着当这些结果出现在 \texttt{e}-type 或 \texttt{x}-type 参数中时, 返回结果不会进一步展开.}
+\end{function}
+\vskip1.25em\relax
+\begin{DocExample}*
+\ExplSyntaxOn
+\def\clistA{\zcmd_clist_patch:nn {\scan_stop:}{, a, 2, \TTT, }}
+\detokenize\expandafter{\expanded{\clistA}}
+\ExplSyntaxOff
+\end{DocExample}
+
+
+
+\begin{function}[added=2025-06-20, updated=2025-09-21, EXP]{
+    \zcmd_sclist_patch:nn, 
+    \zcmd_sclist_patch:ne,
+    \zcmd_sclist_patch:no
+  }
+  \begin{syntax}
+    \cmd{\zcmd_sclist_patch:nn} \Arg{replace}\{\meta{item_1}; ... ;\meta{item_n}\}
+  \end{syntax}
+  该命令会自动将空的 \meta{item} 替换为 ``\meta{replace}''.
+  \vskip.75em\relax\noindent{\sffamily\color{red}\TeX hackers note:返回结果会被包裹在 \cmd{\exp_not:n} 中, 
+  这意味着当这些结果出现在 \texttt{e}-type 或 \texttt{x}-type 参数中时, 返回结果不会进一步展开.}
+\end{function}
+
+\vskip1.25em\relax
+\begin{DocExample}*
+\ExplSyntaxOn
+\def\clistA{\zcmd_sclist_patch:nn {\TTTa}{; a; 2; \TTT; ; }}
+\detokenize\expandafter{\expanded{\clistA}}
+\ExplSyntaxOff
+\end{DocExample}
+
+
+
+\clearpage
+\subsubsection{token 命令}
+本小节主要介绍 \ztex{} 的 \pkg{cmd} 模块中与 token 判断相关的命令, 它们均是完全可展的.
+\vskip1em 
+\noindent{\sffamily\color{red}NOTE: 宏包 \pkg{etl} 也提供了本节的大多数命令，具体用法可参见其手册.}
+
+
+\begin{function}[added=2025-09-19, EXP]{\ztexgentoken, \ztex_token_gen:nn}
+  \begin{syntax}
+    \cmd{\ztexgentoken}\Arg{charcode}\Arg{catcode}
+    \cmd{\ztex_token_gen:nn} \Arg{charcode}\Arg{catcode}
+  \end{syntax}
+  根据 \meta{charcode} 和 \meta{catcode} 生成对应的 token. \cmd{\ztexgentoken}
+  封装自 \cmd{\ztex_token_gen:nn}.
+\end{function}
+
+
+\begin{function}[EXP]{\ztex_token_if_eq:NN}
+  \begin{syntax}
+    \cs{ztex_token_if_eq:NN} \meta{token_1}\meta{token_2}
+  \end{syntax}
+  此命令基于原始的 \cs{ifx} 命令, 可以用于一些 implict token 的判断, 如 \cs{l_peek_token}, 
+  \cs{g_peek_token}. 当 \texttt{\meta{token_1} = \meta{token_2}} 时，该命令返回 ``1'', 
+  反之，则返回 ``0''. 
+\end{function}
+
+
+\begin{function}[added=2025-06-25, pTF, rEXP]{\ztex_tl_if_eq:nn, \ztex_tl_if_eq:ne, \ztex_tl_if_eq:ee}
+  \begin{syntax}
+    \cs{ztex_tl_if_eq:nnTF} \Arg{tl_1}\Arg{tl_2}\Arg{true code}\Arg{false code}
+  \end{syntax}
+  此命令与 \textsf{l3tl} 中默认的 \cs{tl_if_eq:nnTF} 含义相同, 但 \ztex{} 中的 \cs{ztex_tl_if_eq:nnTF}
+  是完全可展的. \textbf{注意}: 该命令目前还有缺陷(此缺陷也存在于 \textsf{l3tl} 的 \cs{tl_if_eq:nnTF} 命令中), 
+  当 \meta{tl_1} 与 \meta{tl_2} 中的 token 数量不一致时, \cs{ztex_tl_if_eq:nnTF} 会直接返回 \texttt{\Arg{false code}}, 
+  比如 ``\verb|\ztex_tl_if_eq:nnTF| \verb|{a{aa}}{aaa} {true}{false}|'' 的返回结果为 ``\texttt{false}''.\par
+  % \vskip1em
+  % \noindent{\color{red}\sffamily NOTE: 此函数基于 \cs{int_step_tokens:nn}, 所以请确保你的 \textsf{l3kernel}% 
+  % 版本在 2025-01-15 之后.}
+\end{function}
+\vskip1.25em\relax
+\begin{DocExample}*
+\ExplSyntaxOn
+\NewDocumentCommand{\tlifeq}{mmmm}
+  { \ztex_tl_if_eq:nnTF {#1}{#2}{#3}{#4} }
+\edef\TTTa{\ztex_tl_if_eq:nnTF {abcdefg}{abcdefh}{EQ}{NOT~EQ}}
+\detokenize\expandafter{\expanded{\TTTa}},~
+\edef\TTTb{\ztex_tl_if_eq:nnTF {ab\c_colon_str cd}{ab:cd}{EQ}{NOT~EQ}}
+\detokenize\expandafter{\expanded{\TTTb}},~
+\str_set:Nn \l_tmpa_str {:}
+\edef\TTTc{\ztex_tl_if_eq:nnTF {ab\c_colon_str cd}{ab\l_tmpa_str cd}{EQ}{NOT~EQ}}
+\detokenize\expandafter{\expanded{\TTTc}}.\par
+\ExplSyntaxOff
+\tlifeq{a}{a}{EQ}{NOT~EQ},
+\tlifeq{a}{b}{EQ}{NOT~EQ},
+\tlifeq{aa}{aa}{EQ}{NOT~EQ}, 
+\tlifeq{aa}{ab}{EQ}{NOT~EQ}.\par
+
+\tlifeq{a{a}}{aa}{EQ}{NOT~EQ},
+\tlifeq{aaa}{a{aa}}{EQ}{NOT~EQ},
+\tlifeq{aaa}{aaa}{EQ}{NOT~EQ}.\par
+\end{DocExample}
+
+
+\begin{function}[added=2025-07-13, updated=2025-09-21, pTF, rEXP]{
+    \ztex_token_if_in:nN, 
+    \ztex_token_if_in:oN, 
+    \ztex_token_if_in:eN,
+  }
+  \begin{syntax}
+    \cs{ztex_token_if_in:nNTF} \Arg{tl}\meta{token}\Arg{true code}\Arg{false code}
+  \end{syntax}
+  此命令用于测试 \meta{token} 是否存在于 \meta{tl} 中, 基于上述的 \cs{ztex_token_if_eq:NN} 
+  命令. 这里的 \meta{token} 可以是 implict token, 如 \cs{l_peek_token}, \cs{g_peek_token}.  
+\end{function}
+
+
+\begin{function}[added=2025-06-25, pTF, rEXP]{\ztex_tl_if_in:nn, \ztex_tl_if_in:no, \ztex_tl_if_in:ne, \ztex_tl_if_in:ee}
+  \begin{syntax}
+    \cs{ztex_tl_if_in:nnTF} \Arg{tl_1}\Arg{tl_2}\Arg{true code}\Arg{false code}
+  \end{syntax}
+  此命令与 \textsf{l3tl} 中默认的 \cs{tl_if_in:nnTF} 含义、用法均相同(用于测试 \meta{tl_2} 能否在 \meta{tl_1} 中找到),
+  但 \ztex{} 中的 \cs{ztex_tl_if_in:nnTF} 是完全可展的. \textbf{注意}: 因为此命令基于上述的 \cs{ztex_tl_if_eq:nn} 命令, 
+  所以该命令目前有缺陷, 该缺陷的详细描述请参见命令 \cs{ztex_tl_if_eq:nnTF} 的说明.
+  \vskip1em
+  \noindent{\color{red}\sffamily NOTE: 目前该函数内部采用的字符串匹配算法比较低效, 后续也许会采用 KMP 算法进行重写;}
+\end{function}
+\begin{DocExample}*
+\ExplSyntaxOn
+\ztex_tl_if_in:nnTF {123456789}{123}{FIND}{NOT~FIND},   
+\ztex_tl_if_in:nnTF {12x34567x89}{7x89}{FIND}{NOT~FIND},
+\edef\TTT{\ztex_tl_if_in:nnTF {1234567x89}{78x9}{FOUND}{NOT~FOUND}}
+\detokenize\expandafter{\expanded{\TTT}}
+\ExplSyntaxOff
+\end{DocExample}
+
+
+\begin{function}[added=2025-06-21, EXP, pTF]{\ztex_colon_if_in:n, \ztex_colon_if_in:e, \ztex_colon_if_in:V}
+  \begin{syntax}
+    \cmd{\ztex_colon_if_in:nTF} \marg{tl}\Arg{true code}\Arg{false code}
+  \end{syntax}
+  此命令用于检测 \meta{tl} 中是否含有 ``\texttt{:}''.
+\end{function}
+
+
+\begin{function}[added=2025-06-21, rEXP, pTF]
+  {
+    \ztex_head_tail_token_if_eq:nnn,
+    \ztex_head_tail_token_if_eq:enn,
+    \ztex_head_tail_token_if_eq:eee,
+  }
+  \begin{syntax}
+    \cmd{\ztex_head_tail_token_if_eq:nnnTF} \marg{tl}\marg{head}\marg{tail}
+    ~~~~~~\Arg{true code}\Arg{false code}
+  \end{syntax}
+  该命令用于检测 \meta{tl} 的首尾 Token 是否与 \meta{head}, \meta{tail} 相同;
+  若均相等, 则执行 \meta{true code} 对应分支, 反之, 则执行\meta{false code} 对应分支.
+\end{function}
+
+
+\begin{function}[added=2025-06-21, rEXP, pTF]{
+    \ztex_index_token_if_eq:nnn,
+    \ztex_index_token_if_eq:enn,
+    \ztex_index_token_if_eq:eee,
+  }
+  \begin{syntax}
+    \cmd{\ztex_head_tail_token_if_eq:nnnTF} \marg{tl}\marg{index}\marg{token}
+    ~~~~~~\Arg{true code}\Arg{false code}
+  \end{syntax}
+  该命令用于检测 \meta{tl} 内 index 为 \meta{index} 的 Token 是否与 \meta{token} 相等;
+  若相等, 则执行 \meta{true code} 对应分支, 反之, 则执行\meta{false code} 对应分支.
+\end{function}
+
+
+\begin{function}[added=2025-09-21, rEXP]{\ztex_tl_pattern_pos:nn}
+  \begin{syntax}
+  \cmd{\ztex_tl_pattern_pos:nn} \Arg{tl}\Arg{test tl}
+  \end{syntax}
+  此命令会返回 \meta{test tl} 在 \meta{tl} 中的所有位置, 不同位置使用 
+  ``\texttt{;}'' 分割.
+\end{function}
+
+
+\begin{function}[added=2025-06-25, updated=2025-09-21, rEXP]
+  {
+    \ztex_tl_replace_once:nnn, 
+    \ztex_tl_replace_once:onn,
+    \ztex_tl_replace_once:enn,
+    \ztex_tl_replace_once:noo,
+    \ztex_tl_replace_once:nee,
+    \ztex_tl_replace_once:eee,
+  }
+  \begin{syntax}
+    \cs{ztex_tl_replace_once:nnn} \rlap{\marg{tl}\Arg{old tokens}\Arg{new tokens}}
+  \end{syntax}
+  此命令与 \textsf{l3tl} 中默认的 \cs{tl_replace_once:nnn} 含义、用法均相同
+  (用于把 \meta{tl} 中第一个匹配到的 \meta{old tokens} 替换为 \meta{new tokens}),
+  但 \ztex{} 中的 \cs{ztex_tl_replace_once:nnn} 是完全可展的.\par
+  \vskip.75em\relax\noindent{\sffamily\color{red}\TeX hackers note:返回结果会被包裹在 \cmd{\exp_not:n} 中, 
+  这意味着当这些结果出现在 \texttt{e}-type 或 \texttt{x}-type 参数中时, 返回结果不会进一步展开.}
+  \vskip.75em\relax
+  \noindent{\color{red}\sffamily NOTE:目前该函数内部采用的字符串匹配算法比较低效, 后续也许会采用 KMP 算法进行重写.}
+\end{function}
+
+
+\begin{function}[added=2025-06-25, updated=2025-09-21, rEXP]
+  {
+    \ztex_tl_replace_all:nnn, 
+    \ztex_tl_replace_all:onn,
+    \ztex_tl_replace_all:enn,
+    \ztex_tl_replace_all:noo,
+    \ztex_tl_replace_all:nee,
+    \ztex_tl_replace_all:eee,
+  }
+  \begin{syntax}
+    \cs{ztex_tl_replace_all:nnn} \rlap{\marg{tl}\Arg{old tokens}\Arg{new tokens}}
+  \end{syntax}
+  此命令与 \textsf{l3tl} 中默认的 \cs{tl_replace_all:nnn} 含义、用法均相同
+  (用于把 \meta{tl} 中所有的 \meta{old tokens} 替换为 \meta{new tokens}),
+  但 \ztex{} 中的 \cs{ztex_tl_replace_all:nnn} 是完全可展的.\par
+  \vskip.75em\relax\noindent{\sffamily\color{red}\TeX hackers note:返回结果会被包裹在 \cmd{\exp_not:n} 中, 
+  这意味着当这些结果出现在 \texttt{e}-type 或 \texttt{x}-type 参数中时, 返回结果不会进一步展开.}
+  \vskip.75em\relax
+  \noindent{\color{red}\sffamily NOTE:目前该函数内部采用的字符串匹配算法比较低效, 后续也许会采用 KMP 算法进行重写.}
+\end{function}
+
+
+\begin{function}[added=2025-09-21, rEXP]{
+    \ztex_tl_replace_cnt:nnnn,
+    \ztex_tl_replace_cnt:nonn,
+    \ztex_tl_replace_cnt:nenn,
+    \ztex_tl_replace_cnt:nooo,
+    \ztex_tl_replace_cnt:neee,
+    \ztex_tl_replace_cnt:eeee,
+  }
+  \begin{syntax}
+  \cmd{\ztex_tl_replace_cnt:nnnn}
+  ~~~~\Arg{count}\marg{tl}
+  ~~~~\Arg{old tokens}\Arg{new tokens}
+  \end{syntax}
+  此命令与前述的 \texttt{\char92ztex_tl_replace_all(once):nnn} 等命令类似, 不同的是:
+  此命令可以指定 \meta{old tokens} 的替换次数, 次数由 \meta{count} 指定.
+  \vskip.75em\relax\noindent{\sffamily\color{red}\TeX hackers note:返回结果会被包裹在 \cmd{\exp_not:n} 中, 
+  这意味着当这些结果出现在 \texttt{e}-type 或 \texttt{x}-type 参数中时, 返回结果不会进一步展开.}
+  \vskip.75em\relax
+  \noindent{\color{red}\sffamily NOTE:目前该函数内部采用的字符串匹配算法比较低效, 后续也许会采用 KMP 算法进行重写.}
+\end{function}
+
+
+\newgeometry{left=2.5cm, right=2.5cm}
+\begin{DocExample}*
+\ExplSyntaxOn
+\edef\TTT{
+  \ztex_tl_pattern_pos:nn 
+    {xxxxabc123def123123fgh123xxx123asdwzzz}
+    {123}
+}
+\edef\TTTa{
+    \ztex_tl_replace_once:nnn 
+      {xxxxabc123def123123fgh123xxx123asdwzzz}
+      {123}{|XXX|}
+  }
+\edef\TTTb{
+    \ztex_tl_replace_all:nnn 
+      {xxxxabc123def123123fgh123xxx123asdwzzz}
+      {123}{|XXX|}
+  }
+\edef\TTTc{
+  \ztex_tl_replace_cnt:nnnn {2}
+    {\fbox X\fbox X\fbox x}{\fbox}{\ffbox}
+}
+\ExplSyntaxOff
+Replace index:\detokenize\expandafter{\TTT}\par
+Replace once:\detokenize\expandafter{\TTTa}\par
+Replace all :\detokenize\expandafter{\TTTb}\par
+Replace cnt :\detokenize\expandafter{\TTTc}
+\end{DocExample}
+\restoregeometry
+
+
+\begin{function}[added=2025-06-21, EXP]{
+    \ztex_token_strip_both:n, 
+    \ztex_token_strip_both:e, 
+    \ztex_token_strip_both:V,
+  }
+  \begin{syntax}
+    \cmd{\ztex_token_strip_both:n} \Arg{tl}
+  \end{syntax}
+  此命令会将 \meta{tl} 两侧的 Token 去掉.
+\end{function}
+
+
+\begin{function}[added=2025-06-21, EXP]{
+    \ztex_token_strip_left:n, 
+    \ztex_token_strip_left:e, 
+    \ztex_token_strip_left:V, 
+  }
+  \begin{syntax}
+    \cmd{\ztex_token_strip_left:n} \Arg{tl}
+  \end{syntax}
+  此命令会将 \meta{tl} 左侧的 Token 去掉.
+\end{function}
+
+
+\begin{function}[added=2025-06-21, EXP]{ 
+    \ztex_token_strip_right:n,
+    \ztex_token_strip_right:e,
+    \ztex_token_strip_right:V,
+  }
+  \begin{syntax}
+    \cmd{\ztex_token_strip_right:n} \Arg{tl}
+  \end{syntax}
+  此命令会将 \meta{tl} 右侧的 Token 去掉.
+\end{function}

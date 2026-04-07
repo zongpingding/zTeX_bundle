@@ -1,0 +1,14 @@
+\begin{tikzpicture}[>=Latex]
+    \xAxis[-1][12]
+    \yAxis[-1][7]
+
+    \PlotPrecise{plot}{22}
+    \Plot[0.75:11][red, thick, opacity=0][type=ball, color=red]{2.5-1/x}
+
+    \PlotPrecise{plot}{22}
+    \Plot[0.5:11.5][red, thick, opacity=0][type=ball, color=green]{3+1/x}
+
+    \PlotPrecise{contour}[long]{40}
+    \ContourPlot[0:12][dashed]{y-2.5}
+    \ContourPlot[0:12][dashed]{y-3}
+\end{tikzpicture}

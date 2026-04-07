@@ -1,0 +1,108 @@
+\ExplSyntaxOn
+% Put the mindmap-toc as watermark at cover page.
+\int_new:N \g__mindmap_color_int
+\seq_new:N \g__mindmap_data_seq
+\seq_new:N \g__mindmap_keyvaldata_seq
+\tl_new:N \g__mindmap_filter_data_tl
+\def\toclinecmd#1#2#3#4
+{
+    % override hyperlink color.
+    {\ztexlink{#1.#2}{\textcolor{white}{#3(#4)}}}
+}
+\cs_new:Npn \__ztoc_gen_mindmap_data:nn #1#2
+{
+    \tl_gclear:N \g_tmpa_tl
+    \ztoc_table_filter_byclass:nnNN
+        { #1 }{ #2 } 
+        \g_ztoc_keyvaltoc_seq
+        \g__mindmap_data_seq
+    \ztoc_generate_keyvaltable_seq:NN
+        \g__mindmap_data_seq
+        \g__mindmap_keyvaldata_seq
+    \ztoc_group_parser:NNNnnnnn \g__mindmap_keyvaldata_seq
+        \toclinecmd \g_tmpa_tl
+        {
+            child [ concept~color = blue!
+                \int_eval:n{\g__mindmap_color_int*6}!green
+            ] \bgroup node[concept]
+        }
+        {}{}{\egroup}{\int_gincr:N \g__mindmap_color_int}
+    % replace '\bgroup' and '\egroup' by '{' and '}'. 
+    \str_clear:N \l_tmpa_str
+    \exp_args:NNo \str_set:Nn \l_tmpa_str { \g_tmpa_tl }
+    \exp_args:NNne \str_replace_all:Nnn \l_tmpa_str
+        { \bgroup }{ \char_generate:nn {123}{12} }
+    \exp_args:NNne \str_replace_all:Nnn \l_tmpa_str
+        { \egroup }{ \char_generate:nn {125}{12} }
+    \tl_gset_rescan:Nno \g__mindmap_filter_data_tl
+        { \cctab_select:N \c_document_cctab }
+        { \l_tmpa_str }
+}
+\cs_new:Npn \__tkz_mind_map:n #1
+{
+    \tl_if_empty:nF {#1}
+    {
+        \node[concept] 
+        {\color{white}\ztex{}~Interface}
+        #1;
+    }
+}
+\newcommand{\mindmap}[2]
+{
+    \__ztoc_gen_mindmap_data:nn
+        { #1 }{ #2 }
+    \exp_args:No \__tkz_mind_map:n
+        { \g__mindmap_filter_data_tl }
+}
+\ExplSyntaxOff
+\zpagemask{%
+    \begin{tikzpicture}[
+        mindmap, grow cyclic,
+        text width=2cm, align=flush center,
+        nodes={concept}, concept color=blue!60,
+        root concept/.append style={text width=4cm, font=\Large},
+        level 1/.append style={level distance=5cm, sibling angle=45, text width=3cm, font=\Large},
+        level 2/.append style={level distance=8.75cm, sibling angle=90, text width=3cm, font=\Large},
+        level 3/.append style={level distance=5cm, sibling angle=45, text width=3cm, font=\Large},
+        level 1 concept/.append style={font=\normalsize, color=white},
+    ]
+    \mindmap{section}{7}
+    \end{tikzpicture}
+}
+
+
+% cover banner note.
+\ExplSyntaxOn
+\zpagemask[position={(0pt, .25\zph)}, anchor=l, layer=foreground]{
+  \rlap{\tikz\fill[fill=gray!25, nearly~opaque] (0, 0) rectangle (\zpw, 6em);}
+  \hcoffin_set:Nn \l_tmpa_coffin {\sffamily\Large\color{black!75} 由于本人时间有限, 目前此文档类的开发暂停.}
+  \coffin_typeset:Nnnnn \l_tmpa_coffin {hc}{vc}{.5\zpw}{3em}
+}
+\ExplSyntaxOff
+
+
+\newgeometry{hmargin=1cm, vmargin=1.5in}
+  \maketitle
+\restoregeometry
+
+
+% contents
+\newgeometry{hmargin=3cm, vmargin=1in}
+\pagenumbering{Roman}
+\thispagestyle{plain}
+\ztexslideTF{
+  \tableofcontents
+}{
+  \addtocbookmark
+  \centerline{\Large\bfseries 总目录}
+  \vskip2em\relax
+  {
+    \ztocformat\subsection{ignore.name={10.}}
+    \ztocformat\subsubsection{ignore.name={10.}}
+    \multicolcontents{2}
+  }
+  \clearpage
+}
+\setcounter{page}{0}
+\pagenumbering{arabic}
+\restoregeometry

@@ -1,0 +1,53 @@
+\clearpage
+\subsection{\titlepkg{graphics} 模块}
+本模块主要设置图片相关的选项, 一部分的命令来自 \pkg{graphicx}, 一部分命令来自 \pkg{l3graphics}.
+
+
+\begin{function}[added=2024-11-05]{\graphicspath}
+  \begin{syntax}
+    \cs{graphicspath}\marg{path}
+  \end{syntax}
+  此命令用于指定图片的搜索路径, 此命令来自 \pkg{graphicx} 宏包, 默认搜索的路径包括:%
+  \texttt{./figure/}, \texttt{./figures/}, \texttt{./image/}, \texttt{./images/}, 
+  \texttt{./pictures/}, \texttt{./picture/}, \texttt{./pics/}, \texttt{./pics/}, \texttt{./graphics/}, 
+  \texttt{./graphic/}. 若用户需要增加额外的路径, 请按照如下方式添加:
+\end{function}
+\begin{DocExample}[++]
+  \graphicspath{
+    {./Fig/}{./Img/}
+  }
+\end{DocExample}
+
+
+
+\begin{function}[added=2025-09-20]{\zgraphicsinclude}
+  \begin{syntax}
+    \cmd{\zgraphicsinclude}\oarg{options}\Arg{file}
+  \end{syntax}
+  此命令封装自 \pkg{l3graphics} 宏包, 用于插入图片, 图片由 \meta{file}
+  指定. \meta{file} 的搜索路径请参见 \cmd{\graphicspath} 的说明; 
+  \meta{options} 用于设置图片属性, 包括: ``\texttt{type, page, draft, pagebox}'' 等.
+\end{function}
+
+
+\begin{function}[added=2026-02-16]{\includegraphicsifexsit}
+	\begin{syntax}
+    \cmd{\includegraphicsifexsit}\oarg{img-spec}\oarg{sub-img}\Arg{img}
+  \end{syntax}
+  此命令用于插入图片, 其会检测 \meta{img} 是否存在; 若 \meta{img} 不存在, 则插入 \meta{sub-img},
+  \meta{sub-img} 默认为 ``\texttt{example-image-a}''; \meta{img-spec} 用于指定图片的排版格式,
+  默认为 ``\texttt{width=.75\textbackslash linewidth}''.
+\end{function}
+
+
+\begin{function}[added=2025-09-20]{\zgraphicspagecnt}
+  \begin{syntax}
+  \cmd{\zgraphicspagecnt}\Arg{file}
+  \end{syntax}
+  此命令用于计算 PDF 图片的页数, 计算结果保存于 \cmd{\zgraphicspageint} 这个宏中.
+\end{function}
+
+
+\begin{function}[added=2025-09-20, EXP]{\zgraphicspageint}
+  命令 \cmd{\zgraphicspagecnt} 的结果保存于 \cmd{\zgraphicspageint} 这个宏中, 这个宏是完全可展的.
+\end{function}

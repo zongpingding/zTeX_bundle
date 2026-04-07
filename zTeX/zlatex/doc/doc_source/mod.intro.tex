@@ -1,0 +1,35 @@
+\clearpage
+\section{\texorpdfstring{\ztex{}}{zTeX} 模块}
+本节对应的所有 module 默认自动加载, 除此之外, 用户还可以通过命令 \cmd{\ztexloadmod} 调用自己编写
+的 module. 目前已有的 module 列表如下:
+
+\begin{multicols}{2}
+  \begin{itemize}
+    \item \file{ztex.module.box.tex}
+    \item \file{ztex.module.cmd.tex}
+    \item \file{ztex.module.color.tex}
+    \item \file{ztex.module.counter.tex}
+    \item \file{ztex.module.font.tex}
+    \item \file{ztex.module.graphics.tex}
+    \item \file{ztex.module.item.tex}
+    \item \file{ztex.module.page.tex}
+    \item \file{ztex.module.ref.tex}
+    \item \file{ztex.module.sclist.tex}
+    \item \file{ztex.module.thm.tex}
+    \item \file{ztex.module.sect.tex}
+  \end{itemize}
+\end{multicols}
+
+用户也可以编写你自己的 module, 不妨假设其名称为 \meta{moduleA}; 将此文件命名为 \texttt{ztex.module.\meta{moduleA}.tex}, 
+然后将其放入路径 \meta{z\TeX}\file{/module/} 下，最后使用 \cs{ztexloadmod}\texttt{\marg{moduleA}} 即可加载此 module. 
+\meta{moduleA} 中程序的基本框架如下:
+
+
+\begin{DocExample}[++]
+\ProvidesExplFile{ztex.module.\ES{\meta{moduleA}}.tex}
+                 {2025/04/26}
+                 {1.0.0}
+                 {\ES{\meta{discription}}}
+
+\newcommand\YourCmd{\ES{\meta{definition}}}
+\end{DocExample}

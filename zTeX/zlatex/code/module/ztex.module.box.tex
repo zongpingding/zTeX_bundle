@@ -1,5 +1,5 @@
 \ProvidesExplFile{ztex.module.box.tex}
-  {2025/09/13}{\ztex@versi@n}
+  {2026/02/05}{\ztex@versi@n}
   {box~module~for~ztex}
 
 
@@ -23,36 +23,99 @@
 
 % ==> better '\mbox' and '\fbox'(\verb can be used inside)
 % REF: https://texhacks.blogspot.com/2011/01/better-mbox-and-fbox.html?m=1
+% enhance \mbox
 \def\zmbox{\leavevmode\hbox}
+
+% universe box-content collect interface
 \newbox\ztexcollectbox
+\def\zboxcollectpre{}
+\def\zboxcollect@pre
+  {
+    \bgroup
+    \zboxcollectpre
+    \aftergroup\zboxcollect@post
+  }
+\def\zboxcollectpost{}
+\def\zboxcollect@post
+  {
+    \zboxcollectpost
+    \egroup
+    \zboxcollect@typeset
+  }
+\def\zboxcollect@typeset
+  {
+    \box\ztexcollectbox\relax
+  }
+\cs_set_protected:Npn \zbox_item_collect:nnnw #1#2#3
+  {% #1:box typeset spec; #2/#3:box material pre/post
+   % NOTE: box typeset is after 'post'.
+    \cs_set:Npn \zboxcollect@typeset
+      { #1 }
+    \def\zboxcollectpre{#2}
+    \def\zboxcollectpost{#3}
+    \zboxcollect
+  }
+
+% users' interface
 \protected\long\def\zboxcollect
   {
     \leavevmode
     \afterassignment\zboxcollect@pre
     \setbox\ztexcollectbox\hbox
   }
-\def\zboxcollect@pre
+\NewDocumentCommand{\zboxcollectcustom}{mO{}O{}}
+  { \zbox_item_collect:nnnw { #1 }{ #2 }{ #3 } }
+
+% enhance \fbox
+\ztex_keys_define:nn { box/enhance-fbox }
   {
-    \bgroup
-    \aftergroup\zboxcollect@post
+    draw .tl_set:N  = \l__zbox_fbox_draw_tl,
+    draw .initial:n = { black },
+    fill .tl_set:N  = \l__zbox_fbox_fill_tl,
+    fill .initial:n = { none },
+    arc  .fp_set:N  = \l__zbox_fbox_arc_fp,
+    arc  .initial:n = { 1 },
+    text .tl_set:N  = \l__zbox_fbox_text_sty_tl,
+    text .initial:n = { },
   }
-\def\zboxcollect@post
+\NewDocumentCommand\zfbox{o}
   {
-    \egroup
-    \zboxcollect@typeset
+    \IfValueT{#1}{
+      \ztex_keys_set:nn { box/enhance-fbox }{ #1 }
+    }
+    \zbox_item_collect:nnnw
+      {
+        \begin{zpic}
+          [
+            unit=1pt, % \wd, \ht and \dp returns dim in 'pt', thus we must set 'unit=1pt'.
+            xoffset=\dim_to_decimal:n {\fboxrule/2},
+            yoffset=-\dim_to_decimal:n {\dp\ztexcollectbox + \fboxsep + \fboxrule/2},
+            width=\dim_to_decimal:n {\wd\ztexcollectbox + 2\fboxsep + 2\fboxrule}
+          ]
+          \zrectangle[
+              arc=\l__zbox_fbox_arc_fp, width=\fboxrule,
+              fill=\l__zbox_fbox_fill_tl, draw=\l__zbox_fbox_draw_tl
+            ]
+            ( 0, 0 )
+            (
+              \dim_to_decimal:n {\wd\ztexcollectbox + 2\fboxsep + \fboxrule},
+              \dim_to_decimal:n {\ht\ztexcollectbox + \dp\ztexcollectbox + 2\fboxsep + \fboxrule}
+            )
+          \put
+            (
+              \dim_to_decimal:n {\wd\ztexcollectbox/2 + \fboxsep + \fboxrule/2},
+              \dim_to_decimal:n {\dp\ztexcollectbox + \fboxsep + \fboxrule/2}
+            ) { \clap{ \hbox{\vbox{\box_use:N \ztexcollectbox}}} }
+        \end{zpic}
+        % reset fbox style options
+        \ztex_keys_set:nn { box/enhance-fbox }
+          {
+             draw = black, fill = none,
+             arc  = 1,     text = ,       
+          }
+        \relax
+      }{ \l__zbox_fbox_text_sty_tl }{}
   }
-\def\zboxcollect@typeset
-  {
-    \box\ztexcollectbox
-  }
-\cs_set_protected:Npn \zbox_item_collect:nw #1
-  {
-    \cs_set:Npn \zboxcollect@typeset
-      { #1 }
-    \zboxcollect
-  }
-\NewDocumentCommand{\zboxcollectcustom}{m}
-  { \zbox_item_collect:nw { #1 } }
 
 
 % ==> 'framed' env for user
@@ -68,6 +131,14 @@
     bg           .initial:n = { gray!10 },
     adj          .dim_set:N = \l__zbox_frameduser_boxadj_dim, % width adjust
     adj          .initial:n = { 0pt },
+  }
+\cs_new:Nn \__ztex_make_frame_options_restore:
+  {
+    \dim_set:Nn \l__zbox_frameduser_rulewd_dim   { 5pt }
+    \tl_set:Nn  \l__zbox_frameduser_rulecolor_tl { red }
+    \dim_set:Nn \l__zbox_frameduser_padding_dim  { 5pt }
+    \tl_set:Nn  \l__zbox_frameduser_bgcolor_tl   { gray!10 }
+    \dim_set:Nn \l__zbox_frameduser_boxadj_dim   { 0pt }
   }
 \cs_new_protected:Npn \ztex_make_frame_begin:nnnnn #1#2#3#4#5 
   {% #1:rule color; #2:rule width; #3:padding; #4:bg color; #5:box width adjust
@@ -90,7 +161,6 @@
   { \endMakeFramed }
 \NewDocumentCommand\ztexframe{o}
   {
-    \group_begin:
     \IfValueT { #1 }
       {
         \ztex_keys_set:nn { box/framed-user }{#1}
@@ -105,7 +175,7 @@
 \NewDocumentCommand\ztexframeend{}
   { 
     \ztex_make_frame_end: 
-    \group_end: 
+    \__ztex_make_frame_options_restore:
   }
 
 

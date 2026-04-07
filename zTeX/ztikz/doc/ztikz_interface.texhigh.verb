@@ -1,0 +1,3 @@
+  > wolframscript -cloud -code 2+2
+  Wolfram ID: +\meta{Account}+
+  Password: +\meta{Password}+

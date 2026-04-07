@@ -1,0 +1,23 @@
+\input{regression-test.tex}
+\documentclass[
+  lang=en,
+  hyper,
+  fancy,
+  class=book,
+  classOption={12pt, oneside, leqno}
+]{zlatex}
+
+
+\begin{document}
+\ExplSyntaxOn
+\START
+\TEST{unknown-class-option-handle}{
+  \zlatex_msg_warn:n {option-unknown} 
+}
+
+\NEWLINE
+\TYPE{=======================================}
+\TYPE{CLASS-COMMON-OPTIONS-PASSING-CORRECTLY}
+\TYPE{=======================================}
+\END
+\end{document}

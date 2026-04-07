@@ -1,0 +1,51 @@
+\clearpage
+\subsection{\titlepkg{fancy} 库}
+此 library 用于章节的格式化以及部分的宏包加载，目前仅对 \cmd{\chapter} 进行了重定义. 
+加载此库后, \ztex{} 会自动载入 \pkg{anyfontsize} 宏包.
+
+
+\begin{keyval}[parent=ztex]{fancy}
+  \begin{syntax}
+    fancy = \meta{true|\textbf{false}}>\dval{false}
+  \end{syntax}
+  此选项可以用于加载 \pkg{fancy} library, 默认为 \texttt{false}. \textbf{注意}:
+  在加载 \pkg{fancy} 库的同时，\ztex{} 会同时加载 \pkg{tcolorbox}, \pkg{tikz} 以及 \pkg{tikz} 的 \pkg{calc} 库.
+\end{keyval}
+
+
+
+\begin{function}[updated=2025-04-25]{\thmark}
+  \begin{syntax}
+    \cs{thmark}\marg{number}
+  \end{syntax}
+  此命令用于数字序号格式化, 其中 \meta{number} 为任意整数. 一个简单的使用样例如下:
+\end{function}
+\vskip1.25em\relax
+\begin{DocExample}*
+  \thmark{1}, \thmark{2}, \thmark{25}
+\end{DocExample}
+
+
+\begin{function}[added=2025-07-10]{\zfancychapset}
+  \begin{syntax}
+    \cs{zfancychapset}\Arg{keyval}
+  \end{syntax}
+  此命令用于设置 \cs{chapter} 也的一些基本信息, \meta{keyval} 列表请参见下述说明:
+\end{function}
+
+\begin{keyval}[parent=ztex/fancy/chap/text]{subtitle, saying, sayauthor, rcontent, lcontent}
+  \begin{syntax}
+    subtitle  = \Arg{content} > \dval{SUBTITLE}
+    saying    = \Arg{content} > \dval{SAYING}
+    sayauthor = \Arg{content} > \dval{SAY-AUTHOR}
+    lcontent  = \Arg{content} > \dval{L-CONTENT}
+    rcontent  = \Arg{content} > \dval{R-CONTENT}
+  \end{syntax}
+  \meta{subtitle} 用于设置章节的副标题; \meta{saying} 用于设置单元引言;
+  \meta{sayauthor} 用于指定引言作者; \meta{lcontent}, \meta{rcontent} 用于
+  指定页面左右两个的内容.
+\end{keyval}
+
+\newpage
+加载 \pkg{fancy} 库后, \verb|\chapter| 页的样式大致如下:\vskip3em
+\noindent\includegraphics[width=\linewidth]{./support/pics/fancy_chapter.pdf}

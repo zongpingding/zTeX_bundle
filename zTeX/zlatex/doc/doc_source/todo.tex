@@ -1,0 +1,116 @@
+\clearpage
+\InsertMark{ztex-right}{}
+\section{TODO}
+\ztex{} 的开发还远远没有结束，还有很多功能需要完善，这里列出部分将来可能会完善的功能%
+(\undone{} -- 未完成; \done{} -- 已完成; \wontfix{} -- 不考虑该功能):
+
+
+\let\olditem\item
+\RenewDocumentCommand{\item}{so}
+  {
+    \IfValueTF{#2}
+      {\color{black}\def\checkmark{\IfBooleanTF{#1}{\wontfix}{\done}}% 
+        \olditem\IfBooleanTF{#1}{(#2)}{\IfValueT{#2}{#2-}已完成:}\color{gray}}
+      {\color{black}\def\checkmark{\IfBooleanTF{#1}{\wontfix}{\undone}}%
+        \olditem}
+  }
+\begin{todolist}
+  \item 封装 \pkg{geometry} 宏包的相关接口，使得用户可以通过 \ztex{} 的接口来设置页面布局和纸张大小等参数.
+  \item [2025-07-06] 在独立实现 \pkg{titlesec} 和 \pkg{titletoc} 之前，先暂时把这两个宏包的接口封装一下，放入 \ztex{} 中.
+  \item [2025-08-20] 使用 new marker mechanism 重写 \hologo{LaTeX2e} 的 mark 机制, 方便和 \pkg{fancyhdr} 宏包配合使用.
+  \item*[使用 \texttt{\char92IfMarksEqualTF[page]\{ztex-right\}\{top\}\{first\}} 进行比较即可] 有时当前页面的 \texttt{ztex-right} 本应是空, 但 \verb|\FirstMark{ztex-right}| 却返回了上一节 \texttt{ztex-right} 中最后一个 mark. 能否提供一个一般性的命令或测试?
+  \item 重写 \cmd{\zpagestyleset} 和 \cmd{\zpage_set_style:nnn} 的接口.
+  \item [2025-04-27] 自定义 \env{syntax} 环境，用于排版代码. (比如给出相关命令的 \meta{key} 或 \meta{key} 的默认值).
+  \item [2025-05-12] 把自己修改的那个 Euler Math 变体配置进 \ztex{}, 命名为 \texttt{var-euler}, 然后把相关配置写入 \pkg{fontcfg} module.
+  \item 给 \cs{zpagemask} 命令增加一个 \meta{transparent} key 以适配不同的对象(文本，图片)以及引擎.
+  \item [2025-02-04] 添加一个证明类环境的 \verb|\zthmProofTitileFormat| 接口, 用于设置证明类环境的标题格式.
+  \item 完善 Metropolis zslide 主题, 实现 zslide 中的 \cs{zslidethemeuse} 和 \cs{zslideColorUse} 接口, 包括二者的自由组合.
+  \item*[使用 \cs{thepage} 命令足矣] 添加一个真正的 \cs{zslideframeall} 命令, 并把现在的 \cs{zslideframeall} 命令重命名为 \cs{zslideFrameSecTotal}.
+  \item [2025-04-22] 完善 \pkg{thm} module 的 icon 接口(类似 Elegant\LaTeX{} 系列), 但此接口仅在用户加载 \pkg{theme} library 时才可用.
+  \item [2025-04-22] 完善 \pkg{thm} module 中 \texttt{paris} 主题的分页样式. 
+  \item [2025-05-12] 使用 \pkg{ztool} 缩放 \pkg{thm} module 中 \texttt{obsidian} 样式标题中的 icon.
+  \item 重新实现部分 \pkg{xcoffins} 宏包中的命令, 目标为: 实现 \cs{parbox} 的功能，并且比之更加的易用.
+  \item 封装 Plain\TeX{} 中的 \cs{parshape} 及其相关命令，使之更加的易用.
+  \item 封装 \cmd{\lastbox} 相关命令, 实现段落的分割和盒子的跨页需求.
+  \item*[使用 \CusTeX{} 中的 \pkg{framedmulticol} 宏包] 在实现跨页盒子的基础上，手动实现 \pkg{framed} 宏包的功能, 在替代该宏包原有功能的基础上, 提供更加易用的接口.
+  \item [2025-05-12] 增加一个基于任意变换矩阵的盒子(内容)操作命令, 也许是依赖 \pkg{l3draw} ?? 或许增加一个 \cs{ztool_set_to_wd_ht:nnn} 或 \cs{ztool_set_wd_ht_plus_dp:nnnn} 命令 ???
+  \item 提供列表设置的相关命令, 目标是成为宏包 \pkg{enumerate} 的一个可选替代. (直接从原始的 \env{list} 环境出发 ?? 未来会把这部分命令抽离到一个新的单独模块)
+  \item 实现 \cs{hyper@icon} 接口, 用于设置文档中的超链接图标. (没有 icon 的超链接未免过于单调)
+  \item [2025-02-05] 优化 module 和 library 的加载检测机制, 完善相关变量的检测设置, 如在 \pkg{alias} 这一 library 中将变量 \cs{g__ztex_math_alias_bool} 显式的设置为 \texttt{true}.
+  \item [2025-04-20] 创建 \cs{zaliasOn}, \cs{zaliasOff} 两命令用于限制 \pkg{alias} library 中命令的使用范围.
+  \item [2025-06-15] 修复 \pkg{alias} 库中别名与已知命令冲突的问题.
+  \item [2025-06-15] 参考 \pkg{fixdif} 宏包, 修复了 \pkg{alias} 库中 \cs{dd} 命令的一系列间距问题.
+  \item [2025-05-12] 在部分 \ztex{} 内置命令的实现中增加 \cs{__ztex_plus_key_aux:nnn} 命令，用于在保留原内容的基础上增加内容.
+  \item [2025-05-12] 修复 \cmd{\zthmtocadd} 增加的定理条目超链接跳转异常这一问题.
+  \item [2025-04-28] 增加分散对齐命令 \cmd{\zboxitemalign}.
+  \item [2025-04-28] 重新制作 \ztex* 的 logo.
+  \item [2025-05-12] 增加 \cs{appmatter} 和 \cs{backmatter} 的定义.
+  \item [2025-09-03] 增加键值:默认的 CMR 和 CMM 字体定义，用于切换回默认字体.
+  \item [2025-08-13] 考虑西文字体的所有 Font Feature, 然后将其加入到 \pkg{font} 模块.
+  \item [2025-09-24] 修复 \texttt{font/doc} 这个键内的配置在 \hologo{XeTeX} 下的适配问题.
+  \item 在 \pkg{slide} 库中增加类似 \cs{step}, \cs{pause} 这样的 \cls{beamer} 命令; 
+  \item*[此需求不适合 \ztex{}] 更进一步, 在 \pkg{slide} 库中实现动画接口.
+  \item 在 \pkg{font} 模块中配置 \pkg{unicode-math} 宏包的相关命令.
+  \item [2025-05-09] 修复 slide 下 section 标题文本基线在 \meta{lang}\texttt{=en/cn} 下无法同时垂直对齐的问题. 
+  \item*[此为中英文字体本身的问题] 修复 slide 模式下当 section 标题为中英混排时基线不一致的问题.
+  \item (\textbf{难})增加浮动体控制相关的接口.
+  \item (\textbf{难})增加 output routine 相关的操作接口.
+  \item 部分 \cs{ztex_label_hook_preamble_last} 或 \cs{ztex_hook_preamble_last} 存在滥用的情况, 需要清理.
+  \item 实现部分直接操作 PDF 的接口, 比如 OCG, 图层/蒙版, 亦或者是透明度之类的, 可以参考 PDF Reference Manual. 
+  \item [2025-05-12] 针对同一个仿射变换矩阵, 比如 $\Lambda=\{1\ 0\ .5\ 1\}$ 时, \cs{ztoolboxaffine} 和 \cs{pdfsetmatrix} 的输出不一致; 但是当 $\Lambda=\{1\ 0\ 1\ 1\}$ 时, 二者的结果是一致的; 什么原因呢 ? 似乎是基本单位不一致 ? 
+  \item [2025-05-15] \texttt{.initial:n} 在 \texttt{.inherit:n} 后会报错, 需要修复.
+  \item [2025-09-03(已经增加了 \pkg{primitive} 库)] 部分引擎对应的 primitive 的封装, 比如 \hologo{pdfTeX} 中的 \cmd{\pdfsetmatrix}, \hologo{XeTeX} 中的 \cmd{\ifprimitive} 等.
+  \item 阅读引擎/驱动手册, 对 \cmd{\special} 命令进行介绍(或是封装), 比如一些直接操作 PDF 的命令 ?
+  \item [2025-06-25] 能否定义一个完全可展的 token replace 命令, 在文件读写过程中可能会有用.
+  \item [2025-06-25] 实现类似 Python 中那样的自定义命令接口 -- 关键点为参数类型标注以及默认值标注, 似乎用 \pkg{xtemplate} 也能做 ?
+  \item 实现类似 \pkg{luacode} 或 \pkg{pythontex} 宏包所提供命令类似的接口, 统一管理这一系列的 shell escape. 
+  \item [2026-02-14] \pkg{alias} 库中与矩阵相关的 ``\cs{mat}, \cs{pmat}, ...'' 命令并没有很好的实现内容(数据)和(排版)格式的分离, 它们这几个命令应该
+    仅用于矩阵的排版, 而非数据的生成.
+  \item \pkg{alias} 库中矩阵相关的命令, 能否实现自动设置 \cs{arraystretch} 的值 ??
+  \item 修复 \cs{qedsymbol} 位置不正确的问题, 或者参考 \pkg{amsthm} 宏包直接写一个新的 \cs{zqedhere} 命令.
+  \item 把原始的 \hologo{LaTeX2e} 中的 \cs{label}, \cs{ref} 和 \cs{pageref} 命令使用 \pkg{ltproperty} 进行重写;(这样或许还能解决页面元素绝对定位的问题 ?)
+  \item 修复 \hologo{LuaTeX} 和 \hologo{XeTeX} 下中文字体高度不一致的问题.
+  \item 使用 KMP 算法重写 \cs{ztex_tl_if_in:nnTF} 函数, 同时需保证其是完全可展的.
+  \item [2025-08-20] 完善 \cs{listoffigures}, \cs{listoftables}, \cs{listofalgorithms} 等命令, 它们暂时无法使用.
+  \item 补充 Tagged PDF 相关的代码, 且目前 \cmd{\DocumentMetadata} 和 bookmark 相关的 link targets 冲突.
+  \item 在 \pkg{page} 模块中实现一个增强的 \cs{marginpar} 命令, 目的是成为 \pkg{sidenotes} 宏包的一个可选替代. (目前 \pkg{marginnote} 宏包存在一系列的问题, 且维护情况也不乐观), 可以参考 \pkg{luatodonotes}, \pkg{chuushaku}, \pkg{marginnote} 等宏包.
+  \item [2025-08-31] \cs{ztocgroupinsert} 与 \cs{zlocaltoc} 中的 \meta{index} 不一致 ?
+  \item [2025-07-06] 处理两个相邻 \cs{section} 和 \cs{subsection} 之间多余的垂直间距.
+  \item [2025-07-06] 添加 \pkg{sect} 模块后, \pkg{thm} 模块中的 \cs{zthmtoc} 命令失效.
+  \item *[真正的原因是: \cs{paragraph} 后的垂直间距被忽略, 因为它被转为了水平间距] \cs{subparagraph} 前的垂直间距丢失了 ?
+  \item [2025-08-20] 现在的 \pkg{sect} 模块无法处理 \cs{texorpdfstring} 宏, 因其与 \meta{ignore} 相关的键冲突.
+  \item [2025-09-01] 由 ``\texttt{*.toc}'' 文件自动生成 ``\texttt{*.ptoc}'' 文件.(这需要对目录数据进行解析, 涉及到的命令比较多, 暂时不考虑)
+  \item *[使用 \cs{UseTemplate} 命令即可实现一次性的标题样式] 添加 \cs{EditNextInstance} 命令, 作用: 仅修改下一个章节命令的格式.
+  \item [2025-08-30] 命令 \cs{zsect_define_title:Nn} 中的 \meta{class} 参数只能是当前文档类中已有的标题级别(如 \texttt{part}, \texttt{section}, \texttt{subsection} 等),%
+        不能为新增的自定义级别.
+  \item [2025-09-02(并没有添加 \cs{zlocaltocenable} 命令)] \cs{ztocenabletable} 命令会改变之后所有与目录相关的变量, 从而所有目录相关命令的输出均不符合预期, 
+        可以考虑增加一个 \cs{zlocaltocenable} 命令.
+  \item 让 \cmd{\zlocaltoc} 以及其背后的命令支持解析 \hologo{LaTeX2e} 中原始目录语法(相关的 \cmd{\__ztoc_extract_name:w} 和 \cmd{\__ztoc_extract_title:w} 命令都需要重新设计; 目前它们和 \cmd{\use_i:nn}, \cmd{\use_ii:nn} 混用).
+  \item 在目录组划分时所加入的 hooks, 也许应该换为 \cmd{\UseHookWithArguments}.
+  \item [2025-09-21] 命令 \verb|\ztex_tl_replace_all:nnn {[ab[c]d}{[}{(}| 运行结果为 ``\texttt{c]d}'', 需要修复.
+  \item 完成术语(glossary)和索引(index)相关的接口(listing 和 algorithm 的接口目前已经可用).
+  \item 实现 \cmd{\zsect_instance_set_fallback:nn} 命令(或许还应该增加一系列的模板调试命令 ?).
+  \item [2025-09-21] 为了兼容性, 使用 \cmd{\tl_map_tokens:nn} 命令替代 \pkg{cmd} 模块, \pkg{alias} 库, ... 中的 \cmd{\int_step_tokens:nnn} 命令.
+  \item [2025-09-23(重新实现为 \cmd{\zthmenvnew} 和 \cmd{\zthmenvset}, 但它不需要实现额外的功能; 数学环境样式理应由 \cmd{\zthmstylenew} 命令管理)] 重写 \cmd{\zthmnew} 命令
+  \item [2025-08-30] 部分情况下页码不正确: \verb|\part| 命令在目录中的页码与其真正所在的页面相差 1.
+  \item 如果当前排版的目录数据为空, 那么添加的 hooks 会应用到下一个非空目录, 如何避免这个问题 ?(Hack \cmd{\hook_use:n} ?)
+  \item 使用 \pkg{l3galley} 提供的命令重写目录格式相关的接口(这部分代码目前采用 Plain \TeX{} 实现).
+  \item 也许我应该去除 \cls{article}, \cls{book} 等基础文档类的依赖, 重新实现一个基础的 \cls{ztex-base} 文档类 ?
+  \item 在 \pkg{font} 模块中增加: 对 NFSS 字体机制的详细介绍; 在 \hologo{pdfTeX} 下调用 (Open)TrueType 字体的方法; 介绍 \verb|*.fd|, \verb|*.map| 等文件的编写规则.
+  \item 增加 ``虚拟字体'' 相关的接口.
+  \item [2025-08-31(更新后, 所有的 template code 均被置于一个局部组中)] \pkg{sect} 模块的 ``章节命令'' 接口中, 部分变量需要手动清空(需要进行充分详细的测试).
+  \item 在 \ztex{} 宏集中再开发一个 \pkg{mindmap} 宏包, 提供以下的功能: 将对应的 tikz 对应的 tl 变量 dump 到一个外部文件中; 使用 \verb|\levelA, \levelB, ...| 等命令替代原始的 \verb|\section, \subsecction, ...| 等命令; 在 \texttt{mindmap} 模式下，仅保留 \verb|\section, \subsection, ...| 等命令向目录文件输出条目的功能(似乎可以直接在 \verb|\zsecformat| 命令中设置 \texttt{explicit=true, code=\{\}}).
+  \item 加载 \pkg{mindmap} 宏包后, 需要给每一个脑图节点增加一个或多个用于定位和连接使用的 TikZ anchor.
+  \item 提供一个 \cmd{\zsecpdfstringcmdsub} 命令, 用于将部分命令在 PDF String 环境中替换为用户的自定义命令(似乎 \pkg{hyperref} 宏包已经提供了对应的接口 ?).
+  \item 在 \pkg{page} 模块中增加一些类似 Koma-Scripts 宏集中 \pkg{typearea} 宏包所提供的接口: 例如临时改变 PDF 纸张大小(\cmd{\pdfpagewidth}, \cmd{\pdfpageheight}) 的接口, 临时改变页面布局的接口(能否实现不换页更改页面样式 ?), ...
+  \item 增加一个 \cmd{\ztool_box_clip:Nnn} 函数, \pkg{adjust} 宏包已经做了相关工作，可以参见：{\ttfamily https://tex.stackexchange.com/questions/22731/}\\ {\ttfamily how-to-clip-a-tex-box-using-low-level-ps-commands}, 并且 interface3 中已经有了 \cmd{\box_set_trim:Nnnnn} 等函数了，不用自己从驱动层面封装.
+  \item [2026-02-14(需要完全可展的实现时, 用户需自行参见后续的编程接口)] 重构 \pkg{alias} 库中的所有矩阵命令 - 加 ``\texttt{*}'' 的 \cmd{\mat} 等命令表示新的语法. 也许得考虑展开问题，毕竟有时需令 ``\texttt{\&}'', ``\verb|\\|'' 等符号提前被识别到.
+  \item \cmd{\zfbox} 命令还是有问题，当作用于包含几个大段落的 \cmd{\parbox} 时, 基线不对.
+  \item *[目前缺少 lap 相关命令的实现, 原始的 ``\texttt{set to}'' 系命令的实现并无问题] \pkg{ztool} 中的 ``\texttt{set to ht}'' 和 ``\texttt{scale to ht}'' 其实作用相同, 与 lap 对比 scale 不同 ! 也许可以使用 \verb|\vbox to| 和 \verb|\hbox to| 两种方法来重新实现前者.
+  \item [2026-02-12] 把 \pkg{alias} 中 \cmd{\zaliasOn}/\cmd{\zaliasOff} 内部的 group 去掉，增加一个 \texttt{zaliascope} 环境。
+  \item [2026-02-12] 在 \pkg{sect} 模块中，部分低级目录在多行时，左侧缩进有问题. (这是正常的，因为目录条目的 ``\texttt{name}'' 部分没有显示，用户自行手动调整即可)
+  \item \pkg{sect} 模块已经是许多模块的依赖了，可以考虑去掉 ``\texttt{sect/load}'' 这个文档类选项了 ?
+  \item 添加 \cmd{\ztexifmodload} 和 \cmd{\ztexiflibload}, 以及 \cmd{\ztexiffileload} 命令 ?
+  \item 添加 \cmd{\zcmdmaplist} 命令，参数形式为 \texttt{[times]\meta{cmd}[list separator]\meta{list}}，此时 \pkg{cmd} 模块中的 \cmd{\zcmd_map_expnot_tl:n} 等命令也需要重构.
+  \item 考虑增加一个 \cmd{\zcmdfilterlist} 命令，或许可以再做一个 \pkg{functional} 库, 其中包含函数式编程的常见操作，如 map, reduce, fold, unfold, take, drop, filter, zip, compose, pipe 等.
+\end{todolist}

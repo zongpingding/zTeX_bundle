@@ -1,0 +1,54 @@
+\usepackage{tikz}
+\usepackage{tikz-qtree}
+\usepackage{tikz-qtree-patch}
+
+\definecolor{Red}{HTML}{e32b2d}
+\definecolor{Green}{HTML}{15821b}
+\definecolor{Blue}{HTML}{0984e3}
+\tikzset{
+  section/.style={draw, rectangle, rounded corners, fill=Red},
+  subsection/.style={draw, rectangle, rounded corners, fill=Blue, text=white},
+  subsubsection/.style={draw, rectangle, rounded corners, fill=Green, text=white},
+}
+
+\ExplSyntaxOn
+\def\toclinecmd#1#2#3#4{{#3}~}
+\ztoc_group_parser:NNNnnnnn \g_ztoc_keyvaltoc_seq
+  \toclinecmd \g_tmpa_tl {[.}{}{}{~]}{}
+\def\TocTree#1
+  {
+    \exp_args:Nno \__toc_tree:nn
+      {#1}{\g_tmpa_tl}
+  }
+\cs_new:Npn \__toc_tree:nn #1#2
+  {
+    \quark_if_no_value:nF {#1}
+      {
+        \Tree[.\node[section]{#1};~#2 ]
+      }
+  }
+\ExplSyntaxOff
+
+\NewDocumentEnvironment{mindmap}{}{%
+  \begin{tikzpicture}[
+    grow'=right, level distance=1cm,
+    sibling distance=10pt,
+    every tree node/.style = {
+      anchor=west, outer sep=0pt, draw, rectangle, 
+      rounded corners, fill=gray!25
+    },
+    every level 1 node/.style = {
+      subsection
+    },
+    every level 2 node/.style = {
+      subsubsection
+    },
+    edge from parent/.style={
+      draw, thick, rounded corners,
+      edge from parent path={
+        (\tikzparentnode.east) -- +(.5cm, 0pt)
+        |- (\tikzchildnode.west)
+      },
+    },
+  ]
+}{\end{tikzpicture}}

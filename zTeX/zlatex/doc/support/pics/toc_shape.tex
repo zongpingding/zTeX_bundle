@@ -1,0 +1,53 @@
+% This code COPY from:
+% https://github.com/Sophanatprime/cus/blob/main/cus-doc/templatetoc-para.tex
+\documentclass[tikz,border=1pt]{standalone}
+\input{generic}
+\usetikzlibrary{arrows.meta,positioning}
+\begin{document}
+
+\newdimen\zw \zw=10pt
+\begin{tikzpicture}[>={Latex},line width=.5pt,
+  every node/.style={font=\fontsize{8pt}{10pt}\selectfont}]
+\draw[<->](-17\zw,10pt)--(17\zw,10pt) 
+  node[fill=white,inner xsep=.4\zw,midway]{\texttt{width.line}};
+\draw(-17\zw,15pt)--(-17\zw,5pt);\draw(17\zw,15pt)--(17\zw,5pt);
+
+\draw[color=green7,<->](-14\zw,2pt)--(-10\zw,2pt) 
+  node[midway,above=2pt,fill=white,inner ysep=0pt]{\texttt{space.hang}};
+\draw[color=green7](-14\zw,5pt)--(-14\zw,-20pt);
+\draw[color=green7](-10\zw,5pt)--(-10\zw,-20pt);
+
+\draw[color=cyan7,<->](-14\zw,-25pt)--(-9\zw,-25pt) 
+  node[midway,below=2pt,fill=white,inner ysep=0pt]{\texttt{width.name}};
+\draw[color=cyan7](-14\zw,1pt)--(-14\zw,-30pt);
+\draw[color=cyan7](-9\zw,1pt)--(-9\zw,-30pt);
+
+\draw[color=azure6,<->](-17\zw,-12pt)--(-10\zw,-12pt) 
+  node[midway,below=2pt,fill=white,inner ysep=0pt]{\texttt{space.left}};
+\draw[color=azure6](-17\zw,-10pt)--(-17\zw,-22pt);
+\draw[color=azure6](-10\zw,-10pt)--(-10\zw,-22pt);
+
+\draw[color=yellow7,<->](10\zw,-5pt)--(17\zw,-5pt) 
+  node[midway,fill=white,inner ysep=0pt]{\texttt{space.right}};
+\draw[color=yellow7](10\zw,0pt)--(10\zw,-10pt);
+\draw[color=yellow7](17\zw,0pt)--(17\zw,-10pt);
+
+\draw[color=violet7,<->](15\zw,-25pt)--(17\zw,-25pt) 
+  node[below left=2pt and 0pt,fill=white,inner sep=0pt]{\texttt{width.page}};
+\draw[color=violet7](15\zw,-20pt)--(15\zw,-30pt);
+\draw[color=violet7](17\zw,-10pt)--(17\zw,-30pt);
+
+\draw[color=magenta6,<->](-.3\zw,-22pt)--(15\zw,-22pt) 
+  node[midway,above=3pt,fill=white,inner ysep=0pt]{\texttt{code.filler}};
+\draw[color=magenta6](-.3\zw,-10pt)--(-.3\zw,-30pt);
+\draw[color=magenta6](15\zw,-10pt)--(15\zw,-20pt);
+
+\node[below right=1pt and 0pt,inner sep=0pt] at(-10\zw,0pt) {\parbox[t]{27\zw}{%
+  \rightskip7\zw \parfillskip-\rightskip
+  \noindent\hskip-4\zw\heiti\color{red5}\makebox[5\zw][l]{第五章}%
+  我能吞下玻璃而不伤身体。我能吞下玻璃而不伤身体。我能吞下玻璃而不伤身体。\dotfill
+  \makebox[2\zw][r]{98}}};
+
+\end{tikzpicture}
+
+\end{document}
