@@ -1,6 +1,6 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% ztex.cls                                                                   %
-%% Copyright 2024, 2025 Zongping Ding.                                        %
+%% Copyright 2024, 2025, 2026 Zongping Ding.                                  %
 %                                                                             %
 % This work may be distributed and/or modified under the conditions of the    %
 % LaTeX Project Public License, either version 1.3 of this license or any     %
@@ -15,7 +15,7 @@
 % The Current Maintainer of this work is Zongping Ding.                       %
 %                                                                             %
 % This work consists of the files ztex.cls,                                   %
-%       the modules: ztex.module.box.tex,                                     %
+% the modules:       ztex.module.box.tex,                                     %
 %                    ztex.module.cmd.tex,                                     %
 %                    ztex.module.color.tex,                                   %
 %                    ztex.module.counter.tex,                                 %
@@ -37,8 +37,8 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \ExplSyntaxOn
 \NeedsTeXFormat{LaTeX2e}
-\gdef\ztex@d@te{2025/10/18}
-\gdef\ztex@versi@n{1.1.5}
+\gdef\ztex@d@te{2026/02/16}
+\gdef\ztex@versi@n{1.3}
 \tl_const:Nn \c__ztex_class_name_tl           {ztex}
 \tl_const:Nn \c__ztex_class_version_tl        {\ztex@versi@n}
 \tl_const:Nn \c__ztex_class_date_tl           {\ztex@d@te}

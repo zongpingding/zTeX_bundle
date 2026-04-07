@@ -1,10 +1,15 @@
 \ProvidesExplFile{ztool.library.zdraw.tex}
-  {2025/09/06}{1.0.1} 
+  {2026/02/05}{1.0.1} 
   {zdraw~library~for~ztool}
 
 
 % ==> ztool draw (based on package 'pict2e' and 'picture' env)
 \RequirePackage{pict2e}
+
+% operations precise
+\fp_const:Nn \c__pic_precise_fp { 0.001 }
+
+% command/env warper
 \cs_new:Npn \_@@_begin_picture:nnnn #1#2#3#4 
   { \begin{picture}
       (\fp_eval:n {#1}, \fp_eval:n {#2})
@@ -31,8 +36,8 @@
     xoffset .initial:n = 0,
     yoffset .fp_set:N  = \l__pic_yoffset_fp,
     yoffset .initial:n = 0,
-    opacity-color .tl_set:N  = \l__pic_opacity_color_tl,
-    opacity-color .initial:n = { white },
+    % opacity-color .tl_set:N  = \l__pic_opacity_color_tl,
+    % opacity-color .initial:n = { white },
   }
 \NewDocumentEnvironment{zpic}{O{}}
   {
@@ -154,7 +159,7 @@
     \group_begin:
     \keys_set:nn { ztool / draw / picture / #1 }{#2}
     \tl_set:Nn \l__draw_line_type { normal }
-    \fp_compare:nNnTF { \__coor_st:n {#4} - \__coor_st:n {#3} } > {0.001}
+    \fp_compare:nNnTF { \__coor_st:n {#4} - \__coor_st:n {#3} } > { \c__pic_precise_fp }
       {
         \fp_set:Nn \l__draw_vector_slope_fp
           { (\__coor_nd:n {#4} - \__coor_nd:n {#3})
@@ -347,6 +352,13 @@
   }
 
 
+% --> arc rule: similar to arc by it's a rule
+\cs_new:Npn \__@@_pic_arcrule:nnn #1#2#3
+  {
+    % To be implemented ... 
+  }
+
+
 % --> circle
 \keys_define:nn { ztool / draw / picture } 
   {
@@ -385,7 +397,7 @@
               { \fp_use:N \l__pic_arc_end_fp    }
               { \fp_use:N \l__pic_arc_radius_fp }
           }
-        % NOTE: border must over the fill
+        % NOTE: border must draw after the fill
         \__pic_set_line_color:
         \exp_args:Ne \__@@_pic_arc:nnnn {}
           { \fp_use:N \l__pic_arc_start_fp  }
@@ -426,15 +438,22 @@
     arc     .fp_set:N   = \l__pic_rec_arc_fp,
     arc     .initial:n  = 0, 
   }
+
 \int_new:N \l__pic_rec_quadrant_index_int
+\clist_const:Nn \l__pic_rec_quadrant_shift_prop
+    { {(0, 0)}, {(-\rec@arc, 0)}, {(-\rec@arc, -\rec@arc)}, {(0, -\rec@arc)} }
 \cs_new_protected:Npn \ztool_pic_rectangle:nnn #1#2#3
   {% #1:key-value; #2:start coor; #3:end coor;
     \group_begin:
     \keys_set:nn { ztool / draw / picture / rectangle }{ fill=false }
     \keys_set:nn { ztool / draw / picture / rectangle }{ #1 }
-    \edef\rec@arc   { \fp_use:N  \l__pic_rec_arc_fp    }
     \edef\rec@width { \fp_eval:n {\__coor_st:n {#3} - \__coor_st:n {#2}} }
     \edef\rec@height{ \fp_eval:n {\__coor_nd:n {#3} - \__coor_nd:n {#2}} }
+    % check if arc radius too large.
+    \edef\rec@arc
+      {
+        \fp_eval:n { min(min(\rec@height/2, \rec@width/2), \l__pic_rec_arc_fp) }
+      }
     \__region_fill_color_miss:n { gray }
     \__color_if_valid:VF \l__pic_region_fill_color_tl
       { 
@@ -442,35 +461,8 @@
         \prg_map_break:Nn \l__ztool_pic_rec_fill {}
       }
     %% begin fill rounded rectangle
-    \__@@_pic_put:nnn {\__coor_st:n {#2}}{\__coor_nd:n {#2}}
-      {
-        \__pic_set_fill_color:
-        \rule
-          {\fp_eval:n {\rec@width *\dim_to_decimal:n {\l__pic_unit_dim}}pt}
-          {\fp_eval:n {\rec@height*\dim_to_decimal:n {\l__pic_unit_dim}}pt}
-      }
-    \int_set:Nn \l__pic_rec_quadrant_index_int { 0 }
-    \tl_map_inline:nn 
-      { 
-        {\__coor_st:n {#2}+\rec@width-\rec@arc, \__coor_nd:n {#2}+\rec@height-\rec@arc} 
-        {\__coor_st:n {#2}+\rec@arc,            \__coor_nd:n {#2}+\rec@height-\rec@arc} 
-        {\__coor_st:n {#2}+\rec@arc,            \__coor_nd:n {#2}+\rec@arc} 
-        {\__coor_st:n {#2}+\rec@width-\rec@arc, \__coor_nd:n {#2}+\rec@arc} 
-      }{
-        \int_incr:N \l__pic_rec_quadrant_index_int
-        \edef\qu@drant@index{\int_use:N \l__pic_rec_quadrant_index_int}
-        \exp_last_unbraced:Ne \__@@_pic_put:nnn 
-          { \__coor_st_nd:n {##1} }
-          {
-            \__color_safe_use:V \l__pic_opacity_color_tl 
-            \__@@_pic_arc:nnnn {*}
-              { (\qu@drant@index-1)*90 }
-              { \qu@drant@index*90     }
-              { sqrt(2)*\rec@arc       }
-            \__pic_set_fill_color: 
-            \__@@_pic_arc:nnnn {*}{0}{360}{\rec@arc}
-          }
-      }
+    \__pic_rectangle_rec_comp_fill:n { #2 }
+    \__pic_rectangle_arc_comp_fill:n { #2 }
     %% end fill rounded rectangle
     \prg_break_point:Nn \l__ztool_pic_rec_fill { }
     \__@@_pic_put:nnn
@@ -486,6 +478,60 @@
       }
     \group_end:
   }
+
+% aux function for rectangle area filling in rectangle
+\cs_new:Npn \__pic_rectangle_rec_comp_fill:n #1
+  {
+    \__@@_pic_put:nnn {\__coor_st:n {#1}+\rec@arc}{\__coor_nd:n {#1}}
+      {
+        \__pic_set_fill_color:
+        \rule
+          {\fp_eval:n {(\rec@width-2*\rec@arc)*\dim_to_decimal:n {\l__pic_unit_dim}}pt}
+          {\fp_eval:n {\rec@height*\dim_to_decimal:n {\l__pic_unit_dim}}pt}
+      }
+    \fp_compare:nNnT { \rec@height-2*\rec@arc } > { \c__pic_precise_fp }
+      {
+        \__@@_pic_put:nnn {\__coor_st:n {#1}}{\__coor_nd:n {#1}+\rec@arc}
+          {
+            \__pic_set_fill_color:
+            \rule
+               {\fp_eval:n {\rec@arc*\dim_to_decimal:n {\l__pic_unit_dim}}pt}
+               {\fp_eval:n {(\rec@height-2*\rec@arc)*\dim_to_decimal:n {\l__pic_unit_dim}}pt}
+          }
+        \__@@_pic_put:nnn {\__coor_st:n {#1}+\rec@width-\rec@arc}{\__coor_nd:n {#1}+\rec@arc}
+          {
+            \__pic_set_fill_color:
+            \rule
+              {\fp_eval:n {\rec@arc*\dim_to_decimal:n {\l__pic_unit_dim}}pt}
+              {\fp_eval:n {(\rec@height-2*\rec@arc)*\dim_to_decimal:n {\l__pic_unit_dim}}pt}
+          }
+     }
+   }
+% aux function for arc area filling in rectangle
+\cs_new:Npn \__pic_rectangle_arc_comp_fill:n #1
+  {
+    \int_set:Nn \l__pic_rec_quadrant_index_int { 0 }
+    \tl_map_inline:nn 
+      { 
+        {\__coor_st:n {#1}+\rec@width-\rec@arc, \__coor_nd:n {#1}+\rec@height-\rec@arc} 
+        {\__coor_st:n {#1}+\rec@arc,            \__coor_nd:n {#1}+\rec@height-\rec@arc} 
+        {\__coor_st:n {#1}+\rec@arc,            \__coor_nd:n {#1}+\rec@arc} 
+        {\__coor_st:n {#1}+\rec@width-\rec@arc, \__coor_nd:n {#1}+\rec@arc} 
+      }{
+        \int_incr:N \l__pic_rec_quadrant_index_int
+        \edef\qu@drant@index{\int_use:N \l__pic_rec_quadrant_index_int}
+        \exp_last_unbraced:Ne \__@@_pic_put:nnn 
+          { \__coor_st_nd:n {##1} }
+          {
+            \__pic_set_fill_color: 
+            \__@@_pic_arc:nnnn {*}
+              { (\qu@drant@index-1)*90 }
+              { \qu@drant@index*90     }
+              { \rec@arc               }
+          }
+      }
+  }
+  
 \NewDocumentCommand{\zrectangle}{O{}d()d()}
   {
     \ztool_pic_rectangle:nnn { #1 }{#2}{#3}

@@ -1,5 +1,5 @@
 \ProvidesExplFile{ztex.library.alias.tex}
-  {2025/09/21}{\ztex@versi@n}
+  {2026/02/14}{\ztex@versi@n}
   {alias~library~for~ztex}
 
 
@@ -35,12 +35,7 @@
 \seq_gclear:N \g__ztex_mathalias_user_seq
 \seq_gclear:N \g__ztex_mathalias_internal_seq
 \seq_gclear:N \g__ztex_mathalias_protected_seq
-\NewDocumentCommand{\zaliasOn}{O{OLD}}
-  {
-    \group_begin:
-    \__zalias_init:
-    \__zalias_cmd_create:n {#1}
-  }
+
 \cs_set_protected:Npn \__zalias_init: 
   {
     \char_set_mathcode:nn {"2F}{"413D} % for '/' in 'fixdif'
@@ -79,12 +74,7 @@
           }
       }
   }
-\NewDocumentCommand{\zaliasOff}{o}
-  {
-    \__zalias_delete:
-    \bool_gset_false:N \g__ztex_math_alias_switch_bool
-    \group_end:
-  }
+
 \NewDocumentCommand{\zaliasError}{}
   {
     \ztex_msg_set:nn {math-alias-cmd}{
@@ -93,6 +83,16 @@
       or~in~the~environment~'zalias'
     }
     \ztex_msg_error:n {math-alias-cmd}
+  }
+\NewDocumentCommand{\zaliasOn}{O{OLD}}
+  {
+    \__zalias_init:
+    \__zalias_cmd_create:n {#1}
+  }
+\NewDocumentCommand{\zaliasOff}{}
+  {
+    \__zalias_delete:
+    \bool_gset_false:N \g__ztex_math_alias_switch_bool
   }
 \NewDocumentEnvironment{zalias}{O{OLD}}
   { 
@@ -489,16 +489,28 @@
   { #1, }
 \cs_generate_variant:Nn \zalias_matrix_from_list:n {e, o, f}
 % NOTE: do NOT nest other mat cmd in '\mat' or '\pmat' ...
+\cs_set_eq:NN \z@mat \zalias_matrix_from_list:n
 \cs_set_eq:NN \z@mat@plain \zalias_matrix_from_list:n
-\cs_set:Npn \z@mat  #1 { \begin{matrix}  \z@mat@plain{#1} \end{matrix} }
-\cs_set:Npn \z@pmat #1 { \begin{pmatrix} \z@mat@plain{#1} \end{pmatrix} }
-\cs_set:Npn \z@bmat #1 { \begin{bmatrix} \z@mat@plain{#1} \end{bmatrix} }
-\cs_set:Npn \z@Bmat #1 { \begin{Bmatrix} \z@mat@plain{#1} \end{Bmatrix} }
-\cs_set:Npn \z@vmat #1 { \begin{vmatrix} \z@mat@plain{#1} \end{vmatrix} }
-\cs_set:Npn \z@Vmat #1 { \begin{Vmatrix} \z@mat@plain{#1} \end{Vmatrix} }
+\NewEnvironmentCopy{omatrix}{matrix}
+% NOTE:
+% 1. star      -> new ztex syntax
+% 2. no star   -> traditional syntax
+% 3. sometimes -> both syntaxes are compatible in star version
+%                 if there is no open ',' or ';' inside
+\cs_new_protected:Npn \__zalias_mat_typeset:n #1
+  {
+    \exp_args:Nc \NewDocumentCommand{z@#1mat}{sm}
+      {
+        \IfBooleanTF{##1}
+          { \begin{#1matrix} \z@mat@plain{##2} \end{#1matrix} }
+          { \begin{#1matrix} ##2 \end{#1matrix} }
+      }
+  }
+\clist_map_inline:nn { o, p, b, B, v, V }
+  { \__zalias_mat_typeset:n {#1} }
 \ztex_mathalias_set:nn 
-  { mat,   pmat,   bmat,   Bmat,   vmat,   Vmat   }
-  { z@mat, z@pmat, z@bmat, z@Bmat, z@vmat, z@Vmat }
+  { mat,   omat,   pmat,   bmat,   Bmat,   vmat,   Vmat   }
+  { z@mat, z@omat, z@pmat, z@bmat, z@Bmat, z@vmat, z@Vmat }
 
 % '\imat', '\admat' and '\zmat'
 \cs_new:Npn \zalias_diag_mat_data:nnnn #1#2#3#4 
@@ -587,22 +599,28 @@
 \cs_generate_variant:Nn \zalias_jmat_data:nn { ne, no }
 \ztex_keys_define:nn { zalias/jhmat }
   {
-    b   .tl_set:N   = \l__zalias_jmat_border_tl,
+    b   .tl_set:N   = \l__zalias_jhmat_border_tl,
     b   .initial:n  = { p },
-    c   .tl_set:N   = \l__zalias_jmat_cmd_tl,
+    c   .tl_set:N   = \l__zalias_jhmat_cmd_tl,
     c   .initial:n  = { textstyle },
-    s   .fp_set:N   = \l__zalias_jmat_stretch_fp,
+    s   .fp_set:N   = \l__zalias_jhmat_stretch_fp,
     s   .initial:n  = { 1.25 },
   }
-\NewDocumentCommand{\z@jmat}{O{}m} 
-  { 
-    \group_begin:
-      \ztex_keys_set:nn { zalias/jhmat }{ #1 }
-      \renewcommand{\arraystretch}{\fp_use:N \l__zalias_jmat_stretch_fp}
-      \exp_args:No \begin{\l__zalias_jmat_border_tl matrix}
-        \exp_args:No \zalias_jmat_data:nn {\l__zalias_jmat_cmd_tl}{#2} 
-      \exp_args:No \end{\l__zalias_jmat_border_tl matrix}
-    \group_end:
+\NewDocumentCommand{\z@jmat}{sO{}m} 
+  {
+    \IfBooleanTF{#1}
+      {
+        \group_begin:
+          \ztex_keys_set:nn { zalias/jhmat }{ #2 }
+          \renewcommand{\arraystretch}{\fp_use:N \l__zalias_jhmat_stretch_fp}
+          \exp_args:No \begin{\l__zalias_jhmat_border_tl matrix}
+            \exp_args:No \zalias_jmat_data:nn {\l__zalias_jhmat_cmd_tl}{#3} 
+          \exp_args:No \end{\l__zalias_jhmat_border_tl matrix}
+        \group_end:
+      }{
+        \exp_args:Ne \zalias_jmat_data:nn
+          {\tl_if_empty:nTF {#2}{textstyle}{#2}}{#3} 
+      }
   }
 \cs_new:Npn \zalias_hmat_data:nn #1#2 
   {
@@ -633,15 +651,21 @@
       } ,
   }
 \cs_generate_variant:Nn \zalias_hmat_data:nn { ne, no }
-\NewDocumentCommand{\z@hmat}{O{}m} 
+\NewDocumentCommand{\z@hmat}{sO{}m} 
   { 
-    \group_begin:
-      \ztex_keys_set:nn { zalias/jhmat }{ #1 }
-      \renewcommand{\arraystretch}{\fp_use:N \l__zalias_jmat_stretch_fp}
-      \exp_args:No \begin{\l__zalias_jmat_border_tl matrix}
-        \exp_args:No \zalias_hmat_data:nn {\l__zalias_jmat_cmd_tl}{#2} 
-      \exp_args:No \end{\l__zalias_jmat_border_tl matrix}
-    \group_end:
+    \IfBooleanTF{#1}
+      {
+        \group_begin:
+          \ztex_keys_set:nn { zalias/jhmat }{ #2 }
+          \renewcommand{\arraystretch}{\fp_use:N \l__zalias_jhmat_stretch_fp}
+          \exp_args:No \begin{\l__zalias_jhmat_border_tl matrix}
+            \exp_args:No \zalias_hmat_data:nn {\l__zalias_jhmat_cmd_tl}{#3} 
+          \exp_args:No \end{\l__zalias_jhmat_border_tl matrix}
+        \group_end:
+      }{
+        \exp_args:Ne \zalias_hmat_data:nn
+          {\tl_if_empty:nTF {#2}{textstyle}{#2}}{#3} 
+      }
   }
 \ztex_mathalias_set:nn { jmat, hmat }{ z@jmat, z@hmat }
 

@@ -1,5 +1,5 @@
 \ProvidesExplFile{ztex.module.page.tex}
-  {2025/09/23}{\ztex@versi@n}
+  {2026/02/01}{\ztex@versi@n}
   {page~module~for~ztex}
 
 
@@ -243,13 +243,18 @@
     \tl_if_empty:eTF {#5}
       {
         \hook_gput_code:nnn {shipout/#1}
-          {ztex@page@mask-\l__ztex_page_mask_label_tl}
-          {\put#2{\makebox(0, 0)[#3]{#4}}}
+          { ztex@page@mask-\l__ztex_page_mask_label_tl }
+          { \put#2{\makebox(0, 0)[#3]{#4}} }
+        % tikz/pgf layer and pagemask rule:
+        \exp_args:Nno \hook_gset_rule:nnnn {shipout/#1}
+          { ztex@page@mask-\l__ztex_page_mask_label_tl }
+          { < }{ pgfrcs }
       }{
         \hook_gput_next_code:nn {shipout/#1}
           {\put#2{\makebox(0, 0)[#3]{#4}}}
       }
   }
+% general pagemask rule:
 \hook_gset_rule:nnnn {shipout/foreground}
   { . }{ < }{ pgfrcs }
 \hook_gset_rule:nnnn {shipout/background}

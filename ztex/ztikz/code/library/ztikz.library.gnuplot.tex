@@ -1,4 +1,4 @@
-\ProvidesExplFile{ztikz.library.gnuplot.tex}{2025/05/31}
+\ProvidesExplFile{ztikz.library.gnuplot.tex}{2025/12/02}
   {1.0.0}{gnuplot~library~for~ztikz}
 
 
@@ -22,6 +22,7 @@
 \ztikz_keys_define:nn { 2dplot }
   {
     domain  .tl_set:N  = \l__ztikz_plot_domain_tl,
+    domain  .initial:n = { -5:5; },
     style   .tl_set:N  = \l__ztikz_plot_style_tl,
     marker  .tl_set:N  = \l__ztikz_plot_marker_tl,
   }
@@ -107,18 +108,20 @@
 
 
 % ==> simple 2d function plot
-\NewDocumentCommand\Plot{ O{domain=-5:5, style={color=black}, marker=}m }
+\NewDocumentCommand\Plot{ O{}m }
   {
     \group_begin:
+    \ztikz_keys_set:nn { 2dplot } { domain=-5:5, style={color=black}, marker= }
     \ztikz_keys_set:nn { 2dplot } { #1 }
     \__ztikz_sed_script:nne {plot_plot.gp}{8}{set~xr~[\l__ztikz_plot_domain_tl]}
     \__ztikz_sed_script:nne {plot_plot.gp}{7}{f(x)~=~#2}
     \__ztikz_gnu_data_plot:nee {plot}{\l__ztikz_plot_style_tl}{\l__ztikz_plot_marker_tl}
     \group_end:
   }
-\NewDocumentCommand\ContourPlot{ O{domain={-5:5;}, style={color=black}, marker=}m }
+\NewDocumentCommand\ContourPlot{ O{}m }
   {
     \group_begin:
+    \ztikz_keys_set:nn { 2dplot } { domain={-5:5;}, style={color=black}, marker= }
     \ztikz_keys_set:nn { 2dplot } { #1 }
     \exp_last_unbraced:Nf \__ztikz_pairs_domain_parse:w \l__ztikz_plot_domain_tl\q_stop
     \__ztikz_sed_script:nne {contour_plot.gp}{11}{set~xr~[\l__pairs_x_domain_tl]}
@@ -130,15 +133,17 @@
 \NewDocumentCommand\ParamPlot{ O{domain=0:2*pi, style=black, marker=}m }
   {
     \group_begin:
+    \ztikz_keys_set:nn { 2dplot } { domain=0:2*pi, style=black, marker= }
     \ztikz_keys_set:nn { 2dplot } { #1 }
     \__ztikz_sed_script:nne {param_plot.gp}{8}{set~trange~[\l__ztikz_plot_domain_tl]}
     \__ztikz_sed_script:nne {param_plot.gp}{9}{plot~#2}
     \__ztikz_gnu_data_plot:nee {param}{\l__ztikz_plot_style_tl}{\l__ztikz_plot_marker_tl}
     \group_end:
   }
-\NewDocumentCommand\PolarPlot{ O{domain=0:2*pi, style=black, marker=}m }
+\NewDocumentCommand\PolarPlot{ O{}m }
   {
     \group_begin:
+    \ztikz_keys_set:nn { 2dplot } { domain=0:2*pi, style=black, marker= }
     \ztikz_keys_set:nn { 2dplot } { #1 }
     \__ztikz_sed_script:nne {polar_plot.gp}{8}{set~trange~[\l__ztikz_plot_domain_tl]}
     \__ztikz_sed_script:nne {polar_plot.gp}{9}{plot~#2}
