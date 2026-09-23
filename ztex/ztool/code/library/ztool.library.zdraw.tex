@@ -1,5 +1,5 @@
 \ProvidesExplFile{ztool.library.zdraw.tex}
-  {2026/02/05}{1.0.1} 
+  {2026/09/23}{1.1.0}
   {zdraw~library~for~ztool}
 
 
@@ -9,14 +9,14 @@
 % operations precise
 \fp_const:Nn \c__pic_precise_fp { 0.001 }
 
-% command/env warper
-\cs_new:Npn \_@@_begin_picture:nnnn #1#2#3#4 
+% command/env wrapper
+\cs_new_protected:Npn \_@@_begin_picture:nnnn #1#2#3#4
   { \begin{picture}
       (\fp_eval:n {#1}, \fp_eval:n {#2})
       (\fp_eval:n {-#3}, \fp_eval:n {-#4}) }
-\cs_new:Nn \_@@_end_picture:
+\cs_new_protected:Npn \_@@_end_picture:
   { \end{picture} }
-\cs_new:Npn \__@@_pic_put:nnn #1#2#3 
+\cs_new_protected:Npn \__@@_pic_put:nnn #1#2#3
   { \put(\fp_eval:n {#1}, \fp_eval:n {#2}){ #3 } }
 \cs_generate_variant:Nn \_@@_begin_picture:nnnn 
   { VVVV, eeee }
@@ -24,6 +24,17 @@
   { VVV, een }
 
 % picture environment alias
+% width/height/depth are measured in units of `unit` and describe the
+% dimensions reported to TeX.  In particular, `height` is the extent above
+% the baseline and `depth` is the extent below it.  The picture environment
+% itself always returns zero depth, so zpic collects its result and restores
+% the requested box dimensions explicitly.
+\box_new:N \l__pic_output_box
+\cs_new:Npn \__pic_to_dim:n #1
+  {
+    \fp_to_dim:n
+      { (#1) * \dim_to_fp:n { \l__pic_unit_dim } }
+  }
 \keys_define:nn { ztool / draw / picture }
   {
     unit    .dim_set:N = \l__pic_unit_dim,
@@ -32,6 +43,8 @@
     width   .initial:n = 0,
     height  .fp_set:N  = \l__pic_height_fp,
     height  .initial:n = 0,
+    depth   .fp_set:N  = \l__pic_depth_fp,
+    depth   .initial:n = 0,
     xoffset .fp_set:N  = \l__pic_xoffset_fp,
     xoffset .initial:n = 0,
     yoffset .fp_set:N  = \l__pic_yoffset_fp,
@@ -41,14 +54,23 @@
   }
 \NewDocumentEnvironment{zpic}{O{}}
   {
-    \group_begin: 
-    \keys_set:nn { ztool / draw / picture } {#1} 
+    \group_begin:
+    \keys_set:nn { ztool / draw / picture } {#1}
     \setlength\unitlength{ \l__pic_unit_dim }
-    \_@@_begin_picture:VVVV   
-      \l__pic_width_fp  \l__pic_height_fp 
+    \hbox_set:Nw \l__pic_output_box
+    \_@@_begin_picture:VVVV
+      \l__pic_width_fp  \l__pic_height_fp
       \l__pic_xoffset_fp\l__pic_yoffset_fp
-  }{ 
-    \_@@_end_picture: 
+  }{
+    \_@@_end_picture:
+    \hbox_set_end:
+    \box_set_wd:Nn \l__pic_output_box
+      { \__pic_to_dim:n { \l__pic_width_fp  } }
+    \box_set_ht:Nn \l__pic_output_box
+      { \__pic_to_dim:n { \l__pic_height_fp } }
+    \box_set_dp:Nn \l__pic_output_box
+      { \__pic_to_dim:n { \l__pic_depth_fp  } }
+    \box_use_drop:N \l__pic_output_box
     \group_end:
   }
 

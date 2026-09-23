@@ -1,5 +1,5 @@
 \ProvidesExplFile{ztex.module.box.tex}
-  {2026/02/05}{\ztex@versi@n}
+  {2026/09/23}{\ztex@versi@n}
   {box~module~for~ztex}
 
 
@@ -69,52 +69,63 @@
 % enhance \fbox
 \ztex_keys_define:nn { box/enhance-fbox }
   {
-    draw .tl_set:N  = \l__zbox_fbox_draw_tl,
+    draw .tl_set:N = \l__zbox_fbox_draw_tl,
     draw .initial:n = { black },
-    fill .tl_set:N  = \l__zbox_fbox_fill_tl,
+    fill .tl_set:N = \l__zbox_fbox_fill_tl,
     fill .initial:n = { none },
-    arc  .fp_set:N  = \l__zbox_fbox_arc_fp,
-    arc  .initial:n = { 1 },
-    text .tl_set:N  = \l__zbox_fbox_text_sty_tl,
-    text .initial:n = { },
+    arc .fp_set:N = \l__zbox_fbox_arc_fp,
+    arc .initial:n = { 1 },
+    text .tl_set:N = \l__zbox_fbox_text_sty_tl,
+    text .initial:n = {},
   }
 \NewDocumentCommand\zfbox{o}
   {
-    \IfValueT{#1}{
-      \ztex_keys_set:nn { box/enhance-fbox }{ #1 }
-    }
+    \IfValueT{#1}{\ztex_keys_set:nn { box/enhance-fbox } {#1}}
     \zbox_item_collect:nnnw
       {
-        \begin{zpic}
-          [
-            unit=1pt, % \wd, \ht and \dp returns dim in 'pt', thus we must set 'unit=1pt'.
-            xoffset=\dim_to_decimal:n {\fboxrule/2},
-            yoffset=-\dim_to_decimal:n {\dp\ztexcollectbox + \fboxsep + \fboxrule/2},
-            width=\dim_to_decimal:n {\wd\ztexcollectbox + 2\fboxsep + 2\fboxrule}
-          ]
-          \zrectangle[
-              arc=\l__zbox_fbox_arc_fp, width=\fboxrule,
-              fill=\l__zbox_fbox_fill_tl, draw=\l__zbox_fbox_draw_tl
-            ]
-            ( 0, 0 )
-            (
-              \dim_to_decimal:n {\wd\ztexcollectbox + 2\fboxsep + \fboxrule},
-              \dim_to_decimal:n {\ht\ztexcollectbox + \dp\ztexcollectbox + 2\fboxsep + \fboxrule}
-            )
-          \put
-            (
-              \dim_to_decimal:n {\wd\ztexcollectbox/2 + \fboxsep + \fboxrule/2},
-              \dim_to_decimal:n {\dp\ztexcollectbox + \fboxsep + \fboxrule/2}
-            ) { \clap{ \hbox{\vbox{\box_use:N \ztexcollectbox}}} }
+        \begin{zpic} [
+          unit=1pt, % \wd, \ht and \dp returns dim in 'pt', thus we must set 'unit=1pt'.
+          xoffset=\dim_to_decimal:n { \fboxrule/2 },
+          yoffset=-\dim_to_decimal:n
+              { \dp\ztexcollectbox + \fboxsep + \fboxrule/2 },
+          width=\dim_to_decimal:n
+              { \wd\ztexcollectbox + 2\fboxsep + 2\fboxrule },
+          height=\dim_to_decimal:n
+              { \ht\ztexcollectbox + \fboxsep + \fboxrule },
+          depth=\dim_to_decimal:n
+              { \dp\ztexcollectbox + \fboxsep + \fboxrule },
+        ]
+        \zrectangle[
+          arc=\l__zbox_fbox_arc_fp, width=\fboxrule,
+          fill=\l__zbox_fbox_fill_tl, draw=\l__zbox_fbox_draw_tl
+        ]
+        ( 0, 0 )
+        (
+        \dim_to_decimal:n { \wd\ztexcollectbox + 2\fboxsep + \fboxrule },
+        \dim_to_decimal:n
+          {
+            \ht\ztexcollectbox + \dp\ztexcollectbox + 2\fboxsep +
+            \fboxrule
+          }
+        )
+        \put
+        (
+        \dim_to_decimal:n
+            { \wd\ztexcollectbox / 2 + \fboxsep + \fboxrule / 2 },
+        \dim_to_decimal:n
+            { \dp\ztexcollectbox + \fboxsep + \fboxrule / 2 }
+        ) { \clap {\box_use_drop:N \ztexcollectbox} }
         \end{zpic}
         % reset fbox style options
         \ztex_keys_set:nn { box/enhance-fbox }
           {
-             draw = black, fill = none,
-             arc  = 1,     text = ,       
+            draw = black, fill = none,
+            arc = 1, text = ,
           }
         \relax
-      }{ \l__zbox_fbox_text_sty_tl }{}
+      }
+      { \l__zbox_fbox_text_sty_tl }
+      {}
   }
 
 

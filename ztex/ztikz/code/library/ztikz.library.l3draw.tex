@@ -1,4 +1,4 @@
-\ProvidesExplFile{ztikz.library.l3draw.tex}{2025/05/31}
+\ProvidesExplFile{ztikz.library.l3draw.tex}{2026/04/29}
   {1.0.0}{zdraw~library~for~ztikz}
 
 
@@ -88,9 +88,9 @@
 \cs_new_eq:NN \zbg        \draw_path_scope_begin:
 \cs_new_eq:NN \zeg        \draw_path_scope_end:
 % segement connect
-\cs_new_eq:NN \zcapbutt   \draw_cap_butt:
-\cs_new_eq:NN \zcaproun   \draw_cap_round:
-\cs_new_eq:NN \zcaprect   \draw_cap_rectangle:
+\cs_new_eq:NN \zcapbutt   \draw_set_cap_butt:
+\cs_new_eq:NN \zcaproun   \draw_set_cap_round:
+\cs_new_eq:NN \zcaprect   \draw_set_cap_rectangle:
 \cs_new_eq:NN \zclosepath \draw_path_close:
 % transformatio
 \cs_new_eq:NN \zshift     \draw_transform_shift:n
@@ -165,8 +165,8 @@
           }{\relax}
           \draw_path_moveto:n {##1 \l__arg_style_i, \l_tmpa_tl \l__arg_style_i}
           \draw_path_lineto:n {(##1+\l__arg_domain_ii) \l__arg_style_i, \l_tmpb_tl \l__arg_style_i}
-          % \draw_cap_rectangle:
-          \draw_cap_round:
+          % \draw_set_cap_rectangle:
+          \draw_set_cap_round:
           \draw_path_use_clear:n {draw}
         }
       }

@@ -1,6 +1,6 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% ztikz.sty                                                                  %
-%% Copyright 2024, 2025 Zongping Ding.                                        %
+%% Copyright 2024, 2025, 2026 Zongping Ding.                                  %
 %                                                                             %
 % This work may be distributed and/or modified under the conditions of the    %
 % LaTeX Project Public License, either version 1.3 of this license or any     %
@@ -24,8 +24,8 @@
 %                       ztikz.library.pyscript.tex.                           %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \NeedsTeXFormat{LaTeX2e}
-\ProvidesExplPackage{ztikz}{2025/09/22}
-  {1.0.0}{A~pre-release~diagram~and~CAS~package}
+\ProvidesExplPackage{ztikz}{2026/05/08}
+  {1.1.0}{A~pre-release~diagram~and~CAS~package}
 
 
 % ----------------------------------------------------------------------
@@ -50,11 +50,11 @@
 % ----------------------------------------------------------------------
 \clist_new:N \g__ztikz_library_loaded_clist
 \clist_gclear:N \g__ztikz_library_loaded_clist
-\cs_new_nopar:Npn \__ztikz_load_library:n #1 
+\cs_new_nopar:Npn \__ztikz_load_library:n #1
   {
     \clist_map_inline:nn {#1} {
       \clist_if_in:NnTF \g__ztikz_library_loaded_clist {##1} {
-        \msg_set:nnn {ztikz} {library-loaded} 
+        \msg_set:nnn {ztikz} {library-loaded}
           {
             ztikz~library~"##1"~already~loaded,ignored~loading.
             \msg_line_context:
@@ -87,14 +87,6 @@
 \ztool_shell_mkdir:n {ztikz_output/}
 \tl_const:Nn \g__ztikz_scripts_path_tl  {ztikz_output/scripts}
 \NewDocumentCommand\ztikzMkdir{m}{ \ztool_shell_mkdir:n {#1} }
-\cs_new_protected:Npn \ztikz_term_info:n #1 
-  {
-    \iow_now:Nn \c_term_iow {#1}
-  }
-\cs_new_protected:Npn \ztikz_term_info:e #1 
-  {
-    \iow_now:Ne \c_term_iow {#1}
-  }
 
 
 
@@ -107,40 +99,48 @@
   { \keys_define:nn { ztikz / #1 }{ #2 } }
 \cs_new_protected:Npn \ztikz_keys_set:nn #1#2
   { \keys_set:nn { ztikz / #1 }{ #2 } }
-\ztikz_keys_define:n 
+\ztikz_keys_define:n
   {
+    quiet             .bool_gset:N = \g_ztikz_quiet_bool,
+    quiet             .initial:n   = { false },
+    quiet             .default:n   = { true },
     library           .multichoice:,
-    library / basic   .code:n  = { \__ztikz_load_library:n {basic}   },
-    library / gnuplot .code:n  = { \__ztikz_load_library:n {gnuplot} },
-    library / cache   .code:n  = { \__ztikz_load_library:n {cache}   },
-    library / python  .code:n  = { \__ztikz_load_library:n {python}  },
-    library / wolfram .code:n  = { \__ztikz_load_library:n {wolfram} },
-    library / l3draw  .code:n  = { \__ztikz_load_library:n {l3draw}  },
-    library / unknown .code:n  = { 
-      \msg_set:nnn {ztikz} {library-not-found} 
-        {ztikz~library~`#1'~not~found,~valid~libraries~are~'basic', 
+    library / basic   .code:n      = { \__ztikz_load_library:n {basic}   },
+    library / gnuplot .code:n      = { \__ztikz_load_library:n {gnuplot} },
+    library / cache   .code:n      = { \__ztikz_load_library:n {cache}   },
+    library / python  .code:n      = { \__ztikz_load_library:n {python}  },
+    library / wolfram .code:n      = { \__ztikz_load_library:n {wolfram} },
+    library / l3draw  .code:n      = { \__ztikz_load_library:n {l3draw}  },
+    library / unknown .code:n      = {
+      \msg_set:nnn {ztikz} {library-not-found}
+        {ztikz~library~`#1'~not~found,~valid~libraries~are~'basic',
         ~'gnuplot',~'cache',~'python',~'wolfram'~and~'l3draw'.}
       \msg_error:nn {ztikz} {library-not-found}
     },
-    wolfram           .meta:nn = { ztikz/wolfram }{ #1 },
+    wolfram           .meta:nn     = { ztikz/wolfram }{ #1 },
   }
 
+% wolfram meta-key
 \tl_new:N \g__ztikz_wolfram_engine_tl
 \bool_new:N \g__ztikz_wolfram_cloud_bool
 \ztikz_keys_define:nn { wolfram }
   {
     engine  .choice:,
-    engine / wolfram .code:n  = 
-      { 
-        \tl_gset:Nn \g__ztikz_wolfram_engine_tl { wolframscript } 
+    engine / wolfram .code:n  =
+      {
+        \tl_gset:Nn \g__ztikz_wolfram_engine_tl { wolframscript }
       },
-    engine / mathics .code:n  = 
-      { 
-        \tl_gset:Nn \g__ztikz_wolfram_engine_tl { mathics } 
+    engine / mathics .code:n  =
+      {
+        \tl_gset:Nn \g__ztikz_wolfram_engine_tl { mathics }
       },
-    engine / unknown .code:n  = 
-      { 
-        \msg_set:nnn {ztikz} {wolfram-engine-not-found} 
+    engine / wstp   .code:n   =
+      {
+        \tl_gset:Nn \g__ztikz_wolfram_engine_tl { wstp }
+      },
+    engine / unknown .code:n  =
+      {
+        \msg_set:nnn {ztikz} {wolfram-engine-not-found}
           {ztik's~'wolfram'~engine~option~`#1'~invalid,
           ~valid~engine~is~'wolframscript'~or~'mathics'.}
         \msg_error:nn {ztikz} {wolfram-engine-not-found}
@@ -148,28 +148,49 @@
     engine  .initial:n        = { wolfram },
     cloud   .choices:nn       = { true, false }
       {
-        \use:c { bool_gset_ \l_keys_choice_tl :N } 
-          \g__ztikz_wolfram_cloud_bool 
+        \use:c { bool_gset_ \l_keys_choice_tl :N }
+          \g__ztikz_wolfram_cloud_bool
       },
     cloud   .initial:n        = { false },
     cloud   .default:n        = { true },
   }
 \ProcessKeyOptions [ ztikz ]
+
 % only 'wolfram' support 'cloud'
 \bool_if:NT \g__ztikz_wolfram_cloud_bool
   {
     \tl_if_eq:VnT \g__ztikz_wolfram_engine_tl { mathics }
-      { 
+      {
         \msg_set:nnn {ztikz}{mathics-cloud}
           {mathics~'cloud'~is~not~supported.}
         \msg_error:nn {ztikz}{mathics-cloud}
       }
   }
 
+% whether to show these debug info
+\bool_if:NTF \g_ztikz_quiet_bool
+  {
+    \cs_new_protected:Npn \ztikz_term_info:n #1
+      {
+      }
+    \cs_new_protected:Npn \ztikz_term_info:e #1
+      {
+      }
+  }{
+    \cs_new_protected:Npn \ztikz_term_info:n #1
+      {
+        \iow_now:Nn \c_term_iow {#1}
+      }
+    \cs_new_protected:Npn \ztikz_term_info:e #1
+      {
+        \iow_now:Ne \c_term_iow {#1}
+      }
+  }
+
 
 
 % ----------------------------------------------------------------------
-%                       cache, sed file and ztikz logo 
+%                       cache, sed file and ztikz logo
 % ----------------------------------------------------------------------
 \cs_generate_variant:Nn \ior_open:Nn { Ne }
 \cs_generate_variant:Nn \iow_open:Nn { Ne }
@@ -184,14 +205,14 @@
             \bool_gset_true:N \g__hash_change_bool
             \prg_return_true:
           }
-        \prg_generate_conditional_variant:Nnn \ztikz_if_run_again:nnn 
+        \prg_generate_conditional_variant:Nnn \ztikz_if_run_again:nnn
           { nen } { p, T, F, TF }
       }
   }
 % sed script
-\cs_new:Npn \__ztikz_addto_script:nn #1#2 
+\cs_new:Npn \__ztikz_addto_script:nn #1#2
   {% #1: file; #2: line; #3:new
-    \ztool_append_to_file:nn 
+    \ztool_append_to_file:nn
       {#1}{#2}
   }
 \cs_generate_variant:Nn \__ztikz_addto_script:nn { ne, en, ee }
@@ -202,15 +223,15 @@
     ori   .tl_set:N  = \l__ztikz_sed_script_ori_tl,
     new   .tl_set:N  = \l__ztikz_sed_script_new_tl,
   }
-\cs_new:Npn \__ztikz_sed_script:nnn #1#2#3 
+\cs_new:Npn \__ztikz_sed_script:nnn #1#2#3
   {% #1: file; #2: line; #3:new
-    \ztool_replace_file_line:nnn 
+    \ztool_replace_file_line:nnn
       {\g__ztikz_scripts_path_tl/#1}
       {#2}{#3}
   }
 \cs_generate_variant:Nn \__ztikz_sed_script:nnn {eee}
 \cs_generate_variant:Nn \__ztikz_sed_script:nnn {nne}
-% ztik logo 
+% ztik logo
 \NewDocumentCommand\TikZ{}{Ti\textcolor{orange}{\textit{k}}Z}
 \NewDocumentCommand\zTikZ{}
   {
